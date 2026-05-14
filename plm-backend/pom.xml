@@ -4,16 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-    <groupId>com.ruoyi</groupId>
-    <artifactId>ruoyi</artifactId>
+    <groupId>cn.com.bosssfot.dv.plm</groupId>
+    <artifactId>plm</artifactId>
     <version>3.9.2</version>
 
-    <name>ruoyi</name>
-    <url>http://www.ruoyi.vip</url>
-    <description>若依管理系统</description>
+    <name>plm</name>
+    
+    <description>PLM 项目全生命周期管理</description>
     
     <properties>
-        <ruoyi.version>3.9.2</ruoyi.version>
+        <plm.version>3.9.2</plm.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
@@ -137,49 +137,49 @@
 
             <!-- 定时任务-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-quartz</artifactId>
-                <version>${ruoyi.version}</version>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-quartz</artifactId>
+                <version>${plm.version}</version>
             </dependency>
 
             <!-- 代码生成-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-generator</artifactId>
-                <version>${ruoyi.version}</version>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-generator</artifactId>
+                <version>${plm.version}</version>
             </dependency>
 
             <!-- 核心模块-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-framework</artifactId>
-                <version>${ruoyi.version}</version>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-framework</artifactId>
+                <version>${plm.version}</version>
             </dependency>
 
             <!-- 系统模块-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-system</artifactId>
-                <version>${ruoyi.version}</version>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-system</artifactId>
+                <version>${plm.version}</version>
             </dependency>
 
             <!-- 通用工具-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-common</artifactId>
-                <version>${ruoyi.version}</version>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-common</artifactId>
+                <version>${plm.version}</version>
             </dependency>
 
         </dependencies>
     </dependencyManagement>
 
     <modules>
-        <module>ruoyi-admin</module>
-        <module>ruoyi-framework</module>
-        <module>ruoyi-system</module>
-        <module>ruoyi-quartz</module>
-        <module>ruoyi-generator</module>
-        <module>ruoyi-common</module>
+        <module>plm-admin</module>
+        <module>plm-framework</module>
+        <module>plm-system</module>
+        <module>plm-quartz</module>
+        <module>plm-generator</module>
+        <module>plm-common</module>
     </modules>
     <packaging>pom</packaging>
 

@@ -1,8 +1,7 @@
 {
-  "name": "ruoyi",
-  "version": "3.9.2",
-  "description": "若依管理系统",
-  "author": "若依",
+  "name": "plm",
+  "version": "0.1.0",
+  "description": "PLM 项目全生命周期管理 - 前端",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -11,10 +10,7 @@
     "build:stage": "vite build --mode staging",
     "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://gitee.com/y_project/RuoYi-Vue.git"
-  },
+  "private": true,
   "dependencies": {
     "@element-plus/icons-vue": "2.3.2",
     "@vueup/vue-quill": "1.2.0",
