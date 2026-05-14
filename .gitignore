@@ -1,0 +1,17 @@
+# Claude Code session data
+.claude/
+
+# Environment files with secrets
+.env
+.env.local
+*.env.local
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# IDE (root-level fallback; subprojects have their own)
+.idea/
+.vscode/
