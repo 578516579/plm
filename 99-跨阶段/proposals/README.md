@@ -51,11 +51,11 @@ proposed    完成填写、关联数据，等 review
 
 > **本表是所有 proposal 的元数据快照**。新增/状态变更时同步更新。
 
-| 编号 | 标题 | 状态 | 提出 | 关联触发 | merged PR / commit | tracking 期 |
+| 编号 | 标题 | 状态 | 提出 | 关联触发 | merged commit | tracking 期 |
 |---|---|---|---|---|---|---|
-| [0001](0001-internal-tool-track.md) | 引入"项目类型"维度（外部产品/内部工具/框架升级） | **proposed** | 2026-05-15 | [reflect/2026-W20-project-phase01-dogfood](../reflect/2026-W20-project-phase01-dogfood.md) F5 | — | — |
-| [0002](0002-team-size-adjusted-thresholds.md) | 按"团队规模"自动调整 Gate 阈值 | **proposed** | 2026-05-15 | reflect F1/F2/F3/F4 | — | — |
-| [0003](0003-require-triage-rationale.md) | Gate 实例头部"分级理由"必填 | **proposed** | 2026-05-15 | reflect F10 | — | — |
+| [0001](0001-internal-tool-track.md) | 引入"项目类型"维度（外部产品/内部工具/框架升级） | **merged → tracking** | 2026-05-15 | [reflect/2026-W20-project-phase01-dogfood](../reflect/2026-W20-project-phase01-dogfood.md) F5 | apply 0001/0002/0003（2026-05-15）| 2026-05-15 → 05-29 |
+| [0002](0002-team-size-adjusted-thresholds.md) | 按"团队规模"自动调整 Gate 阈值 | **merged → tracking** | 2026-05-15 | reflect F1/F2/F3/F4 | 同上 | 同上 |
+| [0003](0003-require-triage-rationale.md) | Gate 实例头部"分级理由"必填 | **merged → tracking** | 2026-05-15 | reflect F10 | 同上 | 同上 |
 
 ---
 

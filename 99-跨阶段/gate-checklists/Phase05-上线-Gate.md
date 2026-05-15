@@ -11,6 +11,9 @@
 |---|---|
 | 模块名 | |
 | 分级 | L1 / L2 / L3 |
+| **分级理由** | _引用 [README §维度 1](../README.md)_ |
+| **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` |
+| **团队规模** | `solo` / `small` / `medium` / `large` |
 | 版本号 | vX.Y.Z |
 | Owner（发布指挥） | |
 | 计划上线时间 | YYYY-MM-DD HH:MM |
@@ -110,15 +113,20 @@
 
 ---
 
-## H. 评审记录与签字
+## H. 评审记录与签字（按 团队规模 调整必填角色数）
+
+发布是高风险操作，**所有规模都至少 2 个签字**：
+
+- `solo`=2（发布指挥 + 至少 1 个其他人在场，`[solo-review]` 不适用 — 发布必须双人）
+- `small` / `medium` / `large` 按下表全签
 
 | 角色 | 姓名 | 签字日期 |
 |---|---|---|
 | 发布指挥 | | YYYY-MM-DD |
 | 后端 oncall | | |
-| 前端 oncall | | |
-| DBA | | |
-| 客服代表（如对外） | | |
+| 前端 oncall（涉及前端时必填） | | |
+| DBA（涉及 DB 迁移时必填） | | |
+| 客服代表（external-product 必填） | | |
 
 ---
 

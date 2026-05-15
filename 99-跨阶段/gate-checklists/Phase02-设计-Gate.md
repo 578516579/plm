@@ -11,6 +11,9 @@
 |---|---|
 | 模块名 | |
 | 分级 | L1 / L2 |
+| **分级理由** | _引用 [README §维度 1](../README.md) 的具体判定列_ |
+| **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` |
+| **团队规模** | `solo` / `small` / `medium` / `large` |
 | Owner（技术 lead） | |
 | 起始日期 | YYYY-MM-DD |
 | 目标完成日期 | YYYY-MM-DD |
@@ -86,15 +89,17 @@
 
 ---
 
-## D. 评审记录与签字
+## D. 评审记录与签字（按 团队规模 调整必填角色数）
+
+按团队规模需达成的最少签字角色数：`solo`=1（自评 `[solo-review]`）/ `small`=2 / `medium`=3 / `large`=5。
 
 | 角色 | 姓名 | 评审结论 | 签字日期 |
 |---|---|---|---|
 | 技术 lead | | 通过 / 有条件通过 / 不通过 | YYYY-MM-DD |
-| 后端架构师 | | | |
+| 后端架构师（medium+ 必填） | | | |
 | 前端 lead（如适用） | | | |
-| DBA | | | |
-| 测试 lead | | | |
+| DBA（涉及 DB 设计必填） | | | |
+| 测试 lead（medium+ 必填） | | | |
 | 安全（L1 涉及鉴权 / 数据敏感时强制） | | | |
 
 ---

@@ -11,6 +11,9 @@
 |---|---|
 | 模块名 | |
 | 分级 | L1 / L2 / L3 |
+| **分级理由** | _引用 [README §维度 1](../README.md)_ |
+| **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` |
+| **团队规模** | `solo` / `small` / `medium` / `large` |
 | Owner（QA lead） | |
 | 起始日期 | YYYY-MM-DD |
 | 目标完成日期 | YYYY-MM-DD |
@@ -118,14 +121,16 @@
 
 ---
 
-## G. 评审记录与签字
+## G. 评审记录与签字（按 团队规模 调整必填角色数）
+
+`solo`=1（QA / 测试自评 `[solo-review]`）/ `small`=2（QA + 业务）/ `medium`=3 / `large`=4。
 
 | 角色 | 姓名 | 评审结论 | 签字日期 |
 |---|---|---|---|
 | QA lead | | 通过 / 有条件通过 / 不通过 | YYYY-MM-DD |
 | 开发 lead | | | |
-| 业务方代表（UAT） | | | |
-| 安全 lead（涉及鉴权 / 数据敏感） | | | |
+| 业务方代表（UAT，small+ 必填） | | | |
+| 安全 lead（涉及鉴权 / 数据敏感时必填） | | | |
 
 ---
 

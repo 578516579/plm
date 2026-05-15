@@ -11,6 +11,9 @@
 |---|---|
 | 模块名 | |
 | 分级 | L1 / L2 / L3 |
+| **分级理由** | _引用 [README §维度 1](../README.md) 的具体判定列_ |
+| **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` |
+| **团队规模** | `solo` / `small` / `medium` / `large` |
 | Owner（开发 lead） | |
 | 起始日期 | YYYY-MM-DD |
 | 目标完成日期 | YYYY-MM-DD |
@@ -132,13 +135,15 @@ L3 仅需：
 
 ---
 
-## G. 评审记录与签字
+## G. 评审记录与签字（按 团队规模 调整必填角色数）
+
+`solo`=1（开发 lead 自评 `[solo-review]`）/ `small`=2 / `medium`=3 / `large` 按下表全部签字。
 
 | 角色 | 姓名 | 评审结论 | 签字日期 |
 |---|---|---|---|
 | 开发 lead | | 通过 / 有条件通过 / 不通过 | YYYY-MM-DD |
-| 主 reviewer | | | |
-| 测试 lead（启动 Phase 04 时） | | | |
+| 主 reviewer（small+ 必填） | | | |
+| 测试 lead（启动 Phase 04 时，medium+ 必填） | | | |
 
 ---
 

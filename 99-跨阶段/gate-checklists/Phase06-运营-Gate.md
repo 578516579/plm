@@ -12,6 +12,9 @@
 |---|---|
 | 模块名 | |
 | 分级 | L1 / L2 |
+| **分级理由** | _引用 [README §维度 1](../README.md)_ |
+| **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` |
+| **团队规模** | `solo` / `small` / `medium` / `large` |
 | 周期类型 | 上线后 7 天 / 30 天 / Q1 / Q2 / ... |
 | 周期起止 | YYYY-MM-DD ~ YYYY-MM-DD |
 | Owner（运营 / 产品 lead） | |
@@ -92,14 +95,16 @@
 
 ---
 
-## I. 评审记录与签字
+## I. 评审记录与签字（按 团队规模 调整必填角色数）
+
+`solo`=1（自评 `[solo-review]`）/ `small`=2 / `medium`=3 / `large`=4。
 
 | 角色 | 姓名 | 评审结论 | 签字日期 |
 |---|---|---|---|
 | 运营 / 产品 lead | | 通过 / 有条件通过 / 不通过 | YYYY-MM-DD |
-| 业务方代表 | | | |
-| 开发 lead（修复纳入 Sprint 确认） | | | |
-| 客服代表（如对外） | | | |
+| 业务方代表（small+ 必填） | | | |
+| 开发 lead（涉及修复纳入 Sprint 时必填） | | | |
+| 客服代表（external-product 必填） | | | |
 
 ---
 

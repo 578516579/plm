@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0001 |
 | 标题 | 引入"项目类型"维度（外部产品 / 内部工具 / 框架升级） |
-| 状态 | **proposed** |
+| 状态 | **merged** → tracking |
 | 类型 | 流程 |
 | 提出人 | Wjl + Claude（来自 Project Phase 01 dogfood） |
 | 提出日期 | 2026-05-15 |
@@ -129,11 +129,28 @@ Tracking 期内观察：
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| Wjl (产品/技术 lead) | _待 review_ | _待签字_ | 自评，待团队扩张后多人 review |
+| Wjl (产品/技术 lead) | ✅ 通过 | 2026-05-15 | solo-review，证据扎实（来自 Project Phase 01 dogfood F5）|
 
 ## 10. 实施后跟踪
 
-_(待 merged 后填)_
+### 实际 PR / commit
+- PR: N/A（直接 commit）
+- 合入 commit: `refactor(gate): apply proposals 0001/0002/0003 …`（2026-05-15）
+- 实际 merged 日期：2026-05-15
+
+### Tracking 数据（merged 后 2 周观察期）
+
+| 信号 | 基线 | 目标 | 实际（W21）| 实际（W22）|
+|---|---|---|---|---|
+| 下一份 Gate 实例的 E 段豁免数 | 3（Project Phase 01）| ≤ 1 | _待 Phase 02 完成时填_ | _待_ |
+| 用户 / Claude 对"语义翻译"吐槽数 | 1 | 0 | _待_ | _待_ |
+| 模板总行数增长 | 9 文件 X 行 | ≤ +10% | _待统计_ | _待_ |
+
+跟踪期：2026-05-15 → 2026-05-29（W20→W22）。
+
+### 最终判定
+- [ ] done
+- [ ] reverted
 
 ---
 
