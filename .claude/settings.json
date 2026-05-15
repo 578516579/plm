@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "PLM 项目的 Claude Code 共享配置。个人权限缓存写在 settings.local.json (gitignored)。hooks 设计与排错见 .claude/hooks-design.md。",
+
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '' >&2 && echo '─── reflect on this turn ────────────────────────────────────────' >&2 && echo 'Did this turn produce knowledge worth keeping?' >&2 && echo '  • New gotcha?       → append to .claude/skills/ruoyi-bootstrap/references/gotchas.md' >&2 && echo '  • Architecture call? → write an ADR in 03-开发/ADR/' >&2 && echo '  • Rule contradiction → open a proposal in 99-跨阶段/proposals/' >&2 && echo '  • Touched a Gate phase? → update gate-checklists/instances/<module>/' >&2 && echo '────────────────────────────────────────────────────────────────' >&2"
+          }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command=\"$CLAUDE_TOOL_INPUT_command\"; case \"$command\" in *'DROP DATABASE'*|*'DROP TABLE'*|*'TRUNCATE TABLE'*|*'git push --force'*|*'git push -f'*|*'git reset --hard'*|*'rm -rf /'*|*'rm -rf ~'*) echo '⚠️  HIGH-RISK COMMAND DETECTED' >&2; echo '   Command: '\"$command\" >&2; echo '   This command is normally blocked. If user explicitly authorised, proceed.' >&2; echo '   Otherwise, STOP and ask for confirmation via AskUserQuestion.' >&2 ;; esac; exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "path=\"$CLAUDE_TOOL_INPUT_file_path\"; case \"$path\" in *'gate-checklists/instances/'*) echo '⚠️  EDITING SIGNED GATE CHECKLIST INSTANCE' >&2; echo '   Path: '\"$path\" >&2; echo '   These files are immutable once signed.' >&2; echo '   Add a 「修订记录」 entry instead of overwriting content.' >&2 ;; esac; exit 0"
+          }
+        ]
+      }
+    ],
+
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "prompt=\"$CLAUDE_USER_PROMPT\"; case \"$prompt\" in *'新功能'*|*'加功能'*|*'新模块'*|*'新业务'*|*'new feature'*|*'add module'*) echo '💡 detected intent: new business feature' >&2; echo '   Consider triggering the ruoyi-bootstrap skill Phase 7, and create the Gate Checklist instance in 99-跨阶段/gate-checklists/instances/' >&2 ;; *'上线'*|*'发布'*|*'release'*|*'deploy'*) echo '💡 detected intent: release' >&2; echo '   Phase 05 Gate must be filled: 99-跨阶段/gate-checklists/Phase05-上线-Gate.md' >&2 ;; *'回滚'*|*'rollback'*|*'revert'*) echo '💡 detected intent: rollback' >&2; echo '   Check 05-上线/Runbook.md and follow the documented rollback steps' >&2 ;; esac; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

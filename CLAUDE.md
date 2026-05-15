@@ -127,13 +127,38 @@ Three layers of project-wide rules — read these before non-trivial work:
 
 | Layer | Where | Audience |
 |---|---|---|
-| Claude hard constraints (auto-loaded) | [.claude/rules.md](.claude/rules.md) | Claude — naming, untouchable zones, secret handling, gotchas reminders, commit format |
+| Claude hard constraints (auto-loaded) | [.claude/rules.md](.claude/rules.md) | Claude — naming, untouchable zones, secret handling, gotchas reminders, commit format, **Gate enforcement (§G)** |
 | Human dev standards | [03-开发/开发规范.md](03-开发/开发规范.md) | Engineers — naming/coding/SQL/PR/test/security rules with examples |
-| Module lifecycle workflow | [99-跨阶段/模块工作流.md](99-跨阶段/模块工作流.md) | All roles — Phase 01 → 06 entry/exit conditions, DoD, gate reviews |
+| Module lifecycle overview | [99-跨阶段/模块工作流.md](99-跨阶段/模块工作流.md) | All roles — Phase 01 → 06 entry/exit conditions, DoD, gate reviews |
+| **🚦 Hard Gate (mandatory)** | [99-跨阶段/gate-checklists/](99-跨阶段/gate-checklists/) | All roles — **6 copy-and-fill Checklist templates**; instance files in `instances/<module>/` are the audit trail. Without a signed checklist commit, **the module is NOT allowed to advance to the next phase**. Triage by L1/L2/L3 (see Checklists README). |
 
 Tool-enforced:
 - [.editorconfig](.editorconfig) — auto-applied indent/charset/EOL by editors
 - [.githooks/commit-msg](.githooks/commit-msg) — Conventional Commits validation. **First-time setup per clone**: `git config core.hooksPath .githooks`
+- [.claude/settings.json](.claude/settings.json) — Claude Code hooks (Stop / PreToolUse / UserPromptSubmit) for runtime reminders. Design + troubleshooting in [.claude/hooks-design.md](.claude/hooks-design.md).
+
+## Self-evolution loop
+
+The repo runs a closed feedback loop on its own rules. Read [.claude/rules.md §L](.claude/rules.md) before working in this area.
+
+```
+signals/       ← objective monthly data (commit bypass / Gate skips / Phase duration / bug recurrence / Claude block&override)
+reflect/       ← weekly/monthly/quarterly reports — observations → diagnoses → actions
+proposals/     ← formal change requests with evidence → review → merge → tracking
+   ↓
+rules + workflow + Gate templates EVOLVE  ← rule docs are versioned code, not stone tablets
+```
+
+Key entry points:
+- [99-跨阶段/signals/README.md](99-跨阶段/signals/README.md) — what gets measured
+- [99-跨阶段/reflect/README.md](99-跨阶段/reflect/README.md) — how reflection runs (weekly/monthly/quarterly)
+- [99-跨阶段/proposals/README.md](99-跨阶段/proposals/README.md) — how a rule change actually lands
+
+Roadmap (current = Phase A complete):
+- ✅ Phase A — passive substrate: directories, templates, Stop/PreToolUse hooks
+- ⏳ Phase B — `/reflect-weekly` & `/reflect-monthly` skills (auto-generate reports)
+- ⏳ Phase C — `/proposal` skill (one-command proposal lifecycle)
+- ⏳ Phase D — metrics-driven rule tuning (auto-suggest MUST↔SHOULD downgrades)
 
 ## Memory references
 

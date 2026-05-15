@@ -1,6 +1,10 @@
-# Claude Code session data — ignore everything under .claude/ EXCEPT shared rule/playbook .md files
+# Claude Code session data — ignore everything under .claude/ EXCEPT shared rule/playbook files
 .claude/*
 !.claude/*.md
+!.claude/settings.json
+# Notes:
+#   settings.json      → shared (team-wide hooks/policies, in git)
+#   settings.local.json → user-specific permissions cache, stays ignored
 
 # Environment files with secrets
 .env

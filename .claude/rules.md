@@ -57,15 +57,37 @@
 - 多文件改动按"一件事一个 commit"拆分；不要把"加业务模块 + 改 CI + 修 typo"塞一个 commit。
 - 涉及生成器/工具/skill 改动，commit 关联到产生它的指令（在 body 写"用户在会话中要求 …"）。
 
-## G. 评审与卡控（SHOULD）
+## G. 评审与卡控（MUST — 已升级为硬约束）
 
-- 帮用户进入下一生命周期阶段前，提醒检查 [99-跨阶段/模块工作流.md](../99-跨阶段/模块工作流.md) 的"准出条件"。
-- 帮用户做下列动作前**必须**先确认：
-  - `DROP DATABASE` / `DROP TABLE` / 大批量删除文件
-  - `git reset --hard` / `git push --force`
-  - 改 main 分支保护规则
-  - 改生产环境的 Redis / MySQL / Druid 等共享资源
-- 用户授权过的是"一次性"还是"长期"，要分清；默认按一次性处理。
+### G.1 Gate Checklist（MUST）
+
+进入任何生命周期下一阶段（01→02、02→03、03→04、04→05、05→06）前，**必须**先核对当前阶段的 Gate Checklist 实例是否已签字 commit：
+
+- 实例位置：`99-跨阶段/gate-checklists/instances/<模块名>/PhaseNN-阶段名-Gate-<YYYY-MM-DD>.md`
+- 若实例不存在 / 未打勾 / 未签字 / 未 commit → **拒绝执行**用户的"进入下一阶段"指令，先提示补 Gate
+- 若用户坚持跳过 → 询问理由 + 用 AskUserQuestion 让用户选"补 Gate / 走 P0 hotfix 通道 / 取消"，并在对话中明确记录"用户授权跳过 Gate"
+- 完成跨阶段操作后，提醒用户更新 [模块工作流总览](../99-跨阶段/模块工作流.md) 的进度行
+
+### G.2 分级判断（MUST）
+
+收到任何 改动请求 / "帮我加 XX 模块" 时，先按 [gate-checklists/README.md §分级](../99-跨阶段/gate-checklists/README.md) 判级：
+
+- 拿不准 → **按"高就高"**（往上一级走）
+- L1 触发条件之一：新业务模块、主架构变更、DB 结构性变更、新增第三方集成、安全合规相关
+- L2 触发条件之一：已有模块大改、新增独立 feature、新增/改公开 API、性能优化 > 20%
+- L3：bug / typo / 小重构 / patch 升级
+
+判定 L1 / L2 后必须告诉用户："这属于 LX，需要走 Phase NN/NN/NN 的 Gate Checklist"。
+
+### G.3 高危操作（MUST）
+
+帮用户做下列动作前**必须**先确认（一次性 vs 长期，默认按一次性）：
+
+- `DROP DATABASE` / `DROP TABLE` / 大批量删除文件
+- `git reset --hard` / `git push --force`
+- 改 main 分支保护规则
+- 改生产环境的 Redis / MySQL / Druid 等共享资源
+- 修改任何 `gate-checklists/instances/` 下**已签字**的 Checklist 文件（必须走"修订记录"追加，不许覆盖）
 
 ## H. 文档落位（MUST）
 
@@ -91,6 +113,58 @@
 发现本文件某条规则与现实冲突（比如约定已演进） → 提醒用户更新本文件，不要私下"按新规则"工作让规则脱节。
 
 每次重大重构（如 P0 改名、技术栈大升级）后，复审本文件 + 根 CLAUDE.md + 03-开发/开发规范.md 三者是否仍同步。
+
+## L. 自进化机制（MUST）
+
+本仓库启用了"自进化反馈环"（signals → reflect → proposals → 规范变更 → tracking）。Claude 必须遵守以下流程约束：
+
+### L.1 会话末沉淀（MUST）
+
+每个回合结束时（由 `.claude/settings.json` 的 Stop hook 自动提示），Claude 必须主动评估本回合是否产生了"值得沉淀的知识"：
+
+| 类型 | 触发条件 | 沉淀位置 |
+|---|---|---|
+| **新 gotcha** | 用户纠错 / 踩到未知坑 / 同类问题第 2 次出现 | `.claude/skills/ruoyi-bootstrap/references/gotchas.md` |
+| **架构决策** | 选型 / 不可逆决策 / 模块拆分合并 | `03-开发/ADR/NNNN-<标题>.md` |
+| **规范矛盾** | 发现两份规则文档自相矛盾 / 规范与实际不符 | `99-跨阶段/proposals/NNNN-<标题>.md` |
+| **Gate 状态变化** | 本回合改动了某 Phase 的产出物 | 更新 `99-跨阶段/gate-checklists/instances/<module>/...` |
+| **信号事件** | Claude 拒绝 / 用户 override / 高危命令 | 留待月度 signals 自动采集 |
+
+判断逻辑：如果回合内**没有**触及上述任何场景 → 跳过沉淀；**有**则在回合末主动提出（"我建议把这条记入 gotchas，要做吗？"），不要等用户问。
+
+### L.2 Proposal 流程（MUST）
+
+涉及修改下列**规范文档**的请求，必须先写 proposal，不允许直接改文件：
+
+- [03-开发/开发规范.md](../03-开发/开发规范.md)
+- [99-跨阶段/模块工作流.md](../99-跨阶段/模块工作流.md)
+- [99-跨阶段/gate-checklists/Phase*.md](../99-跨阶段/gate-checklists/)（模板，非 instances）
+- [.claude/rules.md](rules.md)（本文件）
+- [.claude/settings.json](settings.json)
+
+流程：
+1. Claude 帮用户在 `99-跨阶段/proposals/NNNN-<标题>.md` 创建 proposal（用 `0000-template.md` 模板）
+2. proposal 必须含"证据"（链 signals / reflect / 事故 / gotcha / 用户明确请求之一）
+3. proposal 走 review 通过 → 才能动规范文件
+4. merged 后进 tracking 期 → 看相关 signals 是否好转
+
+**例外**：用户明确说"绕过 proposal 直接改"时允许，但必须在 proposal 文件里事后补录（标 "User-requested-bypass"）。
+
+### L.3 反思引擎（SHOULD）
+
+`/reflect-weekly` / `/reflect-monthly` / `/reflect-quarterly` 命令实现后（Phase B+），Claude 应主动在合适时机建议触发，例如：
+- 周一开会前
+- Sprint 结束前
+- 月初 / 季度初
+- 出了 P0 故障后
+
+反思报告产出后，**必须**追问"哪几条要转 proposal"，避免反思变成"心理按摩"（[reflect/README.md](../99-跨阶段/reflect/README.md) 反模式段）。
+
+### L.4 数据完整性（MUST）
+
+- `signals/`、`reflect/`、`proposals/` 目录下的历史文件**永久保留**，不允许删除。`rejected` 状态的提案也保留作为学习材料。
+- 修改已 `merged` 状态的 proposal → 走"修订记录"追加；修改已签字的 `gate-checklists/instances/` 文件 → 同上。
+- 信号数据隐藏（如把 `commit_bypass_count` 调小）是严重违规，**禁止**。
 
 ---
 
