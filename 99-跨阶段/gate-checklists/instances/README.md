@@ -34,11 +34,12 @@ instances/
 
 ## 当前模块清单
 
-| 模块 | 当前阶段 | 分级 | 项目类型 | 团队规模 | 最近 Gate 时间 | 实例文件 | Owner |
-|---|---|---|---|---|---|---|---|
-| **Project**（项目主实体）| ✅ Phase 01 + 02 + 03 完成 / ⏳ Phase 04 启动 | L1 | `internal-tool` | `solo` | 2026-05-15 | [P01](project/Phase01-立项-Gate-2026-05-15.md) · [P02](project/Phase02-设计-Gate-2026-05-15.md) · [P03](project/Phase03-开发-Gate-2026-05-15.md) | Wjl |
+| 模块 | 当前阶段 | 分级 | 项目类型 | 团队规模 | 项目成熟度 | 最近 Gate 时间 | 实例文件 | Owner |
+|---|---|---|---|---|---|---|---|---|
+| **Project**（项目主实体）| ✅ Phase 01 + 02 + 03 完成 / ⏳ Phase 04 启动 | L1 | `internal-tool` | `solo` | `early` | 2026-05-15 | [P01](project/Phase01-立项-Gate-2026-05-15.md) · [P02](project/Phase02-设计-Gate-2026-05-15.md) · [P03](project/Phase03-开发-Gate-2026-05-15.md) | Wjl |
 
-> 列说明：
+> 列说明（4 维参数化）：
 > - **分级** L1/L2/L3 — 见 [../README §维度 1](../README.md)
 > - **项目类型** external-product / internal-tool / framework-upgrade — 见 [../README §维度 2](../README.md)
 > - **团队规模** solo / small / medium / large — 见 [../README §维度 3](../README.md)
+> - **项目成熟度** early / stable / mature — 见 [../README §维度 4](../README.md)（proposal 0006 引入）

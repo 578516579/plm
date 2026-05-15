@@ -14,6 +14,7 @@
 | **分级理由** | _引用 [README §维度 1](../README.md) 的具体判定列_ |
 | **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` |
 | **团队规模** | `solo` / `small` / `medium` / `large` |
+| **项目成熟度** | `early` / `stable` / `mature` |
 | Owner（技术 lead） | |
 | 起始日期 | YYYY-MM-DD |
 | 目标完成日期 | YYYY-MM-DD |

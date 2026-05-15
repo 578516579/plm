@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0004 |
 | 标题 | 测试代码不再是 Phase 03 准出条件，挪到 Phase 04 兜底 |
-| 状态 | **proposed** |
+| 状态 | **merged** → tracking |
 | 类型 | 流程 |
 | 提出人 | Wjl + Claude（来自 Project Phase 03 dogfood） |
 | 提出日期 | 2026-05-15 |
@@ -105,7 +105,21 @@ Phase 03 模板要求 "Service 单元测试覆盖率 ≥ 70%" 作为准出条件
 
 | 评审人 | 立场 | 日期 |
 |---|---|---|
-| Wjl | _待 review_ | |
+| Wjl | ✅ 通过 | 2026-05-15 (solo-review) |
+
+## 11. 实施后跟踪
+
+- 合入 commit: `refactor(gate): apply proposals 0004/0005/0006 ...`（2026-05-15）
+- Tracking 期：2026-05-15 → 2026-05-29
+
+| 信号 | 基线 | 目标 | W21 | W22 |
+|---|---|---|---|---|
+| Phase 03 E 段豁免数（测试相关）| 1 (F-P03-01) | 0 | **0**（回溯 Project Phase 03 实例已达成）| 待 |
+| Phase 04 测试覆盖率达成率 | TBD | ≥ 80% 模块达 70% | 待 Project Phase 04 | 待 |
+
+最终判定：
+- [ ] done
+- [ ] reverted
 
 ---
 

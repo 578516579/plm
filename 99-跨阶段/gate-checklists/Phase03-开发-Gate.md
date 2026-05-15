@@ -14,6 +14,7 @@
 | **分级理由** | _引用 [README §维度 1](../README.md) 的具体判定列_ |
 | **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` |
 | **团队规模** | `solo` / `small` / `medium` / `large` |
+| **项目成熟度** | `early` / `stable` / `mature` |
 | Owner（开发 lead） | |
 | 起始日期 | YYYY-MM-DD |
 | 目标完成日期 | YYYY-MM-DD |
@@ -61,27 +62,44 @@
 - [ ] 按钮级权限用 `v-hasPermi`
 - [ ] 下拉用 `useDict('biz_xxx_yyy')`（无硬编码选项）
 
-### B.3 SQL
+### B.3 SQL（按 项目成熟度 差异化，proposal 0006）
 
 - [ ] 业务 SQL 文件命名：`plm-backend/sql/business-<entity>.sql`
-- [ ] SQL 已在 staging 演练成功
 - [ ] 含 CREATE TABLE + sys_menu inserts + sys_role_menu grants + sys_dict_type/data inserts
 - [ ] 列均有 `comment`
 - [ ] 字符集 utf8mb4，导入测试用过 `--default-character-set=utf8mb4`
+- [ ] SQL 已演练成功（按 项目成熟度）：
+  - [ ] `early`：本地 dev 环境演练即可（接受 dev 替代 staging）
+  - [ ] `stable`：必须在 staging 演练 + 含数据回滚脚本
+  - [ ] `mature`：必须在 staging + pre-prod 双环境演练 + 数据迁移演练 + 回滚演练
 
-### B.4 测试代码
+### B.4 测试代码（**Phase 03 准出 = 代码骨架 DoD**，proposal 0004）
 
-- [ ] Service 单元测试覆盖率 ≥ 70%（jacoco 报告链接：__）
-- [ ] Controller 集成测试覆盖核心端点
-- [ ] 前端 utils 单元测试（Vitest）
-- [ ] 测试代码 commit 在源码 `src/test/` 下，**不要**写到 `04-测试/` 文档目录
+> ⚠️ proposal 0004 合入后：Phase 03 不再强制 Service 覆盖率 70%。完整测试覆盖率由 Phase 04 兜底（见 [Phase04 Gate §B](Phase04-测试-Gate.md)）。
+
+**Phase 03 阶段强制**：
+- [ ] E2E 关键路径手测通过（≥ 1 个正常 + 1 个异常用例）
+- [ ] 启动后端 + 调主要端点 + 验证业务规则（如本期 ADR / 状态机）
+
+**L1 高风险白名单 — 即使在 Phase 03 仍强制写关键路径单测**（[README §维度 5](../README.md)）：
+- [ ] 鉴权 / 授权 模块
+- [ ] 支付 / 计费 模块
+- [ ] 数据迁移脚本（涉及生产数据）
+- [ ] 第三方集成关键链路
+
+**Phase 03 建议（非强制）**：
+- [ ] Service 单元测试 happy path（≥ 1 个）
+- [ ] 前端 utils 单元测试（若涉及新 utils）
+
+**所有测试代码 commit 在源码 `src/test/` 下，不要写到 `04-测试/` 文档目录**。
 
 ---
 
-## C. 必产出物 — 文档
+## C. 必产出物 — 文档（按 团队规模 + 项目成熟度 差异化，proposal 0005）
 
-- [ ] Sprint 计划已写：`03-开发/Sprint 计划与回顾/Sprint-NN-...md`
-- [ ] Sprint 回顾已写（哪怕一句话）
+- [ ] Sprint 计划与回顾（按 团队规模 / 项目成熟度）：
+  - [ ] `solo` 或 `early`：**可省略独立 Sprint 文档**，由本 Gate 实例 §G/§H/§I 替代（已含完成情况与回顾）
+  - [ ] `small+` 且 `stable+`：文件 `03-开发/Sprint 计划与回顾/Sprint-NN-...md`（含计划 + 回顾）
 - [ ] 如本期有架构决策：ADR 已 accepted，文件在 `03-开发/ADR/NNNN-...md`
 - [ ] Swagger 文档与实现一致（启动后端访问 `/swagger-ui.html` 检查）
 - [ ] 关键业务代码有 Javadoc / TSDoc（public 方法必须）
@@ -121,9 +139,10 @@
 
 ## F. Definition of Done（出口 DoD）
 
-L1 / L2 必须全部满足：
+L1 / L2 必须全部满足（**代码骨架 DoD**，proposal 0004）：
 
-- [ ] B / C / D / E 全部满足
+- [ ] B.1 / B.2 / B.3 / C / D / E 全部满足
+- [ ] B.4 "测试代码"按 Phase 03 强制项满足（E2E + L1 白名单单测）；完整测试覆盖率在 Phase 04 兜底
 - [ ] 本地"完整跑通"验证通过：根 [CLAUDE.md](../../CLAUDE.md) 的 curl 测试返回 200
 - [ ] **本 Checklist 文件已 commit 入库**（`docs(gate): <module> phase 03 passed`）
 

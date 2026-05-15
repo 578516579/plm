@@ -14,6 +14,7 @@
 | **分级理由** | _引用 [README §维度 1](../README.md) 的具体判定列，如「新业务模块 + DB 结构性变更」_ |
 | **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` （见 [README §维度 2](../README.md)） |
 | **团队规模** | `solo` / `small` / `medium` / `large` （见 [README §维度 3](../README.md)） |
+| **项目成熟度** | `early` / `stable` / `mature` （见 [README §维度 4](../README.md)） |
 | Owner（产品） | _名字_ |
 | 业务方 | _名字 / 部门_ |
 | 起始日期 | YYYY-MM-DD |

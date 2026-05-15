@@ -15,6 +15,7 @@
 | **分级理由** | _引用 [README §维度 1](../README.md)_ |
 | **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` |
 | **团队规模** | `solo` / `small` / `medium` / `large` |
+| **项目成熟度** | `early` / `stable` / `mature` |
 | 周期类型 | 上线后 7 天 / 30 天 / Q1 / Q2 / ... |
 | 周期起止 | YYYY-MM-DD ~ YYYY-MM-DD |
 | Owner（运营 / 产品 lead） | |

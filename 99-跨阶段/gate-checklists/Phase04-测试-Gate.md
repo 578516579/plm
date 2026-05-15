@@ -14,6 +14,7 @@
 | **分级理由** | _引用 [README §维度 1](../README.md)_ |
 | **项目类型** | `external-product` / `internal-tool` / `framework-upgrade` |
 | **团队规模** | `solo` / `small` / `medium` / `large` |
+| **项目成熟度** | `early` / `stable` / `mature` |
 | Owner（QA lead） | |
 | 起始日期 | YYYY-MM-DD |
 | 目标完成日期 | YYYY-MM-DD |
@@ -26,7 +27,10 @@
 ## A. 准入条件
 
 - [ ] [Phase 03 Gate](Phase03-开发-Gate.md) 已签字通过
-- [ ] 被测版本已部署到 staging
+- [ ] **上一 Gate（Phase 03）E2E 关键路径已通过**（proposal 0004 新增准入条件）
+- [ ] 被测版本已部署到测试环境（按 项目成熟度）：
+  - [ ] `early`：dev 环境（接受 dev 替代 staging，proposal 0006）
+  - [ ] `stable` / `mature`：staging 环境必需
 - [ ] 测试数据已准备（fixture SQL 或脱敏生产数据子集）
 - [ ] 测试账号已分配（含不同角色）
 
@@ -38,6 +42,15 @@
 - [ ] 测试范围明确（含 / 不含）
 - [ ] 选择的测试类型已标注（单元 / 接口 / 集成 / UI 自动化 / 性能 / 安全 / 回归）
 - [ ] 进入 / 退出标准明确
+
+### B.0 测试代码覆盖率（**Phase 04 准出强制**，proposal 0004）
+
+> Phase 03 推迟到本 Phase 兜底的核心测试要求。
+
+- [ ] **Service 单元测试覆盖率 ≥ 70%**（jacoco 报告链接：__）
+- [ ] **Controller 集成测试**覆盖核心端点（happy path + 关键 error path）
+- [ ] **前端 utils 单元测试**（Vitest，若涉及新 utils）
+- [ ] 测试代码 commit 在源码 `src/test/` 下
 
 ---
 
