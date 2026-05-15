@@ -56,6 +56,9 @@ proposed    完成填写、关联数据，等 review
 | [0001](0001-internal-tool-track.md) | 引入"项目类型"维度（外部产品/内部工具/框架升级） | **merged → tracking** | 2026-05-15 | [reflect/2026-W20-project-phase01-dogfood](../reflect/2026-W20-project-phase01-dogfood.md) F5 | apply 0001/0002/0003（2026-05-15）| 2026-05-15 → 05-29 |
 | [0002](0002-team-size-adjusted-thresholds.md) | 按"团队规模"自动调整 Gate 阈值 | **merged → tracking** | 2026-05-15 | reflect F1/F2/F3/F4 | 同上 | 同上 |
 | [0003](0003-require-triage-rationale.md) | Gate 实例头部"分级理由"必填 | **merged → tracking** | 2026-05-15 | reflect F10 | 同上 | 同上 |
+| [0004](0004-staged-test-dod.md) | 拆 Phase 03 / 04 的 DoD（代码骨架 vs 测试稳定） | **proposed** | 2026-05-15 | [reflect/2026-W20-project-phase03-dogfood](../reflect/2026-W20-project-phase03-dogfood.md) F-P03-01 | — | — |
+| [0005](0005-solo-sprint-merge.md) | solo 模式 Sprint 文档可并入 Gate 实例 | **proposed** | 2026-05-15 | reflect F-P03-02 | — | — |
+| [0006](0006-project-maturity-stage.md) | 引入"项目成熟度"维度（early/stable/mature），4 维参数化 | **proposed** | 2026-05-15 | reflect F-P03-03 | — | — |
 
 ---
 
