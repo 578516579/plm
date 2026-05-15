@@ -23,6 +23,13 @@
             <artifactId>plm-common</artifactId>
         </dependency>
 
+        <!-- 测试（Phase 04 引入；含 JUnit 5 + Mockito + AssertJ + Spring TestContext） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>
