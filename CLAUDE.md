@@ -121,6 +121,20 @@ The P0 rename deliberately left these alone — **do NOT mass-rewrite them witho
 
 A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the entire RuoYi-scaffold-to-named-project flow (the very flow that built this repo's commits `4e9777d → 2679a61 → e2e37c3`). It also ships a `Project` CRUD module template that can be dropped in via Phase 7. Trigger it on future fresh-RuoYi imports by saying "用若依新建项目", "把若依改名", or similar.
 
+## Rules & playbooks
+
+Three layers of project-wide rules — read these before non-trivial work:
+
+| Layer | Where | Audience |
+|---|---|---|
+| Claude hard constraints (auto-loaded) | [.claude/rules.md](.claude/rules.md) | Claude — naming, untouchable zones, secret handling, gotchas reminders, commit format |
+| Human dev standards | [03-开发/开发规范.md](03-开发/开发规范.md) | Engineers — naming/coding/SQL/PR/test/security rules with examples |
+| Module lifecycle workflow | [99-跨阶段/模块工作流.md](99-跨阶段/模块工作流.md) | All roles — Phase 01 → 06 entry/exit conditions, DoD, gate reviews |
+
+Tool-enforced:
+- [.editorconfig](.editorconfig) — auto-applied indent/charset/EOL by editors
+- [.githooks/commit-msg](.githooks/commit-msg) — Conventional Commits validation. **First-time setup per clone**: `git config core.hooksPath .githooks`
+
 ## Memory references
 
 Project-specific context lives under `.claude/projects/.../memory/`:

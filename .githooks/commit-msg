@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# .githooks/commit-msg
+# Conventional Commits 校验 — 拒绝不规范的 commit message
+# 启用方式（在仓库根目录执行一次）：
+#   git config core.hooksPath .githooks
+#
+# 规范：<type>(<scope>): <subject>
+#   - type: feat | fix | docs | refactor | test | chore | perf | build | ci | revert | style
+#   - scope: 可选，小写字母 / 数字 / 短横线 / 斜杠
+#   - subject: 不为空、不以句号结尾、≤ 70 字符（不强校验长度，仅警示）
+#
+# 例外：merge / revert / fixup / squash 提交允许跳过格式校验
+
+MSG_FILE="$1"
+FIRST_LINE="$(head -n1 "$MSG_FILE")"
+
+# 跳过 merge / revert / fixup
+case "$FIRST_LINE" in
+  Merge*|Revert*|"fixup!"*|"squash!"*|"amend!"*)
+    exit 0
+    ;;
+esac
+
+# 允许空行（git 自己处理）
+if [ -z "$FIRST_LINE" ]; then
+  exit 0
+fi
+
+PATTERN='^(feat|fix|docs|refactor|test|chore|perf|build|ci|revert|style)(\([a-z0-9/_\-]+\))?(!)?: .+'
+
+if ! echo "$FIRST_LINE" | grep -qE "$PATTERN"; then
+  cat <<'EOF' >&2
+❌ commit message 不符合 Conventional Commits 规范
+
+期望格式：<type>(<scope>): <subject>
+  type   : feat | fix | docs | refactor | test | chore | perf | build | ci | revert | style
+  scope  : 可选，小写字母/数字/短横线/斜杠
+  subject: 动词起头，不要句号结尾
+
+示例：
+  feat(project): support batch close for projects
+  fix(auth): JWT expiry timezone causing midnight relogin
+  chore(deps): bump fastjson2 from 2.0.60 to 2.0.61
+  docs(rules): refine business module naming convention
+
+详细规范见：03-开发/开发规范.md §4.1
+
+如必须绕过校验（不推荐），可用：git commit --no-verify
+EOF
+  exit 1
+fi
+
+# subject 句末有句号 → 警示但放行
+if echo "$FIRST_LINE" | grep -qE '[.。]$'; then
+  echo "⚠️  commit subject 不要以句号结尾（已放行，请下次注意）" >&2
+fi
+
+# subject 超长 → 警示
+SUBJECT_LEN=$(echo -n "$FIRST_LINE" | wc -c)
+if [ "$SUBJECT_LEN" -gt 70 ]; then
+  echo "⚠️  commit subject 长度 $SUBJECT_LEN > 70，建议精简（已放行）" >&2
+fi
+
+exit 0

@@ -1,0 +1,72 @@
+# EditorConfig — 跨编辑器统一缩进/换行/编码
+# 文档：https://editorconfig.org/
+# IDE 支持：IntelliJ / VS Code / Trae / Cursor 内置；Eclipse 需装插件
+
+root = true
+
+# ───────────────────────────────────────────────────────
+# 默认（兜底）
+# ───────────────────────────────────────────────────────
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# ───────────────────────────────────────────────────────
+# Java / Maven / XML — 4 空格
+# ───────────────────────────────────────────────────────
+[*.{java,xml,pom.xml}]
+indent_size = 4
+
+# Maven & MyBatis Mapper XML 不去除行尾空格（部分模板对齐依赖）
+[**/mapper/**/*.xml]
+trim_trailing_whitespace = false
+
+# ───────────────────────────────────────────────────────
+# 前端 — 2 空格（社区惯例）
+# ───────────────────────────────────────────────────────
+[*.{ts,tsx,js,jsx,vue,json,jsonc,html,css,scss,sass,less}]
+indent_size = 2
+
+# ───────────────────────────────────────────────────────
+# YAML / 配置 — 2 空格（YAML 强制）
+# ───────────────────────────────────────────────────────
+[*.{yml,yaml,toml}]
+indent_size = 2
+
+# ───────────────────────────────────────────────────────
+# Markdown — 不去除行尾空格（两个空格代表换行）
+# ───────────────────────────────────────────────────────
+[*.md]
+indent_size = 2
+trim_trailing_whitespace = false
+
+# ───────────────────────────────────────────────────────
+# Shell / Bat — 平台差异
+# ───────────────────────────────────────────────────────
+[*.sh]
+end_of_line = lf
+indent_size = 2
+
+[*.{bat,cmd,ps1}]
+end_of_line = crlf
+indent_size = 2
+
+# ───────────────────────────────────────────────────────
+# Makefile / Gradle — Tab 缩进强制
+# ───────────────────────────────────────────────────────
+[Makefile]
+indent_style = tab
+
+[*.gradle]
+indent_size = 4
+
+# ───────────────────────────────────────────────────────
+# SQL — 2 空格（避免长 SQL 撑超屏）
+# ───────────────────────────────────────────────────────
+[*.sql]
+indent_size = 2
+trim_trailing_whitespace = false

@@ -1,5 +1,6 @@
-# Claude Code session data
-.claude/
+# Claude Code session data — ignore everything under .claude/ EXCEPT shared rule/playbook .md files
+.claude/*
+!.claude/*.md
 
 # Environment files with secrets
 .env
