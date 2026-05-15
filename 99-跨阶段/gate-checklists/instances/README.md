@@ -36,7 +36,7 @@ instances/
 
 | 模块 | 当前阶段 | 分级 | 项目类型 | 团队规模 | 最近 Gate 时间 | 实例文件 | Owner |
 |---|---|---|---|---|---|---|---|
-| **Project**（项目主实体）| ✅ Phase 01 + 02 完成 / ⏳ Phase 03 启动 | L1 | `internal-tool` | `solo` | 2026-05-15 | [Phase 01](project/Phase01-立项-Gate-2026-05-15.md) · [Phase 02](project/Phase02-设计-Gate-2026-05-15.md) | Wjl |
+| **Project**（项目主实体）| ✅ Phase 01 + 02 + 03 完成 / ⏳ Phase 04 启动 | L1 | `internal-tool` | `solo` | 2026-05-15 | [P01](project/Phase01-立项-Gate-2026-05-15.md) · [P02](project/Phase02-设计-Gate-2026-05-15.md) · [P03](project/Phase03-开发-Gate-2026-05-15.md) | Wjl |
 
 > 列说明：
 > - **分级** L1/L2/L3 — 见 [../README §维度 1](../README.md)
