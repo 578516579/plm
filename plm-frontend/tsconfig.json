@@ -6,7 +6,8 @@
     "lib": ["esnext", "dom"],
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@plm/*": ["packages/plm-*/src"]
     },
 
     // 严格性和类型检查相关配置
@@ -31,10 +32,12 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.vue",
+    "packages/**/*.ts",
+    "packages/**/*.vue",
     "vite/**/*.ts",
     "auto-imports.d.ts",
     "vite.config.ts"
   ],
-  "exclude": ["node_modules", "dist", "src/**/*.js"]
+  "exclude": ["node_modules", "dist", "src/**/*.js", "packages/**/node_modules"]
 }
 

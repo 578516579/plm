@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.requirement.mapper.RequirementMapper">
+
+    <resultMap type="Requirement" id="RequirementResult">
+        <result property="requirementId"   column="requirement_id"   />
+        <result property="requirementNo"   column="requirement_no"   />
+        <result property="projectId"       column="project_id"       />
+        <result property="title"           column="title"            />
+        <result property="description"     column="description"      />
+        <result property="source"          column="source"           />
+        <result property="priority"        column="priority"         />
+        <result property="status"          column="status"           />
+        <result property="assigneeUserId"  column="assignee_user_id" />
+        <result property="reviewNote"      column="review_note"      />
+        <result property="createBy"        column="create_by"        />
+        <result property="createTime"      column="create_time"      />
+        <result property="updateBy"        column="update_by"        />
+        <result property="updateTime"      column="update_time"      />
+        <result property="remark"          column="remark"           />
+        <result property="delFlag"         column="del_flag"         />
+    </resultMap>
+
+    <sql id="selectRequirementVo">
+        select requirement_id, requirement_no, project_id, title, description,
+               source, priority, status, assignee_user_id, review_note,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_requirement
+    </sql>
+
+    <select id="selectRequirementList" parameterType="Requirement" resultMap="RequirementResult">
+        <include refid="selectRequirementVo"/>
+        <where>
+            del_flag = '0'
+            <if test="requirementNo != null and requirementNo != ''">
+                and requirement_no like concat('%', #{requirementNo}, '%')
+            </if>
+            <if test="projectId != null">
+                and project_id = #{projectId}
+            </if>
+            <if test="title != null and title != ''">
+                and title like concat('%', #{title}, '%')
+            </if>
+            <if test="source != null and source != ''">
+                and source = #{source}
+            </if>
+            <if test="priority != null and priority != ''">
+                and priority = #{priority}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="assigneeUserId != null">
+                and assignee_user_id = #{assigneeUserId}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectRequirementById" parameterType="Long" resultMap="RequirementResult">
+        <include refid="selectRequirementVo"/>
+        where requirement_id = #{requirementId} and del_flag = '0'
+    </select>
+
+    <insert id="insertRequirement" parameterType="Requirement" useGeneratedKeys="true" keyProperty="requirementId">
+        insert into tb_requirement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="requirementNo != null">requirement_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="source != null">source,</if>
+            <if test="priority != null">priority,</if>
+            <if test="status != null">status,</if>
+            <if test="assigneeUserId != null">assignee_user_id,</if>
+            <if test="reviewNote != null">review_note,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="requirementNo != null">#{requirementNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="source != null">#{source},</if>
+            <if test="priority != null">#{priority},</if>
+            <if test="status != null">#{status},</if>
+            <if test="assigneeUserId != null">#{assigneeUserId},</if>
+            <if test="reviewNote != null">#{reviewNote},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateRequirement" parameterType="Requirement">
+        update tb_requirement
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="requirementNo != null">requirement_no = #{requirementNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="source != null">source = #{source},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="assigneeUserId != null">assignee_user_id = #{assigneeUserId},</if>
+            <if test="reviewNote != null">review_note = #{reviewNote},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where requirement_id = #{requirementId}
+    </update>
+
+    <update id="deleteRequirementByIds" parameterType="Long">
+        update tb_requirement set del_flag = '2' where requirement_id in
+        <foreach item="requirementId" collection="array" open="(" separator="," close=")">
+            #{requirementId}
+        </foreach>
+    </update>
+
+    <!-- ADR-0002: 查当年内最大流水号（REQ-YYYY-NNNN 末 4 位） -->
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(requirement_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_requirement
+        where requirement_no like concat(#{prefix}, '%')
+    </select>
+
+    <!-- Project 删除前置检查可复用 -->
+    <select id="countByProjectId" parameterType="Long" resultType="int">
+        select count(1) from tb_requirement
+        where project_id = #{projectId} and del_flag = '0'
+    </select>
+
+</mapper>

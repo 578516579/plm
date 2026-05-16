@@ -1,0 +1,12 @@
+{
+  "name": "@plm/submission",
+  "version": "0.0.1",
+  "description": "PLM 业务模块 - 提测管理 (stub 空壳)",
+  "main": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./router": "./src/router.ts"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@plm/requirement",
+  "version": "0.2.0",
+  "description": "PLM 业务模块 - 需求（前端: api + types + views）",
+  "main": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "files": ["src"],
+  "exports": {
+    ".": "./src/index.ts",
+    "./api": "./src/api/index.ts",
+    "./types": "./src/types/index.ts",
+    "./router": "./src/router.ts"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0",
+    "element-plus": "^2.13.0"
+  }
+}

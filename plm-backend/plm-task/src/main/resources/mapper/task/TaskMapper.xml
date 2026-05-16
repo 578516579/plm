@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.task.mapper.TaskMapper">
+
+    <resultMap type="Task" id="TaskResult">
+        <result property="taskId"          column="task_id"           />
+        <result property="taskNo"          column="task_no"           />
+        <result property="projectId"       column="project_id"        />
+        <result property="requirementId"   column="requirement_id"    />
+        <result property="sprintId"        column="sprint_id"         />
+        <result property="title"           column="title"             />
+        <result property="description"     column="description"       />
+        <result property="status"          column="status"            />
+        <result property="priority"        column="priority"          />
+        <result property="assigneeUserId"  column="assignee_user_id"  />
+        <result property="estimatedHours"  column="estimated_hours"   />
+        <result property="actualHours"     column="actual_hours"      />
+        <result property="mrUrl"           column="mr_url"            />
+        <result property="mrBranch"        column="mr_branch"         />
+        <result property="createBy"        column="create_by"         />
+        <result property="createTime"      column="create_time"       />
+        <result property="updateBy"        column="update_by"         />
+        <result property="updateTime"      column="update_time"       />
+        <result property="remark"          column="remark"            />
+        <result property="delFlag"         column="del_flag"          />
+    </resultMap>
+
+    <sql id="selectTaskVo">
+        select task_id, task_no, project_id, requirement_id, sprint_id,
+               title, description, status, priority, assignee_user_id,
+               estimated_hours, actual_hours, mr_url, mr_branch,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_task
+    </sql>
+
+    <select id="selectTaskList" parameterType="Task" resultMap="TaskResult">
+        <include refid="selectTaskVo"/>
+        <where>
+            del_flag = '0'
+            <if test="taskNo != null and taskNo != ''">
+                and task_no like concat('%', #{taskNo}, '%')
+            </if>
+            <if test="projectId != null">
+                and project_id = #{projectId}
+            </if>
+            <if test="requirementId != null">
+                and requirement_id = #{requirementId}
+            </if>
+            <if test="sprintId != null">
+                and sprint_id = #{sprintId}
+            </if>
+            <if test="title != null and title != ''">
+                and title like concat('%', #{title}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="priority != null and priority != ''">
+                and priority = #{priority}
+            </if>
+            <if test="assigneeUserId != null">
+                and assignee_user_id = #{assigneeUserId}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectTaskById" parameterType="Long" resultMap="TaskResult">
+        <include refid="selectTaskVo"/>
+        where task_id = #{taskId} and del_flag = '0'
+    </select>
+
+    <insert id="insertTask" parameterType="Task" useGeneratedKeys="true" keyProperty="taskId">
+        insert into tb_task
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="taskNo != null">task_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="requirementId != null">requirement_id,</if>
+            <if test="sprintId != null">sprint_id,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="status != null">status,</if>
+            <if test="priority != null">priority,</if>
+            <if test="assigneeUserId != null">assignee_user_id,</if>
+            <if test="estimatedHours != null">estimated_hours,</if>
+            <if test="actualHours != null">actual_hours,</if>
+            <if test="mrUrl != null">mr_url,</if>
+            <if test="mrBranch != null">mr_branch,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="taskNo != null">#{taskNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="requirementId != null">#{requirementId},</if>
+            <if test="sprintId != null">#{sprintId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="status != null">#{status},</if>
+            <if test="priority != null">#{priority},</if>
+            <if test="assigneeUserId != null">#{assigneeUserId},</if>
+            <if test="estimatedHours != null">#{estimatedHours},</if>
+            <if test="actualHours != null">#{actualHours},</if>
+            <if test="mrUrl != null">#{mrUrl},</if>
+            <if test="mrBranch != null">#{mrBranch},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateTask" parameterType="Task">
+        update tb_task
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="taskNo != null">task_no = #{taskNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="requirementId != null">requirement_id = #{requirementId},</if>
+            <if test="sprintId != null">sprint_id = #{sprintId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="assigneeUserId != null">assignee_user_id = #{assigneeUserId},</if>
+            <if test="estimatedHours != null">estimated_hours = #{estimatedHours},</if>
+            <if test="actualHours != null">actual_hours = #{actualHours},</if>
+            <if test="mrUrl != null">mr_url = #{mrUrl},</if>
+            <if test="mrBranch != null">mr_branch = #{mrBranch},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where task_id = #{taskId}
+    </update>
+
+    <update id="deleteTaskByIds" parameterType="Long">
+        update tb_task set del_flag = '2' where task_id in
+        <foreach item="taskId" collection="array" open="(" separator="," close=")">
+            #{taskId}
+        </foreach>
+    </update>
+
+    <!-- ADR-0003: TASK-YYYY-NNNN -->
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(task_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_task
+        where task_no like concat(#{prefix}, '%')
+    </select>
+
+    <!-- Sprint S-005 删除前检查 / S-009 健康度统计 -->
+    <select id="countBySprintId" parameterType="Long" resultType="int">
+        select count(1) from tb_task
+        where sprint_id = #{sprintId} and del_flag = '0'
+    </select>
+
+    <select id="countByStatusAndSprint" resultType="int">
+        select count(1) from tb_task
+        where sprint_id = #{sprintId}
+          and status = #{status}
+          and del_flag = '0'
+    </select>
+
+    <select id="countByRequirementId" parameterType="Long" resultType="int">
+        select count(1) from tb_task
+        where requirement_id = #{requirementId} and del_flag = '0'
+    </select>
+
+    <!-- 看板视图：项目 + 可选迭代下所有未取消任务（不分页，每列最多 50 条由 service 切片） -->
+    <select id="selectKanbanTasks" resultMap="TaskResult">
+        <include refid="selectTaskVo"/>
+        where del_flag = '0'
+          and status != '05'
+          and project_id = #{projectId}
+        <if test="sprintId != null">
+          and sprint_id = #{sprintId}
+        </if>
+        order by priority asc, create_time desc
+    </select>
+
+    <!-- Sprint 聚合详情：返回该 sprint 全部任务 -->
+    <select id="selectBySprintId" parameterType="Long" resultMap="TaskResult">
+        <include refid="selectTaskVo"/>
+        where sprint_id = #{sprintId} and del_flag = '0'
+        order by create_time desc
+    </select>
+
+</mapper>

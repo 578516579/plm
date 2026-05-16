@@ -32,14 +32,22 @@ instances/
 
 这些文件作为审计证据，将来过等保 / ISO 27001 / SOC2 评估时直接出示。
 
+## 架构状态（2026-05-16 v0.3 重组后）
+
+后端：37 个 Maven 模块（6 core + 4 active business + 26 stubs + plm-admin + root）
+前端：30 个 pnpm packages（同 30 业务模块）+ 主壳
+
+详见 [03-开发/模块拆分架构.md](../../../03-开发/模块拆分架构.md) / [模块拆分指南.md](../../../03-开发/模块拆分指南.md)
+
 ## 当前模块清单
 
 | 模块 | 当前阶段 | 分级 | 项目类型 | 团队规模 | 项目成熟度 | 最近 Gate 时间 | 实例文件 | Owner |
 |---|---|---|---|---|---|---|---|---|
 | **Project**（项目主实体）| ✅ Phase 01-05 完成 / 🔄 Phase 06 cycle 1 进行中（day 1/7） | L1 | `internal-tool` | `solo` | `early` | 2026-05-15 | [P01](project/Phase01-立项-Gate-2026-05-15.md) · [P02](project/Phase02-设计-Gate-2026-05-15.md) · [P03](project/Phase03-开发-Gate-2026-05-15.md) · [P04](project/Phase04-测试-Gate-2026-05-15.md) · [P05](project/Phase05-上线-Gate-2026-05-15.md) · [P06-c1](project/Phase06-运营-Gate-cycle1-2026-05-15.md) | Wjl |
-| **Requirement**（需求管理）| ✅ Phase 01-02 完成 / ⏳ Phase 03 待开始 | L1 | `internal-tool` | `solo` | `early` (v0.2) | 2026-05-16 | [P01](requirement/Phase01-立项-Gate-2026-05-16.md) · [P02](requirement/Phase02-设计-Gate-2026-05-16.md) | Wjl |
-| **Task**（开发任务+看板）| ✅ Phase 01-02 完成 / ⏳ Phase 03 待开始 | L1 | `internal-tool` | `solo` | `early` (v0.2) | 2026-05-16 | [P01](task/Phase01-立项-Gate-2026-05-16.md) · [P02](task/Phase02-设计-Gate-2026-05-16.md) | Wjl |
-| **Sprint**（迭代）| ✅ Phase 01-02 完成 / ⏳ Phase 03 待开始 | L1 | `internal-tool` | `solo` | `early` (v0.2) | 2026-05-16 | [P01](sprint/Phase01-立项-Gate-2026-05-16.md) · [P02](sprint/Phase02-设计-Gate-2026-05-16.md) | Wjl |
+| **Requirement**（需求管理）| ✅ Phase 01-03 完成 / 🏗️ v0.3 重组到 plm-requirement / ⏳ Phase 04 待开始 | L1 | `internal-tool` | `solo` | `early` (v0.2) | 2026-05-16 | [P01](requirement/Phase01-立项-Gate-2026-05-16.md) · [P02](requirement/Phase02-设计-Gate-2026-05-16.md) · [P03](requirement/Phase03-开发-Gate-2026-05-16.md) | Wjl |
+| **Task**（开发任务+看板）| ✅ Phase 01-03 完成 / 🏗️ v0.3 重组到 plm-task / ⏳ Phase 04 待开始 | L1 | `internal-tool` | `solo` | `early` (v0.2) | 2026-05-16 | [P01](task/Phase01-立项-Gate-2026-05-16.md) · [P02](task/Phase02-设计-Gate-2026-05-16.md) · [P03](task/Phase03-开发-Gate-2026-05-16.md) | Wjl |
+| **Sprint**（迭代）| ✅ Phase 01-03 完成 / 🏗️ v0.3 重组到 plm-sprint / ⏳ Phase 04 待开始 | L1 | `internal-tool` | `solo` | `early` (v0.2) | 2026-05-16 | [P01](sprint/Phase01-立项-Gate-2026-05-16.md) · [P02](sprint/Phase02-设计-Gate-2026-05-16.md) · [P03](sprint/Phase03-开发-Gate-2026-05-16.md) | Wjl |
+| **26 stub 业务模块** | 🟡 空壳骨架已建（pom + package.json + README + 占位 view） | — | — | — | — | 2026-05-16 | 见 plm-backend/plm-* + plm-frontend/packages/plm-* | — |
 
 > 列说明（4 维参数化）：
 > - **分级** L1/L2/L3 — 见 [../README §维度 1](../README.md)

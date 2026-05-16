@@ -170,6 +170,30 @@
                 <version>${plm.version}</version>
             </dependency>
 
+            <!-- ============================================================ -->
+            <!-- 业务模块 (Phase A: 4 已迁移; Phase B: 27 stub 由脚本拉起)    -->
+            <!-- ============================================================ -->
+            <dependency>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-project</artifactId>
+                <version>${plm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-requirement</artifactId>
+                <version>${plm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-sprint</artifactId>
+                <version>${plm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-task</artifactId>
+                <version>${plm.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -180,6 +204,45 @@
         <module>plm-quartz</module>
         <module>plm-generator</module>
         <module>plm-common</module>
+        <!-- 业务模块（按 03-开发/模块拆分架构.md 顺序，4 成熟 + 26 stub = 30 个） -->
+        <!-- A 规划阶段 -->
+        <module>plm-dashboard</module>
+        <module>plm-project</module>
+        <module>plm-proposal</module>
+        <module>plm-competitive</module>
+        <!-- B 需求与设计阶段 -->
+        <module>plm-requirement</module>
+        <module>plm-prd</module>
+        <module>plm-ued</module>
+        <module>plm-arch</module>
+        <module>plm-dbdesign</module>
+        <module>plm-apidesign</module>
+        <!-- C 研发阶段 -->
+        <module>plm-task</module>
+        <module>plm-sprint</module>
+        <!-- D 测试阶段 -->
+        <module>plm-testplan</module>
+        <module>plm-testcase</module>
+        <module>plm-testdata</module>
+        <module>plm-submission</module>
+        <module>plm-autotest</module>
+        <module>plm-defect</module>
+        <module>plm-testreport</module>
+        <!-- E 交付阶段 -->
+        <module>plm-apidoc</module>
+        <module>plm-manual-product</module>
+        <module>plm-manual-impl</module>
+        <module>plm-manual-ops</module>
+        <!-- F 复盘阶段 -->
+        <module>plm-analytics</module>
+        <!-- G DevOps -->
+        <module>plm-pipeline</module>
+        <module>plm-release</module>
+        <module>plm-feature-flag</module>
+        <module>plm-dora</module>
+        <!-- H AI -->
+        <module>plm-openspec</module>
+        <module>plm-ai-agent</module>
     </modules>
     <packaging>pom</packaging>
 

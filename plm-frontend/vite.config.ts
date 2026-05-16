@@ -21,7 +21,9 @@ export default defineConfig(({ mode, command }) => {
         // 设置路径
         '~': path.resolve(__dirname, './'),
         // 设置别名
-        '@': path.resolve(__dirname, './src')
+        '@': path.resolve(__dirname, './src'),
+        // 业务模块 monorepo (Phase C 启用) — @plm/{module} 解析到 packages/plm-{module}/src
+        '@plm': path.resolve(__dirname, './packages')
       },
       // https://cn.vitejs.dev/config/#resolve-extensions
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']

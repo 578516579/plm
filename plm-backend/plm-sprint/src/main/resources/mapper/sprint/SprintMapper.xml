@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.sprint.mapper.SprintMapper">
+
+    <resultMap type="Sprint" id="SprintResult">
+        <result property="sprintId"          column="sprint_id"           />
+        <result property="sprintNo"          column="sprint_no"           />
+        <result property="projectId"         column="project_id"          />
+        <result property="name"              column="name"                />
+        <result property="goal"              column="goal"                />
+        <result property="status"            column="status"              />
+        <result property="plannedStartDate"  column="planned_start_date"  />
+        <result property="plannedEndDate"    column="planned_end_date"    />
+        <result property="actualStartDate"   column="actual_start_date"   />
+        <result property="actualEndDate"     column="actual_end_date"     />
+        <result property="durationDays"      column="duration_days"       />
+        <result property="createBy"          column="create_by"           />
+        <result property="createTime"        column="create_time"         />
+        <result property="updateBy"          column="update_by"           />
+        <result property="updateTime"        column="update_time"         />
+        <result property="remark"            column="remark"              />
+        <result property="delFlag"           column="del_flag"            />
+    </resultMap>
+
+    <sql id="selectSprintVo">
+        select sprint_id, sprint_no, project_id, name, goal, status,
+               planned_start_date, planned_end_date, actual_start_date, actual_end_date,
+               duration_days, create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_sprint
+    </sql>
+
+    <select id="selectSprintList" parameterType="Sprint" resultMap="SprintResult">
+        <include refid="selectSprintVo"/>
+        <where>
+            del_flag = '0'
+            <if test="sprintNo != null and sprintNo != ''">
+                and sprint_no like concat('%', #{sprintNo}, '%')
+            </if>
+            <if test="projectId != null">
+                and project_id = #{projectId}
+            </if>
+            <if test="name != null and name != ''">
+                and name like concat('%', #{name}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="params.beginPlannedStartDate != null and params.beginPlannedStartDate != ''">
+                and planned_start_date &gt;= #{params.beginPlannedStartDate}
+            </if>
+            <if test="params.endPlannedStartDate != null and params.endPlannedStartDate != ''">
+                and planned_start_date &lt;= #{params.endPlannedStartDate}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectSprintById" parameterType="Long" resultMap="SprintResult">
+        <include refid="selectSprintVo"/>
+        where sprint_id = #{sprintId} and del_flag = '0'
+    </select>
+
+    <insert id="insertSprint" parameterType="Sprint" useGeneratedKeys="true" keyProperty="sprintId">
+        insert into tb_sprint
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sprintNo != null">sprint_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="name != null">name,</if>
+            <if test="goal != null">goal,</if>
+            <if test="status != null">status,</if>
+            <if test="plannedStartDate != null">planned_start_date,</if>
+            <if test="plannedEndDate != null">planned_end_date,</if>
+            <if test="actualStartDate != null">actual_start_date,</if>
+            <if test="actualEndDate != null">actual_end_date,</if>
+            <if test="durationDays != null">duration_days,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sprintNo != null">#{sprintNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="name != null">#{name},</if>
+            <if test="goal != null">#{goal},</if>
+            <if test="status != null">#{status},</if>
+            <if test="plannedStartDate != null">#{plannedStartDate},</if>
+            <if test="plannedEndDate != null">#{plannedEndDate},</if>
+            <if test="actualStartDate != null">#{actualStartDate},</if>
+            <if test="actualEndDate != null">#{actualEndDate},</if>
+            <if test="durationDays != null">#{durationDays},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateSprint" parameterType="Sprint">
+        update tb_sprint
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="sprintNo != null">sprint_no = #{sprintNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="goal != null">goal = #{goal},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="plannedStartDate != null">planned_start_date = #{plannedStartDate},</if>
+            <if test="plannedEndDate != null">planned_end_date = #{plannedEndDate},</if>
+            <if test="actualStartDate != null">actual_start_date = #{actualStartDate},</if>
+            <if test="actualEndDate != null">actual_end_date = #{actualEndDate},</if>
+            <if test="durationDays != null">duration_days = #{durationDays},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where sprint_id = #{sprintId}
+    </update>
+
+    <update id="deleteSprintByIds" parameterType="Long">
+        update tb_sprint set del_flag = '2' where sprint_id in
+        <foreach item="sprintId" collection="array" open="(" separator="," close=")">
+            #{sprintId}
+        </foreach>
+    </update>
+
+    <!-- ADR-0004: SPR-YYYY-NNNN -->
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(sprint_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_sprint
+        where sprint_no like concat(#{prefix}, '%')
+    </select>
+
+    <!-- 业务硬规则 703：项目级单一活跃迭代约束 -->
+    <select id="countActiveByProject" resultType="int">
+        select count(1) from tb_sprint
+        where project_id = #{projectId}
+          and status = '01'
+          and del_flag = '0'
+          and sprint_id != #{excludeSprintId}
+    </select>
+
+    <!-- 查项目当前活跃迭代（status='01'），最多一条 -->
+    <select id="selectCurrentByProject" parameterType="Long" resultMap="SprintResult">
+        <include refid="selectSprintVo"/>
+        where project_id = #{projectId}
+          and status = '01'
+          and del_flag = '0'
+        limit 1
+    </select>
+
+</mapper>

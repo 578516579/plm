@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>plm</artifactId>
+        <groupId>cn.com.bosssfot.dv.plm</groupId>
+        <version>3.9.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>plm-sprint</artifactId>
+
+    <description>
+        迭代（Sprint）业务模块 — 4×4 状态机 + 业务硬规则 703 项目级单一活跃 + actual_dates 自动填充 + ADR-0004
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-system</artifactId>
+        </dependency>
+        <!-- FK 校验调 ProjectMapper -->
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-project</artifactId>
+        </dependency>
+        <!-- 注意: 不依赖 plm-task,通过 plm-common 的 ITaskQueryService 接口打破循环 -->
+        <!-- plm-task 的 TaskQueryService 实现本接口 + @Service,Spring 自动注入 -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

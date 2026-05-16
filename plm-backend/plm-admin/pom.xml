@@ -54,6 +54,26 @@
             <artifactId>plm-generator</artifactId>
         </dependency>
 
+        <!-- ============================================================ -->
+        <!-- 业务模块: 通过依赖把 Controller / Mapper XML 拉进 admin classpath -->
+        <!-- ============================================================ -->
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-project</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-requirement</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-sprint</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-task</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
