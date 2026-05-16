@@ -16,13 +16,13 @@ test.describe('Feature Flag 模块 E2E (DevOps)', () => {
   })
 
   test.afterAll(async () => {
-    execDelete('tb_feature_flag', `flag_key like '%${RUN_ID.toLowerCase()}%'`)
+    execDelete('tb_feature_flag', `flag_key like '%${RUN_ID.toLowerCase().replace(/-/g, '_')}%'`)
     await apiRequest?.dispose()
   })
 
   test('TC-FF-F001 创建 canary 灰度 Flag', async () => {
     const r = await api.post('/business/feature-flag', {
-      flagKey: `new_dashboard_${RUN_ID.toLowerCase()}`,
+      flagKey: `new_dashboard_${RUN_ID.toLowerCase().replace(/-/g, '_')}`,
       title: '新版工作台',
       environment: 'prod',
       rolloutStrategy: 'canary',
@@ -35,7 +35,7 @@ test.describe('Feature Flag 模块 E2E (DevOps)', () => {
 
   test('TC-FF-F002 canary 百分比必须 1-99', async () => {
     const r = await api.post('/business/feature-flag', {
-      flagKey: `bad_canary_${RUN_ID.toLowerCase()}`,
+      flagKey: `bad_canary_${RUN_ID.toLowerCase().replace(/-/g, '_')}`,
       title: 'invalid canary',
       environment: 'test',
       rolloutStrategy: 'canary',
@@ -57,7 +57,7 @@ test.describe('Feature Flag 模块 E2E (DevOps)', () => {
 
   test('TC-FF-F004 check 端点 — all_on 返回 true, all_off 返回 false', async () => {
     const a = await api.post('/business/feature-flag', {
-      flagKey: `always_on_${RUN_ID.toLowerCase()}`,
+      flagKey: `always_on_${RUN_ID.toLowerCase().replace(/-/g, '_')}`,
       title: 'always on',
       environment: 'test',
       rolloutStrategy: 'all_on',
@@ -67,7 +67,7 @@ test.describe('Feature Flag 模块 E2E (DevOps)', () => {
     })
     expect(a.code).toBe(200)
     const r = await api.get('/business/feature-flag/check', {
-      flagKey: `always_on_${RUN_ID.toLowerCase()}`,
+      flagKey: `always_on_${RUN_ID.toLowerCase().replace(/-/g, '_')}`,
       environment: 'test',
       userId: 99
     })
