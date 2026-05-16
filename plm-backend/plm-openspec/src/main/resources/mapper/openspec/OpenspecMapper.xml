@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.openspec.mapper.OpenspecMapper">
+    <resultMap type="cn.com.bosssfot.dv.plm.openspec.domain.Openspec" id="OpenspecResult">
+        <id     property="openspecId"     column="openspec_id"     />
+        <result property="openspecNo"     column="openspec_no"     />
+        <result property="specName"       column="spec_name"       />
+        <result property="specType"       column="spec_type"       />
+        <result property="description"    column="description"     />
+        <result property="specContent"    column="spec_content"    />
+        <result property="version"        column="version"         />
+        <result property="agriKbRef"      column="agri_kb_ref"     />
+        <result property="aiGenerated"    column="ai_generated"    />
+        <result property="aiGeneratedAt"  column="ai_generated_at" />
+        <result property="status"         column="status"          />
+        <result property="authorUserId"   column="author_user_id"  />
+        <result property="createBy"       column="create_by"       />
+        <result property="createTime"     column="create_time"     />
+        <result property="updateBy"       column="update_by"       />
+        <result property="updateTime"     column="update_time"     />
+        <result property="remark"         column="remark"          />
+        <result property="delFlag"        column="del_flag"        />
+    </resultMap>
+
+    <sql id="selectOpenspecVo">
+        select openspec_id, openspec_no, spec_name, spec_type, description, spec_content,
+               version, agri_kb_ref, ai_generated, ai_generated_at, status, author_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_openspec
+    </sql>
+
+    <select id="selectOpenspecList" parameterType="cn.com.bosssfot.dv.plm.openspec.domain.Openspec" resultMap="OpenspecResult">
+        <include refid="selectOpenspecVo"/>
+        <where>
+            del_flag = '0'
+            <if test="openspecNo != null and openspecNo != ''">and openspec_no like concat('%', #{openspecNo}, '%')</if>
+            <if test="specName != null and specName != ''">and spec_name like concat('%', #{specName}, '%')</if>
+            <if test="specType != null and specType != ''">and spec_type = #{specType}</if>
+            <if test="version != null and version != ''">and version = #{version}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectOpenspecById" parameterType="Long" resultMap="OpenspecResult">
+        <include refid="selectOpenspecVo"/>
+        where openspec_id = #{openspecId} and del_flag = '0'
+    </select>
+
+    <insert id="insertOpenspec" parameterType="cn.com.bosssfot.dv.plm.openspec.domain.Openspec" useGeneratedKeys="true" keyProperty="openspecId">
+        insert into tb_openspec
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="openspecNo != null">openspec_no,</if>
+            <if test="specName != null">spec_name,</if>
+            <if test="specType != null">spec_type,</if>
+            <if test="description != null">description,</if>
+            <if test="specContent != null">spec_content,</if>
+            <if test="version != null">version,</if>
+            <if test="agriKbRef != null">agri_kb_ref,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="aiGeneratedAt != null">ai_generated_at,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="openspecNo != null">#{openspecNo},</if>
+            <if test="specName != null">#{specName},</if>
+            <if test="specType != null">#{specType},</if>
+            <if test="description != null">#{description},</if>
+            <if test="specContent != null">#{specContent},</if>
+            <if test="version != null">#{version},</if>
+            <if test="agriKbRef != null">#{agriKbRef},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateOpenspec" parameterType="cn.com.bosssfot.dv.plm.openspec.domain.Openspec">
+        update tb_openspec
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="specName != null">spec_name = #{specName},</if>
+            <if test="specType != null">spec_type = #{specType},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="specContent != null">spec_content = #{specContent},</if>
+            <if test="version != null">version = #{version},</if>
+            <if test="agriKbRef != null">agri_kb_ref = #{agriKbRef},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where openspec_id = #{openspecId}
+    </update>
+
+    <update id="deleteOpenspecByIds" parameterType="Long">
+        update tb_openspec set del_flag = '2' where openspec_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(openspec_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_openspec where openspec_no like concat(#{prefix}, '%')
+    </select>
+</mapper>

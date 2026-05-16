@@ -12,7 +12,7 @@
     <artifactId>plm-feature-flag</artifactId>
 
     <description>
-        Feature Flag - DevOps阶段业务模块 (Phase B 拉起的空壳, 计划版本: deferred)
+        Feature Flag - DevOps 扩展 灰度发布 / 紧急开关 / 环境隔离
     </description>
 
     <dependencies>
@@ -23,6 +23,11 @@
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
