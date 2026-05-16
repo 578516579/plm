@@ -41,6 +41,9 @@
 2. `mysql ...` 一定带 `--default-character-set=utf8mb4`
 3. 后端启动一定 `export REDIS_HOST=127.0.0.1`（不要 `localhost`）
 4. 前端做包名重命名时 **一定** 同步扫 `plm-frontend/vite/plugins/auto-import.ts`
+5. **后端启动一定带** `-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8`（Windows JDK 默认 GBK 会污染 HTTP body 解析，参见 [`03-开发/字符编码规范.md`](../03-开发/字符编码规范.md)）
+6. **curl 测试含中文请求体一定走 `--data-binary @file.json`**（不能用内联 `-d '{"x":"中文"}'`，MSYS bash 会改字节）
+7. 任何"DB 字段 HEX 含 `EFBFBD`"视为 P0 编码污染，先停下来排查再继续
 
 碰到类似症状（Lettuce 超时、Data too long、mvn 用 JDK 8、auto-import 错），先查 [references/gotchas.md](../../.claude/skills/ruoyi-bootstrap/references/gotchas.md) 再去 debug。
 
@@ -88,6 +91,22 @@
 - 改 main 分支保护规则
 - 改生产环境的 Redis / MySQL / Druid 等共享资源
 - 修改任何 `gate-checklists/instances/` 下**已签字**的 Checklist 文件（必须走"修订记录"追加，不许覆盖）
+
+### G.4 E2E 自动化测试（MUST — Phase 03 → 04 准入条件）
+
+任何业务模块 Phase 03 完成后,声明"开发完毕"前**必须**:
+
+1. 启动后端（带 `-Dfile.encoding=UTF-8` 等 4 个编码标志）+ 前端 `npm run dev`
+2. 在 `plm-frontend/` 跑 `npm run test:e2e:encoding`（乱码守门员 — 6 case 全过）
+3. 跑 `npm run test:e2e` 全套件 41 case,**任何 fail 不允许进 Phase 04**
+4. 把通过证据（最后一行 `41 passed`）写进 Phase 03 Gate 实例的 §I "进入 Phase 04 准出确认" 段
+
+新增业务模块时,需要：
+- 复用 [E2E-测试矩阵.md](../04-测试/测试用例库/E2E-测试矩阵.md) 模式新建 `e2e/<module>.spec.ts`
+- 至少覆盖：CRUD + 状态机合法/非法 + FK 校验 + 编码 HEX 校验
+- 添加 npm script `test:e2e:<module>`
+
+详细操作见 [`04-测试/测试用例库/E2E-运行手册.md`](../04-测试/测试用例库/E2E-运行手册.md)。
 
 ## H. 文档落位（MUST）
 

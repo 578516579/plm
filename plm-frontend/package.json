@@ -8,7 +8,14 @@
     "dev": "vite",
     "build:prod": "vite build",
     "build:stage": "vite build --mode staging",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:smoke": "playwright test encoding.spec.ts navigation.spec.ts",
+    "test:e2e:encoding": "playwright test encoding.spec.ts",
+    "test:e2e:business": "playwright test project.spec.ts requirement.spec.ts sprint.spec.ts task.spec.ts",
+    "test:e2e:report": "playwright show-report"
   },
   "private": true,
   "dependencies": {
