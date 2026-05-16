@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.manualproduct.mapper.ManualProductMapper">
+    <resultMap type="ManualProduct" id="ManualProductResult">
+        <result property="manualproductId" column="manualproduct_id" />
+        <result property="manualproductNo" column="manualproduct_no" />
+        <result property="projectId"  column="project_id" />
+        <result property="title"      column="title" />
+        <result property="status"     column="status" />
+        <result property="createBy"   column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy"   column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark"     column="remark" />
+        <result property="delFlag"    column="del_flag" />
+    </resultMap>
+
+    <sql id="selectManualProductVo">
+        select manualproduct_id, manualproduct_no, project_id, title, status,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_manual_product
+    </sql>
+
+    <select id="selectManualProductList" parameterType="ManualProduct" resultMap="ManualProductResult">
+        <include refid="selectManualProductVo"/>
+        <where>
+            del_flag = '0'
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectManualProductById" parameterType="Long" resultMap="ManualProductResult">
+        <include refid="selectManualProductVo"/>
+        where manualproduct_id = #{manualproductId} and del_flag = '0'
+    </select>
+
+    <insert id="insertManualProduct" parameterType="ManualProduct" useGeneratedKeys="true" keyProperty="manualproductId">
+        insert into tb_manual_product (manualproduct_no, project_id, title, status, create_by, create_time)
+        values (#{manualproductNo}, #{projectId}, #{title}, #{status}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateManualProduct" parameterType="ManualProduct">
+        update tb_manual_product set title = #{title}, status = #{status}, update_by = #{updateBy}, update_time = sysdate()
+        where manualproduct_id = #{manualproductId}
+    </update>
+
+    <update id="deleteManualProductByIds" parameterType="Long">
+        update tb_manual_product set del_flag = '2' where manualproduct_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+</mapper>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AgriPLM·AI — 农业项目全生命周期管理平台</title>
+<link rel="stylesheet" href="agriplm.css">
+<style>
+/* Index-specific styles */
+body { overflow: auto; }
+.index-wrap { min-height: 100vh; background: linear-gradient(135deg, #0f2419 0%, #1a5235 50%, #0e3d2a 100%); padding: 0; }
+
+.idx-header { padding: 32px 48px 0; display: flex; align-items: center; justify-content: space-between; }
+.idx-logo { display: flex; align-items: center; gap: 14px; }
+.idx-logo-icon { width: 48px; height: 48px; background: #4caf78; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 20px rgba(76,175,120,.4); }
+.idx-logo-text { color: #fff; font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
+.idx-logo-sub { color: rgba(255,255,255,.45); font-size: 12px; margin-top: 2px; }
+.idx-badge { background: rgba(76,175,120,.2); border: 1px solid rgba(76,175,120,.5); color: #4caf78; padding: 5px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 600; }
+
+.idx-hero { text-align: center; padding: 64px 48px 48px; }
+.idx-hero-title { font-size: 52px; font-weight: 800; color: #fff; letter-spacing: -1px; margin-bottom: 12px; line-height: 1.15; }
+.idx-hero-title span { color: #4caf78; }
+.idx-hero-sub { font-size: 18px; color: rgba(255,255,255,.6); margin-bottom: 36px; max-width: 640px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+.idx-stats { display: flex; justify-content: center; gap: 32px; margin-bottom: 48px; flex-wrap: wrap; }
+.idx-stat { text-align: center; }
+.idx-stat-num { font-size: 36px; font-weight: 800; color: #4caf78; line-height: 1; }
+.idx-stat-lbl { font-size: 12.5px; color: rgba(255,255,255,.5); margin-top: 4px; }
+.idx-enter-btn { display: inline-flex; align-items: center; gap: 10px; background: #2d7a4f; color: #fff; padding: 14px 32px; border-radius: 12px; font-size: 16px; font-weight: 700; text-decoration: none; transition: all .2s; box-shadow: 0 4px 20px rgba(45,122,79,.4); }
+.idx-enter-btn:hover { background: #4caf78; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(76,175,120,.5); }
+
+.idx-modules { background: rgba(255,255,255,.04); border-top: 1px solid rgba(255,255,255,.08); padding: 48px; }
+.idx-section-title { text-align: center; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.idx-section-sub { text-align: center; font-size: 14px; color: rgba(255,255,255,.4); margin-bottom: 36px; }
+
+.mod-group { margin-bottom: 40px; }
+.mod-group-title { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 14px; padding-left: 2px; }
+.mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.mod-card { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 16px 18px; cursor: pointer; text-decoration: none; display: block; transition: all .2s; position: relative; overflow: hidden; }
+.mod-card:hover { background: rgba(255,255,255,.13); border-color: rgba(76,175,120,.5); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+.mod-card::before { content: ''; position: absolute; inset: 0; opacity: 0; background: linear-gradient(135deg, rgba(76,175,120,.12), transparent); transition: opacity .2s; }
+.mod-card:hover::before { opacity: 1; }
+.mod-icon { font-size: 24px; margin-bottom: 8px; }
+.mod-name { font-size: 13.5px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+.mod-desc { font-size: 11.5px; color: rgba(255,255,255,.4); line-height: 1.5; }
+.mod-tag { position: absolute; top: 12px; right: 12px; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+.mod-tag.ai { background: rgba(124,58,237,.3); color: #c4b5fd; border: 1px solid rgba(124,58,237,.4); }
+.mod-tag.new { background: rgba(16,185,129,.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,.3); }
+
+.idx-footer { border-top: 1px solid rgba(255,255,255,.08); padding: 28px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap; gap: 12px; }
+.idx-footer-text { font-size: 12.5px; color: rgba(255,255,255,.25); }
+.idx-footer-links { display: flex; gap: 20px; }
+.idx-footer-links a { font-size: 12.5px; color: rgba(255,255,255,.35); text-decoration: none; transition: color .15s; }
+.idx-footer-links a:hover { color: #4caf78; }
+
+@media (max-width: 768px) {
+  .idx-hero-title { font-size: 32px; }
+  .idx-header, .idx-hero, .idx-modules, .idx-footer { padding-left: 20px; padding-right: 20px; }
+  .mod-grid { grid-template-columns: 1fr 1fr; }
+  .idx-stats { gap: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="index-wrap">
+
+  <!-- Header -->
+  <div class="idx-header">
+    <div class="idx-logo">
+      <div class="idx-logo-icon">🌾</div>
+      <div>
+        <div class="idx-logo-text">AgriPLM · AI</div>
+        <div class="idx-logo-sub">农业信息化AI项目全生命周期管理平台</div>
+      </div>
+    </div>
+    <span class="idx-badge">v2.0 · 原型</span>
+  </div>
+
+  <!-- Hero -->
+  <div class="idx-hero">
+    <div class="idx-hero-title">AI 驱动的<br><span>全链路农业研发</span>平台</div>
+    <div class="idx-hero-sub">从立项到交付，18个 Dify AI 工作流贯穿每个环节。AgriKB 农业知识库驱动，MCP 生态集成，效率提升 83%。</div>
+    <div class="idx-stats">
+      <div class="idx-stat"><div class="idx-stat-num">30</div><div class="idx-stat-lbl">功能模块</div></div>
+      <div class="idx-stat"><div class="idx-stat-num">27</div><div class="idx-stat-lbl">交互弹窗</div></div>
+      <div class="idx-stat"><div class="idx-stat-num">23</div><div class="idx-stat-lbl">AI工作流+Agent</div></div>
+      <div class="idx-stat"><div class="idx-stat-num">83%</div><div class="idx-stat-lbl">平均提效</div></div>
+      <div class="idx-stat"><div class="idx-stat-num">5</div><div class="idx-stat-lbl">MCP 集成</div></div>
+    </div>
+    <a href="dashboard.html" class="idx-enter-btn">🚀 进入工作台 →</a>
+  </div>
+
+  <!-- Module Grid -->
+  <div class="idx-modules">
+    <div class="idx-section-title">全部功能模块</div>
+    <div class="idx-section-sub">点击任意模块直接进入，所有页面独立运行</div>
+
+    <!-- 规划 -->
+    <div class="mod-group">
+      <div class="mod-group-title">📦 规划阶段</div>
+      <div class="mod-grid">
+        <a class="mod-card" href="dashboard.html">
+          <div class="mod-icon">🏠</div>
+          <div class="mod-name">工作台</div>
+          <div class="mod-desc">项目进度总览、待办事项、AI快速助手</div>
+        </a>
+        <a class="mod-card" href="projects.html">
+          <div class="mod-icon">📁</div>
+          <div class="mod-name">项目列表</div>
+          <div class="mod-desc">项目管理、甘特图、里程碑、健康度评分</div>
+        </a>
+        <a class="mod-card" href="inception.html">
+          <div class="mod-icon">🚀</div>
+          <div class="mod-name">项目立项</div>
+          <div class="mod-desc">AI生成立项建议书、风险识别、审批流程</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="competitive.html">
+          <div class="mod-icon">🔍</div>
+          <div class="mod-name">竞品情报</div>
+          <div class="mod-desc">15维功能矩阵、动态监控、SWOT分析</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 需求 & 设计 -->
+    <div class="mod-group">
+      <div class="mod-group-title">📝 需求 &amp; 设计阶段</div>
+      <div class="mod-grid">
+        <a class="mod-card" href="requirements.html">
+          <div class="mod-icon">📋</div>
+          <div class="mod-name">需求管理</div>
+          <div class="mod-desc">CRUD、AI优先级分析、追踪矩阵、变更记录</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="prd.html">
+          <div class="mod-icon">📄</div>
+          <div class="mod-name">AI PRD 生成</div>
+          <div class="mod-desc">4步流式生成、完整度评分、导出Word/PDF</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="ued.html">
+          <div class="mod-icon">🎨</div>
+          <div class="mod-name">UED 设计协同</div>
+          <div class="mod-desc">版本管理、AI规范检查、Figma MCP同步</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="archdesign.html">
+          <div class="mod-icon">🏗️</div>
+          <div class="mod-name">系统概要设计</div>
+          <div class="mod-desc">C4架构图生成、技术选型、非功能需求</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="dbdesign.html">
+          <div class="mod-icon">🗄️</div>
+          <div class="mod-name">数据库设计</div>
+          <div class="mod-desc">ER图、数据字典、建表SQL生成与复制</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="apidesign.html">
+          <div class="mod-icon">🔌</div>
+          <div class="mod-name">接口详细设计</div>
+          <div class="mod-desc">接口列表、详情面板、Mock服务控制台</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 研发 -->
+    <div class="mod-group">
+      <div class="mod-group-title">🛠️ 研发阶段</div>
+      <div class="mod-grid">
+        <a class="mod-card" href="kanban.html">
+          <div class="mod-icon">📌</div>
+          <div class="mod-name">研发看板</div>
+          <div class="mod-desc">5列拖拽看板、任务详情/评论/MR关联、Sprint</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 测试 -->
+    <div class="mod-group">
+      <div class="mod-group-title">🧪 测试阶段</div>
+      <div class="mod-grid">
+        <a class="mod-card" href="testplan.html">
+          <div class="mod-icon">📐</div>
+          <div class="mod-name">测试方案</div>
+          <div class="mod-desc">AI生成测试策略、环境管理、资源规划</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="testcase.html">
+          <div class="mod-icon">🧪</div>
+          <div class="mod-name">测试用例</div>
+          <div class="mod-desc">批量执行/删除、AI农业专项生成、手动添加</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="testdata.html">
+          <div class="mod-icon">🏭</div>
+          <div class="mod-name">测试数据工厂</div>
+          <div class="mod-desc">字段语义识别、多格式生成、写入DB、导出</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="submit.html">
+          <div class="mod-icon">📤</div>
+          <div class="mod-name">提测管理</div>
+          <div class="mod-desc">AI质量门禁、提测单详情、审批/驳回流程</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="autotest.html">
+          <div class="mod-icon">🤖</div>
+          <div class="mod-name">自动化测试</div>
+          <div class="mod-desc">套件管理、执行动画、通过率可视化</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="defects.html">
+          <div class="mod-icon">🐛</div>
+          <div class="mod-name">缺陷管理</div>
+          <div class="mod-desc">AI相似检测、缺陷趋势图、分布统计</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="testreport.html">
+          <div class="mod-icon">📊</div>
+          <div class="mod-name">测试报告</div>
+          <div class="mod-desc">AI综合分析、上线风险评级、导出分享</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 交付 -->
+    <div class="mod-group">
+      <div class="mod-group-title">📦 交付阶段</div>
+      <div class="mod-grid">
+        <a class="mod-card" href="apidoc.html">
+          <div class="mod-icon">📗</div>
+          <div class="mod-name">API 文档</div>
+          <div class="mod-desc">分组展示、在线调试、从代码同步</div>
+        </a>
+        <a class="mod-card" href="productmanual.html">
+          <div class="mod-icon">📖</div>
+          <div class="mod-name">产品手册</div>
+          <div class="mod-desc">AI生成、截图AI标注、导出PDF/Word</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="implmanual.html">
+          <div class="mod-icon">🚀</div>
+          <div class="mod-name">实施手册</div>
+          <div class="mod-desc">Docker/K8s部署步骤、常见问题解答</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="opsmanual.html">
+          <div class="mod-icon">🛠️</div>
+          <div class="mod-name">运维手册</div>
+          <div class="mod-desc">监控告警、IoT专项运维、备份恢复</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 分析 & 系统 -->
+    <div class="mod-group">
+      <div class="mod-group-title">📊 分析 &amp; 系统</div>
+      <div class="mod-grid">
+        <a class="mod-card" href="analytics.html">
+          <div class="mod-icon">📈</div>
+          <div class="mod-name">效能分析</div>
+          <div class="mod-desc">AI提效83%、健康度评分、改进建议</div>
+          <span class="mod-tag ai">AI</span>
+        </a>
+        <a class="mod-card" href="settings.html">
+          <div class="mod-icon">⚙️</div>
+          <div class="mod-name">系统设置</div>
+          <div class="mod-desc">模型配置、Dify工作流、MCP、AgriKB、权限</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- DevOps -->
+    <div class="mod-group">
+      <div class="mod-group-title">🚀 DevOps 阶段</div>
+      <div class="mod-grid">
+        <a class="mod-card" href="pipeline.html">
+          <div class="mod-icon">⚙️</div>
+          <div class="mod-name">CI/CD 流水线</div>
+          <div class="mod-desc">全链路流水线可视化、AI安全分析、一键触发/重试</div>
+          <span class="mod-tag new">NEW</span>
+        </a>
+        <a class="mod-card" href="release.html">
+          <div class="mod-icon">🎯</div>
+          <div class="mod-name">发布管理</div>
+          <div class="mod-desc">蓝绿/金丝雀/滚动发布、AI评审、DORA指标、回滚</div>
+          <span class="mod-tag new">NEW</span>
+        </a>
+        <a class="mod-card" href="featureflag.html">
+          <div class="mod-icon">🚩</div>
+          <div class="mod-name">Feature Flag</div>
+          <div class="mod-desc">功能灰度开关、A/B测试、环境隔离、紧急回退</div>
+          <span class="mod-tag new">NEW</span>
+        </a>
+        <a class="mod-card" href="devops.html">
+          <div class="mod-icon">📊</div>
+          <div class="mod-name">DevOps 效能</div>
+          <div class="mod-desc">DORA四键指标、部署热力图、前置时间拆解</div>
+          <span class="mod-tag new">NEW</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- AI Capabilities -->
+    <div class="mod-group">
+      <div class="mod-group-title">🤖 AI 能力层</div>
+      <div class="mod-grid">
+        <a class="mod-card" href="aispec.html">
+          <div class="mod-icon">📐</div>
+          <div class="mod-name">AI OpenSpec</div>
+          <div class="mod-desc">AI生成OpenAPI/AsyncAPI/AI Function Spec，AgriKB语义增强</div>
+          <span class="mod-tag ai">AI</span>
+          <span class="mod-tag new" style="top:32px">NEW</span>
+        </a>
+        <a class="mod-card" href="aiagents.html">
+          <div class="mod-icon">🤖</div>
+          <div class="mod-name">AI Agent 编排</div>
+          <div class="mod-desc">5个专属Agent：需求分析/代码审查/测试生成/发布评审/运维巡检</div>
+          <span class="mod-tag ai">AI</span>
+          <span class="mod-tag new" style="top:32px">NEW</span>
+        </a>
+      </div>
+    </div>
+
+  <!-- Footer -->
+  <div class="idx-footer">
+    <div class="idx-footer-text">© 2026 AgriPLM·AI 产研部 · 原型 v2.0 · 基于交互原型 v5 拆分</div>
+    <div class="idx-footer-links">
+      <a href="dashboard.html">工作台</a>
+      <a href="settings.html">系统设置</a>
+      <a href="analytics.html">效能分析</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

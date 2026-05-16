@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.testreport.mapper.TestReportMapper">
+    <resultMap type="TestReport" id="TestReportResult">
+        <result property="testreportId" column="testreport_id" />
+        <result property="testreportNo" column="testreport_no" />
+        <result property="projectId"  column="project_id" />
+        <result property="title"      column="title" />
+        <result property="status"     column="status" />
+        <result property="createBy"   column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy"   column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark"     column="remark" />
+        <result property="delFlag"    column="del_flag" />
+    </resultMap>
+
+    <sql id="selectTestReportVo">
+        select testreport_id, testreport_no, project_id, title, status,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_testreport
+    </sql>
+
+    <select id="selectTestReportList" parameterType="TestReport" resultMap="TestReportResult">
+        <include refid="selectTestReportVo"/>
+        <where>
+            del_flag = '0'
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectTestReportById" parameterType="Long" resultMap="TestReportResult">
+        <include refid="selectTestReportVo"/>
+        where testreport_id = #{testreportId} and del_flag = '0'
+    </select>
+
+    <insert id="insertTestReport" parameterType="TestReport" useGeneratedKeys="true" keyProperty="testreportId">
+        insert into tb_testreport (testreport_no, project_id, title, status, create_by, create_time)
+        values (#{testreportNo}, #{projectId}, #{title}, #{status}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateTestReport" parameterType="TestReport">
+        update tb_testreport set title = #{title}, status = #{status}, update_by = #{updateBy}, update_time = sysdate()
+        where testreport_id = #{testreportId}
+    </update>
+
+    <update id="deleteTestReportByIds" parameterType="Long">
+        update tb_testreport set del_flag = '2' where testreport_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+</mapper>

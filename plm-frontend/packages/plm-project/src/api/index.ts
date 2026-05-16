@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { ProjectQuery, ProjectForm } from '@/types/api/business/project'
+import type { ProjectQuery, ProjectForm } from '../types'
 
 /** 查询项目列表 */
 export function listProject(query: ProjectQuery) {

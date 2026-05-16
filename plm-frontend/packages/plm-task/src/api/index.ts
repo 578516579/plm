@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { TaskQuery, TaskForm } from '@/types/api/business/task'
+import type { TaskQuery, TaskForm } from '../types'
 
 /** 查询任务列表 */
 export function listTask(query: TaskQuery) {

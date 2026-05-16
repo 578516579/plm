@@ -8,6 +8,11 @@ import InnerLink from '@/layout/components/InnerLink/index.vue'
 // 匹配views里面所有的.vue文件
 const modules = import.meta.glob('./../../views/**/*.vue')
 
+// Legacy 镜像迁移 Stage 2: 同时扫描 packages/plm-*/src/views/*.vue,
+// 让 sys_menu.component='business/<m>/<file>' 也能解析到 packages/ 下的真实现。
+// 这样可以删除 src/views/business/* 下的 Legacy thin shell 副本。
+const packageModules = import.meta.glob('./../../../packages/plm-*/src/views/*.vue')
+
 const usePermissionStore = defineStore(
   'permission',
   {
@@ -114,14 +119,28 @@ export function filterDynamicRoutes(routes: any[]): any[] {
 }
 
 export const loadView = (view: string): any => {
-  let res
+  // 1. 先在 src/views/ 标准位置查
   for (const path in modules) {
     const dir = path.split('views/')[1].split('.vue')[0]
     if (dir === view) {
-      res = () => modules[path]()
+      return () => modules[path]()
     }
   }
-  return res
+  // 2. (Stage 2) 再在 packages/plm-<module>/src/views/*.vue 查
+  //    sys_menu.component='business/project/index' → packages/plm-project/src/views/index.vue
+  //    'business/task/kanban' → packages/plm-task/src/views/kanban.vue
+  const m = view.match(/^business\/([\w-]+)\/(.+)$/)
+  if (m) {
+    const module = m[1]   // project / task / defect / ...
+    const file = m[2]     // index / kanban / my
+    const target = `plm-${module}/src/views/${file}.vue`
+    for (const path in packageModules) {
+      if (path.endsWith(target)) {
+        return () => packageModules[path]()
+      }
+    }
+  }
+  return undefined
 }
 
 export default usePermissionStore

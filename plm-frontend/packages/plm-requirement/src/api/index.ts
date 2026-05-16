@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { RequirementQuery, RequirementForm } from '@/types/api/business/requirement'
+import type { RequirementQuery, RequirementForm } from '../types'
 
 /** 查询需求列表 */
 export function listRequirement(query: RequirementQuery) {

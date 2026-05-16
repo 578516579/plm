@@ -162,8 +162,8 @@
 </template>
 
 <script setup name="Task" lang="ts">
-import { listTask, getTask, addTask, updateTask, delTask } from '@/api/business/task'
-import type { TaskForm, TaskQuery } from '@/types/api/business/task'
+import { listTask, getTask, addTask, updateTask, delTask } from '../api'
+import type { TaskForm, TaskQuery } from '../types'
 
 const { proxy } = getCurrentInstance() as any
 const {

@@ -208,6 +208,13 @@
                 <artifactId>plm-document</artifactId>
                 <version>${plm.version}</version>
             </dependency>
+            <!-- v0.4 6 module scaffolds (generator output) -->
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-submission</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-release</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-testplan</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-testreport</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-apidoc</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-product</artifactId><version>${plm.version}</version></dependency>
 
         </dependencies>
     </dependencyManagement>

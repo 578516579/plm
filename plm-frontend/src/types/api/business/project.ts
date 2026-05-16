@@ -1,2 +1,0 @@
-/** Stage 1 极薄壳 */
-export * from '../../../../packages/plm-project/src/types/index'

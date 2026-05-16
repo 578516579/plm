@@ -1,12 +1,14 @@
 {
   "name": "@plm/testplan",
-  "version": "0.0.1",
-  "description": "PLM 业务模块 - 测试方案 (stub 空壳)",
+  "version": "0.4.0",
+  "description": "测试方案 (生成器输出)",
   "main": "src/index.ts",
   "type": "module",
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./api": "./src/api/index.ts",
+    "./types": "./src/types/index.ts",
     "./router": "./src/router.ts"
   }
 }

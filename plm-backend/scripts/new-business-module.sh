@@ -39,9 +39,12 @@ CN_NAME="$3"         # 用户反馈
 PARENT_MENU_ID="${4:-2000}"   # 默认挂业务管理 2000 下
 
 ENTITY_LOWER=$(echo "$ENTITY" | tr '[:upper:]' '[:lower:]')
-TABLE="tb_$MODULE"
-PKG_BASE="cn/com/bosssfot/dv/plm/$MODULE"
-PKG_DOT="cn.com.bosssfot.dv.plm.$MODULE"
+# Java 包名不能含 hyphen → manual-product → manualproduct
+PKG_LEAF=$(echo "$MODULE" | sed 's/-//g')
+# DB 表名沿用 module (短横线允许,但部分 RDBMS 不爱,sed 改下划线更安全)
+TABLE="tb_$(echo "$MODULE" | sed 's/-/_/g')"
+PKG_BASE="cn/com/bosssfot/dv/plm/$PKG_LEAF"
+PKG_DOT="cn.com.bosssfot.dv.plm.$PKG_LEAF"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
 echo "=== 生成 plm-$MODULE 模块 ==="
@@ -53,8 +56,12 @@ echo
 # 1. 后端 Maven 模块
 # ============================================================
 BACKEND="$ROOT/plm-backend/plm-$MODULE"
-mkdir -p "$BACKEND/src/main/java/$PKG_BASE/{domain,mapper,service/impl,controller}"
-mkdir -p "$BACKEND/src/main/resources/mapper/$MODULE"
+# brace expansion 在某些 sh 不支持,显式列出
+mkdir -p "$BACKEND/src/main/java/$PKG_BASE/domain"
+mkdir -p "$BACKEND/src/main/java/$PKG_BASE/mapper"
+mkdir -p "$BACKEND/src/main/java/$PKG_BASE/service/impl"
+mkdir -p "$BACKEND/src/main/java/$PKG_BASE/controller"
+mkdir -p "$BACKEND/src/main/resources/mapper/$PKG_LEAF"
 
 # pom.xml
 cat > "$BACKEND/pom.xml" <<XML
@@ -162,7 +169,7 @@ public interface ${ENTITY}Mapper {
 JAVA
 
 # Mapper.xml
-cat > "$BACKEND/src/main/resources/mapper/$MODULE/${ENTITY}Mapper.xml" <<XML
+cat > "$BACKEND/src/main/resources/mapper/$PKG_LEAF/${ENTITY}Mapper.xml" <<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="$PKG_DOT.mapper.${ENTITY}Mapper">
@@ -369,8 +376,8 @@ CREATE TABLE $TABLE (
     remark               VARCHAR(500) DEFAULT '',
     del_flag             CHAR(1)      DEFAULT '0',
     PRIMARY KEY (${ENTITY_LOWER}_id),
-    UNIQUE KEY uk_${MODULE}_no (${ENTITY_LOWER}_no),
-    KEY idx_${MODULE}_project (project_id)
+    UNIQUE KEY uk_${PKG_LEAF}_no (${ENTITY_LOWER}_no),
+    KEY idx_${PKG_LEAF}_project (project_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='${CN_NAME}';
 
 -- 菜单 (调整 menu_id 段, 当前 9000+ 是脚手架占位)

@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>接口详细设计 — AgriPLM·AI</title>
+<link rel="stylesheet" href="agriplm.css">
+</head>
+<body>
+<div class="app">
+<div class="sb">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">🌾</div>
+    <div><div class="sb-logo-text">AgriPLM·AI</div><div class="sb-logo-sub">农业项目全生命周期管理</div></div>
+  </div>
+  <nav class="sb-nav">
+    <a class="ni active" href="dashboard.html" data-page="dashboard" onclick="return navClick(event,this)">
+      <span class="ni-icon">🏠</span> 工作台
+    </a>
+    <div class="sb-sec">📦 项目管理</div>
+    <a class="ni" href="projects.html" data-page="projects" onclick="return navClick(event,this)">
+      <span class="ni-icon">📁</span> 项目列表
+    </a>
+    <a class="ni" href="inception.html" data-page="inception" onclick="return navClick(event,this)">
+      <span class="ni-icon">🚀</span> 项目立项
+    </a>
+    <a class="ni" href="competitive.html" data-page="competitive" onclick="return navClick(event,this)">
+      <span class="ni-icon">🔍</span> 竞品情报
+    </a>
+    <div class="sb-sec">📝 需求 & 设计</div>
+    <a class="ni" href="requirements.html" data-page="requirements" onclick="return navClick(event,this)">
+      <span class="ni-icon">📋</span> 需求管理
+    </a>
+    <a class="ni" href="prd.html" data-page="prd" onclick="return navClick(event,this)">
+      <span class="ni-icon">📄</span> AI PRD生成
+    </a>
+    <a class="ni" href="ued.html" data-page="ued" onclick="return navClick(event,this)">
+      <span class="ni-icon">🎨</span> UED设计协同
+    </a>
+    <a class="ni" href="archdesign.html" data-page="archdesign" onclick="return navClick(event,this)">
+      <span class="ni-icon">🏗️</span> 系统概要设计
+    </a>
+    <a class="ni" href="dbdesign.html" data-page="dbdesign" onclick="return navClick(event,this)">
+      <span class="ni-icon">🗄️</span> 数据库设计
+    </a>
+    <a class="ni" href="apidesign.html" data-page="apidesign" onclick="return navClick(event,this)">
+      <span class="ni-icon">🔌</span> 接口详细设计
+    </a>
+    <div class="sb-sec">🛠️ 研发</div>
+    <a class="ni" href="kanban.html" data-page="kanban" onclick="return navClick(event,this)">
+      <span class="ni-icon">📌</span> 研发看板
+    </a>
+    <div class="sb-sec">🧪 测试</div>
+    <a class="ni" href="testplan.html" data-page="testplan" onclick="return navClick(event,this)">
+      <span class="ni-icon">📐</span> 测试方案计划
+    </a>
+    <a class="ni" href="testcase.html" data-page="testcase" onclick="return navClick(event,this)">
+      <span class="ni-icon">🧪</span> 测试用例
+    </a>
+    <a class="ni" href="testdata.html" data-page="testdata" onclick="return navClick(event,this)">
+      <span class="ni-icon">🏭</span> 测试数据工厂
+    </a>
+    <a class="ni" href="submit.html" data-page="submit" onclick="return navClick(event,this)">
+      <span class="ni-icon">📤</span> 提测管理
+    </a>
+    <a class="ni" href="autotest.html" data-page="autotest" onclick="return navClick(event,this)">
+      <span class="ni-icon">🤖</span> 自动化测试
+    </a>
+    <a class="ni" href="defects.html" data-page="defects" onclick="return navClick(event,this)">
+      <span class="ni-icon">🐛</span> 缺陷管理
+    </a>
+    <a class="ni" href="testreport.html" data-page="testreport" onclick="return navClick(event,this)">
+      <span class="ni-icon">📊</span> 测试报告
+    </a>
+    <div class="sb-sec">📦 交付</div>
+    <a class="ni" href="apidoc.html" data-page="apidoc" onclick="return navClick(event,this)">
+      <span class="ni-icon">📗</span> API文档
+    </a>
+    <a class="ni" href="productmanual.html" data-page="productmanual" onclick="return navClick(event,this)">
+      <span class="ni-icon">📖</span> 产品手册
+    </a>
+    <a class="ni" href="implmanual.html" data-page="implmanual" onclick="return navClick(event,this)">
+      <span class="ni-icon">🚀</span> 实施手册
+    </a>
+    <a class="ni" href="opsmanual.html" data-page="opsmanual" onclick="return navClick(event,this)">
+      <span class="ni-icon">🛠️</span> 运维手册
+    </a>
+    <div class="sb-sec">📊 分析</div>
+    <a class="ni" href="analytics.html" data-page="analytics" onclick="return navClick(event,this)">
+      <span class="ni-icon">📈</span> 效能分析
+    </a>
+    <div class="sb-sec">⚙️ 系统</div>
+    <a class="ni" href="settings.html" data-page="settings" onclick="return navClick(event,this)">
+      <span class="ni-icon">⚙️</span> 系统设置
+    </a>
+  
+    <div class="sb-sec">🚀 DevOps</div>
+    <a class="ni" href="pipeline.html" data-page="pipeline">
+      <span class="ni-icon">⚙️</span> CI/CD 流水线
+    </a>
+    <a class="ni" href="release.html" data-page="release">
+      <span class="ni-icon">🎯</span> 发布管理
+    </a>
+    <a class="ni" href="featureflag.html" data-page="featureflag">
+      <span class="ni-icon">🚩</span> Feature Flag
+    </a>
+    <a class="ni" href="devops.html" data-page="devops">
+      <span class="ni-icon">📊</span> DevOps 效能
+    </a>
+    <div class="sb-sec">🤖 AI 能力</div>
+    <a class="ni" href="aispec.html" data-page="aispec">
+      <span class="ni-icon">📐</span> AI OpenSpec
+    </a>
+    <a class="ni" href="aiagents.html" data-page="aiagents">
+      <span class="ni-icon">🤖</span> AI Agent 编排
+    </a>
+  </nav>
+</div><div class="main">
+  <div class="topbar">
+    <div class="tb-title" id="pgTitle">接口详细设计</div>
+    <div class="tb-sp"></div>
+    <div class="ai-cmdbar" onclick="openAICmd()">
+      <span style="color:var(--gp)">✨</span>
+      <span>让AI帮我… 例如"生成气象预警PRD"</span>
+      <kbd style="background:var(--g200);color:var(--g500);font-size:10px;padding:2px 6px;border-radius:4px">⌘K</kbd>
+    </div>
+    <span style="color:var(--g300)">|</span>
+    <span style="font-size:17px;cursor:pointer;position:relative;display:inline-block" onclick="openModal('modal-messages');renderMessages('all')">🔔<span id="notif-badge" style="position:absolute;top:-4px;right:-4px;background:var(--rd);color:#fff;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">3</span></span>
+    <div class="av" title="张总">张</div>
+  </div>
+  <div class="content" id="mainContent">
+    <div class="pg active" id="pg-apidesign">
+
+  <div class="ph">
+    <div><div class="pt">接口详细设计（LLD）</div><div class="ps">AI生成OpenAPI规范接口文档，支持Mock服务</div></div>
+    <button class="btn btn-ai" onclick="genAPIDesign()">✨ AI生成接口设计</button>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="ct">🔌 接口列表</div>
+      <table class="tbl" id="apiDesignTable"></table>
+      <button class="btn btn-s btn-sm mt3" onclick="openModal('modal-newapi')">+ 手动添加接口</button>
+    </div>
+    <div class="card">
+      <div class="ct">📄 接口详情</div>
+      <div id="apiDetailView"><div style="text-align:center;padding:30px;color:var(--g400)"><div style="font-size:28px">🔌
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-newproject"><div class="modal"><div class="mh"><div class="mht">新建项目</div><div class="mclose" onclick="closeModal('modal-newproject')">×</div></div><div class="form-group"><label class="form-label">项目名称 *</label><input class="form-input" id="np-name" placeholder="输入项目名称"/></div><div class="form-row"><div><label class="form-label">业务线</label><select class="form-select" id="np-biz"><option>精准农业</option><option>农资流通</option><option>植保服务</option><option>质量溯源</option></select></div><div><label class="form-label">负责人</label><input class="form-input" id="np-owner" placeholder="姓名"/></div></div><div class="form-row"><div><label class="form-label">开始日期</label><input class="form-input" id="np-start" type="date" value="2026-04-15"/></div><div><label class="form-label">截止日期</label><input class="form-input" id="np-end" type="date" value="2026-10-15"/></div></div><div class="btn-row mt3"><button class="btn btn-p" onclick="addProject()">✅ 创建项目</button><button class="btn btn-s" onclick="closeModal('modal-newproject')">取消</button></div></div></div>
+
+<div class="modal-bg" id="modal-newreq"><div class="modal"><div class="mh"><div class="mht">新建需求</div><div class="mclose" onclick="closeModal('modal-newreq')">×</div></div><div class="form-group"><label class="form-label">需求标题 *</label><input class="form-input" id="nr-title" placeholder="简要描述需求"/></div><div class="form-group"><label class="form-label">详细描述</label><textarea class="form-textarea" id="nr-desc" placeholder="详细说明需求背景、目标用户、期望功能…"></textarea></div><div class="form-row"><div><label class="form-label">来源</label><select class="form-select" id="nr-src"><option>客户反馈</option><option>内部提案</option><option>竞品分析</option><option>运营数据</option></select></div><div><label class="form-label">优先级</label><select class="form-select" id="nr-pri"><option>P0 - 紧急</option><option>P1 - 重要</option><option>P2 - 一般</option></select></div></div><div class="btn-row mt3"><button class="btn btn-p" onclick="addReq()">✅ 提交需求</button><button class="btn btn-ai" onclick="aiEvalReq()">✨ AI评估</button><button class="btn btn-s" onclick="closeModal('modal-newreq')">取消</button></div></div></div>
+
+<div class="modal-bg" id="modal-newtask"><div class="modal"><div class="mh"><div class="mht">新建开发任务</div><div class="mclose" onclick="closeModal('modal-newtask')">×</div></div><div class="form-group"><label class="form-label">任务标题 *</label><input class="form-input" id="nt-title" placeholder="任务名称"/></div><div class="form-row"><div><label class="form-label">负责人</label><select class="form-select" id="nt-owner"><option>王工</option><option>李工</option><option>陈工</option><option>赵工</option></select></div><div><label class="form-label">预估工时(h)</label><input class="form-input" id="nt-hours" type="number" value="8"/></div></div><div class="form-row"><div><label class="form-label">优先级</label><select class="form-select" id="nt-pri"><option>P0</option><option>P1</option><option>P2</option></select></div><div><label class="form-label">看板列</label><select class="form-select" id="nt-col"><option>待开发</option><option>开发中</option><option>代码评审</option></select></div></div><div class="btn-row mt3"><button class="btn btn-p" onclick="addTask()">✅ 创建任务</button><button class="btn btn-s" onclick="closeModal('modal-newtask')">取消</button></div></div></div>
+
+<div class="modal-bg" id="modal-newsubmit"><div class="modal"><div class="mh"><div class="mht">新建提测单</div><div class="mclose" onclick="closeModal('modal-newsubmit')">×</div></div><div class="form-group"><label class="form-label">提测标题 *</label><input class="form-input" id="ns-title" placeholder="如：智慧灌溉v2.1 Sprint3 提测"/></div><div class="form-group"><label class="form-label">提测范围</label><textarea class="form-textarea" id="ns-scope" placeholder="说明本次提测功能范围、变更点…"></textarea></div><div class="form-row"><div><label class="form-label">测试环境</label><select class="form-select"><option>测试环境 TEST</option><option>预发环境 PRE</option></select></div><div><label class="form-label">期望测试周期(天)</label><input class="form-input" type="number" value="3"/></div></div><div id="submitGateResult" style="display:none;margin:10px 0"></div><div class="btn-row mt3"><button class="btn btn-ai" onclick="runSubmitGate()">🔒 AI质量门禁检查</button><button class="btn btn-p" id="submitConfirmBtn" style="display:none" onclick="confirmSubmit()">✅ 确认提测</button><button class="btn btn-s" onclick="closeModal('modal-newsubmit')">取消</button></div></div></div>
+
+<div class="modal-bg" id="modal-newdefect"><div class="modal"><div class="mh"><div class="mht">新建缺陷</div><div class="mclose" onclick="closeModal('modal-newdefect')">×</div></div><div class="form-group"><label class="form-label">缺陷标题 *</label><input class="form-input" id="nd-title" placeholder="简要描述缺陷现象"/></div><div class="form-group"><label class="form-label">复现步骤</label><textarea class="form-textarea" id="nd-steps" placeholder="1. 打开页面…&#10;2. 点击按钮…&#10;3. 出现异常…"></textarea></div><div class="form-row"><div><label class="form-label">严重级别</label><select class="form-select" id="nd-level"><option>P0 - 致命</option><option>P1 - 严重</option><option>P2 - 一般</option><option>P3 - 轻微</option></select></div><div><label class="form-label">指派给</label><select class="form-select" id="nd-owner"><option>王工</option><option>李工</option><option>陈工</option></select></div></div><div id="defectSimMatch" style="display:none;margin:10px 0;background:var(--aml);border-radius:8px;padding:10px;font-size:12px"></div><div class="btn-row mt3"><button class="btn btn-ai" onclick="aiDefectMatch()">✨ AI相似缺陷检测</button><button class="btn btn-p" onclick="addDefect()">✅ 提交缺陷</button><button class="btn btn-s" onclick="closeModal('modal-newdefect')">取消</button></div></div></div>
+
+<div class="modal-bg" id="modal-newapi"><div class="modal"><div class="mh"><div class="mht">添加接口</div><div class="mclose" onclick="closeModal('modal-newapi')">×</div></div><div class="form-row"><div><label class="form-label">HTTP方法</label><select class="form-select" id="na-method"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select></div><div><label class="form-label">接口路径</label><input class="form-input" id="na-path" placeholder="/api/v1/irrigation/recommend"/></div></div><div class="form-group"><label class="form-label">接口描述</label><input class="form-input" id="na-desc" placeholder="功能说明"/></div><div class="btn-row mt3"><button class="btn btn-p" onclick="addAPIDesign()">✅ 添加</button><button class="btn btn-s" onclick="closeModal('modal-newapi')">取消</button></div></div></div>
+
+<div class="modal-bg" id="modal-prdlist"><div class="modal"><div class="mh"><div class="mht">我的PRD文档</div><div class="mclose" onclick="closeModal('modal-prdlist')">×</div></div><table class="tbl"><thead><tr><th>文档名称</th><th>版本</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>AI灌溉推荐引擎</td><td>v1.2</td><td><span class="b bg">已确认</span></td><td><button class="btn btn-s btn-sm" onclick="closeModal('modal-prdlist');notify('已载入PRD','')">载入</button></td></tr><tr><td>农资电商购物车</td><td>v2.0</td><td><span class="b bam">评审中</span></td><td><button class="btn btn-s btn-sm">载入</button></td></tr><tr><td>病虫害识别接入</td><td>v1.0</td><td><span class="b bgr">草稿</span></td><td><button class="btn btn-s btn-sm">载入</button></td></tr><tr><td>溯源区块链对接</td><td>v3.1</td><td><span class="b bg">已确认</span></td><td><button class="btn btn-s btn-sm">载入</button></td></tr></tbody></table></div></div>
+
+<div class="modal-bg" id="modal-testcase-add"><div class="modal"><div class="mh"><div class="mht">添加测试用例</div><div class="mclose" onclick="closeModal('modal-testcase-add')">×</div></div><div class="form-group"><label class="form-label">用例标题 *</label><input class="form-input" id="nca-title" placeholder="用例描述"/></div><div class="form-row"><div><label class="form-label">用例类型</label><select class="form-select" id="nca-type"><option>功能测试</option><option>边界测试</option><option>异常场景</option><option>性能测试</option></select></div><div><label class="form-label">优先级</label><select class="form-select" id="nca-pri"><option>P0</option><option>P1</option><option>P2</option></select></div></div><div class="form-group"><label class="form-label">前置条件</label><input class="form-input" id="nca-pre" placeholder="执行本用例的前提条件"/></div><div class="form-group"><label class="form-label">测试步骤</label><textarea class="form-textarea" id="nca-steps" placeholder="1. 操作步骤一&#10;2. 操作步骤二"></textarea></div><div class="form-group"><label class="form-label">预期结果</label><textarea class="form-textarea" id="nca-expect" placeholder="期望的系统响应/输出"></textarea></div><div class="btn-row mt3"><button class="btn btn-p" onclick="addManualTC()">✅ 添加用例</button><button class="btn btn-s" onclick="closeModal('modal-testcase-add')">取消</button></div></div></div>
+
+<!-- AI Command Modal -->
+<div class="modal-bg" id="modal-aicmd"><div class="modal"><div class="mh"><div class="mht">✨ AI指令中心</div><div class="mclose" onclick="closeModal('modal-aicmd')">×</div></div><input class="form-input" id="aiCmdInput" placeholder="输入指令，例如：生成灌溉系统PRD、分析竞品禅道、生成测试用例…" style="margin-bottom:12px"/><div style="font-size:12px;color:var(--g500);margin-bottom:8px">快捷指令：</div><div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px"><span class="ai-q" style="background:var(--g100);color:var(--g700);border:1px solid var(--g300)" onclick="execAICmd('生成PRD')">📄 生成PRD</span><span class="ai-q" style="background:var(--g100);color:var(--g700);border:1px solid var(--g300)" onclick="execAICmd('竞品分析')">🔍 竞品分析</span><span class="ai-q" style="background:var(--g100);color:var(--g700);border:1px solid var(--g300)" onclick="execAICmd('测试用例')">🧪 测试用例</span><span class="ai-q" style="background:var(--g100);color:var(--g700);border:1px solid var(--g300)" onclick="execAICmd('测试数据')">🏭 测试数据</span><span class="ai-q" style="background:var(--g100);color:var(--g700);border:1px solid var(--g300)" onclick="execAICmd('立项建议')">🚀 立项建议</span><span class="ai-q" style="background:var(--g100);color:var(--g700);border:1px solid var(--g300)" onclick="execAICmd('测试报告')">📊 测试报告</span></div><button class="btn btn-ai w100" style="justify-content:center" onclick="runAICmd()">✨ 执行指令</button></div></div>
+
+
+<!-- ===== NEW MODALS ===== -->
+<!-- Task Detail Modal -->
+<div class="modal-bg" id="modal-taskdetail">
+  <div class="modal modal-lg">
+    <div class="mh">
+      <div><div class="mht" id="tdm-title">任务详情</div><div id="tdm-id" style="font-size:11px;color:var(--g500);margin-top:2px"></div></div>
+      <div class="mclose" onclick="closeModal('modal-taskdetail')">×</div>
+    </div>
+    <div class="grid2" style="gap:16px">
+      <div>
+        <div class="form-group"><label class="form-label">任务标题</label><input class="form-input" id="tdm-edit-title"/></div>
+        <div class="form-group"><label class="form-label">详细描述</label><textarea class="form-textarea" id="tdm-edit-desc" style="min-height:80px" placeholder="描述任务目标、技术要点、验收标准…"></textarea></div>
+        <div class="form-row">
+          <div><label class="form-label">状态</label><select class="form-select" id="tdm-col"><option>待开发</option><option>开发中</option><option>代码评审</option><option>测试中</option><option>已完成</option></select></div>
+          <div><label class="form-label">优先级</label><select class="form-select" id="tdm-pri"><option>P0</option><option>P1</option><option>P2</option></select></div>
+        </div>
+        <div class="form-row">
+          <div><label class="form-label">负责人</label><select class="form-select" id="tdm-owner"><option>王工</option><option>李工</option><option>陈工</option><option>赵工</option></select></div>
+          <div><label class="form-label">预估工时(h)</label><input class="form-input" id="tdm-hours" type="number"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">关联需求</label>
+          <select class="form-select" id="tdm-req">
+            <option value="">不关联</option>
+            <option value="REQ-089">REQ-089 离线模式土壤数据缓存</option>
+            <option value="REQ-088">REQ-088 灌溉推荐多作物参数</option>
+            <option value="REQ-086">REQ-086 农资SKU批量导入</option>
+            <option value="REQ-085">REQ-085 病虫害识别微信分享</option>
+          </select>
+        </div>
+        <div class="btn-row mt3">
+          <button class="btn btn-p" onclick="saveTaskDetail()">💾 保存修改</button>
+          <button class="btn btn-rd btn-sm" onclick="deleteTask()">🗑️ 删除任务</button>
+          <button class="btn btn-s btn-sm" onclick="closeModal('modal-taskdetail')">取消</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px">🔗 关联MR / 代码评审</div>
+        <div id="tdm-mr-list" style="margin-bottom:8px"></div>
+        <button class="btn btn-s btn-sm" onclick="linkNewMR()">+ 关联MR</button>
+        <div class="sep"></div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:7px">💬 评论区</div>
+        <div id="tdm-comments" style="max-height:140px;overflow-y:auto;margin-bottom:8px"></div>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" id="tdm-comment-input" placeholder="添加评论…" style="flex:1" onkeydown="if(event.key==='Enter')addTaskComment()"/>
+          <button class="btn btn-p btn-sm" onclick="addTaskComment()">发送</button>
+        </div>
+        <div class="sep"></div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:6px">📋 操作历史</div>
+        <div id="tdm-history" class="tl" style="font-size:11.5px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Project Detail Modal -->
+<div class="modal-bg" id="modal-projectdetail">
+  <div class="modal modal-lg">
+    <div class="mh">
+      <div><div class="mht" id="pdm-title">项目详情</div><div id="pdm-meta" style="font-size:11px;color:var(--g500);margin-top:2px"></div></div>
+      <div class="mclose" onclick="closeModal('modal-projectdetail')">×</div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchPDTab(this,0)">📊 概览</div>
+      <div class="tab" onclick="switchPDTab(this,1)">🏁 里程碑</div>
+      <div class="tab" onclick="switchPDTab(this,2)">📅 甘特图</div>
+      <div class="tab" onclick="switchPDTab(this,3)">👥 团队</div>
+    </div>
+    <div id="pdm-tp-0"><div id="pdm-overview"></div></div>
+    <div id="pdm-tp-1" style="display:none"><div id="pdm-milestones"></div><button class="btn btn-p btn-sm mt3" onclick="addMilestone()">+ 添加里程碑</button></div>
+    <div id="pdm-tp-2" style="display:none"><div id="pdm-gantt" class="gantt-container"></div></div>
+    <div id="pdm-tp-3" style="display:none"><div id="pdm-team"></div></div>
+  </div>
+</div>
+
+<!-- Requirement Detail Modal -->
+<div class="modal-bg" id="modal-reqdetail">
+  <div class="modal modal-lg">
+    <div class="mh">
+      <div><div class="mht" id="rdm-title">需求详情</div><div id="rdm-id" style="font-size:11px;color:var(--g500);margin-top:2px"></div></div>
+      <div class="mclose" onclick="closeModal('modal-reqdetail')">×</div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchRDTab(this,0)">📝 基本信息</div>
+      <div class="tab" onclick="switchRDTab(this,1)">🔗 追踪矩阵</div>
+      <div class="tab" onclick="switchRDTab(this,2)">📋 变更历史</div>
+    </div>
+    <div id="rdm-tp-0">
+      <div class="form-group"><label class="form-label">需求标题</label><input class="form-input" id="rdm-edit-title"/></div>
+      <div class="form-group"><label class="form-label">详细描述</label><textarea class="form-textarea" id="rdm-edit-desc" style="min-height:80px"></textarea></div>
+      <div class="form-row">
+        <div><label class="form-label">来源</label><select class="form-select" id="rdm-edit-src"><option>客户反馈</option><option>内部提案</option><option>竞品分析</option><option>运营数据</option></select></div>
+        <div><label class="form-label">优先级</label><select class="form-select" id="rdm-edit-pri"><option>P0</option><option>P1</option><option>P2</option></select></div>
+      </div>
+      <div class="form-row">
+        <div><label class="form-label">状态</label><select class="form-select" id="rdm-edit-status"><option>待评审</option><option>开发中</option><option>已完成</option><option>已取消</option></select></div>
+        <div><label class="form-label">AI价值评估</label><select class="form-select" id="rdm-edit-ai"><option>高价值</option><option>中价值</option><option>低价值</option></select></div>
+      </div>
+      <div class="btn-row mt3">
+        <button class="btn btn-p" onclick="saveReqDetail()">💾 保存</button>
+        <button class="btn btn-ai btn-sm" onclick="aiRegenReq()">✨ AI重新评估</button>
+        <button class="btn btn-rd btn-sm" onclick="deleteReqFromDetail()">🗑️ 删除需求</button>
+        <button class="btn btn-s btn-sm" onclick="closeModal('modal-reqdetail')">取消</button>
+      </div>
+    </div>
+    <div id="rdm-tp-1" style="display:none">
+      <div id="rdm-traceability"></div>
+    </div>
+    <div id="rdm-tp-2" style="display:none">
+      <div id="rdm-history" class="tl"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Message Center -->
+<div class="modal-bg" id="modal-messages">
+  <div class="modal">
+    <div class="mh"><div class="mht">🔔 消息中心</div><div class="mclose" onclick="closeModal('modal-messages')">×</div></div>
+    <div style="display:flex;gap:7px;margin-bottom:12px">
+      <button class="btn btn-p btn-sm" onclick="filterMsgType('all')">全部</button>
+      <button class="btn btn-s btn-sm" onclick="filterMsgType('unread')">未读</button>
+      <button class="btn btn-s btn-sm" onclick="markAllMsgRead()">全部已读</button>
+    </div>
+    <div id="msg-list" style="max-height:440px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- AgriKB Knowledge Base -->
+<div class="modal-bg" id="modal-agrikb">
+  <div class="modal modal-lg">
+    <div class="mh"><div class="mht">📚 AgriKB 农业知识库管理</div><div class="mclose" onclick="closeModal('modal-agrikb')">×</div></div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchKBTab(this,0)">📊 概览</div>
+      <div class="tab" onclick="switchKBTab(this,1)">📄 文档管理</div>
+      <div class="tab" onclick="switchKBTab(this,2)">🔍 向量检索测试</div>
+    </div>
+    <div id="kbt-0">
+      <div class="grid3 mb3">
+        <div class="sc"><div class="sl">总文档数</div><div class="sv" style="color:var(--gp)">2,847</div><div class="sd up">↑ 本月新增312篇</div></div>
+        <div class="sc"><div class="sl">已向量化</div><div class="sv" style="color:var(--pu)">2,801</div><div class="sd">Milvus向量库</div></div>
+        <div class="sc"><div class="sl">召回准确率</div><div class="sv" style="color:var(--bl)">94.3%</div><div class="sd up">↑ 优化中</div></div>
+      </div>
+      <div id="kb-cats"></div>
+    </div>
+    <div id="kbt-1" style="display:none">
+      <div class="btn-row mb2">
+        <div class="upload-btn" onclick="openKBUpload()">📄 上传文档</div>
+        <button class="btn btn-ai btn-sm" onclick="batchVectorize(this)">✨ 批量向量化</button>
+      </div>
+      <table class="tbl" id="kb-docs-tbl"></table>
+    </div>
+    <div id="kbt-2" style="display:none">
+      <div class="form-group"><label class="form-label">输入检索 Query</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="kb-query" placeholder="例如：水稻灌溉临界含水率，或：冬小麦蒸散量计算方法" style="flex:1"/>
+          <button class="btn btn-ai" onclick="testKBSearch()">🔍 向量检索</button>
+        </div>
+      </div>
+      <div id="kb-results"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Defect Edit -->
+<div class="modal-bg" id="modal-defectedit">
+  <div class="modal">
+    <div class="mh"><div class="mht" id="dem-title">编辑缺陷</div><div class="mclose" onclick="closeModal('modal-defectedit')">×</div></div>
+    <div class="form-group"><label class="form-label">缺陷标题</label><input class="form-input" id="dem-title-input"/></div>
+    <div class="form-row">
+      <div><label class="form-label">严重级别</label><select class="form-select" id="dem-level"><option>P0 - 致命</option><option>P1 - 严重</option><option>P2 - 一般</option><option>P3 - 轻微</option></select></div>
+      <div><label class="form-label">状态</label><select class="form-select" id="dem-status"><option>待确认</option><option>修复中</option><option>待验证</option><option>已关闭</option></select></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">所属模块</label><input class="form-input" id="dem-module"/></div>
+      <div><label class="form-label">指派给</label><select class="form-select" id="dem-owner"><option>王工</option><option>李工</option><option>陈工</option><option>赵工</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">修复备注</label><textarea class="form-textarea" id="dem-note" placeholder="描述修复方案或验证要点…"></textarea></div>
+    <input type="hidden" id="dem-editing-id"/>
+    <div class="btn-row mt3">
+      <button class="btn btn-p" onclick="saveDefectEdit()">💾 保存修改</button>
+      <button class="btn btn-rd btn-sm" onclick="confirmDeleteDefect()">🗑️ 删除</button>
+      <button class="btn btn-s btn-sm" onclick="closeModal('modal-defectedit')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sprint Management -->
+<div class="modal-bg" id="modal-sprint">
+  <div class="modal">
+    <div class="mh"><div class="mht">📅 迭代/Sprint 管理</div><div class="mclose" onclick="closeModal('modal-sprint')">×</div></div>
+    <div id="sprint-list" style="margin-bottom:14px;max-height:280px;overflow-y:auto"></div>
+    <div style="background:var(--g50);border-radius:8px;padding:12px">
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">+ 新建迭代</div>
+      <div class="form-row">
+        <div><label class="form-label">迭代名称</label><input class="form-input" id="ns-sprint-name" placeholder="Sprint 4"/></div>
+        <div><label class="form-label">工期(天)</label><input class="form-input" id="ns-sprint-days" type="number" value="14"/></div>
+      </div>
+      <div class="form-row">
+        <div><label class="form-label">开始日期</label><input class="form-input" id="ns-sprint-start" type="date" value="2026-05-01"/></div>
+        <div><label class="form-label">目标</label><input class="form-input" id="ns-sprint-goal" placeholder="本迭代目标"/></div>
+      </div>
+      <button class="btn btn-p btn-sm mt2" onclick="addSprint()">✅ 创建迭代</button>
+    </div>
+  </div>
+</div>
+
+<!-- Test Environment Management -->
+<div class="modal-bg" id="modal-testenv">
+  <div class="modal">
+    <div class="mh"><div class="mht">🌐 测试环境管理</div><div class="mclose" onclick="closeModal('modal-testenv')">×</div></div>
+    <table class="tbl" id="testenv-tbl"></table>
+    <div style="background:var(--g50);border-radius:8px;padding:12px;margin-top:12px">
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:8px">+ 添加环境</div>
+      <div class="form-row">
+        <div><label class="form-label">环境名称</label><input class="form-input" id="ne-name" placeholder="UAT环境"/></div>
+        <div><label class="form-label">域名/IP</label><input class="form-input" id="ne-url" placeholder="uat.agri.local"/></div>
+      </div>
+      <div class="form-row">
+        <div><label class="form-label">类型</label><select class="form-select" id="ne-type"><option>测试环境</option><option>预发环境</option><option>生产环境</option></select></div>
+        <div><label class="form-label">负责人</label><input class="form-input" id="ne-owner" placeholder="姓名"/></div>
+      </div>
+      <button class="btn btn-p btn-sm mt2" onclick="addTestEnv()">✅ 添加环境</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== NEW REAL-INTERACTION MODALS ========== -->
+
+<!-- Submit Detail Modal -->
+<div class="modal-bg" id="modal-submitdetail">
+  <div class="modal modal-lg">
+    <div class="mh"><div><div class="mht" id="sdm-title">提测单详情</div><div id="sdm-meta" style="font-size:11px;color:var(--g500);margin-top:2px"></div></div><div class="mclose" onclick="closeModal('modal-submitdetail')">×</div></div>
+    <div class="tabs"><div class="tab active" onclick="switchMTab(this,'sdm',0)">📋 基本信息</div><div class="tab" onclick="switchMTab(this,'sdm',1)">🔒 门禁详情</div><div class="tab" onclick="switchMTab(this,'sdm',2)">📝 审批记录</div></div>
+    <div id="sdm-0">
+      <div class="g2 mb3">
+        <div class="sc"><div class="sl">提测范围</div><div id="sdm-scope" style="font-size:12.5px;margin-top:4px;line-height:1.6"></div></div>
+        <div class="sc"><div class="sl">测试环境 & 周期</div><div id="sdm-env" style="font-size:12.5px;margin-top:4px"></div></div>
+      </div>
+      <div id="sdm-defect-summary"></div>
+    </div>
+    <div id="sdm-1" style="display:none"><div id="sdm-gate-detail"></div></div>
+    <div id="sdm-2" style="display:none"><div id="sdm-approval-log" class="tl"></div></div>
+    <div class="btn-row mt3">
+      <button class="btn btn-p" id="sdm-approve-btn" onclick="approveFromDetail()">✅ 审批通过</button>
+      <button class="btn btn-rd btn-sm" id="sdm-reject-btn" onclick="rejectSubmit()">❌ 驳回</button>
+      <button class="btn btn-s btn-sm" onclick="closeModal('modal-submitdetail')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mock Server Panel Modal -->
+<div class="modal-bg" id="modal-mockserver">
+  <div class="modal modal-lg">
+    <div class="mh"><div><div class="mht">🔧 Mock 服务控制台</div><div id="mock-url" style="font-size:11.5px;color:var(--g500);font-family:monospace;margin-top:2px"></div></div><div class="mclose" onclick="closeMockServer()">×</div></div>
+    <div class="g2" style="gap:12px;margin-bottom:12px">
+      <div class="sc"><div class="sl">状态</div><div id="mock-status" style="color:#10b981;font-weight:700;font-size:14px">● 运行中</div></div>
+      <div class="sc"><div class="sl">请求总数</div><div id="mock-req-count" class="sv" style="font-size:22px;color:var(--bl)">0</div></div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--g600);margin-bottom:6px">📡 实时请求日志</div>
+    <div class="mock-log" id="mock-log-area">等待请求...</div>
+    <div class="sep"></div>
+    <div style="font-size:12px;font-weight:700;margin-bottom:8px">📤 发送测试请求</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div class="fi" id="mock-req-body" style="flex:1;font-family:monospace;font-size:11.5px" contenteditable="true">{"field_code":"350200-FC-0342"}</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-p btn-sm" onclick="sendMockRequest()">▶ 发送请求</button>
+      <button class="btn btn-s btn-sm" onclick="clearMockLog()">🗑️ 清空日志</button>
+      <button class="btn btn-rd btn-sm" onclick="stopMockServer()">⏹ 停止服务</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dify Flow Editor Modal -->
+<div class="modal-bg" id="modal-difyedit">
+  <div class="modal modal-lg">
+    <div class="mh"><div><div class="mht" id="dify-modal-title">Dify 工作流编辑</div><div id="dify-modal-sub" style="font-size:11.5px;color:var(--g500);margin-top:2px"></div></div><div class="mclose" onclick="closeModal('modal-difyedit')">×</div></div>
+    <div class="tabs"><div class="tab active" onclick="switchMTab(this,'dify',0)">🔄 流程节点</div><div class="tab" onclick="switchMTab(this,'dify',1)">⚙️ 变量配置</div><div class="tab" onclick="switchMTab(this,'dify',2)">🧪 测试运行</div></div>
+    <div id="dify-0">
+      <div id="dify-flow-canvas" style="background:var(--g50);border-radius:8px;padding:16px;min-height:200px;overflow-x:auto"></div>
+      <div class="btn-row mt3">
+        <button class="btn btn-p btn-sm" onclick="saveDifyFlow()">💾 保存工作流</button>
+        <button class="btn btn-ai btn-sm" onclick="optimizeDifyFlow()">✨ AI优化</button>
+      </div>
+    </div>
+    <div id="dify-1" style="display:none">
+      <table class="tbl" id="dify-vars-table"></table>
+      <button class="btn btn-p btn-sm mt3" onclick="addDifyVar()">+ 添加变量</button>
+    </div>
+    <div id="dify-2" style="display:none">
+      <div class="fg"><label class="fl">测试输入 (JSON)</label><textarea class="fta" id="dify-test-input" style="font-family:monospace;font-size:11.5px">{"requirement":"实现土壤含水率监测与灌溉推荐"}</textarea></div>
+      <button class="btn btn-ai btn-sm" onclick="runDifyTest()">▶ 运行测试</button>
+      <div id="dify-test-result" class="mt2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Role Permission Edit Modal -->
+<div class="modal-bg" id="modal-roleedit">
+  <div class="modal">
+    <div class="mh"><div><div class="mht" id="role-modal-title">编辑角色权限</div></div><div class="mclose" onclick="closeModal('modal-roleedit')">×</div></div>
+    <div id="role-perm-list"></div>
+    <div class="sep"></div>
+    <div class="fg"><label class="fl">角色说明</label><textarea class="fta" id="role-desc-edit" style="min-height:50px"></textarea></div>
+    <div class="btn-row mt3">
+      <button class="btn btn-p" onclick="saveRolePerms()">💾 保存权限</button>
+      <button class="btn btn-s" onclick="closeModal('modal-roleedit')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Design Preview Modal (Figma) -->
+<div class="modal-bg" id="modal-designpreview">
+  <div class="modal modal-lg">
+    <div class="mh"><div><div class="mht" id="dp-title">设计稿预览</div><div id="dp-meta" style="font-size:11.5px;color:var(--g500);margin-top:2px"></div></div><div class="mclose" onclick="closeModal('modal-designpreview')">×</div></div>
+    <div id="dp-canvas" style="background:#1e1e1e;border-radius:8px;padding:20px;min-height:320px;display:flex;align-items:center;justify-content:center"></div>
+    <div class="btn-row mt3">
+      <button class="btn btn-p btn-sm" onclick="notify('正在导出设计标注文件…','info')">📤 导出标注</button>
+      <button class="btn btn-ai btn-sm" onclick="runUEDCheckFromModal()">✨ AI规范检查</button>
+      <button class="btn btn-s btn-sm" onclick="closeModal('modal-designpreview')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Screenshot Upload Modal -->
+<div class="modal-bg" id="modal-screenshot">
+  <div class="modal">
+    <div class="mh"><div class="mht">📸 截图上传 — AI自动生成操作说明</div><div class="mclose" onclick="closeModal('modal-screenshot')">×</div></div>
+    <div class="upload-zone" onclick="triggerFileInput()" id="ss-dropzone" ondragover="event.preventDefault();this.style.borderColor='var(--gp)'" ondragleave="this.style.borderColor='var(--g300)'" ondrop="handleScreenshotDrop(event)">
+      <div style="font-size:28px;margin-bottom:8px">🖼️</div>
+      <div style="font-weight:600;margin-bottom:4px">点击或拖拽上传截图</div>
+      <div style="font-size:11.5px;color:var(--g400)">支持 PNG/JPG/WebP，可批量上传</div>
+    </div>
+    <input type="file" id="ss-file-input" style="display:none" accept="image/*" multiple onchange="handleScreenshotUpload(this)"/>
+    <div id="ss-previews" class="mt3"></div>
+    <div id="ss-ai-result" class="mt2"></div>
+  </div>
+</div>
+
+<!-- Competitive Subscribe Modal -->
+<div class="modal-bg" id="modal-comp-subscribe">
+  <div class="modal">
+    <div class="mh"><div class="mht">📬 订阅竞品动态推送</div><div class="mclose" onclick="closeModal('modal-comp-subscribe')">×</div></div>
+    <div class="fg"><label class="fl">选择要监控的竞品</label>
+      <div id="comp-sub-list" style="display:flex;flex-direction:column;gap:7px;margin-top:6px"></div>
+    </div>
+    <div class="fg"><label class="fl">推送渠道</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:5px;font-size:12.5px">
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" checked id="sub-feishu"> 飞书</label>
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" checked id="sub-dingtalk"> 钉钉</label>
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="sub-email"> 邮件</label>
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" id="sub-wechat"> 企业微信</label>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">推送频率</label>
+      <select class="fs" id="sub-freq"><option>实时推送（有变更即通知）</option><option>每日汇总</option><option>每周汇总</option></select>
+    </div>
+    <div class="btn-row mt3">
+      <button class="btn btn-p" onclick="confirmCompSubscribe()">✅ 确认订阅</button>
+      <button class="btn btn-s" onclick="closeModal('modal-comp-subscribe')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- KB Upload Modal -->
+<div class="modal-bg" id="modal-kb-upload">
+  <div class="modal">
+    <div class="mh"><div class="mht">📄 上传知识库文档</div><div class="mclose" onclick="closeModal('modal-kb-upload')">×</div></div>
+    <div class="upload-zone" onclick="triggerKBUpload()" ondragover="event.preventDefault()" ondrop="handleKBDrop(event)">
+      <div style="font-size:28px;margin-bottom:8px">📄</div>
+      <div style="font-weight:600;margin-bottom:4px">点击或拖拽上传</div>
+      <div style="font-size:11.5px;color:var(--g400)">支持 PDF / Word / Markdown 格式</div>
+    </div>
+    <input type="file" id="kb-file-input" style="display:none" accept=".pdf,.doc,.docx,.md" multiple onchange="handleKBUpload(this)"/>
+    <div id="kb-upload-list" class="mt3"></div>
+    <div class="fg mt2"><label class="fl">文档分类</label><select class="fs" id="kb-upload-cat"><option>国家/行业标准</option><option>作物栽培技术</option><option>病虫害防治</option><option>节水灌溉技术</option><option>气象农业数据</option></select></div>
+    <div class="btn-row mt3"><button class="btn btn-ai" id="kb-upload-btn" onclick="processKBUpload()">✨ 上传并向量化</button><button class="btn btn-s" onclick="closeModal('modal-kb-upload')">取消</button></div>
+  </div>
+</div>
+
+<!-- DB Write Progress Modal -->
+<div class="modal-bg" id="modal-db-write">
+  <div class="modal">
+    <div class="mh"><div><div class="mht">💾 写入测试数据库</div></div><div class="mclose" onclick="closeModal('modal-db-write')">×</div></div>
+    <div class="fg"><label class="fl">目标数据库</label>
+      <select class="fs" id="dbw-target"><option>测试环境 TEST (test.agri.local)</option><option>开发环境 DEV (dev.agri.local)</option></select>
+    </div>
+    <div class="fg"><label class="fl">写入模式</label>
+      <select class="fs" id="dbw-mode"><option>追加写入（保留现有数据）</option><option>清空写入（先清空再写入）</option><option>UPSERT（有则更新无则插入）</option></select>
+    </div>
+    <div id="dbw-progress" style="display:none;margin:12px 0">
+      <div style="font-size:12.5px;font-weight:600;margin-bottom:8px" id="dbw-stage">准备写入…</div>
+      <div class="pb" style="height:8px;border-radius:4px;margin-bottom:6px"><div class="pf pfg" id="dbw-bar" style="width:0%;transition:width .3s"></div></div>
+      <div style="font-size:12px;color:var(--g500)" id="dbw-log"></div>
+    </div>
+    <div id="dbw-result" style="display:none"></div>
+    <div class="btn-row mt3">
+      <button class="btn btn-p" id="dbw-start-btn" onclick="startDBWrite()">▶ 开始写入</button>
+      <button class="btn btn-s" onclick="closeModal('modal-db-write')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRD Save Modal -->
+<div class="modal-bg" id="modal-prdsave">
+  <div class="modal">
+    <div class="mh"><div class="mht">💾 保存 PRD 到文档库</div><div class="mclose" onclick="closeModal('modal-prdsave')">×</div></div>
+    <div class="fg"><label class="fl">文档标题</label><input class="fi" id="prd-save-title" placeholder="PRD文档名称"/></div>
+    <div class="fr">
+      <div><label class="fl">版本号</label><input class="fi" id="prd-save-ver" value="v1.0"/></div>
+      <div><label class="fl">状态</label><select class="fs" id="prd-save-status"><option>草稿</option><option>评审中</option><option>已确认</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">备注</label><textarea class="fta" id="prd-save-note" placeholder="保存说明…" style="min-height:50px"></textarea></div>
+    <div class="btn-row mt3">
+      <button class="btn btn-p" onclick="confirmPRDSave()">✅ 确认保存</button>
+      <button class="btn btn-s" onclick="closeModal('modal-prdsave')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Pipeline Detail Modal -->
+<div class="modal-bg" id="modal-pipeline-detail">
+  <div class="modal modal-lg">
+    <div class="mh"><div class="mht">流水线详情</div><div class="mclose" onclick="closeModal('modal-pipeline-detail')">×</div></div>
+    <div id="pipeline-detail-content"></div>
+  </div>
+</div>
+
+<!-- New Release Modal -->
+<div class="modal-bg" id="modal-newrelease">
+  <div class="modal">
+    <div class="mh"><div class="mht">新建发布单</div><div class="mclose" onclick="closeModal('modal-newrelease')">×</div></div>
+    <div class="fr">
+      <div><label class="fl">版本号</label><input class="fi" id="nr-version" placeholder="v2.2.0"/></div>
+      <div><label class="fl">项目</label>
+        <select class="fs" id="nr-proj"><option>智慧灌溉决策平台</option><option>农资电商小程序</option><option>病虫害AI识别</option><option>农业溯源平台</option></select>
+      </div>
+    </div>
+    <div class="fr">
+      <div><label class="fl">目标环境</label>
+        <select class="fs" id="nr-env"><option>STAGING</option><option>PROD</option></select>
+      </div>
+      <div><label class="fl">发布策略</label>
+        <select class="fs" id="nr-strategy"><option>蓝绿部署</option><option>金丝雀(10%)</option><option>滚动更新</option><option>直接替换</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">发布说明</label><textarea class="fta" id="nr-note" placeholder="本次发布内容说明…" style="min-height:60px"></textarea></div>
+    <div class="btn-row mt3">
+      <button class="btn btn-p" onclick="createRelease()">✅ 创建发布单</button>
+      <button class="btn btn-s" onclick="closeModal('modal-newrelease')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Spec Modal -->
+<div class="modal-bg" id="modal-newspec">
+  <div class="modal">
+    <div class="mh"><div class="mht">✨ AI生成新规范</div><div class="mclose" onclick="closeModal('modal-newspec')">×</div></div>
+    <div class="fg"><label class="fl">规范名称</label><input class="fi" id="ns-name" placeholder="如: 农业IoT数据推送接口"/></div>
+    <div class="fg"><label class="fl">规范类型</label>
+      <select class="fs" id="ns-type">
+        <option>OpenAPI 3.1</option><option>AsyncAPI 3.0</option>
+        <option>AI Function Spec</option><option>GraphQL Schema</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">描述</label><input class="fi" id="ns-desc" placeholder="接口功能描述…"/></div>
+    <div class="btn-row mt3">
+      <button class="btn btn-ai" onclick="genNewSpec()">✨ AI生成</button>
+      <button class="btn btn-s" onclick="closeModal('modal-newspec')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Feature Flag Modal -->
+<div class="modal-bg" id="modal-newff">
+  <div class="modal">
+    <div class="mh"><div class="mht">新建 Feature Flag</div><div class="mclose" onclick="closeModal('modal-newff')">×</div></div>
+    <div class="fg"><label class="fl">Flag名称 (snake_case)</label><input class="fi" id="nff-name" placeholder="如: new_irrigation_v3"/></div>
+    <div class="fg"><label class="fl">描述</label><input class="fi" id="nff-desc" placeholder="功能说明…"/></div>
+    <div class="fg"><label class="fl">目标环境</label>
+      <select class="fs" id="nff-env"><option>TEST</option><option>STAGING</option><option>PROD</option></select>
+    </div>
+    <div class="btn-row mt3">
+      <button class="btn btn-p" onclick="addFF()">✅ 创建</button>
+      <button class="btn btn-s" onclick="closeModal('modal-newff')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications -->
+<div class="notif" id="notifContainer"></div>
+
+<script src="agriplm.js"></script>
+<script>
+
+// ── Multi-file navigation override ──────────────────────────────
+function navClick(event, el) {
+  // Allow normal link behavior for cross-page navigation
+  return true;
+}
+
+// Override showPage to do cross-page navigation
+var _origShowPage = showPage;
+function showPage(name) {
+  window.location.href = name + '.html';
+}
+
+// Mark current page active in sidebar
+(function() {
+  var cur = location.pathname.replace(/.*\//, '').replace('.html','') || 'dashboard';
+  document.querySelectorAll('.ni[data-page]').forEach(function(n) {
+    n.classList.toggle('active', n.dataset.page === cur);
+  });
+})();
+
+// Init this page
+document.addEventListener('DOMContentLoaded', function() {
+  renderPage('apidesign');
+  if ('apidesign' === 'dashboard') {
+    renderDashboard();
+  }
+});
+</script>
+</body>
+</html>

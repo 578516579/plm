@@ -3,20 +3,16 @@
 | 字段 | 值 |
 |---|---|
 | 模块中文名 | 测试报告 |
-| 业务阶段 | 测试 |
-| 当前状态 | **stub**（空壳骨架） |
-| 计划启动 | v0.4 |
-| AgriPLM 映射 | 见 [99-跨阶段/AgriPLM-模块映射-2026-05-16.md](../../99-跨阶段/AgriPLM-模块映射-2026-05-16.md) |
-| Java 包路径 | `cn.com.bosssfot.dv.plm.testreport` |
+| 状态 | **scaffold** (生成器输出, 待补字段 + 业务规则) |
+| 后端 Maven | plm-testreport |
+| 前端 package | @plm/testreport |
+| DB 表 | tb_testreport |
+| Java 包 | cn.com.bosssfot.dv.plm.testreport |
 
-## 状态说明
+## 后续步骤
 
-本模块为 Phase B 阶段拉起的空壳。当前只占位 Maven 坐标，未实现任何业务功能。
-
-## 启动 checklist (实现时跑)
-
-- [ ] 复用 `plm-project` 模板创建 Domain / Mapper / Service / Controller (放在 `testreport/` 包下)
-- [ ] 走 Phase 01 → 02 → 03 Gate 完成立项 → 设计 → 开发
-- [ ] DB 表 `tb_testreport` + 字典 + 菜单
-- [ ] 前端 `plm-frontend/packages/plm-testreport/` 实现 api / types / views
-- [ ] E2E 用例添加到 `plm-backend/scripts/check-encoding-runtime.sh`
+1. 编辑 Domain.java 加自己的字段
+2. 编辑 Mapper.xml 加对应 SQL
+3. 编辑 ServiceImpl 加业务规则 (状态机 / FK 校验等)
+4. 编辑 SQL 改字典/菜单
+5. 走 Phase 01-03 Gate 走 R&D 流程

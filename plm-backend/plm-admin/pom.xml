@@ -85,6 +85,13 @@
             <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-document</artifactId>
         </dependency>
+        <!-- v0.4 6 模块 (scaffolds) -->
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-submission</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-release</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-testplan</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-testreport</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-apidoc</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-product</artifactId></dependency>
 
     </dependencies>
 

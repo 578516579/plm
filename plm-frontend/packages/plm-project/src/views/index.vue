@@ -129,8 +129,8 @@
 </template>
 
 <script setup name="Project" lang="ts">
-import { listProject, getProject, addProject, updateProject, delProject } from '@/api/business/project'
-import type { ProjectForm, ProjectQuery } from '@/types/api/business/project'
+import { listProject, getProject, addProject, updateProject, delProject } from '../api'
+import type { ProjectForm, ProjectQuery } from '../types'
 
 const { proxy } = getCurrentInstance() as any
 const { biz_project_type: project_type_options, biz_project_status: status_options } = toRefs<any>(proxy.useDict('biz_project_type', 'biz_project_status'))

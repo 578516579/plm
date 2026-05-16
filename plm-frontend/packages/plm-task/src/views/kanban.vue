@@ -41,8 +41,8 @@
 </template>
 
 <script setup name="TaskKanban" lang="ts">
-import { kanbanTasks } from '@/api/business/task'
-import type { KanbanColumn } from '@/types/api/business/task'
+import { kanbanTasks } from '../api'
+import type { KanbanColumn } from '../types'
 
 const { proxy } = getCurrentInstance() as any
 const { biz_task_priority: priority_options } = toRefs<any>(proxy.useDict('biz_task_priority'))

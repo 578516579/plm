@@ -155,8 +155,8 @@
 </template>
 
 <script setup name="Requirement" lang="ts">
-import { listRequirement, getRequirement, addRequirement, updateRequirement, delRequirement } from '@/api/business/requirement'
-import type { RequirementForm, RequirementQuery } from '@/types/api/business/requirement'
+import { listRequirement, getRequirement, addRequirement, updateRequirement, delRequirement } from '../api'
+import type { RequirementForm, RequirementQuery } from '../types'
 
 const { proxy } = getCurrentInstance() as any
 const {

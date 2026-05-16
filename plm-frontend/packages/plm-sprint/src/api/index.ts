@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { SprintQuery, SprintForm } from '@/types/api/business/sprint'
+import type { SprintQuery, SprintForm } from '../types'
 
 /** 查询迭代列表 */
 export function listSprint(query: SprintQuery) {

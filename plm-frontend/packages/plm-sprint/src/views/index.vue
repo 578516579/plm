@@ -149,8 +149,8 @@
 </template>
 
 <script setup name="Sprint" lang="ts">
-import { listSprint, getSprint, addSprint, updateSprint, delSprint, sprintStats } from '@/api/business/sprint'
-import type { SprintForm, SprintQuery, SprintStats } from '@/types/api/business/sprint'
+import { listSprint, getSprint, addSprint, updateSprint, delSprint, sprintStats } from '../api'
+import type { SprintForm, SprintQuery, SprintStats } from '../types'
 
 const { proxy } = getCurrentInstance() as any
 const { biz_sprint_status: status_options } = toRefs<any>(proxy.useDict('biz_sprint_status'))
