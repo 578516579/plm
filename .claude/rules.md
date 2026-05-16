@@ -187,6 +187,98 @@
 
 ---
 
+## M. PRD/原型驱动开发（MUST — 防跑偏硬规则）
+
+**核心原则**：本仓库是 **AgriPLM·AI** 的实现，**所有业务模块的字段、状态机、错误码、UI 文案、URL 路径，必须能追溯到** `prd和原型/AgriAI-PLM-完整PRD文档.md` 的 §章节 + `prd和原型/AgriPLM-DevOps-原型/agriplm_split/*.html` 的具体表单/按钮元素。
+
+**单一事实来源**：[`PRD-MAPPING.md`](../PRD-MAPPING.md)（项目根）。Claude 任何业务相关动作都先读这个文件确认对应模块的 PRD § / 原型 HTML / 字段对照表 / 状态机 / 错误码，然后再写代码。
+
+### M.1 PRD 与原型的权威性（MUST）
+
+- PRD 文档 + 原型 HTML + `PRD-MAPPING.md` 三者**完全一致**时，以 `PRD-MAPPING.md` 为准（它是规范化产物）。
+- 三者不一致时，**停下来不要写代码**，先用 AskUserQuestion 让用户决策：
+  - 选项 A：改代码对齐 PRD（Drift 是 bug）
+  - 选项 B：改 PRD-MAPPING.md 对齐当前需求（PRD 演化，需走 §L.2 Proposal）
+  - 选项 C：把分歧记入 `99-跨阶段/proposals/` 等评审
+- **禁止**：凭直觉添加 PRD 未提及的字段、状态、菜单项、错误码。
+
+### M.2 新模块落地强制 9 项 DoD（MUST）
+
+任何「空壳模块 PRD-align 落地」必须按 [PRD-MAPPING.md §8 DoD](../PRD-MAPPING.md) 9 项 checkbox 全过：
+
+```
+□ 1. 在 PRD-MAPPING.md §2 追加该模块的"字段对照表"（Domain ↔ 原型元素 — 逐字段）
+□ 2. business-<entity>.sql 建表 + 字典（biz_<entity>_*）
+□ 3. Domain.java 字段完整，Excel/JsonFormat 注解到位
+□ 4. Mapper.xml 完整 resultMap + 动态 trim + selectMaxSeqOfYear
+□ 5. Mapper.java 接口含 selectMaxSeqOfYear
+□ 6. ServiceImpl.java 包含 (a) FK 校验 702 (b) 状态机校验 601 (c) 编号生成
+□ 7. Controller 6 端点 + 权限串 business:<entity>:*（list/query/add/edit/remove/export）
+□ 8. E2E spec 至少 1 测试，POST /business/<entity> 返回 code=200
+□ 9. mvn install BUILD SUCCESS + E2E suite 全绿
+```
+
+**先字段表后代码**：字段对照表 commit 必须**先于**代码 commit（字段对照可以独立 commit，但代码 commit 必须 reference 对照表的 commit hash）。
+
+### M.3 字段命名映射（MUST）
+
+| 来源 | 命名规则 |
+|---|---|
+| 原型 HTML 表单 `<label>提测标题 *</label>` | Java field `title`，列 `title` |
+| 原型 HTML 表单 `<label>期望测试周期(天)</label>` | Java field `expectedTestDays`，列 `expected_test_days` |
+| 原型 HTML 表单下拉 `测试环境` | Java field `environment`，列 `environment`，字典 `biz_<entity>_environment` |
+| 原型 HTML AI 按钮 `AI质量门禁检查` | 服务端字段 `qualityGatePassed`（服务端计算，**不接受**前端写入） |
+
+- 服务端计算字段（qualityGatePassed / aiReviewScore 等）在 Mapper update 时**不要**信任前端值，必须根据其他字段重算。
+- 任何 ENUM 类字段（status / strategy / riskLevel）在 service 入口校验**白名单**，不在范围 → 抛 604。
+
+### M.4 状态机来自原型（MUST）
+
+新模块的状态机**只能**来自：
+- PRD §3.2 该模块的功能描述里的状态术语（草稿/评审/确认/...）
+- 原型 HTML 该模块的状态徽章 CSS 类（`.bg`=已确认绿 / `.bam`=评审中黄 / `.bgr`=草稿灰 / `.bd`=失败红）
+- [PRD-MAPPING.md §3](../PRD-MAPPING.md) 状态机汇总
+
+禁止凭"参考其他模块顺便补全状态"。每个状态必须在 PRD 或原型里能指出原文。
+
+### M.5 错误码统一登记（MUST）
+
+新增任何错误码必须先在 [PRD-MAPPING.md §4](../PRD-MAPPING.md) 错误码表登记（代码含义 + 出处 + 示例），不允许在代码注释里"裸"用一个数字（例如 `throw new ServiceException("...", 999)` 在表里没登记 = 违规）。
+
+### M.6 跑偏检测（Drift Detection）（SHOULD）
+
+收到「加 XX 模块」「新增字段 YY」「改状态 ZZ」请求时：
+
+1. **先查表**：打开 [PRD-MAPPING.md](../PRD-MAPPING.md) 找该模块
+2. **逐项对照**：
+   - 用户要的字段在原型 HTML 里能找到吗？
+   - 用户要的状态在 PRD §3.2 里能找到吗？
+   - 用户要的 API 路径符合 `/business/<entity>` 规则吗？
+3. **冲突时停下**：若用户要求与原型/PRD 冲突，先用 AskUserQuestion 列两个选项（按原型 / 按用户），用户选"按用户"则要求**同步更新 PRD-MAPPING.md**（不允许只改代码不改表）。
+
+### M.7 跨模块一致性（SHOULD）
+
+不同模块的同一概念必须用同名字段：
+- 项目关联：都用 `projectId`（列 `project_id`）
+- 迭代关联：都用 `sprintId`（列 `sprint_id`）
+- 作者/责任人：按角色区分 `authorUserId` / `assigneeUserId` / `reviewerUserId`（不要混用 `userId`）
+- AI 生成标志：都用 `aiGenerated` CHAR(1) Y/N
+- 软删除：都用 `delFlag` CHAR(1)（'0' 正常 / '2' 已删）
+
+发现某新模块要用"奇怪"字段（如 `creatorId` 而不是 `createBy`） → 检查是否有 PRD 依据，没有就用现有命名规约。
+
+### M.8 16 个空壳模块的攻坚优先级（REFERENCE）
+
+按 [PRD-MAPPING.md §7](../PRD-MAPPING.md) 路线图：
+- **P0（Phase 1 MVP）**：`inception`（🔴 缺模块）/ `prd` / `competitive`
+- **P1（Phase 2）**：`arch` / `dbdesign` / `apidesign` / `ued` / `testdata` / `autotest`
+- **P2（Phase 3）**：`manual-impl` / `manual-ops` / `analytics` / `dashboard`
+- **P3（扩展）**：`ai-agent` / `openspec` / `pipeline` / `feature-flag` / `dora`
+
+每次攻坚一个模块走完 §M.2 的 9 项 DoD + 提交一次 `feat(prd-align): <entity> PRD-aligned per F? + <html>`。
+
+---
+
 ## 索引：相关规则文件
 
 | 文件 | 受众 | 强制层 |

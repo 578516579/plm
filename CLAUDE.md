@@ -121,6 +121,23 @@ The P0 rename deliberately left these alone — **do NOT mass-rewrite them witho
 
 A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the entire RuoYi-scaffold-to-named-project flow (the very flow that built this repo's commits `4e9777d → 2679a61 → e2e37c3`). It also ships a `Project` CRUD module template that can be dropped in via Phase 7. Trigger it on future fresh-RuoYi imports by saying "用若依新建项目", "把若依改名", or similar.
 
+## 🎯 PRD/原型驱动开发 — 单一事实来源 (SSoT)
+
+本仓库是 **AgriPLM·AI** 的实现 (PRD V1.0 in `prd和原型/AgriAI-PLM-完整PRD文档.md`, 31 个原型 HTML in `prd和原型/AgriPLM-DevOps-原型/agriplm_split/*.html`)。
+
+**所有业务字段、状态机、错误码、URL、菜单文案,必须能追溯到 PRD § + 原型 HTML 表单元素**。规范化的对照表是 [PRD-MAPPING.md](PRD-MAPPING.md) (项目根)。
+
+工作流:
+1. 收到「加 XX 模块 / 改 YY 字段」请求 → **先查** [PRD-MAPPING.md](PRD-MAPPING.md)
+2. 用户要的东西不在 PRD/原型里 → 停下来 AskUserQuestion 让用户选 (按 PRD 走 / 走 proposal 改 PRD-MAPPING.md)
+3. PRD-align 落地走 [PRD-MAPPING.md §8 9 项 DoD](PRD-MAPPING.md)
+4. 详细硬规则见 [.claude/rules.md §M](.claude/rules.md)
+
+**实现进度速览** (详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
+- 🟢 PRD-aligned 13 个: project / requirement / sprint / task / defect / testcase / document / submission / release / testplan / testreport / apidoc / manual-product
+- 🟡 空壳 16 个: competitive / prd / ued / arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora
+- 🔴 缺模块 1 个: inception
+
 ## Rules & playbooks
 
 Three layers of project-wide rules — read these before non-trivial work:
