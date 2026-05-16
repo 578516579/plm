@@ -8,21 +8,12 @@
         <version>3.9.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>plm-dbdesign</artifactId>
-
-    <description>
-        数据库设计 - 设计阶段业务模块 (Phase B 拉起的空壳, 计划版本: v0.4)
-    </description>
-
+    <description>数据库设计 — PRD F3.2 + 原型 dbdesign.html — AI 生成 ER 图 + 数据字典 + 建表 SQL + 规范检查</description>
     <dependencies>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-system</artifactId>
-        </dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-common</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-system</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-project</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>
