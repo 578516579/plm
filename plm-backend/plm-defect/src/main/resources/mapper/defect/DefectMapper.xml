@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.defect.mapper.DefectMapper">
+
+    <resultMap type="Defect" id="DefectResult">
+        <result property="defectId"        column="defect_id"        />
+        <result property="defectNo"        column="defect_no"        />
+        <result property="projectId"       column="project_id"       />
+        <result property="sprintId"        column="sprint_id"        />
+        <result property="taskId"          column="task_id"          />
+        <result property="title"           column="title"            />
+        <result property="description"     column="description"      />
+        <result property="severity"        column="severity"         />
+        <result property="category"        column="category"         />
+        <result property="status"          column="status"           />
+        <result property="assigneeUserId"  column="assignee_user_id" />
+        <result property="reporterUserId"  column="reporter_user_id" />
+        <result property="reproduceSteps"  column="reproduce_steps"  />
+        <result property="expectedResult"  column="expected_result"  />
+        <result property="actualResult"    column="actual_result"    />
+        <result property="resolution"      column="resolution"       />
+        <result property="tags"            column="tags"             />
+        <result property="createBy"        column="create_by"        />
+        <result property="createTime"      column="create_time"      />
+        <result property="updateBy"        column="update_by"        />
+        <result property="updateTime"      column="update_time"      />
+        <result property="remark"          column="remark"           />
+        <result property="delFlag"         column="del_flag"         />
+    </resultMap>
+
+    <sql id="selectDefectVo">
+        select defect_id, defect_no, project_id, sprint_id, task_id, title, description,
+               severity, category, status, assignee_user_id, reporter_user_id,
+               reproduce_steps, expected_result, actual_result, resolution, tags,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_defect
+    </sql>
+
+    <select id="selectDefectList" parameterType="Defect" resultMap="DefectResult">
+        <include refid="selectDefectVo"/>
+        <where>
+            del_flag = '0'
+            <if test="defectNo != null and defectNo != ''">and defect_no like concat('%', #{defectNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="sprintId != null">and sprint_id = #{sprintId}</if>
+            <if test="taskId != null">and task_id = #{taskId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="severity != null and severity != ''">and severity = #{severity}</if>
+            <if test="category != null and category != ''">and category = #{category}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="assigneeUserId != null">and assignee_user_id = #{assigneeUserId}</if>
+            <if test="reporterUserId != null">and reporter_user_id = #{reporterUserId}</if>
+            <if test="tags != null and tags != ''">and tags like concat('%', #{tags}, '%')</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectDefectById" parameterType="Long" resultMap="DefectResult">
+        <include refid="selectDefectVo"/>
+        where defect_id = #{defectId} and del_flag = '0'
+    </select>
+
+    <insert id="insertDefect" parameterType="Defect" useGeneratedKeys="true" keyProperty="defectId">
+        insert into tb_defect
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="defectNo != null">defect_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="sprintId != null">sprint_id,</if>
+            <if test="taskId != null">task_id,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="severity != null">severity,</if>
+            <if test="category != null">category,</if>
+            <if test="status != null">status,</if>
+            <if test="assigneeUserId != null">assignee_user_id,</if>
+            <if test="reporterUserId != null">reporter_user_id,</if>
+            <if test="reproduceSteps != null">reproduce_steps,</if>
+            <if test="expectedResult != null">expected_result,</if>
+            <if test="actualResult != null">actual_result,</if>
+            <if test="resolution != null">resolution,</if>
+            <if test="tags != null">tags,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="defectNo != null">#{defectNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="sprintId != null">#{sprintId},</if>
+            <if test="taskId != null">#{taskId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="severity != null">#{severity},</if>
+            <if test="category != null">#{category},</if>
+            <if test="status != null">#{status},</if>
+            <if test="assigneeUserId != null">#{assigneeUserId},</if>
+            <if test="reporterUserId != null">#{reporterUserId},</if>
+            <if test="reproduceSteps != null">#{reproduceSteps},</if>
+            <if test="expectedResult != null">#{expectedResult},</if>
+            <if test="actualResult != null">#{actualResult},</if>
+            <if test="resolution != null">#{resolution},</if>
+            <if test="tags != null">#{tags},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateDefect" parameterType="Defect">
+        update tb_defect
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="defectNo != null">defect_no = #{defectNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="sprintId != null">sprint_id = #{sprintId},</if>
+            <if test="taskId != null">task_id = #{taskId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="severity != null">severity = #{severity},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="assigneeUserId != null">assignee_user_id = #{assigneeUserId},</if>
+            <if test="reporterUserId != null">reporter_user_id = #{reporterUserId},</if>
+            <if test="reproduceSteps != null">reproduce_steps = #{reproduceSteps},</if>
+            <if test="expectedResult != null">expected_result = #{expectedResult},</if>
+            <if test="actualResult != null">actual_result = #{actualResult},</if>
+            <if test="resolution != null">resolution = #{resolution},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where defect_id = #{defectId}
+    </update>
+
+    <update id="deleteDefectByIds" parameterType="Long">
+        update tb_defect set del_flag = '2' where defect_id in
+        <foreach item="defectId" collection="array" open="(" separator="," close=")">
+            #{defectId}
+        </foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(defect_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_defect
+        where defect_no like concat(#{prefix}, '%')
+    </select>
+
+</mapper>

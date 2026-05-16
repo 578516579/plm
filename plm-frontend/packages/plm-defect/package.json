@@ -1,12 +1,18 @@
 {
   "name": "@plm/defect",
-  "version": "0.0.1",
-  "description": "PLM 业务模块 - 缺陷管理 (stub 空壳)",
+  "version": "0.3.0",
+  "description": "PLM 业务模块 - 缺陷管理（Defect）",
   "main": "src/index.ts",
   "type": "module",
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./api": "./src/api/index.ts",
+    "./types": "./src/types/index.ts",
     "./router": "./src/router.ts"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0",
+    "element-plus": "^2.13.0"
   }
 }

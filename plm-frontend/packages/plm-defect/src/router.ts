@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
     path: '/business/defect',
     name: 'Defect',
     component: () => import('./views/index.vue'),
-    meta: { title: '缺陷管理', icon: 'warning', stub: true }
+    meta: { title: '缺陷管理', icon: 'bug', permi: 'business:defect:list' }
   }
 ]
 

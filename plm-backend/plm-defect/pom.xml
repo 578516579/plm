@@ -12,7 +12,7 @@
     <artifactId>plm-defect</artifactId>
 
     <description>
-        缺陷管理 - 测试阶段业务模块 (Phase B 拉起的空壳, 计划版本: v0.3)
+        缺陷（Defect）业务模块 — 5×5 状态机含反向边 03→01 + 3 FK + ADR-0005
     </description>
 
     <dependencies>
@@ -23,6 +23,25 @@
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-system</artifactId>
+        </dependency>
+        <!-- FK 校验调对应 Mapper -->
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-project</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-sprint</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-task</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

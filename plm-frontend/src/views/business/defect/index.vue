@@ -174,8 +174,8 @@
 </template>
 
 <script setup name="Defect" lang="ts">
-import { listDefect, getDefect, addDefect, updateDefect, delDefect } from '../api'
-import type { DefectForm, DefectQuery } from '../types'
+import { listDefect, getDefect, addDefect, updateDefect, delDefect } from '@/api/business/defect'
+import type { DefectForm, DefectQuery } from '@/types/api/business/defect'
 
 const { proxy } = getCurrentInstance() as any
 const {
