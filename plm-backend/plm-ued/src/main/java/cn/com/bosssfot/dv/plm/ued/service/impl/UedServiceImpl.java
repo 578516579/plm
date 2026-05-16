@@ -26,20 +26,16 @@ import cn.com.bosssfot.dv.plm.ued.service.IUedService;
  * UED 设计协同 Service — PRD §F2.3 + 原型 ued.html
  *
  * 落地:
- * - generateUedNo() — UED-YYYY-NNNN
- * - 4 状态机 (含反向边 01→00):
- *   00 草稿 → 01 评审中 → 02 已确认 → 03 已废弃 (终态)
- *   01→00 评审打回
- * - aiReview(): 本期 mock — 生成设计规范检查报告 Markdown
- *   PRD §F2.3 验收: aiReviewScore ≥80,本期固定置 88.0
- * - PRD §2.3 ued-review-flow Dify 接入 Phase 后续
+ * - ADR: generateUedNo() — UED-YYYY-NNNN
+ * - 4 状态机 (含反向边 01→00): 00→01→{00,02}→03 已废弃
+ * - aiReview() mock: 返回 aiReviewScore (85.0) + complianceCheck JSON + 可用性建议
+ *   Dify 工作流 ued-review-flow Phase 后续接入
  */
 @Service
 public class UedServiceImpl implements IUedService
 {
     private static final Logger log = LoggerFactory.getLogger(UedServiceImpl.class);
 
-    /** 4 状态机 含反向边 01→00 */
     private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
     static {
         STATUS_TRANSITIONS.put("00", Set.of("01"));
@@ -75,11 +71,10 @@ public class UedServiceImpl implements IUedService
         }
 
         if (StringUtils.isBlank(t.getAiGenerated())) t.setAiGenerated("N");
-        if (StringUtils.isBlank(t.getVersion())) t.setVersion("v1.0");
         if (StringUtils.isBlank(t.getStatus())) {
             t.setStatus("00");
         } else if (!"00".equals(t.getStatus())) {
-            throw new ServiceException("新建设计稿状态必须为「草稿」", 601);
+            throw new ServiceException("新建 UED 状态必须为「草稿」", 601);
         }
 
         if (StringUtils.isBlank(t.getUedNo())) {
@@ -101,9 +96,8 @@ public class UedServiceImpl implements IUedService
     public int updateUed(Ued t) {
         Ued old = uedMapper.selectUedById(t.getUedId());
         if (old == null) {
-            throw new ServiceException("设计稿不存在", 404);
+            throw new ServiceException("UED 设计不存在", 404);
         }
-
         if (StringUtils.isNotBlank(t.getStatus()) && !t.getStatus().equals(old.getStatus())) {
             Set<String> allowed = STATUS_TRANSITIONS.getOrDefault(old.getStatus(), Set.of());
             if (!allowed.contains(t.getStatus())) {
@@ -114,18 +108,12 @@ public class UedServiceImpl implements IUedService
                 );
             }
         }
-
         if (t.getProjectId() != null && !t.getProjectId().equals(old.getProjectId())) {
             Project project = projectMapper.selectProjectById(t.getProjectId());
             if (project == null) {
                 throw new ServiceException("关联项目不存在", 702);
             }
         }
-
-        // 服务端计算字段不接受前端传入 (PRD §M.3)
-        t.setAiReviewScore(null);
-        t.setAiReviewedAt(null);
-
         t.setUpdateBy(SecurityUtils.getUsername());
         return uedMapper.updateUed(t);
     }
@@ -136,45 +124,29 @@ public class UedServiceImpl implements IUedService
         return uedMapper.deleteUedByIds(ids);
     }
 
-    /**
-     * AI 设计规范检查 (PRD §F2.3 + §2.3 ued-review-flow)
-     * 本期 mock:返回标准化设计规范检查报告 Markdown,aiReviewScore 固定 88.0 (≥80 通过验收)
-     * Phase 后续:HTTP 调 Dify 工作流,传 figmaUrl + 设计稿截图,返回评审结果
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Ued aiReview(Long uedId) {
-        Ued ued = uedMapper.selectUedById(uedId);
-        if (ued == null) {
-            throw new ServiceException("设计稿不存在", 404);
+        Ued u = uedMapper.selectUedById(uedId);
+        if (u == null) {
+            throw new ServiceException("UED 设计不存在", 404);
         }
-        String content = "# " + ued.getTitle() + " — AI 设计规范检查报告\n\n"
-            + "**版本**: " + ued.getVersion() + "　**评审分**: 88.0 / 100\n\n"
-            + "## 1. 设计规范遵从度\n"
-            + "- ✅ 颜色 Token: 使用 4 种主色,覆盖 `--gp / --gl / --gpale`,符合品牌规范\n"
-            + "- ✅ 字体层级: 标题/正文/辅助 3 级清晰\n"
-            + "- ⚠ 间距: 部分组件间距非 4px 倍数 (页面 §3 卡片间距 = 15px),建议调整\n\n"
-            + "## 2. 可用性问题\n"
-            + "- ⚠ 触控目标: 部分按钮宽度 < 32px,移动端难触达\n"
-            + "- ✅ 表单交互: focus / hover / disabled 三态完整\n"
-            + "- ✅ 空状态: 无数据时有友好提示\n\n"
-            + "## 3. 标注建议 (自动生成)\n"
-            + "- 卡片圆角统一为 12px (现 8/12 混用)\n"
-            + "- 主按钮高度 36px,padding 7px 14px\n"
-            + "- 状态徽章使用 `.b.bg/.bam/.brd` 标准类\n\n"
-            + "## 4. 农业 UI 组件库使用建议\n"
-            + "- 农情大屏可复用 `分块卡片 + 数字大字体` 模式\n"
-            + "- IoT 数据看板建议接入告警阈值线 (红色虚线)\n\n"
-            + "## 5. 综合结论\n"
-            + "本设计稿整体规范度 **88 分**,主要改进点为间距精度与移动端触控目标,可进入评审环节。";
-
-        ued.setAiGenerated("Y");
-        ued.setAiReviewResult(content);
-        ued.setAiReviewScore(new BigDecimal("88.00"));
-        ued.setAiReviewedAt(new Date());
-        ued.setUpdateBy(SecurityUtils.getUsername());
-        uedMapper.updateUed(ued);
-        return ued;
+        String report = "# UED 设计评审报告:" + u.getTitle() + "\n\n"
+            + "## 设计规范遵从度\n- 布局:符合 8px 栅格规范\n- 配色:符合主题色规范\n- 字体:正文 14px 符合无障碍\n\n"
+            + "## 可用性建议\n1. 移动端核心操作按钮需 ≥44pt 触控热区\n"
+            + "2. 农业场景下大屏需考虑户外强光对比度\n"
+            + "3. 弱网场景下加载提示需明确\n";
+        String compliance = "{\"layout\":\"pass\",\"color\":\"pass\",\"typography\":\"pass\",\"accessibility\":\"warn\"}";
+        String usability = "1. 主要操作按钮触控热区不足\n2. 错误提示文案过技术化\n3. 加载状态视觉反馈缺失";
+        u.setAiReviewReport(report);
+        u.setComplianceCheck(compliance);
+        u.setUsabilityIssues(usability);
+        u.setAiReviewScore(new BigDecimal("85.00"));
+        u.setAiGenerated("Y");
+        u.setAiGeneratedAt(new Date());
+        u.setUpdateBy(SecurityUtils.getUsername());
+        uedMapper.updateUed(u);
+        return u;
     }
 
     private String generateUedNo() {

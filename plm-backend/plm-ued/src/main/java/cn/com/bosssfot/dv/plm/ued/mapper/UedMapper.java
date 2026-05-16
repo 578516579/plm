@@ -10,6 +10,6 @@ public interface UedMapper {
     int updateUed(Ued ued);
     int deleteUedByIds(Long[] uedIds);
 
-    /** 查"以 prefix 开头的 ued_no 中"最大流水号；无则 null */
+    /** ADR: 查"以 prefix 开头的 ued_no 中"最大流水号；无则 null */
     Integer selectMaxSeqOfYear(String prefix);
 }

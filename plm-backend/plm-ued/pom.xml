@@ -8,11 +8,8 @@
         <version>3.9.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>plm-ued</artifactId>
-
-    <description>UED 设计协同 — PRD F2.3 + 原型 ued.html — Figma MCP 集成 + AI 设计规范检查</description>
-
+    <description>UED 设计协同 — PRD F2.3 + 原型 ued.html — Figma 集成 + AI 规范检查 + 农业 UI 组件库</description>
     <dependencies>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-common</artifactId></dependency>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-system</artifactId></dependency>

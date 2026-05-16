@@ -16,7 +16,7 @@ import cn.com.bosssfot.dv.plm.ued.service.IUedService;
 
 /**
  * UED 设计协同 Controller — PRD §F2.3
- * 业务路径 /business/ued/* (RuoYi 6 标准端点 + AI 设计规范检查入口)
+ * /business/ued/* (6 标准 + AI 评审入口)
  */
 @RestController
 @RequestMapping("/business/ued")
@@ -33,11 +33,11 @@ public class UedController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('business:ued:export')")
-    @Log(title = "UED 设计稿", businessType = BusinessType.EXPORT)
+    @Log(title = "UED 设计", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, Ued ued) {
         List<Ued> list = uedService.selectUedList(ued);
-        new ExcelUtil<Ued>(Ued.class).exportExcel(response, list, "UED 设计稿数据");
+        new ExcelUtil<Ued>(Ued.class).exportExcel(response, list, "UED 设计数据");
     }
 
     @PreAuthorize("@ss.hasPermi('business:ued:query')")
@@ -47,21 +47,21 @@ public class UedController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('business:ued:add')")
-    @Log(title = "UED 设计稿", businessType = BusinessType.INSERT)
+    @Log(title = "UED 设计", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody Ued ued) {
         return toAjax(uedService.insertUed(ued));
     }
 
     @PreAuthorize("@ss.hasPermi('business:ued:edit')")
-    @Log(title = "UED 设计稿", businessType = BusinessType.UPDATE)
+    @Log(title = "UED 设计", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody Ued ued) {
         return toAjax(uedService.updateUed(ued));
     }
 
     @PreAuthorize("@ss.hasPermi('business:ued:remove')")
-    @Log(title = "UED 设计稿", businessType = BusinessType.DELETE)
+    @Log(title = "UED 设计", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(uedService.deleteUedByIds(ids));
@@ -69,7 +69,7 @@ public class UedController extends BaseController {
 
     /** PRD §F2.3 AI 设计规范检查 — ued-review-flow */
     @PreAuthorize("@ss.hasPermi('business:ued:edit')")
-    @Log(title = "UED-AI规范检查", businessType = BusinessType.OTHER)
+    @Log(title = "UED-AI评审", businessType = BusinessType.OTHER)
     @PostMapping("/ai/review/{id}")
     public AjaxResult aiReview(@PathVariable("id") Long id) {
         return success(uedService.aiReview(id));

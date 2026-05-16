@@ -8,21 +8,12 @@
         <version>3.9.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>plm-testdata</artifactId>
-
-    <description>
-        测试数据工厂 - 测试阶段业务模块 (Phase B 拉起的空壳, 计划版本: deferred)
-    </description>
-
+    <description>测试数据工厂 — PRD F4.3 + 原型 testdata.html — AI 基于字段语义 + AgriKB 生成农业场景真实感测试数据</description>
     <dependencies>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-system</artifactId>
-        </dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-common</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-system</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-project</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>
