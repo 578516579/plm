@@ -1,12 +1,14 @@
 {
   "name": "@plm/testcase",
-  "version": "0.0.1",
-  "description": "PLM 业务模块 - 测试用例 (stub 空壳)",
+  "version": "0.3.0",
+  "description": "PLM 业务模块 - 测试用例管理 + /execute 端点",
   "main": "src/index.ts",
   "type": "module",
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./api": "./src/api/index.ts",
+    "./types": "./src/types/index.ts",
     "./router": "./src/router.ts"
   }
 }

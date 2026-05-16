@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.testcase.mapper.TestCaseMapper">
+
+    <resultMap type="TestCase" id="TestCaseResult">
+        <result property="testcaseId"            column="testcase_id"            />
+        <result property="testcaseNo"            column="testcase_no"            />
+        <result property="projectId"             column="project_id"             />
+        <result property="requirementId"         column="requirement_id"         />
+        <result property="title"                 column="title"                  />
+        <result property="description"           column="description"            />
+        <result property="category"              column="category"               />
+        <result property="priority"              column="priority"               />
+        <result property="status"                column="status"                 />
+        <result property="preconditions"         column="preconditions"          />
+        <result property="steps"                 column="steps"                  />
+        <result property="expectedResult"        column="expected_result"        />
+        <result property="actualResult"          column="actual_result"          />
+        <result property="isAutomated"           column="is_automated"           />
+        <result property="automationScriptPath"  column="automation_script_path" />
+        <result property="executionCount"        column="execution_count"        />
+        <result property="lastExecutedAt"        column="last_executed_at"       />
+        <result property="tags"                  column="tags"                   />
+        <result property="createBy"              column="create_by"              />
+        <result property="createTime"            column="create_time"            />
+        <result property="updateBy"              column="update_by"              />
+        <result property="updateTime"            column="update_time"            />
+        <result property="remark"                column="remark"                 />
+        <result property="delFlag"               column="del_flag"               />
+    </resultMap>
+
+    <sql id="selectTestCaseVo">
+        select testcase_id, testcase_no, project_id, requirement_id, title, description,
+               category, priority, status, preconditions, steps, expected_result, actual_result,
+               is_automated, automation_script_path, execution_count, last_executed_at, tags,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_testcase
+    </sql>
+
+    <select id="selectTestCaseList" parameterType="TestCase" resultMap="TestCaseResult">
+        <include refid="selectTestCaseVo"/>
+        <where>
+            del_flag = '0'
+            <if test="testcaseNo != null and testcaseNo != ''">and testcase_no like concat('%', #{testcaseNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="requirementId != null">and requirement_id = #{requirementId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="category != null and category != ''">and category = #{category}</if>
+            <if test="priority != null and priority != ''">and priority = #{priority}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="isAutomated != null and isAutomated != ''">and is_automated = #{isAutomated}</if>
+            <if test="tags != null and tags != ''">and tags like concat('%', #{tags}, '%')</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectTestCaseById" parameterType="Long" resultMap="TestCaseResult">
+        <include refid="selectTestCaseVo"/>
+        where testcase_id = #{testcaseId} and del_flag = '0'
+    </select>
+
+    <insert id="insertTestCase" parameterType="TestCase" useGeneratedKeys="true" keyProperty="testcaseId">
+        insert into tb_testcase
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="testcaseNo != null">testcase_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="requirementId != null">requirement_id,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="category != null">category,</if>
+            <if test="priority != null">priority,</if>
+            <if test="status != null">status,</if>
+            <if test="preconditions != null">preconditions,</if>
+            <if test="steps != null">steps,</if>
+            <if test="expectedResult != null">expected_result,</if>
+            <if test="actualResult != null">actual_result,</if>
+            <if test="isAutomated != null">is_automated,</if>
+            <if test="automationScriptPath != null">automation_script_path,</if>
+            <if test="executionCount != null">execution_count,</if>
+            <if test="lastExecutedAt != null">last_executed_at,</if>
+            <if test="tags != null">tags,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="testcaseNo != null">#{testcaseNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="requirementId != null">#{requirementId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="category != null">#{category},</if>
+            <if test="priority != null">#{priority},</if>
+            <if test="status != null">#{status},</if>
+            <if test="preconditions != null">#{preconditions},</if>
+            <if test="steps != null">#{steps},</if>
+            <if test="expectedResult != null">#{expectedResult},</if>
+            <if test="actualResult != null">#{actualResult},</if>
+            <if test="isAutomated != null">#{isAutomated},</if>
+            <if test="automationScriptPath != null">#{automationScriptPath},</if>
+            <if test="executionCount != null">#{executionCount},</if>
+            <if test="lastExecutedAt != null">#{lastExecutedAt},</if>
+            <if test="tags != null">#{tags},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateTestCase" parameterType="TestCase">
+        update tb_testcase
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="testcaseNo != null">testcase_no = #{testcaseNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="requirementId != null">requirement_id = #{requirementId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="preconditions != null">preconditions = #{preconditions},</if>
+            <if test="steps != null">steps = #{steps},</if>
+            <if test="expectedResult != null">expected_result = #{expectedResult},</if>
+            <if test="actualResult != null">actual_result = #{actualResult},</if>
+            <if test="isAutomated != null">is_automated = #{isAutomated},</if>
+            <if test="automationScriptPath != null">automation_script_path = #{automationScriptPath},</if>
+            <if test="executionCount != null">execution_count = #{executionCount},</if>
+            <if test="lastExecutedAt != null">last_executed_at = #{lastExecutedAt},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where testcase_id = #{testcaseId}
+    </update>
+
+    <update id="deleteTestCaseByIds" parameterType="Long">
+        update tb_testcase set del_flag = '2' where testcase_id in
+        <foreach item="testcaseId" collection="array" open="(" separator="," close=")">#{testcaseId}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(testcase_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_testcase
+        where testcase_no like concat(#{prefix}, '%')
+    </select>
+
+</mapper>

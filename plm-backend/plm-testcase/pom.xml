@@ -12,7 +12,7 @@
     <artifactId>plm-testcase</artifactId>
 
     <description>
-        测试用例 - 测试阶段业务模块 (Phase B 拉起的空壳, 计划版本: v0.3)
+        测试用例（TestCase）业务模块 — 5×5 状态机含反向边 03/04→01 (重测) + ADR-0006 + /execute 端点
     </description>
 
     <dependencies>
@@ -23,6 +23,20 @@
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-project</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-requirement</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

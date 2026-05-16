@@ -169,8 +169,8 @@
 </template>
 
 <script setup name="TestCase" lang="ts">
-import { listTestCase, getTestCase, addTestCase, updateTestCase, delTestCase, executeTestCase } from '../api'
-import type { TestCaseForm, TestCaseQuery } from '../types'
+import { listTestCase, getTestCase, addTestCase, updateTestCase, delTestCase, executeTestCase } from '@/api/business/testcase'
+import type { TestCaseForm, TestCaseQuery } from '@/types/api/business/testcase'
 
 const { proxy } = getCurrentInstance() as any
 const {
