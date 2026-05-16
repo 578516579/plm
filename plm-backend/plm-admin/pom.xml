@@ -83,6 +83,18 @@
         </dependency>
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-arch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-dbdesign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-apidesign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-sprint</artifactId>
         </dependency>
         <dependency>

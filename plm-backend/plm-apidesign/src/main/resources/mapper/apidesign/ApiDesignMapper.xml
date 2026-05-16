@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.apidesign.mapper.ApiDesignMapper">
+
+    <resultMap type="ApiDesign" id="ApiDesignResult">
+        <result property="apidesignId"     column="apidesign_id"     />
+        <result property="apidesignNo"     column="apidesign_no"     />
+        <result property="projectId"       column="project_id"       />
+        <result property="archId"          column="arch_id"          />
+        <result property="title"           column="title"            />
+        <result property="httpMethod"      column="http_method"      />
+        <result property="path"            column="path"             />
+        <result property="description"     column="description"      />
+        <result property="requestSchema"   column="request_schema"   />
+        <result property="responseSchema"  column="response_schema"  />
+        <result property="openapiSpec"     column="openapi_spec"     />
+        <result property="mockEnabled"     column="mock_enabled"     />
+        <result property="mockResponse"    column="mock_response"    />
+        <result property="aiGenerated"     column="ai_generated"     />
+        <result property="aiGeneratedAt"   column="ai_generated_at"  />
+        <result property="status"          column="status"           />
+        <result property="authorUserId"    column="author_user_id"   />
+        <result property="reviewerUserId"  column="reviewer_user_id" />
+        <result property="createBy"        column="create_by"        />
+        <result property="createTime"      column="create_time"      />
+        <result property="updateBy"        column="update_by"        />
+        <result property="updateTime"      column="update_time"      />
+        <result property="remark"          column="remark"           />
+        <result property="delFlag"         column="del_flag"         />
+    </resultMap>
+
+    <sql id="selectApiDesignVo">
+        select apidesign_id, apidesign_no, project_id, arch_id, title,
+               http_method, path, description, request_schema, response_schema, openapi_spec,
+               mock_enabled, mock_response, ai_generated, ai_generated_at,
+               status, author_user_id, reviewer_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_apidesign
+    </sql>
+
+    <select id="selectApiDesignList" parameterType="ApiDesign" resultMap="ApiDesignResult">
+        <include refid="selectApiDesignVo"/>
+        <where>
+            del_flag = '0'
+            <if test="apidesignNo != null and apidesignNo != ''">and apidesign_no like concat('%', #{apidesignNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="archId != null">and arch_id = #{archId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="httpMethod != null and httpMethod != ''">and http_method = #{httpMethod}</if>
+            <if test="path != null and path != ''">and path like concat('%', #{path}, '%')</if>
+            <if test="mockEnabled != null and mockEnabled != ''">and mock_enabled = #{mockEnabled}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectApiDesignById" parameterType="Long" resultMap="ApiDesignResult">
+        <include refid="selectApiDesignVo"/>
+        where apidesign_id = #{apidesignId} and del_flag = '0'
+    </select>
+
+    <insert id="insertApiDesign" parameterType="ApiDesign" useGeneratedKeys="true" keyProperty="apidesignId">
+        insert into tb_apidesign
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="apidesignNo != null">apidesign_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="archId != null">arch_id,</if>
+            <if test="title != null">title,</if>
+            <if test="httpMethod != null">http_method,</if>
+            <if test="path != null">path,</if>
+            <if test="description != null">description,</if>
+            <if test="requestSchema != null">request_schema,</if>
+            <if test="responseSchema != null">response_schema,</if>
+            <if test="openapiSpec != null">openapi_spec,</if>
+            <if test="mockEnabled != null">mock_enabled,</if>
+            <if test="mockResponse != null">mock_response,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="aiGeneratedAt != null">ai_generated_at,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="apidesignNo != null">#{apidesignNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="archId != null">#{archId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="httpMethod != null">#{httpMethod},</if>
+            <if test="path != null">#{path},</if>
+            <if test="description != null">#{description},</if>
+            <if test="requestSchema != null">#{requestSchema},</if>
+            <if test="responseSchema != null">#{responseSchema},</if>
+            <if test="openapiSpec != null">#{openapiSpec},</if>
+            <if test="mockEnabled != null">#{mockEnabled},</if>
+            <if test="mockResponse != null">#{mockResponse},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateApiDesign" parameterType="ApiDesign">
+        update tb_apidesign
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="apidesignNo != null">apidesign_no = #{apidesignNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="archId != null">arch_id = #{archId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="httpMethod != null">http_method = #{httpMethod},</if>
+            <if test="path != null">path = #{path},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="requestSchema != null">request_schema = #{requestSchema},</if>
+            <if test="responseSchema != null">response_schema = #{responseSchema},</if>
+            <if test="openapiSpec != null">openapi_spec = #{openapiSpec},</if>
+            <if test="mockEnabled != null">mock_enabled = #{mockEnabled},</if>
+            <if test="mockResponse != null">mock_response = #{mockResponse},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where apidesign_id = #{apidesignId}
+    </update>
+
+    <update id="deleteApiDesignByIds" parameterType="Long">
+        update tb_apidesign set del_flag = '2' where apidesign_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(apidesign_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_apidesign
+        where apidesign_no like concat(#{prefix}, '%')
+    </select>
+</mapper>

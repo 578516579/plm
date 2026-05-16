@@ -205,6 +205,21 @@
             </dependency>
             <dependency>
                 <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-arch</artifactId>
+                <version>${plm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-dbdesign</artifactId>
+                <version>${plm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-apidesign</artifactId>
+                <version>${plm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
                 <artifactId>plm-sprint</artifactId>
                 <version>${plm.version}</version>
             </dependency>
