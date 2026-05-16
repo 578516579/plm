@@ -12,7 +12,7 @@
     <artifactId>plm-manual-ops</artifactId>
 
     <description>
-        运维手册 - 交付阶段业务模块 (Phase B 拉起的空壳, 计划版本: v0.5)
+        运维手册 - PRD §F5.3 AI 一键生成 (监控/告警/IoT 维度)
     </description>
 
     <dependencies>
@@ -23,6 +23,15 @@
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-project</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
