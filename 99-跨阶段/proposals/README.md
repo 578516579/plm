@@ -59,6 +59,27 @@ proposed    完成填写、关联数据，等 review
 | [0004](0004-staged-test-dod.md) | 拆 Phase 03 / 04 的 DoD（代码骨架 vs 测试稳定） | **merged → tracking** | 2026-05-15 | [reflect/2026-W20-project-phase03-dogfood](../reflect/2026-W20-project-phase03-dogfood.md) F-P03-01 | apply 0004/0005/0006（2026-05-15）| 2026-05-15 → 05-29 |
 | [0005](0005-solo-sprint-merge.md) | solo 模式 Sprint 文档可并入 Gate 实例 | **merged → tracking** | 2026-05-15 | reflect F-P03-02 | 同上 | 同上 |
 | [0006](0006-project-maturity-stage.md) | 引入"项目成熟度"维度（early/stable/mature），4 维参数化 | **merged → tracking** | 2026-05-15 | reflect F-P03-03 | 同上 | 同上 |
+| [0007](0007-solo-early-dev-self-review.md) | Phase 05 §H 双人签字在 solo+internal-tool+early 允许 self-review | **merged → tracking** | 2026-05-17 | [reflect/2026-W20](../reflect/2026-W20.md) F-W20-03 / signals 0007 / 风险 R-001 | apply 0007/0010/0011/0012（2026-05-17）| 2026-05-17 → 05-31 |
+| [0010](0010-phase06-substrate-only-metrics.md) | Phase 06 §B 5 指标在 early/internal-tool 允许"替代方案表" | **merged → tracking** | 2026-05-17 | reflect F-W20-03 / signals 0010 | 同上 | 同上 |
+| [0011](0011-phase06-okr-optional-in-early.md) | Phase 06 §G OKR 对照在 solo+early 可标 N/A | **merged → tracking** | 2026-05-17 | reflect F-W20-03 / signals 0011 / phase01-dogfood F7 | 同上 | 同上 |
+| [0012](0012-phase06-two-stage-signoff.md) | Phase 06 cycle 拆"启动 (day 0) + 终态 (day N)"两段式签字 | **merged → tracking** | 2026-05-17 | reflect F-W20-03 / signals 0012 / cycle 1 实例已实现 | 同上 | 同上 |
+| [0027](0027-business-module-scaffold-script.md) | 业务模块生成器 `new-business-module.sh` | **merged → tracking** (retro, User-requested-bypass) | 2026-05-17 追溯 | reflect F-W20-02 / signals 0027+0034 | `75b3233` (2026-05-16) | 2026-05-17 → 05-30 |
+| [0028](0028-encoding-runtime-hardrules.md) | rules.md §D #5-7 编码硬规则 + check-encoding 脚本 | **merged → tracking** (retro, User-requested-bypass) | 2026-05-17 追溯 | reflect F-W20-02 / signals 0028 / 周六编码事故 | `913d431` (2026-05-16) | 2026-05-17 → 05-30 |
+| [0029](0029-curl-data-binary-cn-body.md) | curl 中文 body 强制 `--data-binary @file` | **merged → tracking** (retro, User-requested-bypass) | 2026-05-17 追溯 | reflect F-W20-02 / signals 0029 / 同 0028 事故 | `913d431` (2026-05-16) | 2026-05-17 → 05-30 |
+
+### 候选堆积（signals 中等待批量升格，下次周末闭合反思处理）
+
+> 来源 [signals/2026-05.md](../signals/2026-05.md)。规则: 候选超过 14 天或超过 10 条时触发批量升格。
+
+| 候选号 | 标题摘要 | 处置 |
+|---|---|---|
+| 0008 / 0009 | Phase 05 §B.1 / §C 在 early+solo 简化 | 留 W21 升格 |
+| 0013 / 0014 / 0015 | Phase 01 子实体 / 立项时序 / 技术债列 | 留 W21 升格 |
+| 0016 ~ 0021 | Phase 02 6 处设计模板债务（架构沿用 / 主键规范 / REST vs 复合视图 / 反向边 UI / 聚合详情 / 并发选型）| 留 W21 升格（建议合并为 1-2 个总提案）|
+| 0022 ~ 0026 | Phase 03 5 处实现细节（FK 校验 / Sprint stats SQL / Task 看板 LIMIT / MR URL 白名单 / 看板列字典化）| 留 W21 升格 |
+| 0030 | check-encoding-runtime.sh 纳入 PreToolUse hook 自动跑 | 留 W21 升格（独立于 0028 的运维提升）|
+| 0032 / 0033 | early 阶段 staging 路径 / `bash deploy.sh` 自动化 | 留 W21 升格 |
+| 0034 | 业务模块生成器（同 0027，重复编号）| **superseded by 0027**，不再单独升格 |
 
 ---
 
