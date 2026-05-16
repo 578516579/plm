@@ -8,21 +8,12 @@
         <version>3.9.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>plm-arch</artifactId>
-
-    <description>
-        系统架构 - 设计阶段业务模块 (Phase B 拉起的空壳, 计划版本: v0.4)
-    </description>
-
+    <description>系统概要设计 HLD — PRD F3.1 + 原型 archdesign.html — AI 根据 PRD 推荐技术架构 + C4 容器图</description>
     <dependencies>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-system</artifactId>
-        </dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-common</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-system</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-project</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>
