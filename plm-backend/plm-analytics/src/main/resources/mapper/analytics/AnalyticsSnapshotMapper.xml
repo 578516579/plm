@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.analytics.mapper.AnalyticsSnapshotMapper">
+
+    <resultMap type="cn.com.bosssfot.dv.plm.analytics.domain.AnalyticsSnapshot" id="AnalyticsResult">
+        <id     property="snapshotId"             column="snapshot_id"             />
+        <result property="snapshotNo"             column="snapshot_no"             />
+        <result property="projectId"              column="project_id"              />
+        <result property="title"                  column="title"                   />
+        <result property="periodType"             column="period_type"             />
+        <result property="snapshotDate"           column="snapshot_date"           />
+        <result property="requirementThroughput"  column="requirement_throughput"  />
+        <result property="sprintOnTimeRate"       column="sprint_on_time_rate"     />
+        <result property="defectDensity"          column="defect_density"          />
+        <result property="autoTestCoverage"       column="auto_test_coverage"      />
+        <result property="deploymentFrequency"    column="deployment_frequency"    />
+        <result property="leadTimeHours"          column="lead_time_hours"         />
+        <result property="mttrHours"              column="mttr_hours"              />
+        <result property="changeFailureRate"      column="change_failure_rate"     />
+        <result property="aiHoursSaved"           column="ai_hours_saved"          />
+        <result property="activeProjects"         column="active_projects"         />
+        <result property="projectsAtRisk"         column="projects_at_risk"        />
+        <result property="aiRecommendations"      column="ai_recommendations"      />
+        <result property="aiGenerated"            column="ai_generated"            />
+        <result property="aiGeneratedAt"          column="ai_generated_at"         />
+        <result property="status"                 column="status"                  />
+        <result property="authorUserId"           column="author_user_id"          />
+        <result property="createBy"               column="create_by"               />
+        <result property="createTime"             column="create_time"             />
+        <result property="updateBy"               column="update_by"               />
+        <result property="updateTime"             column="update_time"             />
+        <result property="remark"                 column="remark"                  />
+        <result property="delFlag"                column="del_flag"                />
+    </resultMap>
+
+    <sql id="selectAnalyticsVo">
+        select snapshot_id, snapshot_no, project_id, title, period_type, snapshot_date,
+               requirement_throughput, sprint_on_time_rate, defect_density, auto_test_coverage,
+               deployment_frequency, lead_time_hours, mttr_hours, change_failure_rate,
+               ai_hours_saved, active_projects, projects_at_risk,
+               ai_recommendations, ai_generated, ai_generated_at, status, author_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_analytics_snapshot
+    </sql>
+
+    <select id="selectAnalyticsList" parameterType="cn.com.bosssfot.dv.plm.analytics.domain.AnalyticsSnapshot" resultMap="AnalyticsResult">
+        <include refid="selectAnalyticsVo"/>
+        <where>
+            del_flag = '0'
+            <if test="snapshotNo != null and snapshotNo != ''">and snapshot_no like concat('%', #{snapshotNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="periodType != null and periodType != ''">and period_type = #{periodType}</if>
+            <if test="aiGenerated != null and aiGenerated != ''">and ai_generated = #{aiGenerated}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="authorUserId != null">and author_user_id = #{authorUserId}</if>
+        </where>
+        order by snapshot_date desc, create_time desc
+    </select>
+
+    <select id="selectAnalyticsById" parameterType="Long" resultMap="AnalyticsResult">
+        <include refid="selectAnalyticsVo"/>
+        where snapshot_id = #{snapshotId} and del_flag = '0'
+    </select>
+
+    <insert id="insertAnalytics" parameterType="cn.com.bosssfot.dv.plm.analytics.domain.AnalyticsSnapshot" useGeneratedKeys="true" keyProperty="snapshotId">
+        insert into tb_analytics_snapshot
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="snapshotNo != null">snapshot_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="title != null">title,</if>
+            <if test="periodType != null">period_type,</if>
+            <if test="snapshotDate != null">snapshot_date,</if>
+            <if test="requirementThroughput != null">requirement_throughput,</if>
+            <if test="sprintOnTimeRate != null">sprint_on_time_rate,</if>
+            <if test="defectDensity != null">defect_density,</if>
+            <if test="autoTestCoverage != null">auto_test_coverage,</if>
+            <if test="deploymentFrequency != null">deployment_frequency,</if>
+            <if test="leadTimeHours != null">lead_time_hours,</if>
+            <if test="mttrHours != null">mttr_hours,</if>
+            <if test="changeFailureRate != null">change_failure_rate,</if>
+            <if test="aiHoursSaved != null">ai_hours_saved,</if>
+            <if test="activeProjects != null">active_projects,</if>
+            <if test="projectsAtRisk != null">projects_at_risk,</if>
+            <if test="aiRecommendations != null">ai_recommendations,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="aiGeneratedAt != null">ai_generated_at,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="snapshotNo != null">#{snapshotNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="periodType != null">#{periodType},</if>
+            <if test="snapshotDate != null">#{snapshotDate},</if>
+            <if test="requirementThroughput != null">#{requirementThroughput},</if>
+            <if test="sprintOnTimeRate != null">#{sprintOnTimeRate},</if>
+            <if test="defectDensity != null">#{defectDensity},</if>
+            <if test="autoTestCoverage != null">#{autoTestCoverage},</if>
+            <if test="deploymentFrequency != null">#{deploymentFrequency},</if>
+            <if test="leadTimeHours != null">#{leadTimeHours},</if>
+            <if test="mttrHours != null">#{mttrHours},</if>
+            <if test="changeFailureRate != null">#{changeFailureRate},</if>
+            <if test="aiHoursSaved != null">#{aiHoursSaved},</if>
+            <if test="activeProjects != null">#{activeProjects},</if>
+            <if test="projectsAtRisk != null">#{projectsAtRisk},</if>
+            <if test="aiRecommendations != null">#{aiRecommendations},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateAnalytics" parameterType="cn.com.bosssfot.dv.plm.analytics.domain.AnalyticsSnapshot">
+        update tb_analytics_snapshot
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="snapshotNo != null">snapshot_no = #{snapshotNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="periodType != null">period_type = #{periodType},</if>
+            <if test="snapshotDate != null">snapshot_date = #{snapshotDate},</if>
+            <if test="requirementThroughput != null">requirement_throughput = #{requirementThroughput},</if>
+            <if test="sprintOnTimeRate != null">sprint_on_time_rate = #{sprintOnTimeRate},</if>
+            <if test="defectDensity != null">defect_density = #{defectDensity},</if>
+            <if test="autoTestCoverage != null">auto_test_coverage = #{autoTestCoverage},</if>
+            <if test="deploymentFrequency != null">deployment_frequency = #{deploymentFrequency},</if>
+            <if test="leadTimeHours != null">lead_time_hours = #{leadTimeHours},</if>
+            <if test="mttrHours != null">mttr_hours = #{mttrHours},</if>
+            <if test="changeFailureRate != null">change_failure_rate = #{changeFailureRate},</if>
+            <if test="aiHoursSaved != null">ai_hours_saved = #{aiHoursSaved},</if>
+            <if test="activeProjects != null">active_projects = #{activeProjects},</if>
+            <if test="projectsAtRisk != null">projects_at_risk = #{projectsAtRisk},</if>
+            <if test="aiRecommendations != null">ai_recommendations = #{aiRecommendations},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where snapshot_id = #{snapshotId}
+    </update>
+
+    <update id="deleteAnalyticsByIds" parameterType="Long">
+        update tb_analytics_snapshot set del_flag = '2' where snapshot_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(snapshot_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_analytics_snapshot
+        where snapshot_no like concat(#{prefix}, '%')
+    </select>
+</mapper>
