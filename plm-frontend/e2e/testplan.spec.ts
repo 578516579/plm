@@ -1,24 +1,21 @@
-/** TestPlan 模块 E2E (生成器脚手架, 待补业务规则测试) */
+/** TestPlan 模块 E2E — PRD §F4.1 */
 import { test, expect, APIRequestContext } from '@playwright/test'
 import { loginAsAdmin } from './helpers/auth'
 import { ApiClient } from './helpers/api'
 import { execDelete } from './helpers/db'
 import { RUN_ID, makeProjectData } from './helpers/fixtures'
 
-let token: string
-let api: ApiClient
-let apiRequest: APIRequestContext
-let projectId: number
+let token: string, api: ApiClient, apiRequest: APIRequestContext, projectId: number
 
-test.describe('TestPlan 模块 E2E (脚手架)', () => {
+test.describe('TestPlan 模块 E2E', () => {
   test.beforeAll(async ({ playwright, browser }) => {
     apiRequest = await playwright.request.newContext()
     const ctx = await browser.newContext()
     token = await loginAsAdmin(apiRequest, ctx)
     api = new ApiClient(apiRequest, token)
-    await api.createProject(makeProjectData(`testplan-suite-${RUN_ID}`))
+    await api.createProject(makeProjectData(`tp-suite-${RUN_ID}`))
     const pl = await api.listProjects()
-    projectId = pl.rows.find((p: any) => p.projectName.includes(`testplan-suite-${RUN_ID}`))?.id
+    projectId = pl.rows.find((p: any) => p.projectName.includes(`tp-suite-${RUN_ID}`))?.id
   })
 
   test.afterAll(async () => {
@@ -29,13 +26,18 @@ test.describe('TestPlan 模块 E2E (脚手架)', () => {
     await apiRequest?.dispose()
   })
 
-  test('TC-TestPlan-F001 CRUD 脚手架', async () => {
-    const c = await api.post('/business/testplan', {
-      testplanNo: `SCAFFOLD-${RUN_ID}`,
+  test('TC-TP-F001 创建测试方案 (5 种 test_types)', async () => {
+    const r = await api.post('/business/testplan', {
       projectId,
-      title: `生成器测试-${RUN_ID}`,
-      status: '00'
+      title: `Sprint 测试方案-${RUN_ID}`,
+      testTypes: 'functional,api,automation',
+      testCycleDays: 10,
+      scope: '需求 REQ-001~005',
+      strategy: '功能优先,自动化覆盖核心路径',
+      toolsRecommended: 'playwright,jmeter',
+      aiGenerated: 'Y',
+      authorUserId: 1
     })
-    expect(c.code).toBe(200)
+    expect(r.code).toBe(200)
   })
 })

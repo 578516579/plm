@@ -9,4 +9,7 @@ public interface SubmissionMapper {
     int insertSubmission(Submission submission);
     int updateSubmission(Submission submission);
     int deleteSubmissionByIds(Long[] submissionIds);
+
+    /** ADR: 查"以 prefix 开头的 submission_no 中"最大流水号；无则 null */
+    Integer selectMaxSeqOfYear(String prefix);
 }

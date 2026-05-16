@@ -9,4 +9,7 @@ public interface ReleaseMapper {
     int insertRelease(Release release);
     int updateRelease(Release release);
     int deleteReleaseByIds(Long[] releaseIds);
+
+    /** ADR: 查"以 prefix 开头的 release_no 中"最大流水号；无则 null */
+    Integer selectMaxSeqOfYear(String prefix);
 }

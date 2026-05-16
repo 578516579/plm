@@ -1,22 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.com.bosssfot.dv.plm.manualproduct.mapper.ManualProductMapper">
+
     <resultMap type="ManualProduct" id="ManualProductResult">
-        <result property="manualproductId" column="manualproduct_id" />
-        <result property="manualproductNo" column="manualproduct_no" />
-        <result property="projectId"  column="project_id" />
-        <result property="title"      column="title" />
-        <result property="status"     column="status" />
-        <result property="createBy"   column="create_by" />
-        <result property="createTime" column="create_time" />
-        <result property="updateBy"   column="update_by" />
-        <result property="updateTime" column="update_time" />
-        <result property="remark"     column="remark" />
-        <result property="delFlag"    column="del_flag" />
+        <result property="manualproductId"   column="manualproduct_id"   />
+        <result property="manualproductNo"   column="manualproduct_no"   />
+        <result property="projectId"         column="project_id"         />
+        <result property="title"             column="title"              />
+        <result property="productVersion"    column="product_version"    />
+        <result property="includeModules"    column="include_modules"    />
+        <result property="content"           column="content"            />
+        <result property="screenshotsUrls"   column="screenshots_urls"   />
+        <result property="screenshotsCount"  column="screenshots_count"  />
+        <result property="outputFormats"     column="output_formats"     />
+        <result property="aiGenerated"       column="ai_generated"       />
+        <result property="generatedAt"       column="generated_at"       />
+        <result property="status"            column="status"             />
+        <result property="authorUserId"      column="author_user_id"     />
+        <result property="createBy"          column="create_by"          />
+        <result property="createTime"        column="create_time"        />
+        <result property="updateBy"          column="update_by"          />
+        <result property="updateTime"        column="update_time"        />
+        <result property="remark"            column="remark"             />
+        <result property="delFlag"           column="del_flag"           />
     </resultMap>
 
     <sql id="selectManualProductVo">
-        select manualproduct_id, manualproduct_no, project_id, title, status,
+        select manualproduct_id, manualproduct_no, project_id, title, product_version, include_modules,
+               content, screenshots_urls, screenshots_count, output_formats,
+               ai_generated, generated_at, status, author_user_id,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_manual_product
     </sql>
@@ -25,9 +37,13 @@
         <include refid="selectManualProductVo"/>
         <where>
             del_flag = '0'
-            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="manualproductNo != null and manualproductNo != ''">and manualproduct_no like concat('%', #{manualproductNo}, '%')</if>
             <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="productVersion != null and productVersion != ''">and product_version = #{productVersion}</if>
+            <if test="aiGenerated != null and aiGenerated != ''">and ai_generated = #{aiGenerated}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="authorUserId != null">and author_user_id = #{authorUserId}</if>
         </where>
         order by create_time desc
     </select>
@@ -38,12 +54,65 @@
     </select>
 
     <insert id="insertManualProduct" parameterType="ManualProduct" useGeneratedKeys="true" keyProperty="manualproductId">
-        insert into tb_manual_product (manualproduct_no, project_id, title, status, create_by, create_time)
-        values (#{manualproductNo}, #{projectId}, #{title}, #{status}, #{createBy}, sysdate())
+        insert into tb_manual_product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="manualproductNo != null">manualproduct_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="title != null">title,</if>
+            <if test="productVersion != null">product_version,</if>
+            <if test="includeModules != null">include_modules,</if>
+            <if test="content != null">content,</if>
+            <if test="screenshotsUrls != null">screenshots_urls,</if>
+            <if test="screenshotsCount != null">screenshots_count,</if>
+            <if test="outputFormats != null">output_formats,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="generatedAt != null">generated_at,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="manualproductNo != null">#{manualproductNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="productVersion != null">#{productVersion},</if>
+            <if test="includeModules != null">#{includeModules},</if>
+            <if test="content != null">#{content},</if>
+            <if test="screenshotsUrls != null">#{screenshotsUrls},</if>
+            <if test="screenshotsCount != null">#{screenshotsCount},</if>
+            <if test="outputFormats != null">#{outputFormats},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="generatedAt != null">#{generatedAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
     </insert>
 
     <update id="updateManualProduct" parameterType="ManualProduct">
-        update tb_manual_product set title = #{title}, status = #{status}, update_by = #{updateBy}, update_time = sysdate()
+        update tb_manual_product
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="manualproductNo != null">manualproduct_no = #{manualproductNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="productVersion != null">product_version = #{productVersion},</if>
+            <if test="includeModules != null">include_modules = #{includeModules},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="screenshotsUrls != null">screenshots_urls = #{screenshotsUrls},</if>
+            <if test="screenshotsCount != null">screenshots_count = #{screenshotsCount},</if>
+            <if test="outputFormats != null">output_formats = #{outputFormats},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="generatedAt != null">generated_at = #{generatedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
         where manualproduct_id = #{manualproductId}
     </update>
 
@@ -51,4 +120,10 @@
         update tb_manual_product set del_flag = '2' where manualproduct_id in
         <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
     </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(manualproduct_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_manual_product
+        where manualproduct_no like concat(#{prefix}, '%')
+    </select>
 </mapper>

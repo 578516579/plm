@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.com.bosssfot.dv.plm.testplan.mapper.TestPlanMapper">
+
     <resultMap type="TestPlan" id="TestPlanResult">
-        <result property="testplanId" column="testplan_id" />
-        <result property="testplanNo" column="testplan_no" />
-        <result property="projectId"  column="project_id" />
-        <result property="title"      column="title" />
-        <result property="status"     column="status" />
-        <result property="createBy"   column="create_by" />
-        <result property="createTime" column="create_time" />
-        <result property="updateBy"   column="update_by" />
-        <result property="updateTime" column="update_time" />
-        <result property="remark"     column="remark" />
-        <result property="delFlag"    column="del_flag" />
+        <result property="testplanId"        column="testplan_id"        />
+        <result property="testplanNo"        column="testplan_no"        />
+        <result property="projectId"         column="project_id"         />
+        <result property="sprintId"          column="sprint_id"          />
+        <result property="title"             column="title"              />
+        <result property="testTypes"         column="test_types"         />
+        <result property="testCycleDays"     column="test_cycle_days"    />
+        <result property="scope"             column="scope"              />
+        <result property="strategy"          column="strategy"           />
+        <result property="toolsRecommended"  column="tools_recommended"  />
+        <result property="resourcesPlan"     column="resources_plan"     />
+        <result property="riskAssessment"    column="risk_assessment"    />
+        <result property="aiGenerated"       column="ai_generated"       />
+        <result property="status"            column="status"             />
+        <result property="authorUserId"      column="author_user_id"     />
+        <result property="createBy"          column="create_by"          />
+        <result property="createTime"        column="create_time"        />
+        <result property="updateBy"          column="update_by"          />
+        <result property="updateTime"        column="update_time"        />
+        <result property="remark"            column="remark"             />
+        <result property="delFlag"           column="del_flag"           />
     </resultMap>
 
     <sql id="selectTestPlanVo">
-        select testplan_id, testplan_no, project_id, title, status,
+        select testplan_id, testplan_no, project_id, sprint_id, title, test_types, test_cycle_days,
+               scope, strategy, tools_recommended, resources_plan, risk_assessment,
+               ai_generated, status, author_user_id,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_testplan
     </sql>
@@ -25,9 +38,13 @@
         <include refid="selectTestPlanVo"/>
         <where>
             del_flag = '0'
-            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="testplanNo != null and testplanNo != ''">and testplan_no like concat('%', #{testplanNo}, '%')</if>
             <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="sprintId != null">and sprint_id = #{sprintId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="aiGenerated != null and aiGenerated != ''">and ai_generated = #{aiGenerated}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="authorUserId != null">and author_user_id = #{authorUserId}</if>
         </where>
         order by create_time desc
     </select>
@@ -38,12 +55,68 @@
     </select>
 
     <insert id="insertTestPlan" parameterType="TestPlan" useGeneratedKeys="true" keyProperty="testplanId">
-        insert into tb_testplan (testplan_no, project_id, title, status, create_by, create_time)
-        values (#{testplanNo}, #{projectId}, #{title}, #{status}, #{createBy}, sysdate())
+        insert into tb_testplan
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="testplanNo != null">testplan_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="sprintId != null">sprint_id,</if>
+            <if test="title != null">title,</if>
+            <if test="testTypes != null">test_types,</if>
+            <if test="testCycleDays != null">test_cycle_days,</if>
+            <if test="scope != null">scope,</if>
+            <if test="strategy != null">strategy,</if>
+            <if test="toolsRecommended != null">tools_recommended,</if>
+            <if test="resourcesPlan != null">resources_plan,</if>
+            <if test="riskAssessment != null">risk_assessment,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="testplanNo != null">#{testplanNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="sprintId != null">#{sprintId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="testTypes != null">#{testTypes},</if>
+            <if test="testCycleDays != null">#{testCycleDays},</if>
+            <if test="scope != null">#{scope},</if>
+            <if test="strategy != null">#{strategy},</if>
+            <if test="toolsRecommended != null">#{toolsRecommended},</if>
+            <if test="resourcesPlan != null">#{resourcesPlan},</if>
+            <if test="riskAssessment != null">#{riskAssessment},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
     </insert>
 
     <update id="updateTestPlan" parameterType="TestPlan">
-        update tb_testplan set title = #{title}, status = #{status}, update_by = #{updateBy}, update_time = sysdate()
+        update tb_testplan
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="testplanNo != null">testplan_no = #{testplanNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="sprintId != null">sprint_id = #{sprintId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="testTypes != null">test_types = #{testTypes},</if>
+            <if test="testCycleDays != null">test_cycle_days = #{testCycleDays},</if>
+            <if test="scope != null">scope = #{scope},</if>
+            <if test="strategy != null">strategy = #{strategy},</if>
+            <if test="toolsRecommended != null">tools_recommended = #{toolsRecommended},</if>
+            <if test="resourcesPlan != null">resources_plan = #{resourcesPlan},</if>
+            <if test="riskAssessment != null">risk_assessment = #{riskAssessment},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
         where testplan_id = #{testplanId}
     </update>
 
@@ -51,4 +124,10 @@
         update tb_testplan set del_flag = '2' where testplan_id in
         <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
     </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(testplan_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_testplan
+        where testplan_no like concat(#{prefix}, '%')
+    </select>
 </mapper>

@@ -9,4 +9,7 @@ public interface ApiDocMapper {
     int insertApiDoc(ApiDoc apidoc);
     int updateApiDoc(ApiDoc apidoc);
     int deleteApiDocByIds(Long[] apidocIds);
+
+    /** ADR: 查"以 prefix 开头的 apidoc_no 中"最大流水号；无则 null */
+    Integer selectMaxSeqOfYear(String prefix);
 }

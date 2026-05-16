@@ -9,4 +9,7 @@ public interface TestReportMapper {
     int insertTestReport(TestReport testreport);
     int updateTestReport(TestReport testreport);
     int deleteTestReportByIds(Long[] testreportIds);
+
+    /** ADR: 查"以 prefix 开头的 testreport_no 中"最大流水号；无则 null */
+    Integer selectMaxSeqOfYear(String prefix);
 }

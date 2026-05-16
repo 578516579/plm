@@ -1,24 +1,21 @@
-/** Release 模块 E2E (生成器脚手架, 待补业务规则测试) */
+/** Release 模块 E2E — 原型 release.html 蓝绿/金丝雀/滚动 + DORA */
 import { test, expect, APIRequestContext } from '@playwright/test'
 import { loginAsAdmin } from './helpers/auth'
 import { ApiClient } from './helpers/api'
 import { execDelete } from './helpers/db'
 import { RUN_ID, makeProjectData } from './helpers/fixtures'
 
-let token: string
-let api: ApiClient
-let apiRequest: APIRequestContext
-let projectId: number
+let token: string, api: ApiClient, apiRequest: APIRequestContext, projectId: number
 
-test.describe('Release 模块 E2E (脚手架)', () => {
+test.describe('Release 模块 E2E', () => {
   test.beforeAll(async ({ playwright, browser }) => {
     apiRequest = await playwright.request.newContext()
     const ctx = await browser.newContext()
     token = await loginAsAdmin(apiRequest, ctx)
     api = new ApiClient(apiRequest, token)
-    await api.createProject(makeProjectData(`release-suite-${RUN_ID}`))
+    await api.createProject(makeProjectData(`rel-suite-${RUN_ID}`))
     const pl = await api.listProjects()
-    projectId = pl.rows.find((p: any) => p.projectName.includes(`release-suite-${RUN_ID}`))?.id
+    projectId = pl.rows.find((p: any) => p.projectName.includes(`rel-suite-${RUN_ID}`))?.id
   })
 
   test.afterAll(async () => {
@@ -29,13 +26,15 @@ test.describe('Release 模块 E2E (脚手架)', () => {
     await apiRequest?.dispose()
   })
 
-  test('TC-Release-F001 CRUD 脚手架', async () => {
-    const c = await api.post('/business/release', {
-      releaseNo: `SCAFFOLD-${RUN_ID}`,
+  test('TC-Rel-F001 创建发布单 (canary 策略)', async () => {
+    const r = await api.post('/business/release', {
       projectId,
-      title: `生成器测试-${RUN_ID}`,
-      status: '00'
+      version: `v1.0.0-${RUN_ID.slice(-4)}`,
+      strategy: 'canary',
+      environment: 'prod',
+      releaseNotes: '# v1.0.0\n- 新增导出 Excel\n- 修复登录超时',
+      releasedByUserId: 1
     })
-    expect(c.code).toBe(200)
+    expect(r.code).toBe(200)
   })
 })

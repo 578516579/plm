@@ -9,4 +9,7 @@ public interface ManualProductMapper {
     int insertManualProduct(ManualProduct manualproduct);
     int updateManualProduct(ManualProduct manualproduct);
     int deleteManualProductByIds(Long[] manualproductIds);
+
+    /** ADR: 查"以 prefix 开头的 manualproduct_no 中"最大流水号；无则 null */
+    Integer selectMaxSeqOfYear(String prefix);
 }

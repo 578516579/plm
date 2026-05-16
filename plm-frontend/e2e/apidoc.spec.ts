@@ -1,16 +1,13 @@
-/** ApiDoc 模块 E2E (生成器脚手架, 待补业务规则测试) */
+/** ApiDoc 模块 E2E — PRD §F5.4 OpenAPI 规范 */
 import { test, expect, APIRequestContext } from '@playwright/test'
 import { loginAsAdmin } from './helpers/auth'
 import { ApiClient } from './helpers/api'
 import { execDelete } from './helpers/db'
 import { RUN_ID, makeProjectData } from './helpers/fixtures'
 
-let token: string
-let api: ApiClient
-let apiRequest: APIRequestContext
-let projectId: number
+let token: string, api: ApiClient, apiRequest: APIRequestContext, projectId: number
 
-test.describe('ApiDoc 模块 E2E (脚手架)', () => {
+test.describe('ApiDoc 模块 E2E', () => {
   test.beforeAll(async ({ playwright, browser }) => {
     apiRequest = await playwright.request.newContext()
     const ctx = await browser.newContext()
@@ -29,13 +26,16 @@ test.describe('ApiDoc 模块 E2E (脚手架)', () => {
     await apiRequest?.dispose()
   })
 
-  test('TC-ApiDoc-F001 CRUD 脚手架', async () => {
-    const c = await api.post('/business/apidoc', {
-      apidocNo: `SCAFFOLD-${RUN_ID}`,
+  test('TC-API-F001 创建 API 文档 (HTTP 方法 + 路径)', async () => {
+    const r = await api.post('/business/apidoc', {
       projectId,
-      title: `生成器测试-${RUN_ID}`,
-      status: '00'
+      title: `获取项目列表-${RUN_ID}`,
+      httpMethod: 'GET',
+      path: `/test/api-${RUN_ID.slice(-4)}`,
+      description: '分页查询项目列表',
+      version: 'v1.0',
+      autoExtracted: 'Y'
     })
-    expect(c.code).toBe(200)
+    expect(r.code).toBe(200)
   })
 })

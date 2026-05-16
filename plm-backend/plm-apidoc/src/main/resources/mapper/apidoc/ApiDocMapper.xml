@@ -1,22 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.com.bosssfot.dv.plm.apidoc.mapper.ApiDocMapper">
+
     <resultMap type="ApiDoc" id="ApiDocResult">
-        <result property="apidocId" column="apidoc_id" />
-        <result property="apidocNo" column="apidoc_no" />
-        <result property="projectId"  column="project_id" />
-        <result property="title"      column="title" />
-        <result property="status"     column="status" />
-        <result property="createBy"   column="create_by" />
-        <result property="createTime" column="create_time" />
-        <result property="updateBy"   column="update_by" />
-        <result property="updateTime" column="update_time" />
-        <result property="remark"     column="remark" />
-        <result property="delFlag"    column="del_flag" />
+        <result property="apidocId"        column="apidoc_id"         />
+        <result property="apidocNo"        column="apidoc_no"         />
+        <result property="projectId"       column="project_id"        />
+        <result property="title"           column="title"             />
+        <result property="httpMethod"      column="http_method"       />
+        <result property="path"            column="path"              />
+        <result property="description"     column="description"       />
+        <result property="requestSchema"   column="request_schema"    />
+        <result property="responseSchema"  column="response_schema"   />
+        <result property="openapiSpec"     column="openapi_spec"      />
+        <result property="sourceClass"     column="source_class"      />
+        <result property="sourceMethod"    column="source_method"     />
+        <result property="version"         column="version"           />
+        <result property="status"          column="status"            />
+        <result property="lastSyncedAt"    column="last_synced_at"    />
+        <result property="autoExtracted"   column="auto_extracted"    />
+        <result property="createBy"        column="create_by"         />
+        <result property="createTime"      column="create_time"       />
+        <result property="updateBy"        column="update_by"         />
+        <result property="updateTime"      column="update_time"       />
+        <result property="remark"          column="remark"            />
+        <result property="delFlag"         column="del_flag"          />
     </resultMap>
 
     <sql id="selectApiDocVo">
-        select apidoc_id, apidoc_no, project_id, title, status,
+        select apidoc_id, apidoc_no, project_id, title, http_method, path, description,
+               request_schema, response_schema, openapi_spec,
+               source_class, source_method, version, status, last_synced_at, auto_extracted,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_apidoc
     </sql>
@@ -25,9 +39,14 @@
         <include refid="selectApiDocVo"/>
         <where>
             del_flag = '0'
-            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="apidocNo != null and apidocNo != ''">and apidoc_no like concat('%', #{apidocNo}, '%')</if>
             <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="httpMethod != null and httpMethod != ''">and http_method = #{httpMethod}</if>
+            <if test="path != null and path != ''">and path like concat('%', #{path}, '%')</if>
+            <if test="version != null and version != ''">and version = #{version}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="autoExtracted != null and autoExtracted != ''">and auto_extracted = #{autoExtracted}</if>
         </where>
         order by create_time desc
     </select>
@@ -38,12 +57,71 @@
     </select>
 
     <insert id="insertApiDoc" parameterType="ApiDoc" useGeneratedKeys="true" keyProperty="apidocId">
-        insert into tb_apidoc (apidoc_no, project_id, title, status, create_by, create_time)
-        values (#{apidocNo}, #{projectId}, #{title}, #{status}, #{createBy}, sysdate())
+        insert into tb_apidoc
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="apidocNo != null">apidoc_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="title != null">title,</if>
+            <if test="httpMethod != null">http_method,</if>
+            <if test="path != null">path,</if>
+            <if test="description != null">description,</if>
+            <if test="requestSchema != null">request_schema,</if>
+            <if test="responseSchema != null">response_schema,</if>
+            <if test="openapiSpec != null">openapi_spec,</if>
+            <if test="sourceClass != null">source_class,</if>
+            <if test="sourceMethod != null">source_method,</if>
+            <if test="version != null">version,</if>
+            <if test="status != null">status,</if>
+            <if test="lastSyncedAt != null">last_synced_at,</if>
+            <if test="autoExtracted != null">auto_extracted,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="apidocNo != null">#{apidocNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="httpMethod != null">#{httpMethod},</if>
+            <if test="path != null">#{path},</if>
+            <if test="description != null">#{description},</if>
+            <if test="requestSchema != null">#{requestSchema},</if>
+            <if test="responseSchema != null">#{responseSchema},</if>
+            <if test="openapiSpec != null">#{openapiSpec},</if>
+            <if test="sourceClass != null">#{sourceClass},</if>
+            <if test="sourceMethod != null">#{sourceMethod},</if>
+            <if test="version != null">#{version},</if>
+            <if test="status != null">#{status},</if>
+            <if test="lastSyncedAt != null">#{lastSyncedAt},</if>
+            <if test="autoExtracted != null">#{autoExtracted},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
     </insert>
 
     <update id="updateApiDoc" parameterType="ApiDoc">
-        update tb_apidoc set title = #{title}, status = #{status}, update_by = #{updateBy}, update_time = sysdate()
+        update tb_apidoc
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="apidocNo != null">apidoc_no = #{apidocNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="httpMethod != null">http_method = #{httpMethod},</if>
+            <if test="path != null">path = #{path},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="requestSchema != null">request_schema = #{requestSchema},</if>
+            <if test="responseSchema != null">response_schema = #{responseSchema},</if>
+            <if test="openapiSpec != null">openapi_spec = #{openapiSpec},</if>
+            <if test="sourceClass != null">source_class = #{sourceClass},</if>
+            <if test="sourceMethod != null">source_method = #{sourceMethod},</if>
+            <if test="version != null">version = #{version},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="lastSyncedAt != null">last_synced_at = #{lastSyncedAt},</if>
+            <if test="autoExtracted != null">auto_extracted = #{autoExtracted},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
         where apidoc_id = #{apidocId}
     </update>
 
@@ -51,4 +129,10 @@
         update tb_apidoc set del_flag = '2' where apidoc_id in
         <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
     </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(apidoc_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_apidoc
+        where apidoc_no like concat(#{prefix}, '%')
+    </select>
 </mapper>

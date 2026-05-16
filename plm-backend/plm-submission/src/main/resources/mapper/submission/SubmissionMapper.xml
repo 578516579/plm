@@ -1,22 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.com.bosssfot.dv.plm.submission.mapper.SubmissionMapper">
+
     <resultMap type="Submission" id="SubmissionResult">
-        <result property="submissionId" column="submission_id" />
-        <result property="submissionNo" column="submission_no" />
-        <result property="projectId"  column="project_id" />
-        <result property="title"      column="title" />
-        <result property="status"     column="status" />
-        <result property="createBy"   column="create_by" />
-        <result property="createTime" column="create_time" />
-        <result property="updateBy"   column="update_by" />
-        <result property="updateTime" column="update_time" />
-        <result property="remark"     column="remark" />
-        <result property="delFlag"    column="del_flag" />
+        <result property="submissionId"      column="submission_id"       />
+        <result property="submissionNo"      column="submission_no"       />
+        <result property="projectId"         column="project_id"          />
+        <result property="sprintId"          column="sprint_id"           />
+        <result property="title"             column="title"               />
+        <result property="scope"             column="scope"               />
+        <result property="environment"       column="environment"         />
+        <result property="expectedTestDays"  column="expected_test_days"  />
+        <result property="riskNotes"         column="risk_notes"          />
+        <result property="unitTestCoverage"  column="unit_test_coverage"  />
+        <result property="codeScanPassed"    column="code_scan_passed"    />
+        <result property="prdCompleted"      column="prd_completed"       />
+        <result property="apiDocUpdated"     column="api_doc_updated"     />
+        <result property="qualityGatePassed" column="quality_gate_passed" />
+        <result property="status"            column="status"              />
+        <result property="rejectReason"      column="reject_reason"       />
+        <result property="submitterUserId"   column="submitter_user_id"   />
+        <result property="reviewerUserId"    column="reviewer_user_id"    />
+        <result property="submittedAt"       column="submitted_at"        />
+        <result property="approvedAt"        column="approved_at"         />
+        <result property="createBy"          column="create_by"           />
+        <result property="createTime"        column="create_time"         />
+        <result property="updateBy"          column="update_by"           />
+        <result property="updateTime"        column="update_time"         />
+        <result property="remark"            column="remark"              />
+        <result property="delFlag"           column="del_flag"            />
     </resultMap>
 
     <sql id="selectSubmissionVo">
-        select submission_id, submission_no, project_id, title, status,
+        select submission_id, submission_no, project_id, sprint_id, title, scope,
+               environment, expected_test_days, risk_notes,
+               unit_test_coverage, code_scan_passed, prd_completed, api_doc_updated, quality_gate_passed,
+               status, reject_reason, submitter_user_id, reviewer_user_id, submitted_at, approved_at,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_submission
     </sql>
@@ -25,9 +44,14 @@
         <include refid="selectSubmissionVo"/>
         <where>
             del_flag = '0'
-            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="submissionNo != null and submissionNo != ''">and submission_no like concat('%', #{submissionNo}, '%')</if>
             <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="sprintId != null">and sprint_id = #{sprintId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="environment != null and environment != ''">and environment = #{environment}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="qualityGatePassed != null and qualityGatePassed != ''">and quality_gate_passed = #{qualityGatePassed}</if>
+            <if test="submitterUserId != null">and submitter_user_id = #{submitterUserId}</if>
         </where>
         order by create_time desc
     </select>
@@ -38,12 +62,83 @@
     </select>
 
     <insert id="insertSubmission" parameterType="Submission" useGeneratedKeys="true" keyProperty="submissionId">
-        insert into tb_submission (submission_no, project_id, title, status, create_by, create_time)
-        values (#{submissionNo}, #{projectId}, #{title}, #{status}, #{createBy}, sysdate())
+        insert into tb_submission
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="submissionNo != null">submission_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="sprintId != null">sprint_id,</if>
+            <if test="title != null">title,</if>
+            <if test="scope != null">scope,</if>
+            <if test="environment != null">environment,</if>
+            <if test="expectedTestDays != null">expected_test_days,</if>
+            <if test="riskNotes != null">risk_notes,</if>
+            <if test="unitTestCoverage != null">unit_test_coverage,</if>
+            <if test="codeScanPassed != null">code_scan_passed,</if>
+            <if test="prdCompleted != null">prd_completed,</if>
+            <if test="apiDocUpdated != null">api_doc_updated,</if>
+            <if test="qualityGatePassed != null">quality_gate_passed,</if>
+            <if test="status != null">status,</if>
+            <if test="rejectReason != null">reject_reason,</if>
+            <if test="submitterUserId != null">submitter_user_id,</if>
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            <if test="submittedAt != null">submitted_at,</if>
+            <if test="approvedAt != null">approved_at,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="submissionNo != null">#{submissionNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="sprintId != null">#{sprintId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="scope != null">#{scope},</if>
+            <if test="environment != null">#{environment},</if>
+            <if test="expectedTestDays != null">#{expectedTestDays},</if>
+            <if test="riskNotes != null">#{riskNotes},</if>
+            <if test="unitTestCoverage != null">#{unitTestCoverage},</if>
+            <if test="codeScanPassed != null">#{codeScanPassed},</if>
+            <if test="prdCompleted != null">#{prdCompleted},</if>
+            <if test="apiDocUpdated != null">#{apiDocUpdated},</if>
+            <if test="qualityGatePassed != null">#{qualityGatePassed},</if>
+            <if test="status != null">#{status},</if>
+            <if test="rejectReason != null">#{rejectReason},</if>
+            <if test="submitterUserId != null">#{submitterUserId},</if>
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            <if test="submittedAt != null">#{submittedAt},</if>
+            <if test="approvedAt != null">#{approvedAt},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
     </insert>
 
     <update id="updateSubmission" parameterType="Submission">
-        update tb_submission set title = #{title}, status = #{status}, update_by = #{updateBy}, update_time = sysdate()
+        update tb_submission
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="submissionNo != null">submission_no = #{submissionNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="sprintId != null">sprint_id = #{sprintId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="scope != null">scope = #{scope},</if>
+            <if test="environment != null">environment = #{environment},</if>
+            <if test="expectedTestDays != null">expected_test_days = #{expectedTestDays},</if>
+            <if test="riskNotes != null">risk_notes = #{riskNotes},</if>
+            <if test="unitTestCoverage != null">unit_test_coverage = #{unitTestCoverage},</if>
+            <if test="codeScanPassed != null">code_scan_passed = #{codeScanPassed},</if>
+            <if test="prdCompleted != null">prd_completed = #{prdCompleted},</if>
+            <if test="apiDocUpdated != null">api_doc_updated = #{apiDocUpdated},</if>
+            <if test="qualityGatePassed != null">quality_gate_passed = #{qualityGatePassed},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="rejectReason != null">reject_reason = #{rejectReason},</if>
+            <if test="submitterUserId != null">submitter_user_id = #{submitterUserId},</if>
+            <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            <if test="submittedAt != null">submitted_at = #{submittedAt},</if>
+            <if test="approvedAt != null">approved_at = #{approvedAt},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
         where submission_id = #{submissionId}
     </update>
 
@@ -51,4 +146,10 @@
         update tb_submission set del_flag = '2' where submission_id in
         <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
     </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(submission_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_submission
+        where submission_no like concat(#{prefix}, '%')
+    </select>
 </mapper>

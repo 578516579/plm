@@ -1,22 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.com.bosssfot.dv.plm.testreport.mapper.TestReportMapper">
+
     <resultMap type="TestReport" id="TestReportResult">
-        <result property="testreportId" column="testreport_id" />
-        <result property="testreportNo" column="testreport_no" />
-        <result property="projectId"  column="project_id" />
-        <result property="title"      column="title" />
-        <result property="status"     column="status" />
-        <result property="createBy"   column="create_by" />
-        <result property="createTime" column="create_time" />
-        <result property="updateBy"   column="update_by" />
-        <result property="updateTime" column="update_time" />
-        <result property="remark"     column="remark" />
-        <result property="delFlag"    column="del_flag" />
+        <result property="testreportId"     column="testreport_id"      />
+        <result property="testreportNo"     column="testreport_no"      />
+        <result property="projectId"        column="project_id"         />
+        <result property="sprintId"         column="sprint_id"          />
+        <result property="testplanId"       column="testplan_id"        />
+        <result property="title"            column="title"              />
+        <result property="totalCases"       column="total_cases"        />
+        <result property="passedCases"      column="passed_cases"       />
+        <result property="failedCases"      column="failed_cases"       />
+        <result property="coverageRate"     column="coverage_rate"      />
+        <result property="defectSummary"    column="defect_summary"     />
+        <result property="p0Defects"        column="p0_defects"         />
+        <result property="p1Defects"        column="p1_defects"         />
+        <result property="p2Defects"        column="p2_defects"         />
+        <result property="riskLevel"        column="risk_level"         />
+        <result property="riskEvaluation"   column="risk_evaluation"    />
+        <result property="recommendations"  column="recommendations"    />
+        <result property="aiGenerated"      column="ai_generated"       />
+        <result property="status"           column="status"             />
+        <result property="generatedAt"      column="generated_at"       />
+        <result property="reviewerUserId"   column="reviewer_user_id"   />
+        <result property="createBy"         column="create_by"          />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateBy"         column="update_by"          />
+        <result property="updateTime"       column="update_time"        />
+        <result property="remark"           column="remark"             />
+        <result property="delFlag"          column="del_flag"           />
     </resultMap>
 
     <sql id="selectTestReportVo">
-        select testreport_id, testreport_no, project_id, title, status,
+        select testreport_id, testreport_no, project_id, sprint_id, testplan_id, title,
+               total_cases, passed_cases, failed_cases, coverage_rate, defect_summary,
+               p0_defects, p1_defects, p2_defects, risk_level, risk_evaluation, recommendations,
+               ai_generated, status, generated_at, reviewer_user_id,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_testreport
     </sql>
@@ -25,8 +45,13 @@
         <include refid="selectTestReportVo"/>
         <where>
             del_flag = '0'
-            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="testreportNo != null and testreportNo != ''">and testreport_no like concat('%', #{testreportNo}, '%')</if>
             <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="sprintId != null">and sprint_id = #{sprintId}</if>
+            <if test="testplanId != null">and testplan_id = #{testplanId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="riskLevel != null and riskLevel != ''">and risk_level = #{riskLevel}</if>
+            <if test="aiGenerated != null and aiGenerated != ''">and ai_generated = #{aiGenerated}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
         </where>
         order by create_time desc
@@ -38,12 +63,86 @@
     </select>
 
     <insert id="insertTestReport" parameterType="TestReport" useGeneratedKeys="true" keyProperty="testreportId">
-        insert into tb_testreport (testreport_no, project_id, title, status, create_by, create_time)
-        values (#{testreportNo}, #{projectId}, #{title}, #{status}, #{createBy}, sysdate())
+        insert into tb_testreport
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="testreportNo != null">testreport_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="sprintId != null">sprint_id,</if>
+            <if test="testplanId != null">testplan_id,</if>
+            <if test="title != null">title,</if>
+            <if test="totalCases != null">total_cases,</if>
+            <if test="passedCases != null">passed_cases,</if>
+            <if test="failedCases != null">failed_cases,</if>
+            <if test="coverageRate != null">coverage_rate,</if>
+            <if test="defectSummary != null">defect_summary,</if>
+            <if test="p0Defects != null">p0_defects,</if>
+            <if test="p1Defects != null">p1_defects,</if>
+            <if test="p2Defects != null">p2_defects,</if>
+            <if test="riskLevel != null">risk_level,</if>
+            <if test="riskEvaluation != null">risk_evaluation,</if>
+            <if test="recommendations != null">recommendations,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="status != null">status,</if>
+            <if test="generatedAt != null">generated_at,</if>
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="testreportNo != null">#{testreportNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="sprintId != null">#{sprintId},</if>
+            <if test="testplanId != null">#{testplanId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="totalCases != null">#{totalCases},</if>
+            <if test="passedCases != null">#{passedCases},</if>
+            <if test="failedCases != null">#{failedCases},</if>
+            <if test="coverageRate != null">#{coverageRate},</if>
+            <if test="defectSummary != null">#{defectSummary},</if>
+            <if test="p0Defects != null">#{p0Defects},</if>
+            <if test="p1Defects != null">#{p1Defects},</if>
+            <if test="p2Defects != null">#{p2Defects},</if>
+            <if test="riskLevel != null">#{riskLevel},</if>
+            <if test="riskEvaluation != null">#{riskEvaluation},</if>
+            <if test="recommendations != null">#{recommendations},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="status != null">#{status},</if>
+            <if test="generatedAt != null">#{generatedAt},</if>
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
     </insert>
 
     <update id="updateTestReport" parameterType="TestReport">
-        update tb_testreport set title = #{title}, status = #{status}, update_by = #{updateBy}, update_time = sysdate()
+        update tb_testreport
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="testreportNo != null">testreport_no = #{testreportNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="sprintId != null">sprint_id = #{sprintId},</if>
+            <if test="testplanId != null">testplan_id = #{testplanId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="totalCases != null">total_cases = #{totalCases},</if>
+            <if test="passedCases != null">passed_cases = #{passedCases},</if>
+            <if test="failedCases != null">failed_cases = #{failedCases},</if>
+            <if test="coverageRate != null">coverage_rate = #{coverageRate},</if>
+            <if test="defectSummary != null">defect_summary = #{defectSummary},</if>
+            <if test="p0Defects != null">p0_defects = #{p0Defects},</if>
+            <if test="p1Defects != null">p1_defects = #{p1Defects},</if>
+            <if test="p2Defects != null">p2_defects = #{p2Defects},</if>
+            <if test="riskLevel != null">risk_level = #{riskLevel},</if>
+            <if test="riskEvaluation != null">risk_evaluation = #{riskEvaluation},</if>
+            <if test="recommendations != null">recommendations = #{recommendations},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="generatedAt != null">generated_at = #{generatedAt},</if>
+            <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
         where testreport_id = #{testreportId}
     </update>
 
@@ -51,4 +150,10 @@
         update tb_testreport set del_flag = '2' where testreport_id in
         <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
     </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(testreport_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_testreport
+        where testreport_no like concat(#{prefix}, '%')
+    </select>
 </mapper>
