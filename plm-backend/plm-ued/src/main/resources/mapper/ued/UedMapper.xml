@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.ued.mapper.UedMapper">
+
+    <resultMap type="Ued" id="UedResult">
+        <result property="uedId"           column="ued_id"           />
+        <result property="uedNo"           column="ued_no"           />
+        <result property="projectId"       column="project_id"       />
+        <result property="title"           column="title"            />
+        <result property="version"         column="version"          />
+        <result property="figmaUrl"        column="figma_url"        />
+        <result property="figmaSyncedAt"   column="figma_synced_at"  />
+        <result property="aiReviewResult"  column="ai_review_result" />
+        <result property="aiReviewScore"   column="ai_review_score"  />
+        <result property="aiReviewedAt"    column="ai_reviewed_at"   />
+        <result property="aiGenerated"     column="ai_generated"     />
+        <result property="status"          column="status"           />
+        <result property="designerUserId"  column="designer_user_id" />
+        <result property="reviewerUserId"  column="reviewer_user_id" />
+        <result property="createBy"        column="create_by"        />
+        <result property="createTime"      column="create_time"      />
+        <result property="updateBy"        column="update_by"        />
+        <result property="updateTime"      column="update_time"      />
+        <result property="remark"          column="remark"           />
+        <result property="delFlag"         column="del_flag"         />
+    </resultMap>
+
+    <sql id="selectUedVo">
+        select ued_id, ued_no, project_id, title, version,
+               figma_url, figma_synced_at,
+               ai_review_result, ai_review_score, ai_reviewed_at, ai_generated,
+               status, designer_user_id, reviewer_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_ued
+    </sql>
+
+    <select id="selectUedList" parameterType="Ued" resultMap="UedResult">
+        <include refid="selectUedVo"/>
+        <where>
+            del_flag = '0'
+            <if test="uedNo != null and uedNo != ''">and ued_no like concat('%', #{uedNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="version != null and version != ''">and version = #{version}</if>
+            <if test="aiGenerated != null and aiGenerated != ''">and ai_generated = #{aiGenerated}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="designerUserId != null">and designer_user_id = #{designerUserId}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectUedById" parameterType="Long" resultMap="UedResult">
+        <include refid="selectUedVo"/>
+        where ued_id = #{uedId} and del_flag = '0'
+    </select>
+
+    <insert id="insertUed" parameterType="Ued" useGeneratedKeys="true" keyProperty="uedId">
+        insert into tb_ued
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uedNo != null">ued_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="title != null">title,</if>
+            <if test="version != null">version,</if>
+            <if test="figmaUrl != null">figma_url,</if>
+            <if test="figmaSyncedAt != null">figma_synced_at,</if>
+            <if test="aiReviewResult != null">ai_review_result,</if>
+            <if test="aiReviewScore != null">ai_review_score,</if>
+            <if test="aiReviewedAt != null">ai_reviewed_at,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="status != null">status,</if>
+            <if test="designerUserId != null">designer_user_id,</if>
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uedNo != null">#{uedNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="version != null">#{version},</if>
+            <if test="figmaUrl != null">#{figmaUrl},</if>
+            <if test="figmaSyncedAt != null">#{figmaSyncedAt},</if>
+            <if test="aiReviewResult != null">#{aiReviewResult},</if>
+            <if test="aiReviewScore != null">#{aiReviewScore},</if>
+            <if test="aiReviewedAt != null">#{aiReviewedAt},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="status != null">#{status},</if>
+            <if test="designerUserId != null">#{designerUserId},</if>
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateUed" parameterType="Ued">
+        update tb_ued
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="uedNo != null">ued_no = #{uedNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="version != null">version = #{version},</if>
+            <if test="figmaUrl != null">figma_url = #{figmaUrl},</if>
+            <if test="figmaSyncedAt != null">figma_synced_at = #{figmaSyncedAt},</if>
+            <if test="aiReviewResult != null">ai_review_result = #{aiReviewResult},</if>
+            <if test="aiReviewScore != null">ai_review_score = #{aiReviewScore},</if>
+            <if test="aiReviewedAt != null">ai_reviewed_at = #{aiReviewedAt},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="designerUserId != null">designer_user_id = #{designerUserId},</if>
+            <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where ued_id = #{uedId}
+    </update>
+
+    <update id="deleteUedByIds" parameterType="Long">
+        update tb_ued set del_flag = '2' where ued_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(ued_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_ued
+        where ued_no like concat(#{prefix}, '%')
+    </select>
+</mapper>
