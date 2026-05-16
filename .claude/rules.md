@@ -270,8 +270,8 @@
 ### M.8 16 个空壳模块的攻坚优先级（REFERENCE）
 
 按 [PRD-MAPPING.md §7](../PRD-MAPPING.md) 路线图：
-- **P0（Phase 1 MVP）**：`inception`（🔴 缺模块）/ `prd` / `competitive`
-- **P1（Phase 2）**：`arch` / `dbdesign` / `apidesign` / `ued` / `testdata` / `autotest`
+- **P0（Phase 1 MVP，已完成 🟢）**：`inception` / `prd` / `competitive`
+- **P1（Phase 2，启动）**：~~`ued`（🟢 已完成）~~ / `arch` / `dbdesign` / `apidesign` / `testdata` / `autotest`
 - **P2（Phase 3）**：`manual-impl` / `manual-ops` / `analytics` / `dashboard`
 - **P3（扩展）**：`ai-agent` / `openspec` / `pipeline` / `feature-flag` / `dora`
 
