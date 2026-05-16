@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.competitive.mapper.CompetitiveMapper">
+
+    <resultMap type="Competitive" id="CompetitiveResult">
+        <result property="competitiveId"      column="competitive_id"       />
+        <result property="competitiveNo"      column="competitive_no"       />
+        <result property="projectId"          column="project_id"           />
+        <result property="competitorName"     column="competitor_name"      />
+        <result property="vendor"             column="vendor"               />
+        <result property="website"            column="website"              />
+        <result property="pricingModel"       column="pricing_model"        />
+        <result property="pricingTier"        column="pricing_tier"         />
+        <result property="featureMatrix"      column="feature_matrix"       />
+        <result property="strengths"          column="strengths"            />
+        <result property="weaknesses"         column="weaknesses"           />
+        <result property="opportunities"      column="opportunities"        />
+        <result property="threats"            column="threats"              />
+        <result property="aiAnalysisReport"   column="ai_analysis_report"   />
+        <result property="aiGenerated"        column="ai_generated"         />
+        <result property="aiGeneratedAt"      column="ai_generated_at"      />
+        <result property="monitorEnabled"     column="monitor_enabled"      />
+        <result property="monitorKeywords"    column="monitor_keywords"     />
+        <result property="lastMonitoredAt"    column="last_monitored_at"    />
+        <result property="status"             column="status"               />
+        <result property="authorUserId"       column="author_user_id"       />
+        <result property="createBy"           column="create_by"            />
+        <result property="createTime"         column="create_time"          />
+        <result property="updateBy"           column="update_by"            />
+        <result property="updateTime"         column="update_time"          />
+        <result property="remark"             column="remark"               />
+        <result property="delFlag"            column="del_flag"             />
+    </resultMap>
+
+    <sql id="selectCompetitiveVo">
+        select competitive_id, competitive_no, project_id, competitor_name, vendor, website,
+               pricing_model, pricing_tier, feature_matrix,
+               strengths, weaknesses, opportunities, threats,
+               ai_analysis_report, ai_generated, ai_generated_at,
+               monitor_enabled, monitor_keywords, last_monitored_at,
+               status, author_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_competitive
+    </sql>
+
+    <select id="selectCompetitiveList" parameterType="Competitive" resultMap="CompetitiveResult">
+        <include refid="selectCompetitiveVo"/>
+        <where>
+            del_flag = '0'
+            <if test="competitiveNo != null and competitiveNo != ''">and competitive_no like concat('%', #{competitiveNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="competitorName != null and competitorName != ''">and competitor_name like concat('%', #{competitorName}, '%')</if>
+            <if test="pricingTier != null and pricingTier != ''">and pricing_tier = #{pricingTier}</if>
+            <if test="monitorEnabled != null and monitorEnabled != ''">and monitor_enabled = #{monitorEnabled}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectCompetitiveById" parameterType="Long" resultMap="CompetitiveResult">
+        <include refid="selectCompetitiveVo"/>
+        where competitive_id = #{competitiveId} and del_flag = '0'
+    </select>
+
+    <insert id="insertCompetitive" parameterType="Competitive" useGeneratedKeys="true" keyProperty="competitiveId">
+        insert into tb_competitive
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="competitiveNo != null">competitive_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="competitorName != null">competitor_name,</if>
+            <if test="vendor != null">vendor,</if>
+            <if test="website != null">website,</if>
+            <if test="pricingModel != null">pricing_model,</if>
+            <if test="pricingTier != null">pricing_tier,</if>
+            <if test="featureMatrix != null">feature_matrix,</if>
+            <if test="strengths != null">strengths,</if>
+            <if test="weaknesses != null">weaknesses,</if>
+            <if test="opportunities != null">opportunities,</if>
+            <if test="threats != null">threats,</if>
+            <if test="aiAnalysisReport != null">ai_analysis_report,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="aiGeneratedAt != null">ai_generated_at,</if>
+            <if test="monitorEnabled != null">monitor_enabled,</if>
+            <if test="monitorKeywords != null">monitor_keywords,</if>
+            <if test="lastMonitoredAt != null">last_monitored_at,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="competitiveNo != null">#{competitiveNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="competitorName != null">#{competitorName},</if>
+            <if test="vendor != null">#{vendor},</if>
+            <if test="website != null">#{website},</if>
+            <if test="pricingModel != null">#{pricingModel},</if>
+            <if test="pricingTier != null">#{pricingTier},</if>
+            <if test="featureMatrix != null">#{featureMatrix},</if>
+            <if test="strengths != null">#{strengths},</if>
+            <if test="weaknesses != null">#{weaknesses},</if>
+            <if test="opportunities != null">#{opportunities},</if>
+            <if test="threats != null">#{threats},</if>
+            <if test="aiAnalysisReport != null">#{aiAnalysisReport},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
+            <if test="monitorEnabled != null">#{monitorEnabled},</if>
+            <if test="monitorKeywords != null">#{monitorKeywords},</if>
+            <if test="lastMonitoredAt != null">#{lastMonitoredAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateCompetitive" parameterType="Competitive">
+        update tb_competitive
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="competitiveNo != null">competitive_no = #{competitiveNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="competitorName != null">competitor_name = #{competitorName},</if>
+            <if test="vendor != null">vendor = #{vendor},</if>
+            <if test="website != null">website = #{website},</if>
+            <if test="pricingModel != null">pricing_model = #{pricingModel},</if>
+            <if test="pricingTier != null">pricing_tier = #{pricingTier},</if>
+            <if test="featureMatrix != null">feature_matrix = #{featureMatrix},</if>
+            <if test="strengths != null">strengths = #{strengths},</if>
+            <if test="weaknesses != null">weaknesses = #{weaknesses},</if>
+            <if test="opportunities != null">opportunities = #{opportunities},</if>
+            <if test="threats != null">threats = #{threats},</if>
+            <if test="aiAnalysisReport != null">ai_analysis_report = #{aiAnalysisReport},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="monitorEnabled != null">monitor_enabled = #{monitorEnabled},</if>
+            <if test="monitorKeywords != null">monitor_keywords = #{monitorKeywords},</if>
+            <if test="lastMonitoredAt != null">last_monitored_at = #{lastMonitoredAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where competitive_id = #{competitiveId}
+    </update>
+
+    <update id="deleteCompetitiveByIds" parameterType="Long">
+        update tb_competitive set del_flag = '2' where competitive_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(competitive_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_competitive
+        where competitive_no like concat(#{prefix}, '%')
+    </select>
+</mapper>

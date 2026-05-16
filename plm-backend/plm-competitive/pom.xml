@@ -8,21 +8,12 @@
         <version>3.9.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>plm-competitive</artifactId>
-
-    <description>
-        竞品情报 - 规划阶段业务模块 (Phase B 拉起的空壳, 计划版本: deferred)
-    </description>
-
+    <description>竞品情报 (Competitive) — PRD F1.3 + 原型 competitive.html — AI 自动爬取 + SWOT 分析 + 订阅监控</description>
     <dependencies>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-system</artifactId>
-        </dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-common</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-system</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-project</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>
