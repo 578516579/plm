@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.dashboard.mapper.DashboardMapper">
+
+    <resultMap type="cn.com.bosssfot.dv.plm.dashboard.domain.Dashboard" id="DashboardResult">
+        <id     property="dashboardId"     column="dashboard_id"     />
+        <result property="dashboardNo"     column="dashboard_no"     />
+        <result property="title"           column="title"            />
+        <result property="ownerUserId"     column="owner_user_id"    />
+        <result property="layoutJson"      column="layout_json"      />
+        <result property="widgetTypes"     column="widget_types"     />
+        <result property="refreshInterval" column="refresh_interval" />
+        <result property="isDefault"       column="is_default"       />
+        <result property="status"          column="status"           />
+        <result property="createBy"        column="create_by"        />
+        <result property="createTime"      column="create_time"      />
+        <result property="updateBy"        column="update_by"        />
+        <result property="updateTime"      column="update_time"      />
+        <result property="remark"          column="remark"           />
+        <result property="delFlag"         column="del_flag"         />
+    </resultMap>
+
+    <sql id="selectDashboardVo">
+        select dashboard_id, dashboard_no, title, owner_user_id, layout_json, widget_types,
+               refresh_interval, is_default, status,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_dashboard
+    </sql>
+
+    <select id="selectDashboardList" parameterType="cn.com.bosssfot.dv.plm.dashboard.domain.Dashboard" resultMap="DashboardResult">
+        <include refid="selectDashboardVo"/>
+        <where>
+            del_flag = '0'
+            <if test="dashboardNo != null and dashboardNo != ''">and dashboard_no like concat('%', #{dashboardNo}, '%')</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="ownerUserId != null">and owner_user_id = #{ownerUserId}</if>
+            <if test="isDefault != null and isDefault != ''">and is_default = #{isDefault}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by is_default desc, create_time desc
+    </select>
+
+    <select id="selectDashboardById" parameterType="Long" resultMap="DashboardResult">
+        <include refid="selectDashboardVo"/>
+        where dashboard_id = #{dashboardId} and del_flag = '0'
+    </select>
+
+    <insert id="insertDashboard" parameterType="cn.com.bosssfot.dv.plm.dashboard.domain.Dashboard" useGeneratedKeys="true" keyProperty="dashboardId">
+        insert into tb_dashboard
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="dashboardNo != null">dashboard_no,</if>
+            <if test="title != null">title,</if>
+            <if test="ownerUserId != null">owner_user_id,</if>
+            <if test="layoutJson != null">layout_json,</if>
+            <if test="widgetTypes != null">widget_types,</if>
+            <if test="refreshInterval != null">refresh_interval,</if>
+            <if test="isDefault != null">is_default,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="dashboardNo != null">#{dashboardNo},</if>
+            <if test="title != null">#{title},</if>
+            <if test="ownerUserId != null">#{ownerUserId},</if>
+            <if test="layoutJson != null">#{layoutJson},</if>
+            <if test="widgetTypes != null">#{widgetTypes},</if>
+            <if test="refreshInterval != null">#{refreshInterval},</if>
+            <if test="isDefault != null">#{isDefault},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateDashboard" parameterType="cn.com.bosssfot.dv.plm.dashboard.domain.Dashboard">
+        update tb_dashboard
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="dashboardNo != null">dashboard_no = #{dashboardNo},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="ownerUserId != null">owner_user_id = #{ownerUserId},</if>
+            <if test="layoutJson != null">layout_json = #{layoutJson},</if>
+            <if test="widgetTypes != null">widget_types = #{widgetTypes},</if>
+            <if test="refreshInterval != null">refresh_interval = #{refreshInterval},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where dashboard_id = #{dashboardId}
+    </update>
+
+    <update id="deleteDashboardByIds" parameterType="Long">
+        update tb_dashboard set del_flag = '2' where dashboard_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <update id="clearDefaultForOwner" parameterType="Long">
+        update tb_dashboard set is_default = 'N', update_time = sysdate()
+        where owner_user_id = #{ownerUserId} and is_default = 'Y' and del_flag = '0'
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(dashboard_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_dashboard
+        where dashboard_no like concat(#{prefix}, '%')
+    </select>
+</mapper>
