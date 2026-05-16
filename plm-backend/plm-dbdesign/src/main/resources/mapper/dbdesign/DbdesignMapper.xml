@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.dbdesign.mapper.DbdesignMapper">
+
+    <resultMap type="cn.com.bosssfot.dv.plm.dbdesign.domain.Dbdesign" id="DbdesignResult">
+        <id     property="dbdesignId"      column="dbdesign_id"/>
+        <result property="dbdesignNo"      column="dbdesign_no"/>
+        <result property="projectId"       column="project_id"/>
+        <result property="title"           column="title"/>
+        <result property="dbType"          column="db_type"/>
+        <result property="erContent"       column="er_content"/>
+        <result property="dictContent"     column="dict_content"/>
+        <result property="ddlContent"      column="ddl_content"/>
+        <result property="reviewReport"    column="review_report"/>
+        <result property="aiGenerated"     column="ai_generated"/>
+        <result property="aiGeneratedAt"   column="ai_generated_at"/>
+        <result property="status"          column="status"/>
+        <result property="authorUserId"    column="author_user_id"/>
+        <result property="reviewerUserId"  column="reviewer_user_id"/>
+        <result property="createBy"        column="create_by"/>
+        <result property="createTime"      column="create_time"/>
+        <result property="updateBy"        column="update_by"/>
+        <result property="updateTime"      column="update_time"/>
+        <result property="remark"          column="remark"/>
+    </resultMap>
+
+    <sql id="selectDbdesignVo">
+        SELECT dbdesign_id, dbdesign_no, project_id, title, db_type,
+               er_content, dict_content, ddl_content, review_report,
+               ai_generated, ai_generated_at, status,
+               author_user_id, reviewer_user_id,
+               create_by, create_time, update_by, update_time, remark
+        FROM tb_dbdesign
+        WHERE del_flag = '0'
+    </sql>
+
+    <select id="selectDbdesignList" parameterType="cn.com.bosssfot.dv.plm.dbdesign.domain.Dbdesign" resultMap="DbdesignResult">
+        <include refid="selectDbdesignVo"/>
+        <if test="dbdesignNo != null and dbdesignNo != ''">AND dbdesign_no LIKE CONCAT('%', #{dbdesignNo}, '%')</if>
+        <if test="projectId != null">AND project_id = #{projectId}</if>
+        <if test="title != null and title != ''">AND title LIKE CONCAT('%', #{title}, '%')</if>
+        <if test="dbType != null and dbType != ''">AND db_type = #{dbType}</if>
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectDbdesignById" parameterType="Long" resultMap="DbdesignResult">
+        <include refid="selectDbdesignVo"/>
+        AND dbdesign_id = #{dbdesignId}
+    </select>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="Integer">
+        SELECT MAX(CAST(SUBSTRING_INDEX(dbdesign_no, '-', -1) AS UNSIGNED))
+        FROM tb_dbdesign
+        WHERE dbdesign_no LIKE CONCAT(#{prefix}, '%') AND del_flag = '0'
+    </select>
+
+    <insert id="insertDbdesign" parameterType="cn.com.bosssfot.dv.plm.dbdesign.domain.Dbdesign" useGeneratedKeys="true" keyProperty="dbdesignId">
+        INSERT INTO tb_dbdesign
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            dbdesign_no, project_id, title,
+            <if test="dbType != null">db_type,</if>
+            <if test="erContent != null">er_content,</if>
+            <if test="dictContent != null">dict_content,</if>
+            <if test="ddlContent != null">ddl_content,</if>
+            ai_generated, status, author_user_id,
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            create_by, create_time, update_by, update_time,
+            <if test="remark != null">remark,</if>
+            del_flag
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{dbdesignNo}, #{projectId}, #{title},
+            <if test="dbType != null">#{dbType},</if>
+            <if test="erContent != null">#{erContent},</if>
+            <if test="dictContent != null">#{dictContent},</if>
+            <if test="ddlContent != null">#{ddlContent},</if>
+            #{aiGenerated}, #{status}, #{authorUserId},
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            #{createBy}, #{createTime}, #{updateBy}, #{updateTime},
+            <if test="remark != null">#{remark},</if>
+            '0'
+        </trim>
+    </insert>
+
+    <update id="updateDbdesign" parameterType="cn.com.bosssfot.dv.plm.dbdesign.domain.Dbdesign">
+        UPDATE tb_dbdesign
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="dbType != null">db_type = #{dbType},</if>
+            <if test="erContent != null">er_content = #{erContent},</if>
+            <if test="dictContent != null">dict_content = #{dictContent},</if>
+            <if test="ddlContent != null">ddl_content = #{ddlContent},</if>
+            <if test="reviewReport != null">review_report = #{reviewReport},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            update_by = #{updateBy},
+            update_time = #{updateTime},
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        WHERE dbdesign_id = #{dbdesignId}
+    </update>
+
+    <update id="deleteDbdesignByIds" parameterType="Long">
+        UPDATE tb_dbdesign SET del_flag = '2'
+        WHERE dbdesign_id IN
+        <foreach collection="array" item="dbdesignId" open="(" separator="," close=")">
+            #{dbdesignId}
+        </foreach>
+    </update>
+
+</mapper>

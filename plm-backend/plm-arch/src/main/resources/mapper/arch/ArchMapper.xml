@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.arch.mapper.ArchMapper">
+
+    <resultMap type="cn.com.bosssfot.dv.plm.arch.domain.Arch" id="ArchResult">
+        <id     property="archId"          column="arch_id"/>
+        <result property="archNo"          column="arch_no"/>
+        <result property="projectId"       column="project_id"/>
+        <result property="title"           column="title"/>
+        <result property="archMode"        column="arch_mode"/>
+        <result property="techStack"       column="tech_stack"/>
+        <result property="dbStack"         column="db_stack"/>
+        <result property="aiOrchestration" column="ai_orchestration"/>
+        <result property="deployMode"      column="deploy_mode"/>
+        <result property="iotProtocol"     column="iot_protocol"/>
+        <result property="archContent"     column="arch_content"/>
+        <result property="c4Diagram"       column="c4_diagram"/>
+        <result property="nfrContent"      column="nfr_content"/>
+        <result property="reviewReport"    column="review_report"/>
+        <result property="aiGenerated"     column="ai_generated"/>
+        <result property="aiGeneratedAt"   column="ai_generated_at"/>
+        <result property="status"          column="status"/>
+        <result property="authorUserId"    column="author_user_id"/>
+        <result property="reviewerUserId"  column="reviewer_user_id"/>
+        <result property="createBy"        column="create_by"/>
+        <result property="createTime"      column="create_time"/>
+        <result property="updateBy"        column="update_by"/>
+        <result property="updateTime"      column="update_time"/>
+        <result property="remark"          column="remark"/>
+    </resultMap>
+
+    <sql id="selectArchVo">
+        SELECT arch_id, arch_no, project_id, title, arch_mode, tech_stack, db_stack,
+               ai_orchestration, deploy_mode, iot_protocol, arch_content, c4_diagram,
+               nfr_content, review_report, ai_generated, ai_generated_at,
+               status, author_user_id, reviewer_user_id,
+               create_by, create_time, update_by, update_time, remark
+        FROM tb_arch
+        WHERE del_flag = '0'
+    </sql>
+
+    <select id="selectArchList" parameterType="cn.com.bosssfot.dv.plm.arch.domain.Arch" resultMap="ArchResult">
+        <include refid="selectArchVo"/>
+        <if test="archNo != null and archNo != ''">AND arch_no LIKE CONCAT('%', #{archNo}, '%')</if>
+        <if test="projectId != null">AND project_id = #{projectId}</if>
+        <if test="title != null and title != ''">AND title LIKE CONCAT('%', #{title}, '%')</if>
+        <if test="archMode != null and archMode != ''">AND arch_mode = #{archMode}</if>
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectArchById" parameterType="Long" resultMap="ArchResult">
+        <include refid="selectArchVo"/>
+        AND arch_id = #{archId}
+    </select>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="Integer">
+        SELECT MAX(CAST(SUBSTRING_INDEX(arch_no, '-', -1) AS UNSIGNED))
+        FROM tb_arch
+        WHERE arch_no LIKE CONCAT(#{prefix}, '%') AND del_flag = '0'
+    </select>
+
+    <insert id="insertArch" parameterType="cn.com.bosssfot.dv.plm.arch.domain.Arch" useGeneratedKeys="true" keyProperty="archId">
+        INSERT INTO tb_arch
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            arch_no, project_id, title,
+            <if test="archMode != null">arch_mode,</if>
+            <if test="techStack != null">tech_stack,</if>
+            <if test="dbStack != null">db_stack,</if>
+            <if test="aiOrchestration != null">ai_orchestration,</if>
+            <if test="deployMode != null">deploy_mode,</if>
+            <if test="iotProtocol != null">iot_protocol,</if>
+            <if test="archContent != null">arch_content,</if>
+            <if test="c4Diagram != null">c4_diagram,</if>
+            <if test="nfrContent != null">nfr_content,</if>
+            ai_generated, status, author_user_id,
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            create_by, create_time, update_by, update_time,
+            <if test="remark != null">remark,</if>
+            del_flag
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{archNo}, #{projectId}, #{title},
+            <if test="archMode != null">#{archMode},</if>
+            <if test="techStack != null">#{techStack},</if>
+            <if test="dbStack != null">#{dbStack},</if>
+            <if test="aiOrchestration != null">#{aiOrchestration},</if>
+            <if test="deployMode != null">#{deployMode},</if>
+            <if test="iotProtocol != null">#{iotProtocol},</if>
+            <if test="archContent != null">#{archContent},</if>
+            <if test="c4Diagram != null">#{c4Diagram},</if>
+            <if test="nfrContent != null">#{nfrContent},</if>
+            #{aiGenerated}, #{status}, #{authorUserId},
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            #{createBy}, #{createTime}, #{updateBy}, #{updateTime},
+            <if test="remark != null">#{remark},</if>
+            '0'
+        </trim>
+    </insert>
+
+    <update id="updateArch" parameterType="cn.com.bosssfot.dv.plm.arch.domain.Arch">
+        UPDATE tb_arch
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="archMode != null">arch_mode = #{archMode},</if>
+            <if test="techStack != null">tech_stack = #{techStack},</if>
+            <if test="dbStack != null">db_stack = #{dbStack},</if>
+            <if test="aiOrchestration != null">ai_orchestration = #{aiOrchestration},</if>
+            <if test="deployMode != null">deploy_mode = #{deployMode},</if>
+            <if test="iotProtocol != null">iot_protocol = #{iotProtocol},</if>
+            <if test="archContent != null">arch_content = #{archContent},</if>
+            <if test="c4Diagram != null">c4_diagram = #{c4Diagram},</if>
+            <if test="nfrContent != null">nfr_content = #{nfrContent},</if>
+            <if test="reviewReport != null">review_report = #{reviewReport},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            update_by = #{updateBy},
+            update_time = #{updateTime},
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        WHERE arch_id = #{archId}
+    </update>
+
+    <update id="deleteArchByIds" parameterType="Long">
+        UPDATE tb_arch SET del_flag = '2'
+        WHERE arch_id IN
+        <foreach collection="array" item="archId" open="(" separator="," close=")">
+            #{archId}
+        </foreach>
+    </update>
+
+</mapper>
