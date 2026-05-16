@@ -175,6 +175,11 @@
             <!-- ============================================================ -->
             <dependency>
                 <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-inception</artifactId>
+                <version>${plm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
                 <artifactId>plm-project</artifactId>
                 <version>${plm.version}</version>
             </dependency>
@@ -229,6 +234,7 @@
         <!-- 业务模块（按 03-开发/模块拆分架构.md 顺序，4 成熟 + 26 stub = 30 个） -->
         <!-- A 规划阶段 -->
         <module>plm-dashboard</module>
+        <module>plm-inception</module>
         <module>plm-project</module>
         <module>plm-proposal</module>
         <module>plm-competitive</module>

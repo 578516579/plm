@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.inception.mapper.InceptionMapper">
+
+    <resultMap type="Inception" id="InceptionResult">
+        <result property="inceptionId"            column="inception_id"             />
+        <result property="inceptionNo"            column="inception_no"             />
+        <result property="projectName"            column="project_name"             />
+        <result property="businessLine"           column="business_line"            />
+        <result property="inceptionType"          column="inception_type"           />
+        <result property="background"             column="background"               />
+        <result property="estimatedDurationMonths" column="estimated_duration_months" />
+        <result property="estimatedTeam"          column="estimated_team"           />
+        <result property="aiGenerated"            column="ai_generated"             />
+        <result property="aiProposalContent"      column="ai_proposal_content"      />
+        <result property="aiRisks"                column="ai_risks"                 />
+        <result property="aiGeneratedAt"          column="ai_generated_at"          />
+        <result property="status"                 column="status"                   />
+        <result property="rejectReason"           column="reject_reason"            />
+        <result property="submitterUserId"        column="submitter_user_id"        />
+        <result property="approverUserId"         column="approver_user_id"         />
+        <result property="approvedAt"             column="approved_at"              />
+        <result property="projectId"              column="project_id"               />
+        <result property="createBy"               column="create_by"                />
+        <result property="createTime"             column="create_time"              />
+        <result property="updateBy"               column="update_by"                />
+        <result property="updateTime"             column="update_time"              />
+        <result property="remark"                 column="remark"                   />
+        <result property="delFlag"                column="del_flag"                 />
+    </resultMap>
+
+    <sql id="selectInceptionVo">
+        select inception_id, inception_no, project_name, business_line, inception_type,
+               background, estimated_duration_months, estimated_team,
+               ai_generated, ai_proposal_content, ai_risks, ai_generated_at,
+               status, reject_reason, submitter_user_id, approver_user_id, approved_at, project_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_inception
+    </sql>
+
+    <select id="selectInceptionList" parameterType="Inception" resultMap="InceptionResult">
+        <include refid="selectInceptionVo"/>
+        <where>
+            del_flag = '0'
+            <if test="inceptionNo != null and inceptionNo != ''">and inception_no like concat('%', #{inceptionNo}, '%')</if>
+            <if test="projectName != null and projectName != ''">and project_name like concat('%', #{projectName}, '%')</if>
+            <if test="businessLine != null and businessLine != ''">and business_line = #{businessLine}</if>
+            <if test="inceptionType != null and inceptionType != ''">and inception_type = #{inceptionType}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="aiGenerated != null and aiGenerated != ''">and ai_generated = #{aiGenerated}</if>
+            <if test="submitterUserId != null">and submitter_user_id = #{submitterUserId}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectInceptionById" parameterType="Long" resultMap="InceptionResult">
+        <include refid="selectInceptionVo"/>
+        where inception_id = #{inceptionId} and del_flag = '0'
+    </select>
+
+    <insert id="insertInception" parameterType="Inception" useGeneratedKeys="true" keyProperty="inceptionId">
+        insert into tb_inception
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="inceptionNo != null">inception_no,</if>
+            <if test="projectName != null">project_name,</if>
+            <if test="businessLine != null">business_line,</if>
+            <if test="inceptionType != null">inception_type,</if>
+            <if test="background != null">background,</if>
+            <if test="estimatedDurationMonths != null">estimated_duration_months,</if>
+            <if test="estimatedTeam != null">estimated_team,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="aiProposalContent != null">ai_proposal_content,</if>
+            <if test="aiRisks != null">ai_risks,</if>
+            <if test="aiGeneratedAt != null">ai_generated_at,</if>
+            <if test="status != null">status,</if>
+            <if test="rejectReason != null">reject_reason,</if>
+            <if test="submitterUserId != null">submitter_user_id,</if>
+            <if test="approverUserId != null">approver_user_id,</if>
+            <if test="approvedAt != null">approved_at,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="inceptionNo != null">#{inceptionNo},</if>
+            <if test="projectName != null">#{projectName},</if>
+            <if test="businessLine != null">#{businessLine},</if>
+            <if test="inceptionType != null">#{inceptionType},</if>
+            <if test="background != null">#{background},</if>
+            <if test="estimatedDurationMonths != null">#{estimatedDurationMonths},</if>
+            <if test="estimatedTeam != null">#{estimatedTeam},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="aiProposalContent != null">#{aiProposalContent},</if>
+            <if test="aiRisks != null">#{aiRisks},</if>
+            <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="rejectReason != null">#{rejectReason},</if>
+            <if test="submitterUserId != null">#{submitterUserId},</if>
+            <if test="approverUserId != null">#{approverUserId},</if>
+            <if test="approvedAt != null">#{approvedAt},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateInception" parameterType="Inception">
+        update tb_inception
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="inceptionNo != null">inception_no = #{inceptionNo},</if>
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="businessLine != null">business_line = #{businessLine},</if>
+            <if test="inceptionType != null">inception_type = #{inceptionType},</if>
+            <if test="background != null">background = #{background},</if>
+            <if test="estimatedDurationMonths != null">estimated_duration_months = #{estimatedDurationMonths},</if>
+            <if test="estimatedTeam != null">estimated_team = #{estimatedTeam},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiProposalContent != null">ai_proposal_content = #{aiProposalContent},</if>
+            <if test="aiRisks != null">ai_risks = #{aiRisks},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="rejectReason != null">reject_reason = #{rejectReason},</if>
+            <if test="submitterUserId != null">submitter_user_id = #{submitterUserId},</if>
+            <if test="approverUserId != null">approver_user_id = #{approverUserId},</if>
+            <if test="approvedAt != null">approved_at = #{approvedAt},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where inception_id = #{inceptionId}
+    </update>
+
+    <update id="deleteInceptionByIds" parameterType="Long">
+        update tb_inception set del_flag = '2' where inception_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(inception_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_inception
+        where inception_no like concat(#{prefix}, '%')
+    </select>
+</mapper>
