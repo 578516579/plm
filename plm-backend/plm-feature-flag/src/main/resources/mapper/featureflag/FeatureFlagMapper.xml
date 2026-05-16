@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.featureflag.mapper.FeatureFlagMapper">
+    <resultMap type="cn.com.bosssfot.dv.plm.featureflag.domain.FeatureFlag" id="FeatureFlagResult">
+        <id     property="flagId"             column="flag_id"             />
+        <result property="flagNo"             column="flag_no"             />
+        <result property="flagKey"            column="flag_key"            />
+        <result property="title"              column="title"               />
+        <result property="description"        column="description"         />
+        <result property="environment"        column="environment"         />
+        <result property="rolloutPercentage"  column="rollout_percentage"  />
+        <result property="rolloutStrategy"    column="rollout_strategy"    />
+        <result property="targetUserSegment"  column="target_user_segment" />
+        <result property="status"             column="status"              />
+        <result property="authorUserId"       column="author_user_id"      />
+        <result property="createBy"           column="create_by"           />
+        <result property="createTime"         column="create_time"         />
+        <result property="updateBy"           column="update_by"           />
+        <result property="updateTime"         column="update_time"         />
+        <result property="remark"             column="remark"              />
+        <result property="delFlag"            column="del_flag"            />
+    </resultMap>
+
+    <sql id="selectFeatureFlagVo">
+        select flag_id, flag_no, flag_key, title, description, environment,
+               rollout_percentage, rollout_strategy, target_user_segment, status, author_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_feature_flag
+    </sql>
+
+    <select id="selectFeatureFlagList" parameterType="cn.com.bosssfot.dv.plm.featureflag.domain.FeatureFlag" resultMap="FeatureFlagResult">
+        <include refid="selectFeatureFlagVo"/>
+        <where>
+            del_flag = '0'
+            <if test="flagNo != null and flagNo != ''">and flag_no like concat('%', #{flagNo}, '%')</if>
+            <if test="flagKey != null and flagKey != ''">and flag_key like concat('%', #{flagKey}, '%')</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="environment != null and environment != ''">and environment = #{environment}</if>
+            <if test="rolloutStrategy != null and rolloutStrategy != ''">and rollout_strategy = #{rolloutStrategy}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectFeatureFlagById" parameterType="Long" resultMap="FeatureFlagResult">
+        <include refid="selectFeatureFlagVo"/>
+        where flag_id = #{flagId} and del_flag = '0'
+    </select>
+
+    <insert id="insertFeatureFlag" parameterType="cn.com.bosssfot.dv.plm.featureflag.domain.FeatureFlag" useGeneratedKeys="true" keyProperty="flagId">
+        insert into tb_feature_flag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="flagNo != null">flag_no,</if>
+            <if test="flagKey != null">flag_key,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="environment != null">environment,</if>
+            <if test="rolloutPercentage != null">rollout_percentage,</if>
+            <if test="rolloutStrategy != null">rollout_strategy,</if>
+            <if test="targetUserSegment != null">target_user_segment,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="flagNo != null">#{flagNo},</if>
+            <if test="flagKey != null">#{flagKey},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="environment != null">#{environment},</if>
+            <if test="rolloutPercentage != null">#{rolloutPercentage},</if>
+            <if test="rolloutStrategy != null">#{rolloutStrategy},</if>
+            <if test="targetUserSegment != null">#{targetUserSegment},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateFeatureFlag" parameterType="cn.com.bosssfot.dv.plm.featureflag.domain.FeatureFlag">
+        update tb_feature_flag
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="flagKey != null">flag_key = #{flagKey},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="environment != null">environment = #{environment},</if>
+            <if test="rolloutPercentage != null">rollout_percentage = #{rolloutPercentage},</if>
+            <if test="rolloutStrategy != null">rollout_strategy = #{rolloutStrategy},</if>
+            <if test="targetUserSegment != null">target_user_segment = #{targetUserSegment},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where flag_id = #{flagId}
+    </update>
+
+    <update id="deleteFeatureFlagByIds" parameterType="Long">
+        update tb_feature_flag set del_flag = '2' where flag_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(flag_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_feature_flag where flag_no like concat(#{prefix}, '%')
+    </select>
+</mapper>
