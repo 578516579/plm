@@ -132,6 +132,8 @@
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-testreport</artifactId></dependency>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-apidoc</artifactId></dependency>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-product</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-impl</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-ops</artifactId></dependency>
 
     </dependencies>
 
