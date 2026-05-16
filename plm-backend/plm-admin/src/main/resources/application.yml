@@ -20,6 +20,13 @@ server:
   servlet:
     # 应用的访问路径
     context-path: /
+    # HTTP 请求/响应字符集 — Windows + JDK 17 默认 file.encoding=GBK 会污染 char↔byte 转换，
+    # 这里强制 servlet 层 UTF-8（含 form/multipart/请求体回退）。
+    # 配合启动参数 -Dfile.encoding=UTF-8 形成双保险。
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
   tomcat:
     # tomcat的URI编码
     uri-encoding: UTF-8
