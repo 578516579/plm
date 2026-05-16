@@ -134,9 +134,18 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 4. 详细硬规则见 [.claude/rules.md §M](.claude/rules.md)
 
 **实现进度速览** (详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
-- 🟢 PRD-aligned 13 个: project / requirement / sprint / task / defect / testcase / document / submission / release / testplan / testreport / apidoc / manual-product
-- 🟡 空壳 16 个: competitive / prd / ued / arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora
-- 🔴 缺模块 1 个: inception
+- 🟢 PRD-aligned **31/31 个** 🎉 (2026-05-17 收官):
+  - F1 立项: inception / project / competitive
+  - F2 设计: requirement / prd / ued
+  - F3 研发: arch / dbdesign / apidesign / sprint / task / ai-agent / openspec
+  - F4 质量: testplan / testcase / testdata / submission / autotest / defect / testreport
+  - F5 文档: manual-product / manual-impl / manual-ops / apidoc / document
+  - F6 效能: analytics / dashboard
+  - DevOps: release / pipeline / feature-flag / dora
+- 🟡 空壳 = **0 个**
+- 🔴 缺模块 = **0 个**
+
+每个模块 9 项 DoD 全过 (字段对照 / SQL / Domain / Mapper / Service / Controller / E2E / BUILD SUCCESS),所有业务编号/状态机/字典追溯到 PRD § + 原型 HTML。Maven 本地仓已迁至 `D:/m2-repository`,见 `~/.m2/settings.xml`。
 
 ## Rules & playbooks
 
