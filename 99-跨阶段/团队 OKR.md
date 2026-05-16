@@ -1,5 +1,9 @@
 # 团队 OKR
 
+> **当前阶段标识**：`solo + early`。**本周期不维护数值型 KR**（per [proposal 0011](proposals/0011-phase06-okr-optional-in-early.md)）。
+> 下次评审：2026-08-01（Q3 起或团队 ≥ 2 人时强制启用 OKR 节奏）。
+> Phase 06 Gate §G 在此期间允许标 N/A，请用 Gate 实例 §I "本周期完成情况" 代替 KR 对照。
+
 季度 / 半年度目标与关键结果，对齐全员方向。
 
 ## 当期 OKR（QX YYYY）

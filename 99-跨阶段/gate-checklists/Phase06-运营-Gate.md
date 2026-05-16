@@ -31,11 +31,23 @@
 
 ---
 
-## B. 必产出物 — 监控与看板
+## B. 必产出物 — 监控与看板（按 项目成熟度 差异化，proposal 0010）
+
+### B.standard — `stable` / `mature` 适用
 
 - [ ] 已在 [06-运营/数据看板（链接）](../../06-运营/数据看板（链接）/) 维护本模块看板链接
 - [ ] 关键指标至少 5 个（业务 / 性能 / 错误率 / 用户行为 / 容量），每个有量化阈值与告警
 - [ ] 告警接收人明确（写在 [Runbook.md](../../05-上线/Runbook.md)）
+
+### B.substrate-only — `early` 适用（proposal 0010）
+
+适用条件：项目尚无生产监控基础设施（Prometheus/Grafana/SLS 都没接），仅 dev 环境。
+
+- [ ] 在本 Gate 实例 §J 写"监控替代方案表"，至少含:
+  - 5 项当前可用的观察手段（如：手动 curl healthcheck / `journalctl` 日志 / 后端 stdout / E2E 测试套件通过情况 / 数据库慢查询 EXPLAIN）
+  - 每项的"触发响应条件"（什么情况下应该停下来 / 应该改进基础设施）
+- [ ] 在本 Gate 实例 §J 标"升级路径"：转入 `stable` 时本段失效，必须补齐正式看板链接（链 proposal 0010）。
+- [ ] §C 项目成熟度字段已确认为 `early`，且 §A 已部署目标环境 ≤ dev。
 
 ---
 
@@ -82,27 +94,59 @@
 
 ---
 
-## G. 必产出物 — OKR 对照
+## G. 必产出物 — OKR 对照（按 团队规模 × 项目成熟度 差异化，proposal 0011）
+
+### G.standard — `small+` 或 `stable+` 适用
 
 - [ ] 在 [99-跨阶段/团队 OKR.md](../团队%20OKR.md) 中更新本模块对应 KR 的实际数值
 - [ ] 若 KR 偏差 > 20%，写一段差距说明 + 下一周期行动
 
+### G.solo-early — `solo + early` 二条件叠加适用（proposal 0011）
+
+可标 `N/A`，**前提同时满足**：
+
+- [ ] [99-跨阶段/团队 OKR.md](../团队%20OKR.md) 顶部已显式标"本周期不维护数值型 KR，下次评审 YYYY-MM-DD"
+- [ ] 在本 Gate 实例 §J 写一句"使用 Gate 实例 §I 的'本周期完成情况'代替 KR 对照"
+
+转入 `small+` 或 `stable+` 时本段失效，回到 G.standard。
+
 ---
 
-## H. Definition of Done（每个周期完成）
+## H. Definition of Done — 两段式（proposal 0012）
+
+### H.1 启动 (day 0) — cycle 开始当日提交
+
+- [ ] §A 进入条件全满足
+- [ ] §C 项目状态字段已填（含 maturity / 团队规模）
+- [ ] 已部署且可访问（链 demo URL / 后端 health check 输出）
+- [ ] §I.1 "启动签字" 已完成
+- [ ] **本 Checklist 文件已 commit 入库**（`docs(gate): <module> phase 06 cycle N kickoff`）— 启动占位 commit
+
+### H.2 终态 (day N，cycle 末) — cycle 满规定时长后追加段提交
 
 - [ ] B / C / D / E（如适用）/ F / G 全部满足
-- [ ] **本 Checklist 文件已 commit 入库**（`docs(gate): <module> phase 06 cycle YYYY-MM-DD passed`）
+- [ ] §J 异常/风险已收尾，或有转下周期的明确计划
+- [ ] §I.2 "终态签字" 已完成
+- [ ] **本 Checklist 文件已追加 commit 入库**（`docs(gate): <module> phase 06 cycle N closure`）
 
 ---
 
-## I. 评审记录与签字（按 团队规模 调整必填角色数）
+## I. 评审记录与签字 — 两段式（proposal 0012）
 
-`solo`=1（自评 `[solo-review]`）/ `small`=2 / `medium`=3 / `large`=4。
+### I.1 启动签字 (day 0)
 
 | 角色 | 姓名 | 评审结论 | 签字日期 |
 |---|---|---|---|
-| 运营 / 产品 lead | | 通过 / 有条件通过 / 不通过 | YYYY-MM-DD |
+| 运营 / 产品 lead | | ✅ cycle N 已启动 / ⚠️ 启动有条件 / ❌ 取消启动 | YYYY-MM-DD |
+| 开发 lead | | ✅ 已部署且可访问 | YYYY-MM-DD |
+
+### I.2 终态签字 (day N，cycle 末)
+
+按 团队规模 调整必填角色数。`solo`=1（自评 `[solo-review]`）/ `small`=2 / `medium`=3 / `large`=4。
+
+| 角色 | 姓名 | 评审结论 | 签字日期 |
+|---|---|---|---|
+| 运营 / 产品 lead | | 通过 / 有条件通过 / 不通过（决议进下周期 / 暂停 / 修复后再 cycle） | YYYY-MM-DD |
 | 业务方代表（small+ 必填） | | | |
 | 开发 lead（涉及修复纳入 Sprint 时必填） | | | |
 | 客服代表（external-product 必填） | | | |
@@ -139,4 +183,6 @@
 
 | 日期 | 修改人 | 原因 | 决议 |
 |---|---|---|---|
-| | | | |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | [proposal 0010](../proposals/0010-phase06-substrate-only-metrics.md) accepted | §B 拆 B.standard / B.substrate-only — early 阶段允许"监控替代方案表" |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | [proposal 0011](../proposals/0011-phase06-okr-optional-in-early.md) accepted | §G 拆 G.standard / G.solo-early — solo+early 可标 N/A，前提团队 OKR.md 顶部显式标注 |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | [proposal 0012](../proposals/0012-phase06-two-stage-signoff.md) accepted | §H DoD 拆 H.1 启动 / H.2 终态；§I 签字拆 I.1 启动 / I.2 终态 — 模板对齐 Project cycle 1 已实操的两段式 |

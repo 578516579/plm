@@ -122,6 +122,8 @@
 发布是高风险操作，**所有规模都至少 2 个签字**：
 
 - `solo`=2（发布指挥 + 至少 1 个其他人在场，`[solo-review]` 不适用 — 发布必须双人）
+  - **例外（proposal 0007）**：当 `项目类型=internal-tool` 且 `项目成熟度=early` 且 `发布目标环境=dev` 三条件**同时**满足，允许 `[solo-review]` self-review 等价。在签字栏角色处标 `[solo-review-3conditions-early-dev]`，并在 §I 异常段写满足三条件的证据（无生产用户 / 仅 dev 环境 / 无金钱损失）。
+  - 三条件**任一**失效（如转入 `stable` / 加入第 2 人 / 目标环境改为 `staging`/`prod`），本例外**自动失效**，回到双人硬规则。
 - `small` / `medium` / `large` 按下表全签
 
 | 角色 | 姓名 | 签字日期 |
@@ -170,4 +172,4 @@
 
 | 日期 | 修改人 | 原因 | 决议 |
 |---|---|---|---|
-| | | | |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | [proposal 0007](../proposals/0007-solo-early-dev-self-review.md) accepted | §H 双人签字 solo 段加 `internal-tool + early + dev` 三条件叠加例外（self-review 等价），失效条件明确 |
