@@ -8,21 +8,12 @@
         <version>3.9.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>plm-ued</artifactId>
-
-    <description>
-        UED 设计 - 设计阶段业务模块 (Phase B 拉起的空壳, 计划版本: v0.5)
-    </description>
-
+    <description>UED 设计协同 — PRD F2.3 + 原型 ued.html — Figma 集成 + AI 规范检查 + 农业 UI 组件库</description>
     <dependencies>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-system</artifactId>
-        </dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-common</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-system</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-project</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>

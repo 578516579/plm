@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.ued.mapper.UedMapper">
+
+    <resultMap type="Ued" id="UedResult">
+        <result property="uedId"              column="ued_id"              />
+        <result property="uedNo"              column="ued_no"              />
+        <result property="projectId"          column="project_id"          />
+        <result property="requirementId"      column="requirement_id"      />
+        <result property="title"              column="title"               />
+        <result property="figmaUrl"           column="figma_url"           />
+        <result property="figmaFileKey"       column="figma_file_key"      />
+        <result property="versionLabel"       column="version_label"       />
+        <result property="previewUrl"         column="preview_url"         />
+        <result property="annotationContent"  column="annotation_content"  />
+        <result property="aiReviewReport"     column="ai_review_report"    />
+        <result property="aiReviewScore"      column="ai_review_score"     />
+        <result property="complianceCheck"    column="compliance_check"    />
+        <result property="usabilityIssues"    column="usability_issues"    />
+        <result property="agriComponentTags"  column="agri_component_tags" />
+        <result property="aiGenerated"        column="ai_generated"        />
+        <result property="aiGeneratedAt"      column="ai_generated_at"     />
+        <result property="status"             column="status"              />
+        <result property="designerUserId"     column="designer_user_id"    />
+        <result property="reviewerUserId"     column="reviewer_user_id"    />
+        <result property="createBy"           column="create_by"           />
+        <result property="createTime"         column="create_time"         />
+        <result property="updateBy"           column="update_by"           />
+        <result property="updateTime"         column="update_time"         />
+        <result property="remark"             column="remark"              />
+        <result property="delFlag"            column="del_flag"            />
+    </resultMap>
+
+    <sql id="selectUedVo">
+        select ued_id, ued_no, project_id, requirement_id, title,
+               figma_url, figma_file_key, version_label, preview_url, annotation_content,
+               ai_review_report, ai_review_score, compliance_check, usability_issues, agri_component_tags,
+               ai_generated, ai_generated_at, status, designer_user_id, reviewer_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_ued
+    </sql>
+
+    <select id="selectUedList" parameterType="Ued" resultMap="UedResult">
+        <include refid="selectUedVo"/>
+        <where>
+            del_flag = '0'
+            <if test="uedNo != null and uedNo != ''">and ued_no like concat('%', #{uedNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="requirementId != null">and requirement_id = #{requirementId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="versionLabel != null and versionLabel != ''">and version_label = #{versionLabel}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectUedById" parameterType="Long" resultMap="UedResult">
+        <include refid="selectUedVo"/>
+        where ued_id = #{uedId} and del_flag = '0'
+    </select>
+
+    <insert id="insertUed" parameterType="Ued" useGeneratedKeys="true" keyProperty="uedId">
+        insert into tb_ued
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uedNo != null">ued_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="requirementId != null">requirement_id,</if>
+            <if test="title != null">title,</if>
+            <if test="figmaUrl != null">figma_url,</if>
+            <if test="figmaFileKey != null">figma_file_key,</if>
+            <if test="versionLabel != null">version_label,</if>
+            <if test="previewUrl != null">preview_url,</if>
+            <if test="annotationContent != null">annotation_content,</if>
+            <if test="aiReviewReport != null">ai_review_report,</if>
+            <if test="aiReviewScore != null">ai_review_score,</if>
+            <if test="complianceCheck != null">compliance_check,</if>
+            <if test="usabilityIssues != null">usability_issues,</if>
+            <if test="agriComponentTags != null">agri_component_tags,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="aiGeneratedAt != null">ai_generated_at,</if>
+            <if test="status != null">status,</if>
+            <if test="designerUserId != null">designer_user_id,</if>
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uedNo != null">#{uedNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="requirementId != null">#{requirementId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="figmaUrl != null">#{figmaUrl},</if>
+            <if test="figmaFileKey != null">#{figmaFileKey},</if>
+            <if test="versionLabel != null">#{versionLabel},</if>
+            <if test="previewUrl != null">#{previewUrl},</if>
+            <if test="annotationContent != null">#{annotationContent},</if>
+            <if test="aiReviewReport != null">#{aiReviewReport},</if>
+            <if test="aiReviewScore != null">#{aiReviewScore},</if>
+            <if test="complianceCheck != null">#{complianceCheck},</if>
+            <if test="usabilityIssues != null">#{usabilityIssues},</if>
+            <if test="agriComponentTags != null">#{agriComponentTags},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="designerUserId != null">#{designerUserId},</if>
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateUed" parameterType="Ued">
+        update tb_ued
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="uedNo != null">ued_no = #{uedNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="requirementId != null">requirement_id = #{requirementId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="figmaUrl != null">figma_url = #{figmaUrl},</if>
+            <if test="figmaFileKey != null">figma_file_key = #{figmaFileKey},</if>
+            <if test="versionLabel != null">version_label = #{versionLabel},</if>
+            <if test="previewUrl != null">preview_url = #{previewUrl},</if>
+            <if test="annotationContent != null">annotation_content = #{annotationContent},</if>
+            <if test="aiReviewReport != null">ai_review_report = #{aiReviewReport},</if>
+            <if test="aiReviewScore != null">ai_review_score = #{aiReviewScore},</if>
+            <if test="complianceCheck != null">compliance_check = #{complianceCheck},</if>
+            <if test="usabilityIssues != null">usability_issues = #{usabilityIssues},</if>
+            <if test="agriComponentTags != null">agri_component_tags = #{agriComponentTags},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="designerUserId != null">designer_user_id = #{designerUserId},</if>
+            <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where ued_id = #{uedId}
+    </update>
+
+    <update id="deleteUedByIds" parameterType="Long">
+        update tb_ued set del_flag = '2' where ued_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(ued_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_ued
+        where ued_no like concat(#{prefix}, '%')
+    </select>
+</mapper>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.testdata.mapper.TestDataMapper">
+
+    <resultMap type="TestData" id="TestDataResult">
+        <result property="testdataId"           column="testdata_id"            />
+        <result property="testdataNo"           column="testdata_no"            />
+        <result property="projectId"            column="project_id"             />
+        <result property="title"                column="title"                  />
+        <result property="targetTable"          column="target_table"           />
+        <result property="generateCount"        column="generate_count"         />
+        <result property="outputFormat"         column="output_format"          />
+        <result property="fieldSemantics"       column="field_semantics"        />
+        <result property="ruleChinaCoord"       column="rule_china_coord"       />
+        <result property="ruleTimeContinuity"   column="rule_time_continuity"   />
+        <result property="ruleSensorRange"      column="rule_sensor_range"      />
+        <result property="ruleIncludeOutliers"  column="rule_include_outliers"  />
+        <result property="generatedContent"     column="generated_content"      />
+        <result property="generatedAt"          column="generated_at"           />
+        <result property="aiGenerated"          column="ai_generated"           />
+        <result property="status"               column="status"                 />
+        <result property="authorUserId"         column="author_user_id"         />
+        <result property="createBy"             column="create_by"              />
+        <result property="createTime"           column="create_time"            />
+        <result property="updateBy"             column="update_by"              />
+        <result property="updateTime"           column="update_time"            />
+        <result property="remark"               column="remark"                 />
+        <result property="delFlag"              column="del_flag"               />
+    </resultMap>
+
+    <sql id="selectTestDataVo">
+        select testdata_id, testdata_no, project_id, title, target_table, generate_count, output_format,
+               field_semantics, rule_china_coord, rule_time_continuity, rule_sensor_range, rule_include_outliers,
+               generated_content, generated_at, ai_generated, status, author_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_testdata
+    </sql>
+
+    <select id="selectTestDataList" parameterType="TestData" resultMap="TestDataResult">
+        <include refid="selectTestDataVo"/>
+        <where>
+            del_flag = '0'
+            <if test="testdataNo != null and testdataNo != ''">and testdata_no like concat('%', #{testdataNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="targetTable != null and targetTable != ''">and target_table = #{targetTable}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectTestDataById" parameterType="Long" resultMap="TestDataResult">
+        <include refid="selectTestDataVo"/>
+        where testdata_id = #{testdataId} and del_flag = '0'
+    </select>
+
+    <insert id="insertTestData" parameterType="TestData" useGeneratedKeys="true" keyProperty="testdataId">
+        insert into tb_testdata
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="testdataNo != null">testdata_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="title != null">title,</if>
+            <if test="targetTable != null">target_table,</if>
+            <if test="generateCount != null">generate_count,</if>
+            <if test="outputFormat != null">output_format,</if>
+            <if test="fieldSemantics != null">field_semantics,</if>
+            <if test="ruleChinaCoord != null">rule_china_coord,</if>
+            <if test="ruleTimeContinuity != null">rule_time_continuity,</if>
+            <if test="ruleSensorRange != null">rule_sensor_range,</if>
+            <if test="ruleIncludeOutliers != null">rule_include_outliers,</if>
+            <if test="generatedContent != null">generated_content,</if>
+            <if test="generatedAt != null">generated_at,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="testdataNo != null">#{testdataNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="targetTable != null">#{targetTable},</if>
+            <if test="generateCount != null">#{generateCount},</if>
+            <if test="outputFormat != null">#{outputFormat},</if>
+            <if test="fieldSemantics != null">#{fieldSemantics},</if>
+            <if test="ruleChinaCoord != null">#{ruleChinaCoord},</if>
+            <if test="ruleTimeContinuity != null">#{ruleTimeContinuity},</if>
+            <if test="ruleSensorRange != null">#{ruleSensorRange},</if>
+            <if test="ruleIncludeOutliers != null">#{ruleIncludeOutliers},</if>
+            <if test="generatedContent != null">#{generatedContent},</if>
+            <if test="generatedAt != null">#{generatedAt},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateTestData" parameterType="TestData">
+        update tb_testdata
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="testdataNo != null">testdata_no = #{testdataNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="targetTable != null">target_table = #{targetTable},</if>
+            <if test="generateCount != null">generate_count = #{generateCount},</if>
+            <if test="outputFormat != null">output_format = #{outputFormat},</if>
+            <if test="fieldSemantics != null">field_semantics = #{fieldSemantics},</if>
+            <if test="ruleChinaCoord != null">rule_china_coord = #{ruleChinaCoord},</if>
+            <if test="ruleTimeContinuity != null">rule_time_continuity = #{ruleTimeContinuity},</if>
+            <if test="ruleSensorRange != null">rule_sensor_range = #{ruleSensorRange},</if>
+            <if test="ruleIncludeOutliers != null">rule_include_outliers = #{ruleIncludeOutliers},</if>
+            <if test="generatedContent != null">generated_content = #{generatedContent},</if>
+            <if test="generatedAt != null">generated_at = #{generatedAt},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where testdata_id = #{testdataId}
+    </update>
+
+    <update id="deleteTestDataByIds" parameterType="Long">
+        update tb_testdata set del_flag = '2' where testdata_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(testdata_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_testdata
+        where testdata_no like concat(#{prefix}, '%')
+    </select>
+</mapper>
