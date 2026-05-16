@@ -99,6 +99,10 @@
         </dependency>
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-autotest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-sprint</artifactId>
         </dependency>
         <dependency>
