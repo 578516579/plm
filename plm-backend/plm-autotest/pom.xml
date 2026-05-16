@@ -12,7 +12,7 @@
     <artifactId>plm-autotest</artifactId>
 
     <description>
-        自动化测试 - 测试阶段业务模块 (Phase B 拉起的空壳, 计划版本: deferred)
+        自动化测试套件 - PRD §F4.5 AI 脚本生成
     </description>
 
     <dependencies>
@@ -23,6 +23,15 @@
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-system</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-project</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

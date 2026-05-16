@@ -91,6 +91,14 @@
         </dependency>
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-testdata</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-autotest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-competitive</artifactId>
         </dependency>
         <dependency>
