@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.document.mapper.DocumentMapper">
+
+    <resultMap type="Document" id="DocumentResult">
+        <result property="documentId"          column="document_id"          />
+        <result property="documentNo"          column="document_no"          />
+        <result property="projectId"           column="project_id"           />
+        <result property="relatedEntityType"   column="related_entity_type"  />
+        <result property="relatedEntityId"     column="related_entity_id"    />
+        <result property="docType"             column="doc_type"             />
+        <result property="title"               column="title"                />
+        <result property="content"             column="content"              />
+        <result property="version"             column="version"              />
+        <result property="status"              column="status"               />
+        <result property="authorUserId"        column="author_user_id"       />
+        <result property="reviewerUserId"      column="reviewer_user_id"     />
+        <result property="tags"                column="tags"                 />
+        <result property="createBy"            column="create_by"            />
+        <result property="createTime"          column="create_time"          />
+        <result property="updateBy"            column="update_by"            />
+        <result property="updateTime"          column="update_time"          />
+        <result property="remark"              column="remark"               />
+        <result property="delFlag"             column="del_flag"             />
+    </resultMap>
+
+    <sql id="selectDocumentVo">
+        select document_id, document_no, project_id, related_entity_type, related_entity_id,
+               doc_type, title, content, version, status, author_user_id, reviewer_user_id, tags,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_document
+    </sql>
+
+    <select id="selectDocumentList" parameterType="Document" resultMap="DocumentResult">
+        <include refid="selectDocumentVo"/>
+        <where>
+            del_flag = '0'
+            <if test="documentNo != null and documentNo != ''">and document_no like concat('%', #{documentNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="relatedEntityType != null and relatedEntityType != ''">and related_entity_type = #{relatedEntityType}</if>
+            <if test="relatedEntityId != null">and related_entity_id = #{relatedEntityId}</if>
+            <if test="docType != null and docType != ''">and doc_type = #{docType}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="authorUserId != null">and author_user_id = #{authorUserId}</if>
+            <if test="tags != null and tags != ''">and tags like concat('%', #{tags}, '%')</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectDocumentById" parameterType="Long" resultMap="DocumentResult">
+        <include refid="selectDocumentVo"/>
+        where document_id = #{documentId} and del_flag = '0'
+    </select>
+
+    <insert id="insertDocument" parameterType="Document" useGeneratedKeys="true" keyProperty="documentId">
+        insert into tb_document
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="documentNo != null">document_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="relatedEntityType != null">related_entity_type,</if>
+            <if test="relatedEntityId != null">related_entity_id,</if>
+            <if test="docType != null">doc_type,</if>
+            <if test="title != null">title,</if>
+            <if test="content != null">content,</if>
+            <if test="version != null">version,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            <if test="tags != null">tags,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="documentNo != null">#{documentNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="relatedEntityType != null">#{relatedEntityType},</if>
+            <if test="relatedEntityId != null">#{relatedEntityId},</if>
+            <if test="docType != null">#{docType},</if>
+            <if test="title != null">#{title},</if>
+            <if test="content != null">#{content},</if>
+            <if test="version != null">#{version},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            <if test="tags != null">#{tags},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateDocument" parameterType="Document">
+        update tb_document
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="documentNo != null">document_no = #{documentNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="relatedEntityType != null">related_entity_type = #{relatedEntityType},</if>
+            <if test="relatedEntityId != null">related_entity_id = #{relatedEntityId},</if>
+            <if test="docType != null">doc_type = #{docType},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="version != null">version = #{version},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where document_id = #{documentId}
+    </update>
+
+    <update id="deleteDocumentByIds" parameterType="Long">
+        update tb_document set del_flag = '2' where document_id in
+        <foreach item="documentId" collection="array" open="(" separator="," close=")">#{documentId}</foreach>
+    </update>
+
+    <!-- ADR-0007: 编号按 type 分别累加 -->
+    <select id="selectMaxSeqOfYearByType" resultType="java.lang.Integer">
+        select max(cast(substring(document_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_document
+        where document_no like concat(#{prefix}, '%')
+    </select>
+
+</mapper>

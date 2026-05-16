@@ -1,2 +1,2 @@
-/** 极薄壳: 真实现 → packages/plm-defect/src/types/index.ts */
+/** Stage 1 极薄壳 */
 export * from '../../../../packages/plm-defect/src/types/index'

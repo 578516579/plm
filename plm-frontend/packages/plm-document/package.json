@@ -1,0 +1,14 @@
+{
+  "name": "@plm/document",
+  "version": "0.4.0",
+  "description": "PLM 业务模块 - 文档管理 (合并 prd/arch/dbdesign/apidesign/proposal 等 12 doc_type)",
+  "main": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./api": "./src/api/index.ts",
+    "./types": "./src/types/index.ts",
+    "./router": "./src/router.ts"
+  }
+}

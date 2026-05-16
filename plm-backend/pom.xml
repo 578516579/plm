@@ -203,6 +203,11 @@
                 <artifactId>plm-testcase</artifactId>
                 <version>${plm.version}</version>
             </dependency>
+            <dependency>
+                <groupId>cn.com.bosssfot.dv.plm</groupId>
+                <artifactId>plm-document</artifactId>
+                <version>${plm.version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -230,6 +235,8 @@
         <!-- C 研发阶段 -->
         <module>plm-task</module>
         <module>plm-sprint</module>
+        <!-- v0.4 启动: plm-document (合并 5 文档类 stub) -->
+        <module>plm-document</module>
         <!-- D 测试阶段 -->
         <module>plm-testplan</module>
         <module>plm-testcase</module>
