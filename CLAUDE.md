@@ -153,9 +153,10 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 - `05-上线/<Module>-发布计划-YYYY-MM-DD.md`
 
 **文档完整性现状** ([审计 2026-05-17](99-跨阶段/audits/2026-05-17-process-docs-completeness-audit.md)):
-- ✅ **31/31 模块文档骨架已 5/5 完整** (2026-05-17 当天 132 份骨架批量落地)
-- 骨架级:头部 + 引用 PRD-MAPPING §2 + `<待人工填写>` 占位
-- 实质内容:按 P0 (24 PRD) → P1 (48 设计) → P2 (60 测试/上线) 优先级逐步人工填
+- ✅ **31/31 模块 5/5 文档骨架完整** (2026-05-17 当日 222 份骨架 + 6 阶段 README)
+- ✅ **31/31 模块 PRD 全部至少半实质级** (Project/Inception/Requirement 完整实质,其余 28 个半实质 v1.1)
+- 半实质级:头部/字段/状态机/AI/验收 已填,业务深度段落 (痛点/目标/场景/OOS) 留 `<待人工填写>` 占位
+- 下一步:按业务优先级把高优模块 PRD 从半实质升完整实质 (Defect/Competitive/Sprint+Task 优先)
 
 详细规则:[.claude/rules.md §O](.claude/rules.md) | [03-开发/开发规范.md §6.0](03-开发/开发规范.md)
 
