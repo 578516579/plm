@@ -23,7 +23,7 @@ public class Submission extends BaseEntity
     private Long sprintId;
     @Excel(name = "提测标题") private String title;
     private String scope;
-    @Excel(name = "环境") private String environment;
+    @Excel(name = "环境", dictType = "biz_submission_environment") private String environment;
     @Excel(name = "期望测试周期(天)") private Integer expectedTestDays;
     private String riskNotes;
 

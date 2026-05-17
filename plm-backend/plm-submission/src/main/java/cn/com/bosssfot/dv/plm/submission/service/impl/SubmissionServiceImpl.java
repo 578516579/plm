@@ -43,6 +43,9 @@ public class SubmissionServiceImpl implements ISubmissionService
     /** 单测覆盖率最低要求 60% (PRD §F4.4) */
     private static final BigDecimal MIN_UNIT_TEST_COVERAGE = new BigDecimal("60.00");
 
+    /** environment 白名单(biz_submission_environment 字典 5 值,PRD-MAPPING §2 D1) */
+    private static final Set<String> VALID_ENVIRONMENT = Set.of("test", "pre", "dev", "staging", "prod");
+
     /** 5×5 状态机转换矩阵 — 含反向边 04→00 */
     private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
     static {
@@ -88,6 +91,12 @@ public class SubmissionServiceImpl implements ISubmissionService
         } else if (!"00".equals(t.getStatus())) {
             throw new ServiceException("新建提测单状态必须为「草稿」", 601);
         }
+        if (StringUtils.isBlank(t.getEnvironment())) {
+            t.setEnvironment("test");
+        } else if (!VALID_ENVIRONMENT.contains(t.getEnvironment())) {
+            throw new ServiceException("非法 environment 值: " + t.getEnvironment()
+                + " (合法值: test/pre/dev/staging/prod)", 604);
+        }
 
         // 自动算质量门禁
         t.setQualityGatePassed(computeQualityGate(t));
@@ -110,6 +119,13 @@ public class SubmissionServiceImpl implements ISubmissionService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int updateSubmission(Submission t) {
+        // environment 白名单校验 (604)
+        if (StringUtils.isNotBlank(t.getEnvironment())
+                && !VALID_ENVIRONMENT.contains(t.getEnvironment())) {
+            throw new ServiceException("非法 environment 值: " + t.getEnvironment()
+                + " (合法值: test/pre/dev/staging/prod)", 604);
+        }
+
         Submission old = submissionMapper.selectSubmissionById(t.getSubmissionId());
         if (old == null) {
             throw new ServiceException("提测单不存在", 404);

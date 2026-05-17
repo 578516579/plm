@@ -10,7 +10,7 @@ CREATE TABLE tb_submission (
     sprint_id             BIGINT(20)    DEFAULT NULL             COMMENT 'FK→tb_sprint',
     title                 VARCHAR(200)  NOT NULL                 COMMENT '提测标题',
     scope                 TEXT                                   COMMENT '提测范围（涉及需求/任务CSV）',
-    environment           VARCHAR(20)   NOT NULL DEFAULT 'dev'   COMMENT '测试环境 dev/staging/prod',
+    environment           VARCHAR(20)   NOT NULL DEFAULT 'test'  COMMENT '测试环境(biz_submission_environment:test/pre/dev/staging/prod)',
     expected_test_days    INT           DEFAULT 5                COMMENT '期望测试周期(天)',
     risk_notes            TEXT                                   COMMENT '风险提示',
     unit_test_coverage    DECIMAL(5,2)  DEFAULT NULL             COMMENT '单测覆盖率 %',
@@ -38,9 +38,10 @@ CREATE TABLE tb_submission (
     KEY idx_submission_submitter (submitter_user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='提测单（Submission）';
 
--- biz_submission_status 5x5 状态机
+-- biz_submission_status 5x5 状态机 + biz_submission_environment 5 值字典
 INSERT INTO sys_dict_type (dict_name, dict_type, status, create_by, create_time, remark) VALUES
-('提测状态', 'biz_submission_status', '0', 'admin', SYSDATE(), 'PRD F4.4 5 状态');
+('提测状态',   'biz_submission_status',      '0', 'admin', SYSDATE(), 'PRD F4.4 5 状态'),
+('提测环境', 'biz_submission_environment', '0', 'admin', SYSDATE(), '兼容原型 modal-newsubmit (test/pre) + SQL 历史 (dev/staging/prod) — 5 值');
 
 INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time, remark) VALUES
 (1, '草稿',       '00', 'biz_submission_status', '', 'info',    'Y', '0', 'admin', SYSDATE(), ''),
@@ -48,3 +49,11 @@ INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_cla
 (3, '质量门禁中', '02', 'biz_submission_status', '', 'warning', 'N', '0', 'admin', SYSDATE(), 'AI 检测中'),
 (4, '已通过',     '03', 'biz_submission_status', '', 'success', 'N', '0', 'admin', SYSDATE(), '终态'),
 (5, '已退回',     '04', 'biz_submission_status', '', 'danger',  'N', '0', 'admin', SYSDATE(), '可回 00 重新填');
+
+-- 提测环境 5 值(D1):对齐原型 modal-newsubmit "测试环境 TEST" / "预发环境 PRE" + 兼容历史值 dev/staging/prod
+INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time, remark) VALUES
+(1, '测试环境 TEST',    'test',    'biz_submission_environment', '', 'primary', 'Y', '0', 'admin', SYSDATE(), '原型 ns-env 第 1 选项 / 默认值'),
+(2, '预发环境 PRE',     'pre',     'biz_submission_environment', '', 'warning', 'N', '0', 'admin', SYSDATE(), '原型 ns-env 第 2 选项'),
+(3, '开发环境 DEV',     'dev',     'biz_submission_environment', '', 'info',    'N', '0', 'admin', SYSDATE(), '兼容旧数据'),
+(4, 'Staging',          'staging', 'biz_submission_environment', '', 'info',    'N', '0', 'admin', SYSDATE(), '兼容 E2E + featureflag 命名'),
+(5, '生产环境 PROD',    'prod',    'biz_submission_environment', '', 'danger',  'N', '0', 'admin', SYSDATE(), '极少用,生产环境提测特殊场景');
