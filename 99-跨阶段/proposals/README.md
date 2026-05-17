@@ -73,6 +73,7 @@ proposed    完成填写、关联数据，等 review
 | [0100](0100-fk-validation-via-service-checkexists.md) | FK 跨表校验走 `Service.checkExists()`，禁 Mapper 直读 | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0022 | — | （待 merged，需改 rules.md / 开发规范.md，独立 apply）|
 | [0101](0101-mr-url-host-whitelist.md) | 业务 URL 字段 host 白名单校验（防钓鱼）| **proposed** | 2026-05-17 | reflect W21 批次 / signals 0025 | — | （待 merged，独立 apply）|
 | [0200](0200-encoding-pretooluse-hook.md) | 编码自检脚本接入 git pre-commit + Claude PreToolUse hook | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0030（派生自 0028）| — | （待 merged，需改 settings.json/githooks，独立 apply）|
+| [0040](0040-self-evolution-v2-meta-rules.md) | self-evolution v2 元规则：写前 Read / partial 状态 / bundle 判据 / Sprint backlog 通道 / solo 评审节奏 | **proposed** | 2026-05-17 | [reflect/2026-W20-self-evolution-process-meta](../reflect/2026-W20-self-evolution-process-meta.md) F-META-01~05 (5-friction bundle) | — | （待 merged，meta 层升级）|
 
 ### 候选堆积处置回顾（W21 批量升格已清空）
 
