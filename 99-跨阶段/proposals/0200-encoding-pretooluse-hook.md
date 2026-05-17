@@ -165,7 +165,7 @@ Tracking 期: merged 后 2 周。
 
 | BL ID | 任务 | 优先级 | 估期 |
 |---|---|---|---|
-| BL-2026-009 | 改造 `check-encoding.sh` 加 `--staged` 模式, pre-commit 只扫 `git diff --cached --name-only` | P2 | S | TBD |
+| ~~BL-2026-009~~ | ✅ **已完成 2026-05-17**：`check-encoding.sh` 加 `--staged` 模式 + pre-commit hook 切到 --staged + 同次修 `-A2→-A5` 检测漏洞 | ~~P2~~ | ~~S~~ | Wjl+Claude |
 
 ### Tracking 数据
 

@@ -18,13 +18,13 @@
 | BL-2026-006 | [W20 tracking audit F-AUDIT-F1](../99-跨阶段/reflect/2026-W20-tracking-audit-mid.md) | 24 个 Phase 0X Gate instance 文件补 "溯及 proposal NNNN" 注 (per 0007/0008/0010/0011/0012/0013/0016/0032 §7 Step 4 集体承诺)| P2 | TBD | TBD | 单纯文本回标，无技术风险；建议批量脚本辅助 |
 | BL-2026-007 | [proposal 0101](../99-跨阶段/proposals/0101-mr-url-host-whitelist.md) §10 派生 | 实现 `cn.com.bosssfot.dv.plm.common.utils.UrlValidator` (含 checkHost + CSV 多值版本 + Guava InternetDomainName); Task / ManualProduct ServiceImpl add+edit 调用 | P1 | TBD | TBD | per 0041 grep 后确认 2 个字段; 含 unit test |
 | BL-2026-008 | [proposal 0101](../99-跨阶段/proposals/0101-mr-url-host-whitelist.md) §10 派生 | 配 application-dev/staging/prod.yml 的 `plm.url.allowed-hosts.task` + `.manualProduct` 白名单 | P1 | TBD | TBD | 与运维同步具体白名单后做 |
-| BL-2026-009 | [proposal 0200](../99-跨阶段/proposals/0200-encoding-pretooluse-hook.md) §10 派生 | 改造 `plm-backend/scripts/check-encoding.sh` 加 `--staged` 模式, pre-commit 只扫 `git diff --cached --name-only` | P2 | TBD | TBD | 性能优化, 当前全仓库扫描估 5-10s |
+| ~~BL-2026-009~~ | ~~[proposal 0200](../99-跨阶段/proposals/0200-encoding-pretooluse-hook.md) §10 派生~~ | ~~改造 `plm-backend/scripts/check-encoding.sh` 加 `--staged` 模式~~ | ~~P2~~ | ~~W21~~ | ~~Wjl+Claude~~ | ✅ 已完成 2026-05-17，移至 §已完成 |
 
 ## 已完成（归档）
 
-| ID | Sprint | 完成 commit | 完成日期 |
-|---|---|---|---|
-| | | | |
+| ID | Sprint | 完成 commit | 完成日期 | 备注 |
+|---|---|---|---|---|
+| BL-2026-009 | W21（自进化批次内）| 待回填 | 2026-05-17 | check-encoding.sh 加 `--staged` 模式 + 同次修复 `grep -A2 → -A5` 检测漏洞; pre-commit hook 切到 --staged; 性能从 ~5-10s（全扫）降到 <1s（增量扫）|
 
 ---
 
