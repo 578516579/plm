@@ -142,8 +142,9 @@
 - [x] competitive (P0) — 不动现有表结构,加 3 个项目级 JSON 字段
       (matrixJson 15×5 / monitorsJson 4 行 / ourSwotJson 4 象限),
       `aiAnalyze` 同步填,跟原型 renderCompetitive 1:1 + 前端 Vue 单页工作流 ✅
-- [ ] analytics (P1) — 前端追原型 (字段已对齐)
-- [ ] dashboard (P1) — active_projects 聚合接真实数据
+- [x] analytics (P1) — 前端按原型仪表盘做 (4 stat 卡 + DORA 4 卡 + 2 chart + AI 建议)
+- [x] dashboard (P1) — 前端按原型工作台做 (welcome + 4 stat + AI 面板 + 4 widget + 17 阶段 swimlane);
+      `active_projects` 真实聚合 backend `aggregate()` 仍 mock (待跨模块 join 替换)
 - [ ] dbdesign (P1) — ER 图渲染
 - [ ] testdata (P1) — 写库执行按钮
 - [ ] autotest (P1) — 运行历史时间线
