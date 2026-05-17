@@ -13,6 +13,7 @@ git config core.hooksPath .githooks
 | 文件 | 触发时机 | 作用 |
 |---|---|---|
 | [commit-msg](commit-msg) | `git commit` 写完 message 后、记录前 | 校验 message 符合 Conventional Commits 规范 |
+| [pre-push](pre-push) | `git push` 执行前 | 校验分支名规范；禁止直接推送 `main`/`release/*` |
 
 ## 跨平台说明
 
