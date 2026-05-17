@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,8 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.aiagent.domain.AiAgent;
 import cn.com.bosssfot.dv.plm.aiagent.mapper.AiAgentMapper;
 import cn.com.bosssfot.dv.plm.aiagent.service.IAiAgentService;
-import cn.com.bosssfot.dv.plm.common.dify.DifyService;
-import cn.com.bosssfot.dv.plm.common.dify.dto.DifyWorkflowResult;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatResult;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -33,6 +33,7 @@ public class AiAgentServiceImpl implements IAiAgentService {
     private static final Logger log = LoggerFactory.getLogger(AiAgentServiceImpl.class);
 
     private static final Set<String> ALLOWED_TYPE = Set.of("requirement","prd","code","test","release","ops");
+    private static final Set<String> ALLOWED_PROVIDER = Set.of("mock","dify","openai","anthropic");
     private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
     static {
         STATUS_TRANSITIONS.put("00", Set.of("01","02"));
@@ -41,7 +42,7 @@ public class AiAgentServiceImpl implements IAiAgentService {
     }
 
     @Autowired private AiAgentMapper aiAgentMapper;
-    @Autowired private DifyService difyService;
+    @Autowired private AiService aiService;
 
     @Override
     public List<AiAgent> selectAiAgentList(AiAgent t) { return aiAgentMapper.selectAiAgentList(t); }
@@ -57,6 +58,10 @@ public class AiAgentServiceImpl implements IAiAgentService {
         if (!ALLOWED_TYPE.contains(t.getAgentType()))
             throw new ServiceException("无效的 Agent 类型: " + t.getAgentType(), 604);
         if (t.getAuthorUserId() == null) throw new ServiceException("创建者不能为空", 602);
+        // provider 校验:默认 mock,非法值挡掉
+        if (StringUtils.isBlank(t.getProvider())) t.setProvider("mock");
+        if (!ALLOWED_PROVIDER.contains(t.getProvider().toLowerCase()))
+            throw new ServiceException("无效的 provider: " + t.getProvider() + ",允许 " + ALLOWED_PROVIDER, 604);
 
         if (t.getTotalCalls() == null)  t.setTotalCalls(0L);
         if (t.getSuccessRate() == null) t.setSuccessRate(BigDecimal.ZERO);
@@ -84,6 +89,8 @@ public class AiAgentServiceImpl implements IAiAgentService {
         }
         if (t.getAgentType() != null && !ALLOWED_TYPE.contains(t.getAgentType()))
             throw new ServiceException("无效的 Agent 类型: " + t.getAgentType(), 604);
+        if (t.getProvider() != null && !ALLOWED_PROVIDER.contains(t.getProvider().toLowerCase()))
+            throw new ServiceException("无效的 provider: " + t.getProvider() + ",允许 " + ALLOWED_PROVIDER, 604);
         t.setUpdateBy(SecurityUtils.getUsername());
         return aiAgentMapper.updateAiAgent(t);
     }
@@ -100,22 +107,41 @@ public class AiAgentServiceImpl implements IAiAgentService {
         if (!"00".equals(t.getStatus()))
             throw new ServiceException("Agent 当前状态不可调用 (需运行中)", 601);
 
-        // === 1. 走 Dify (若可用) === —— Mock 实现也实现了 DifyService 接口,所以始终非空
-        Map<String, Object> inputs = new LinkedHashMap<>();
-        inputs.put("agent_no",   t.getAgentNo());
-        inputs.put("agent_name", t.getAgentName());
-        inputs.put("agent_type", t.getAgentType());
-        inputs.put("description", t.getDescription() == null ? "" : t.getDescription());
-        inputs.put("prompt_template", t.getPromptTemplate() == null ? "" : t.getPromptTemplate());
+        // === 1. 构造统一 AiChatRequest,按 agent.provider 路由 ===
+        String provider = StringUtils.isBlank(t.getProvider()) ? "mock" : t.getProvider().toLowerCase();
 
-        DifyWorkflowResult result;
-        if (StringUtils.isNotBlank(t.getDifyWorkflowId())) {
-            // 优先用 Agent 上配置的 workflow_id
-            result = difyService.runWorkflow(t.getDifyWorkflowId(), inputs);
+        // provider=dify 时,model 字段语义为 workflow_id (优先 dify_workflow_id);
+        // 其他 provider 时,model 字段直接是模型名 (gpt-4o-mini / deepseek-chat / claude-sonnet-4-5)
+        String modelOrWorkflow;
+        if ("dify".equals(provider)) {
+            modelOrWorkflow = StringUtils.isNotBlank(t.getDifyWorkflowId())
+                    ? t.getDifyWorkflowId() : t.getModelName();
         } else {
-            // 否则按 agent_type 走 plm.dify.workflows 兜底路由
-            result = difyService.runWorkflowByType(t.getAgentType(), inputs);
+            modelOrWorkflow = t.getModelName();
         }
+
+        // 系统指令优先用 prompt_template,否则用 description
+        String systemPrompt = StringUtils.isNotBlank(t.getPromptTemplate())
+                ? t.getPromptTemplate()
+                : (StringUtils.isBlank(t.getDescription()) ? "你是 PLM 系统中的 AI Agent" : t.getDescription());
+
+        // 简单的"用户问题":让 Agent 自检/巡检,真实接入由各业务模块拼装
+        String userMsg = String.format("请执行 [%s] 类型 Agent '%s' 的任务", t.getAgentType(), t.getAgentName());
+
+        AiChatRequest req = AiChatRequest.builder(provider)
+                .model(modelOrWorkflow)
+                .system(systemPrompt)
+                .user(userMsg)
+                .temperature(0.5)
+                .maxTokens(2000)
+                .callerTag("ai-agent#" + t.getAgentNo())
+                // 给 dify 多传一份元信息作为 inputs 兜底
+                .difyInput("agent_no", t.getAgentNo())
+                .difyInput("agent_type", t.getAgentType())
+                .difyInput("description", t.getDescription() == null ? "" : t.getDescription())
+                .build();
+
+        AiChatResult result = aiService.chat(req);
 
         // === 2. 真实成功率统计 (移动平均) ===
         long calls = (t.getTotalCalls() == null ? 0L : t.getTotalCalls()) + 1;
@@ -130,13 +156,15 @@ public class AiAgentServiceImpl implements IAiAgentService {
         t.setUpdateBy("ai-agent");
         aiAgentMapper.updateAiAgent(t);
 
-        // === 3. 失败抛 708,业务层/前端按 PRD 错误码处理 ===
+        // === 3. 失败抛 708 ===
         if (!result.isSuccess()) {
-            log.warn("[AiAgent#{}] Dify 调用失败: {}", t.getAgentNo(), result.getErrorMessage());
-            throw new ServiceException("AI 调用失败: " + result.getErrorMessage(), 708);
+            log.warn("[AiAgent#{}] AI 调用失败 provider={}, error={}",
+                    t.getAgentNo(), result.getProvider(), result.getError());
+            throw new ServiceException("AI 调用失败: " + result.getError(), 708);
         }
-        log.info("[AiAgent#{}] Dify 调用成功,runId={},elapsed={}s,tokens={}",
-                t.getAgentNo(), result.getWorkflowRunId(), result.getElapsedSeconds(), result.getTotalTokens());
+        log.info("[AiAgent#{}] AI 调用成功 provider={}, model={}, tokens={}, elapsed={}ms",
+                t.getAgentNo(), result.getProvider(), result.getModel(),
+                result.getTotalTokens(), result.getElapsedMs());
         return aiAgentMapper.selectAiAgentById(id);
     }
 

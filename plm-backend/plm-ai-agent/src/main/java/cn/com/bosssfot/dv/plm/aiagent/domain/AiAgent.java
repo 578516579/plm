@@ -22,6 +22,8 @@ public class AiAgent extends BaseEntity {
     @Excel(name = "描述")      private String description;
     private String promptTemplate;
     @Excel(name = "Dify工作流ID") private String difyWorkflowId;
+    @Excel(name = "Provider")     private String provider;      // mock / dify / openai / anthropic
+    @Excel(name = "模型名")       private String modelName;
     private String configJson;
     @Excel(name = "总调用")    private Long totalCalls;
     @Excel(name = "成功率")    private BigDecimal successRate;
@@ -44,6 +46,10 @@ public class AiAgent extends BaseEntity {
     public void setPromptTemplate(String v) { this.promptTemplate = v; }
     public String getDifyWorkflowId() { return difyWorkflowId; }
     public void setDifyWorkflowId(String v) { this.difyWorkflowId = v; }
+    public String getProvider() { return provider; }
+    public void setProvider(String v) { this.provider = v; }
+    public String getModelName() { return modelName; }
+    public void setModelName(String v) { this.modelName = v; }
     public String getConfigJson() { return configJson; }
     public void setConfigJson(String v) { this.configJson = v; }
     public Long getTotalCalls() { return totalCalls; }

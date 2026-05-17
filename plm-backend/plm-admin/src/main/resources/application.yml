@@ -12,6 +12,31 @@ plm:
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
+  # ==================== AI 多 Provider 集成 (V2) ====================
+  # 默认 default-provider=mock → 业务 agent 未指定 provider 时走 mock。
+  # 4 个 provider 实现:mock / dify / openai / anthropic
+  #   - openai 协议兼容 OpenAI / DeepSeek / 通义 / Moonshot / SiliconFlow 等
+  #     (改 base-url 即可切厂商,无需改代码)
+  #   - anthropic 走 Claude Messages API (x-api-key + anthropic-version)
+  #   - dify 仍走下方 plm.dify.* 配置 (workflow 编排)
+  ai:
+    default-provider: ${AI_DEFAULT_PROVIDER:mock}
+    openai:
+      enabled: ${AI_OPENAI_ENABLED:false}
+      base-url: ${AI_OPENAI_BASE_URL:https://api.openai.com/v1}
+      api-key: ${AI_OPENAI_API_KEY:}
+      default-model: ${AI_OPENAI_DEFAULT_MODEL:gpt-4o-mini}
+      connect-timeout-ms: ${AI_OPENAI_CONNECT_TIMEOUT_MS:5000}
+      read-timeout-ms: ${AI_OPENAI_READ_TIMEOUT_MS:60000}
+    anthropic:
+      enabled: ${AI_ANTHROPIC_ENABLED:false}
+      base-url: ${AI_ANTHROPIC_BASE_URL:https://api.anthropic.com}
+      api-key: ${AI_ANTHROPIC_API_KEY:}
+      default-model: ${AI_ANTHROPIC_DEFAULT_MODEL:claude-sonnet-4-5}
+      version: ${AI_ANTHROPIC_VERSION:2023-06-01}
+      connect-timeout-ms: ${AI_ANTHROPIC_CONNECT_TIMEOUT_MS:5000}
+      read-timeout-ms: ${AI_ANTHROPIC_READ_TIMEOUT_MS:60000}
+
   # ==================== Dify AI 编排集成 (PRD §2.3) ====================
   # 默认 enabled=false → 全部走 mock,本地启动零依赖、CI E2E 不抖动。
   # 生产开启:export DIFY_ENABLED=true 且 DIFY_API_KEY=<Dify Service API Key>

@@ -9,6 +9,8 @@
         <result property="description"     column="description"      />
         <result property="promptTemplate"  column="prompt_template"  />
         <result property="difyWorkflowId"  column="dify_workflow_id" />
+        <result property="provider"        column="provider"         />
+        <result property="modelName"       column="model_name"       />
         <result property="configJson"      column="config_json"      />
         <result property="totalCalls"      column="total_calls"      />
         <result property="successRate"     column="success_rate"     />
@@ -25,7 +27,7 @@
 
     <sql id="selectAiAgentVo">
         select agent_id, agent_no, agent_name, agent_type, description, prompt_template,
-               dify_workflow_id, config_json, total_calls, success_rate, last_invoked_at,
+               dify_workflow_id, provider, model_name, config_json, total_calls, success_rate, last_invoked_at,
                status, author_user_id, create_by, create_time, update_by, update_time, remark, del_flag
         from tb_ai_agent
     </sql>
@@ -57,6 +59,8 @@
             <if test="description != null">description,</if>
             <if test="promptTemplate != null">prompt_template,</if>
             <if test="difyWorkflowId != null">dify_workflow_id,</if>
+            <if test="provider != null">provider,</if>
+            <if test="modelName != null">model_name,</if>
             <if test="configJson != null">config_json,</if>
             <if test="totalCalls != null">total_calls,</if>
             <if test="successRate != null">success_rate,</if>
@@ -74,6 +78,8 @@
             <if test="description != null">#{description},</if>
             <if test="promptTemplate != null">#{promptTemplate},</if>
             <if test="difyWorkflowId != null">#{difyWorkflowId},</if>
+            <if test="provider != null">#{provider},</if>
+            <if test="modelName != null">#{modelName},</if>
             <if test="configJson != null">#{configJson},</if>
             <if test="totalCalls != null">#{totalCalls},</if>
             <if test="successRate != null">#{successRate},</if>
@@ -94,6 +100,8 @@
             <if test="description != null">description = #{description},</if>
             <if test="promptTemplate != null">prompt_template = #{promptTemplate},</if>
             <if test="difyWorkflowId != null">dify_workflow_id = #{difyWorkflowId},</if>
+            <if test="provider != null">provider = #{provider},</if>
+            <if test="modelName != null">model_name = #{modelName},</if>
             <if test="configJson != null">config_json = #{configJson},</if>
             <if test="totalCalls != null">total_calls = #{totalCalls},</if>
             <if test="successRate != null">success_rate = #{successRate},</if>
