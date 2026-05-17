@@ -142,6 +142,22 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 - 🔴 1 个 (Requirement) / 🟡 5 个 / 🟢 6 个
 - 3 个架构性问题需 ADR (Requirement 状态机 / Defect 状态机 / Document vs F5.5 知识库)
 
+## 🔒 无文档不执行 (2026-05-17 生效)
+
+**硬约束**:业务模块的任何实质性修改(加字段/改状态机/加 API/改业务规则)**必须先有对应 Phase 文档**。
+
+每模块必备 **5 份核心文档**:
+- `01-立项/<Module>-PRD.md`
+- `02-设计/<Module>-数据库设计.md` + `<Module>-API设计.md`
+- `04-测试/<Module>-测试计划-YYYY-MM-DD.md` + 测试用例库
+- `05-上线/<Module>-发布计划-YYYY-MM-DD.md`
+
+**文档完整性现状** ([审计 2026-05-17](99-跨阶段/audits/2026-05-17-process-docs-completeness-audit.md)):
+- 5/5 完整: **1 个** (project,范本) — 0/5 空白: **24 个** — 3/5 部分: **6 个**
+- 待补 132 份核心文档(P0 24 份 PRD + P1 48 份设计 + P2 60 份测试/上线)
+
+详细规则:[.claude/rules.md §O](.claude/rules.md) | [03-开发/开发规范.md §6.0](03-开发/开发规范.md)
+
 旧"PRD-aligned 17 + 空壳 13"统计是早期 Phase 03 末状态,已过时。
 
 ## Rules & playbooks

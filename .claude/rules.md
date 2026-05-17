@@ -338,6 +338,73 @@ PR 涉及 UI 改动时，PR 描述中包含 UED规范.md §13 的 8 项自检 Ch
 
 ---
 
+## O. 无文档不执行（MUST — 模块准入硬约束,2026-05-17 生效）
+
+**核心原则**：业务模块的过程文档与代码同等重要。**任何对模块的实质性修改**（加字段、改状态机、加 API、改业务规则）**都必须先有对应 Phase 文档**,文档不在或不齐 → **拒绝执行,先补文档再写代码**。
+
+本约束源于 [审计 2026-05-17](../99-跨阶段/audits/2026-05-17-process-docs-completeness-audit.md):31 个 🟢 PRD-aligned 模块中只有 Project 一个 5/5 完整,24 个 0/5 完全空白,文档库与代码库严重 drift。
+
+### O.1 必产出物清单(强制对照)
+
+每个业务模块在 v1.0 GA 前必须具备的 **5 份核心文档**（参考 Project 模块范本）:
+
+| Phase | 必产出 | 路径模板 | 范本 |
+|---|---|---|---|
+| 01 立项 | `<Module>-PRD.md` | `01-立项/<Module>-PRD.md` | [Project-PRD.md](../01-立项/Project-PRD.md) |
+| 02 设计 | `<Module>-数据库设计.md` | `02-设计/<Module>-数据库设计.md` | [Project-数据库设计.md](../02-设计/Project-数据库设计.md) |
+| 02 设计 | `<Module>-API设计.md` | `02-设计/<Module>-API设计.md` | [Project-API设计.md](../02-设计/Project-API设计.md) |
+| 04 测试 | `<Module>-测试计划-YYYY-MM-DD.md` + 测试用例库 | `04-测试/<Module>-测试计划-...md` + `04-测试/测试用例库/<Module>-{functional,api,e2e}.md` | [Project-测试计划-2026-05-15.md](../04-测试/Project-测试计划-2026-05-15.md) |
+| 05 上线 | `<Module>-发布计划-YYYY-MM-DD.md` | `05-上线/<Module>-发布计划-...md` | [Project-发布计划-2026-05-15.md](../05-上线/Project-发布计划-2026-05-15.md) |
+
+### O.2 触发拒绝执行的场景(MUST)
+
+Claude 收到以下任一类请求时,**先检查必产出物是否齐全**,缺则拒绝执行 + 引导先补文档:
+
+| 触发场景 | 必备 Phase 文档 |
+|---|---|
+| 加字段 / 改 Domain / 改 SQL DDL | 01 PRD + 02 数据库设计 |
+| 加 API 端点 / 改 Controller / 改 Mapper | 01 PRD + 02 API 设计 |
+| 改业务规则 / 加白名单 / 改状态机 | 01 PRD + 02 API 设计 |
+| 加单测 / E2E / 改 fixtures | 04 测试计划 + 测试用例库 |
+| 准备发布 / 改 Changelog | 05 发布计划 |
+
+**例外**(允许先写代码,事后回溯补文档):
+- 修 typo / 修 lint / 删 dead code(不动业务逻辑)
+- 紧急安全修复(密码泄露 / SQL 注入等),但**事后 7 天内必须补对应 Phase 文档**
+
+### O.3 文档完整性检查(SHOULD,Claude 自检)
+
+收到模块修改请求时,Claude 应在第一回合主动做以下检查并展示结果:
+
+```
+Checking <Module> module process docs:
+  □ 01-立项/<Module>-PRD.md            <存在/缺失>
+  □ 02-设计/<Module>-数据库设计.md     <存在/缺失>
+  □ 02-设计/<Module>-API设计.md        <存在/缺失>
+  □ 04-测试/<Module>-测试计划-*.md     <存在/缺失>
+  □ 05-上线/<Module>-发布计划-*.md     <存在/缺失>
+```
+
+缺一份就提示用户:"<Module> 模块缺 <docName>,按规则 §O.2 应先补该文档再做代码改动。我先用模板生成骨架?或继续坚持先动代码(走例外)?"
+
+### O.4 与 §M.2 9 项 DoD 的关系
+
+[§M.2 PRD-align 9 项 DoD](rules.md#m2-新模块落地强制-9-项-dodmust) 是**字段层**的硬约束(PRD-MAPPING.md §2 字段表 + 代码 + 测试)。
+**§O 是流程层** 的硬约束(Phase 01-05 过程文档)。
+
+两者**叠加生效**:
+- 一个新模块的"真完成"需要 9 项 DoD + 5 份 Phase 文档 = 14 项硬指标全过
+- 既有模块(本会话 31 个 🟢 PRD-aligned)的 9 项 DoD 已过,但 5 份 Phase 文档欠账(24 个 0/5),由 [审计 2026-05-17](../99-跨阶段/audits/2026-05-17-process-docs-completeness-audit.md) 跟踪补齐
+
+### O.5 自动派生工具链(允许,SHOULD)
+
+`02 数据库设计 / 02 API 设计 / 04 测试计划` 三类文档**可由 PRD-MAPPING.md §2 + SQL + Controller + E2E spec 自动派生**(信息已存在,只是组装格式不同)。Claude **允许且鼓励**批量生成这三类骨架,但:
+- 派生文档必须在文件头**明确标注"由 X 自动派生于 commit Y"**
+- 业务背景 / AI 能力规划 / 验收标准等需要**人工判断**的段落,保留 `<待人工填写>` 占位
+- `PRD / 发布计划` 这两类不允许纯自动派生,必须人工写 + Claude 辅助
+
+---
+
 ## 索引：相关规则文件
 
 | 文件 | 受众 | 强制层 |

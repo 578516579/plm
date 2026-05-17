@@ -1,0 +1,97 @@
+# 31 模块过程文档完整性审计 (2026-05-17)
+
+> **审计触发**: 用户指令"将 PRD 的各个模块的过程文档在文档库补充完整,以后的任务必须按照有文档才能执行的原则进行"
+>
+> **审计方法**: 派遣 agent 扫描 `01-立项/`、`02-设计/`、`04-测试/`、`05-上线/` 4 个目录,对 31 个 🟢 PRD-aligned 业务模块逐个核对文件存在性
+>
+> **强制约束已落地**: 本审计同步触发 [.claude/rules.md §O "无文档不执行"](../../.claude/rules.md) 硬约束生效
+
+---
+
+## 现状矩阵 (31 模块 × 5 Phase)
+
+| 模块 | 01 PRD | 02 数据库 | 02 API | 04 测试 | 05 上线 | 完整度 |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|
+| **project** | ✅ | ✅ | ✅ | ✅ (4 文件) | ✅ | **5/5 🟢** |
+| requirement | ✅ | ✅ | ✅ | ❌ | ❌ | 3/5 🟡 |
+| sprint | ✅ | ✅ | ✅ | ❌ | ❌ | 3/5 🟡 |
+| task | ✅ | ✅ | ✅ | ❌ | ❌ | 3/5 🟡 |
+| testcase | ✅ | ✅ | ✅ | ❌ | ❌ | 3/5 🟡 |
+| defect | ✅ | ✅ | ✅ | ❌ | ❌ | 3/5 🟡 |
+| document | ✅ | ✅ | ✅ | ❌ | ❌ | 3/5 🟡 |
+| inception | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| competitive | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| prd | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| ued | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| arch | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| dbdesign | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| apidesign | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| testplan | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| testreport | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| testdata | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| autotest | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| submission | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| manual-product | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| manual-impl | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| manual-ops | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| apidoc | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| analytics | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| dashboard | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| ai-agent | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| openspec | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| pipeline | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| feature-flag | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| dora | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+| release | ❌ | ❌ | ❌ | ❌ | ❌ | 0/5 ⚪ |
+
+---
+
+## 缺口统计
+
+- **完全完整 (5/5)**: **1 个** — project (范本模块)
+- **部分完整 (3/5)**: **6 个** — requirement / sprint / task / testcase / defect / document (有 PRD + 02 双设计,缺 04 + 05)
+- **完全空白 (0/5)**: **24 个** — inception / competitive / prd / ued / arch / dbdesign / apidesign / testplan / testreport / testdata / autotest / submission / manual-product / manual-impl / manual-ops / apidoc / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora / release
+
+**核心文档缺口总计: 132 份**:
+- 缺 PRD: **24 份** (P0)
+- 缺数据库设计: **24 份** (P1)
+- 缺 API 设计: **24 份** (P1)
+- 缺测试计划: **30 份** (P2,project 已有)
+- 缺发布计划: **30 份** (P2,project 已有)
+
+---
+
+## 优先级建议 (补齐策略)
+
+| 优先级 | 类型 | 数量 | 可派生程度 | 推荐工具 |
+|---|---|---|---|---|
+| **P0** | PRD (模块准入凭证) | 24 份 | 中 — 引用 PRD-MAPPING §2 + 原型 HTML + AgriAI-PLM 完整 PRD 文档 | Claude 批量从模板 + SSoT 生成 |
+| **P1** | 数据库设计 | 24 份 | 高 — 直接从 `business-<entity>.sql` DDL + PRD-MAPPING §2 字段表派生 | 模板化生成 |
+| **P1** | API 设计 | 24 份 | 高 — 直接从 `<Module>Controller.java` + Mapper.xml + PRD-MAPPING §2 派生 | 模板化生成 |
+| **P2** | 测试计划 | 30 份 | 高 — 从 E2E spec `plm-frontend/e2e/<module>.spec.ts` 派生 | 模板化生成 |
+| **P2** | 发布计划 | 30 份 | 中 — 参考 `Project-发布计划-2026-05-15.md` 范本 | 模板化生成 |
+
+---
+
+## 关键观察
+
+1. **文档库与代码库严重 drift** — 31 模块全 🟢 PRD-aligned (字段表 + 代码 + 测试),但 24 个完全没过程文档,只靠 PRD-MAPPING.md §2 集中维护字段层,**Phase 01-05 流程文档严重缺位**。
+
+2. **范本只有 Project** — Project 模块作为 v0.1.0 首发,完整走完 Phase 01-05,文档体系健全,可作其余 30 模块的复制范本。
+
+3. **6 个 🟡 部分完整模块** (requirement / sprint / task / testcase / defect / document) 距完整只差 04 + 05 两层,补齐成本相对低。
+
+4. **02-设计目录存在 3 份通用旧文档** (`API 设计.md` / `数据库设计.md` / `系统架构.md` / `UED规范.md`),非模块前缀,推断为 P0-Phase 早期占位,需保留作总览 + 各模块切片并存。
+
+5. **01-立项有 3 份通用文档** (`PRD.md` / `商业计划.md` / `市场调研.md` / `立项评审纪要.md`),非模块前缀;Project 已切出 `Project-商业计划.md` 等,其余 30 模块未切。
+
+6. **审计与"无文档不执行"约束的关系**:本次审计揭示的 24 个 0/5 模块如果按新规则严格执行,**它们之后的任何修改都需要先补齐文档**;但**24 个模块代码已落地**(本会话刚完成 PRD-align),回溯补文档不强制阻塞旧代码。新规则从下一个变更开始生效。
+
+---
+
+## 后续行动 (主进程跟进)
+
+按 P0 → P1 → P2 顺序分批补齐 132 份文档。每批次走规则 §M.2 "字段表先于代码" 同款 commit 范式:
+1. 批量产出**骨架文档** (引用 PRD-MAPPING §2 + 代码 + 原型)
+2. 标注**待人工填实质**部分 (业务背景 / AI 能力规划 / 验收标准)
+3. 单次 commit 闭环,记入本审计闭环
