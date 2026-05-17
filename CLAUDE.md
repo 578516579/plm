@@ -133,10 +133,10 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 3. PRD-align 落地走 [PRD-MAPPING.md §8 9 项 DoD](PRD-MAPPING.md)
 4. 详细硬规则见 [.claude/rules.md §M](.claude/rules.md)
 
-**实现进度速览** (2026-05-17 重核,详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
-- 🟢 真 PRD-aligned (§2 字段对照表 + 代码) **30 个**: 含 project / requirement / sprint / task / testcase / defect / testplan / testreport / apidoc / manual-product / release / submission (本会话) + 原 18 个
-- 🟢 早期对齐 (待 ADR-C 决策) **1 个**: document
-- 🔴 缺模块 0 个
+**实现进度速览** (2026-05-17 重核,详 [PRD-MAPPING.md §1](PRD-MAPPING.md)) — **🎉 31/31 全 PRD-aligned**:
+- 🟢 真 PRD-aligned (§2 字段对照表 + 代码) **31 个**: 含本会话补齐的 13 个模块 (project / requirement / sprint / task / testcase / defect / testplan / testreport / apidoc / manual-product / release / submission / document) + 原 18 个
+- 🟢 早期对齐 **0 个** 🎉
+- 🔴 缺模块 **0 个**
 
 **12 个早期模块 drift 审计** ([99-跨阶段/audits/2026-05-17-12-modules-drift-audit.md](99-跨阶段/audits/2026-05-17-12-modules-drift-audit.md)):
 - 🔴 1 个 (Requirement) / 🟡 5 个 / 🟢 6 个
