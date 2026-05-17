@@ -10,12 +10,13 @@
         <p class="page-subtitle">统一管理 12 类项目文档 (PRD/HLD/LLD/DB/API/需求/架构/测试/手册/Changelog)</p>
       </div>
       <el-button type="primary" @click="openAdd">
-        <el-icon><Plus /></el-icon>&nbsp;+ 新建文档
+        <el-icon><Plus /></el-icon>&nbsp;新增文档
       </el-button>
     </div>
 
     <!-- 类型 chip 筛选 -->
     <el-card shadow="never" class="filter-card">
+      <div class="chip-label">📂 文档类型:</div>
       <div class="chip-row">
         <el-tag
           :type="!queryParams.docType ? 'primary' : 'info'"

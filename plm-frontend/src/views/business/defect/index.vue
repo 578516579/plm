@@ -10,7 +10,7 @@
         <p class="page-subtitle">AI 辅助缺陷描述规范化,智能相似缺陷匹配</p>
       </div>
       <el-button type="primary" @click="openAdd">
-        <el-icon><Plus /></el-icon>&nbsp;+ 新建缺陷
+        <el-icon><Plus /></el-icon>&nbsp;新增缺陷
       </el-button>
     </div>
 
@@ -62,7 +62,7 @@
       <el-table v-loading="listLoading" :data="list" stripe>
         <el-table-column label="编号" prop="defectNo" width="160" />
         <el-table-column label="缺陷标题" prop="title" min-width="200" show-overflow-tooltip />
-        <el-table-column label="严重" width="90" align="center">
+        <el-table-column label="严重级别" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="severityTag(row.severity)" size="small" effect="dark">{{ row.severity || '-' }}</el-tag>
           </template>
@@ -72,7 +72,7 @@
             <el-tag :type="statusTagFor(row.status).type" size="small">{{ statusTagFor(row.status).label }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="类型" width="100" align="center">
+        <el-table-column label="分类" width="100" align="center">
           <template #default="{ row }">{{ categoryLabel(row.category) }}</template>
         </el-table-column>
         <el-table-column label="指派" width="100" align="center">

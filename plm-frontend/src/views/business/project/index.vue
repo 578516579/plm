@@ -112,6 +112,9 @@
     <!-- 新建/编辑 Dialog -->
     <el-dialog v-model="formDialog" :title="form.id ? `编辑项目 #${form.projectNo}` : '新增项目'" width="600">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+        <el-form-item label="项目编号" prop="projectNo">
+          <el-input v-model="form.projectNo" placeholder="留空自动生成 PRJ-YYYY-NNNN" maxlength="64" />
+        </el-form-item>
         <el-form-item label="项目名称" prop="projectName" required>
           <el-input v-model="form.projectName" placeholder="输入项目名称" maxlength="128" show-word-limit />
         </el-form-item>
@@ -164,7 +167,7 @@
       <template #footer>
         <el-button @click="formDialog = false">取消</el-button>
         <el-button type="primary" :loading="saving" @click="handleSubmit">
-          {{ form.id ? '更新' : '创建' }}
+          {{ form.id ? '更新' : '确定' }}
         </el-button>
       </template>
     </el-dialog>

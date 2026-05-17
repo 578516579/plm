@@ -15,7 +15,7 @@
           <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 分析优先级
         </el-button>
         <el-button type="primary" @click="openAdd">
-          <el-icon><Plus /></el-icon>&nbsp;+ 新建需求
+          <el-icon><Plus /></el-icon>&nbsp;新增需求
         </el-button>
       </div>
     </div>

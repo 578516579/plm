@@ -16,7 +16,7 @@
         <el-button type="success" :loading="aiLoading" @click="openAiSplit">
           <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 拆分任务
         </el-button>
-        <el-button type="primary" @click="openAdd"><el-icon><Plus /></el-icon>&nbsp;+ 新建任务</el-button>
+        <el-button type="primary" @click="openAdd"><el-icon><Plus /></el-icon>&nbsp;新增任务</el-button>
       </div>
     </div>
 
