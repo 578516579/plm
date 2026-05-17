@@ -50,6 +50,12 @@ public class RequirementServiceImpl implements IRequirementService
         STATUS_TRANSITIONS.put("03", Set.of());             // 已取消（终态）
     }
 
+    /** 字段白名单(604 校验,PRD-MAPPING §2 Requirement) */
+    private static final Set<String> VALID_STATUS = Set.of("00", "01", "02", "03");
+    private static final Set<String> VALID_AI_VALUE = Set.of("H", "M", "L");
+    private static final Set<String> VALID_PRIORITY = Set.of("00", "01", "02");
+    private static final Set<String> VALID_SOURCE = Set.of("01", "02", "03", "04");
+
     @Autowired
     private RequirementMapper requirementMapper;
 
@@ -79,6 +85,9 @@ public class RequirementServiceImpl implements IRequirementService
         if (requirement.getProjectId() == null) {
             throw new ServiceException("关联项目不能为空", 602);
         }
+        // 字段白名单 (604)
+        validateWhitelist(requirement);
+
         // FK 校验：项目必须存在
         Project project = projectMapper.selectProjectById(requirement.getProjectId());
         if (project == null) {
@@ -118,6 +127,9 @@ public class RequirementServiceImpl implements IRequirementService
     @Transactional(rollbackFor = Exception.class)
     public int updateRequirement(Requirement requirement)
     {
+        // 字段白名单 (604)
+        validateWhitelist(requirement);
+
         Requirement old = requirementMapper.selectRequirementById(requirement.getRequirementId());
         if (old == null) {
             throw new ServiceException("需求不存在", 404);
@@ -165,6 +177,21 @@ public class RequirementServiceImpl implements IRequirementService
     // ─────────────────────────────────────────────────────────────────────
     // 私有辅助
     // ─────────────────────────────────────────────────────────────────────
+
+    private void validateWhitelist(Requirement r) {
+        if (StringUtils.isNotBlank(r.getStatus()) && !VALID_STATUS.contains(r.getStatus())) {
+            throw new ServiceException("非法状态值: " + r.getStatus(), 604);
+        }
+        if (StringUtils.isNotBlank(r.getAiValue()) && !VALID_AI_VALUE.contains(r.getAiValue())) {
+            throw new ServiceException("非法 AI 价值评估值: " + r.getAiValue(), 604);
+        }
+        if (StringUtils.isNotBlank(r.getPriority()) && !VALID_PRIORITY.contains(r.getPriority())) {
+            throw new ServiceException("非法优先级值: " + r.getPriority(), 604);
+        }
+        if (StringUtils.isNotBlank(r.getSource()) && !VALID_SOURCE.contains(r.getSource())) {
+            throw new ServiceException("非法需求来源值: " + r.getSource(), 604);
+        }
+    }
 
     /** ADR-0002：编号规则 REQ-YYYY-NNNN */
     private String generateRequirementNo() {

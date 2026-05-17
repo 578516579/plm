@@ -72,7 +72,8 @@ export function makeRequirementData(projectId: number, suffix?: string) {
     title: `E2E 需求-${tag}`,
     description: `自动测试需求描述 ${tag}`,
     source: '01',
-    priority: '01'
+    priority: '01',
+    aiValue: 'M'   // 中价值,可选字段,PRD-MAPPING §2 Requirement
   }
 }
 

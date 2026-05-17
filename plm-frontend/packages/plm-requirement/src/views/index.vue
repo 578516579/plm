@@ -26,6 +26,11 @@
           <el-option v-for="dict in status_options" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
       </el-form-item>
+      <el-form-item label="AI价值" prop="aiValue">
+        <el-select v-model="queryParams.aiValue" placeholder="全部" clearable>
+          <el-option v-for="dict in ai_value_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -69,6 +74,11 @@
       <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :options="status_options" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="AI价值" align="center" prop="aiValue" width="90">
+        <template #default="scope">
+          <dict-tag :options="ai_value_options" :value="scope.row.aiValue" />
         </template>
       </el-table-column>
       <el-table-column label="指派" align="center" prop="assigneeUserId" width="80" />
@@ -128,6 +138,13 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
+            <el-form-item label="AI 价值评估" prop="aiValue">
+              <el-select v-model="form.aiValue" placeholder="AI 评估或人工填" clearable style="width: 100%">
+                <el-option v-for="dict in ai_value_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
             <el-form-item label="指派用户ID" prop="assigneeUserId">
               <el-input v-model="form.assigneeUserId" placeholder="可空" />
             </el-form-item>
@@ -162,8 +179,9 @@ const { proxy } = getCurrentInstance() as any
 const {
   biz_req_source: source_options,
   biz_req_priority: priority_options,
-  biz_req_status: status_options
-} = toRefs<any>(proxy.useDict('biz_req_source', 'biz_req_priority', 'biz_req_status'))
+  biz_req_status: status_options,
+  biz_req_ai_value: ai_value_options
+} = toRefs<any>(proxy.useDict('biz_req_source', 'biz_req_priority', 'biz_req_status', 'biz_req_ai_value'))
 
 const list = ref<RequirementForm[]>([])
 const loading = ref(true)
@@ -185,6 +203,7 @@ const queryParams = ref<RequirementQuery>({
   source: undefined,
   priority: undefined,
   status: undefined,
+  aiValue: undefined,
   assigneeUserId: undefined
 })
 
@@ -211,6 +230,7 @@ function reset() {
     source: '01',
     priority: '02',
     status: '00',
+    aiValue: undefined,
     assigneeUserId: undefined,
     reviewNote: undefined
   }

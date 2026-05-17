@@ -18,7 +18,8 @@ CREATE TABLE tb_requirement (
     description       TEXT                                   COMMENT '详细描述（Markdown 兼容）',
     source            VARCHAR(2)    NOT NULL DEFAULT '01'    COMMENT '需求来源（字典 biz_req_source）',
     priority          VARCHAR(2)    NOT NULL DEFAULT '02'    COMMENT '优先级（字典 biz_req_priority）',
-    status            VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT '状态（字典 biz_req_status）',
+    status            VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT '状态（字典 biz_req_status,4 态实用版 — ADR-A)',
+    ai_value          VARCHAR(2)    DEFAULT NULL             COMMENT 'AI 价值评估（字典 biz_req_ai_value:H/M/L,原型 rdm-edit-ai + PRD §F2.1）',
     assignee_user_id  BIGINT(20)    DEFAULT NULL             COMMENT '指派给的用户 FK→sys_user.user_id',
     review_note       VARCHAR(500)  DEFAULT NULL             COMMENT '评审简要纪要（状态推进时填）',
     create_by         VARCHAR(64)   DEFAULT ''               COMMENT '创建者',
@@ -35,12 +36,13 @@ CREATE TABLE tb_requirement (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='需求（Requirement）';
 
 -- ----------------------------
--- 2. 字典类型（3 个）
+-- 2. 字典类型（4 个）
 -- ----------------------------
 INSERT INTO sys_dict_type (dict_name, dict_type, status, create_by, create_time, remark) VALUES
-('需求来源',   'biz_req_source',   '0', 'admin', SYSDATE(), '需求来源分类'),
-('需求优先级', 'biz_req_priority', '0', 'admin', SYSDATE(), '需求优先级 P0/P1/P2'),
-('需求状态',   'biz_req_status',   '0', 'admin', SYSDATE(), '需求生命周期状态');
+('需求来源',     'biz_req_source',   '0', 'admin', SYSDATE(), '需求来源分类'),
+('需求优先级',   'biz_req_priority', '0', 'admin', SYSDATE(), '需求优先级 P0/P1/P2'),
+('需求状态',     'biz_req_status',   '0', 'admin', SYSDATE(), '需求生命周期状态(4 态实用版 — ADR-A)'),
+('AI价值评估', 'biz_req_ai_value', '0', 'admin', SYSDATE(), 'AI 评估的需求价值 H/M/L(原型 rdm-edit-ai)');
 
 -- ----------------------------
 -- 3. 字典数据（4 + 3 + 4 = 11 条）
@@ -58,12 +60,18 @@ INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_cla
 (2, 'P1 重要', '01', 'biz_req_priority', '', 'warning', 'N', '0', 'admin', SYSDATE(), ''),
 (3, 'P2 一般', '02', 'biz_req_priority', '', 'info',    'Y', '0', 'admin', SYSDATE(), '');
 
--- 状态（与 PRD §3.3 4×4 状态机一致）
+-- 状态（4 态实用版 — ADR-A,详见 PRD-MAPPING.md §2 Requirement 决策记录 D1）
 INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time, remark) VALUES
 (1, '待评审', '00', 'biz_req_status',   '', 'info',    'Y', '0', 'admin', SYSDATE(), ''),
 (2, '开发中', '01', 'biz_req_status',   '', 'primary', 'N', '0', 'admin', SYSDATE(), ''),
 (3, '已完成', '02', 'biz_req_status',   '', 'success', 'N', '0', 'admin', SYSDATE(), '终态'),
 (4, '已取消', '03', 'biz_req_status',   '', 'danger',  'N', '0', 'admin', SYSDATE(), '终态');
+
+-- AI 价值评估(原型 rdm-edit-ai)
+INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time, remark) VALUES
+(1, '高价值', 'H', 'biz_req_ai_value', '', 'danger',  'N', '0', 'admin', SYSDATE(), ''),
+(2, '中价值', 'M', 'biz_req_ai_value', '', 'warning', 'N', '0', 'admin', SYSDATE(), ''),
+(3, '低价值', 'L', 'biz_req_ai_value', '', 'info',    'N', '0', 'admin', SYSDATE(), '');
 
 -- ----------------------------
 -- 4. 菜单与权限（菜单 ID 2020-2025，挂在业务管理 2000 下）

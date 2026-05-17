@@ -11,6 +11,7 @@
         <result property="source"          column="source"           />
         <result property="priority"        column="priority"         />
         <result property="status"          column="status"           />
+        <result property="aiValue"         column="ai_value"         />
         <result property="assigneeUserId"  column="assignee_user_id" />
         <result property="reviewNote"      column="review_note"      />
         <result property="createBy"        column="create_by"        />
@@ -23,7 +24,7 @@
 
     <sql id="selectRequirementVo">
         select requirement_id, requirement_no, project_id, title, description,
-               source, priority, status, assignee_user_id, review_note,
+               source, priority, status, ai_value, assignee_user_id, review_note,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_requirement
     </sql>
@@ -50,6 +51,9 @@
             <if test="status != null and status != ''">
                 and status = #{status}
             </if>
+            <if test="aiValue != null and aiValue != ''">
+                and ai_value = #{aiValue}
+            </if>
             <if test="assigneeUserId != null">
                 and assignee_user_id = #{assigneeUserId}
             </if>
@@ -72,6 +76,7 @@
             <if test="source != null">source,</if>
             <if test="priority != null">priority,</if>
             <if test="status != null">status,</if>
+            <if test="aiValue != null">ai_value,</if>
             <if test="assigneeUserId != null">assignee_user_id,</if>
             <if test="reviewNote != null">review_note,</if>
             <if test="createBy != null">create_by,</if>
@@ -86,6 +91,7 @@
             <if test="source != null">#{source},</if>
             <if test="priority != null">#{priority},</if>
             <if test="status != null">#{status},</if>
+            <if test="aiValue != null">#{aiValue},</if>
             <if test="assigneeUserId != null">#{assigneeUserId},</if>
             <if test="reviewNote != null">#{reviewNote},</if>
             <if test="createBy != null">#{createBy},</if>
@@ -104,6 +110,7 @@
             <if test="source != null">source = #{source},</if>
             <if test="priority != null">priority = #{priority},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="aiValue != null">ai_value = #{aiValue},</if>
             <if test="assigneeUserId != null">assignee_user_id = #{assigneeUserId},</if>
             <if test="reviewNote != null">review_note = #{reviewNote},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>

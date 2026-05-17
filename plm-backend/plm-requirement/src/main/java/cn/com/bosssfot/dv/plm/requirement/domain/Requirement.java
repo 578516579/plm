@@ -42,9 +42,13 @@ public class Requirement extends BaseEntity
     @Excel(name = "优先级", dictType = "biz_req_priority")
     private String priority;
 
-    /** 状态（字典 biz_req_status） */
+    /** 状态（字典 biz_req_status,4 态实用版 — ADR-A) */
     @Excel(name = "状态", dictType = "biz_req_status")
     private String status;
+
+    /** AI 价值评估（字典 biz_req_ai_value:H/M/L,原型 rdm-edit-ai + PRD §F2.1） */
+    @Excel(name = "AI价值", dictType = "biz_req_ai_value")
+    private String aiValue;
 
     /** 指派给的用户 ID（FK→sys_user.user_id） */
     @Excel(name = "指派用户ID")
@@ -80,6 +84,9 @@ public class Requirement extends BaseEntity
     public void setStatus(String status) { this.status = status; }
     public String getStatus() { return status; }
 
+    public void setAiValue(String aiValue) { this.aiValue = aiValue; }
+    public String getAiValue() { return aiValue; }
+
     public void setAssigneeUserId(Long assigneeUserId) { this.assigneeUserId = assigneeUserId; }
     public Long getAssigneeUserId() { return assigneeUserId; }
 
@@ -100,6 +107,7 @@ public class Requirement extends BaseEntity
             .append("source", getSource())
             .append("priority", getPriority())
             .append("status", getStatus())
+            .append("aiValue", getAiValue())
             .append("assigneeUserId", getAssigneeUserId())
             .append("reviewNote", getReviewNote())
             .append("createBy", getCreateBy())
