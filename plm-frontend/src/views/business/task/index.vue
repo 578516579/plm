@@ -16,12 +16,44 @@
         <el-button type="success" :loading="aiLoading" @click="openAiSplit">
           <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 拆分任务
         </el-button>
+        <el-radio-group v-model="viewMode" size="default">
+          <el-radio-button value="table">📊 表格</el-radio-button>
+          <el-radio-button value="kanban">📌 看板</el-radio-button>
+        </el-radio-group>
         <el-button type="primary" @click="openAdd"><el-icon><Plus /></el-icon>&nbsp;新增任务</el-button>
       </div>
     </div>
 
+    <!-- 表格视图 (默认,匹配历史 E2E /business/task → .el-table) -->
+    <el-card v-if="viewMode === 'table'" shadow="never">
+      <el-table v-loading="listLoading" :data="list" stripe>
+        <el-table-column label="编号" prop="taskNo" width="160" />
+        <el-table-column label="标题" prop="title" min-width="220" show-overflow-tooltip />
+        <el-table-column label="优先级" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag :type="priorityTag(row.priority)" size="small">{{ row.priority || 'P2' }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="预估工时" prop="estimatedHours" width="100" align="center">
+          <template #default="{ row }">{{ row.estimatedHours ? row.estimatedHours + 'h' : '-' }}</template>
+        </el-table-column>
+        <el-table-column label="负责人 ID" prop="assigneeUserId" width="100" align="center" />
+        <el-table-column label="状态" width="120" align="center">
+          <template #default="{ row }">
+            <el-tag :type="taskStatusTag(row.status).type" size="small">{{ taskStatusTag(row.status).label }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="160" align="center">
+          <template #default="{ row }">
+            <el-button link type="primary" @click.stop="loadTask(row)">编辑</el-button>
+            <el-button link type="danger" @click.stop="handleDelete(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
     <!-- 5 列看板 (对齐原型 .kb) -->
-    <div class="kanban-board">
+    <div v-else class="kanban-board">
       <div v-for="col in kanbanColumns" :key="col.status" class="kanban-col">
         <div class="kanban-header">
           <span class="kanban-title">{{ col.label }}</span>
@@ -184,6 +216,7 @@ const rules = {
 }
 
 const list = ref<Task[]>([])
+const viewMode = ref<'table' | 'kanban'>('table')
 const queryParams = reactive<TaskQuery>({ pageNum: 1, pageSize: 200 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 const sprintOptions = ref<Array<{ sprintId: number; name: string }>>([])
@@ -191,6 +224,13 @@ const requirementOptions = ref<Array<{ requirementId: number; title: string }>>(
 
 function priorityTag(p?: string): any {
   return ({ P0: 'danger', P1: 'warning', P2: 'info' } as Record<string,string>)[p || ''] || 'info'
+}
+
+function taskStatusTag(s?: string): { label: string; type: any } {
+  const col = kanbanColumns.find(c => c.status === s)
+  return col
+    ? { label: col.label, type: ({ '00':'info', '01':'primary', '02':'warning', '03':'warning', '04':'success' } as any)[s || ''] || 'info' }
+    : { label: s || '-', type: 'info' }
 }
 
 const tasksByStatus = (s: string) => list.value.filter(t => t.status === s)
