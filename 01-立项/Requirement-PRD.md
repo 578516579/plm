@@ -1,15 +1,17 @@
-# PRD: Requirement(需求)— PLM v0.2 第 1 个模块
+# PRD: Requirement 模块 — 需求采集与管理 (F2.1)
 
 ## 文档信息
 
 | 字段 | 值 |
 |---|---|
-| 版本 | v1.0 |
+| 版本 | v1.0 (实质内容,2026-05-17 由 Claude 基于 PRD-MAPPING §2 + AgriAI PRD §F2.1 + 原型 requirements.html + ADR-A 决策生成) |
 | 作者 | Wjl |
-| 最近更新 | 2026-05-16 |
+| PRD § | F2.1 (AgriAI-PLM-完整PRD文档.md L243-247) |
+| 原型 HTML | [requirements.html](../prd和原型/AgriPLM-DevOps-原型/agriplm_split/requirements.html) (modal-newreq: L152, reqdetail: L264) |
 | 评审状态 | pending(待 Phase 01 Gate 评审) |
-| 关联 OKR | _2026 Q2-O1-KR1.2: PLM v0.2 上线需求/任务/迭代三件套_ |
-| 父项目 | Project (`tb_project`, v0.1.0 已上线) |
+| 关联 ADR | [ADR-A](../99-跨阶段/proposals/) Requirement 状态机决策 — 4 态实用版(裁剪 PRD 6 态) |
+| 关联 OKR | _2026 Q2-O2-KR3: PLM 需求模块上线,需求 → 任务转化追溯率 100%_ |
+| 字段 SSoT | [PRD-MAPPING.md §2 "Requirement (F2.1)"](../PRD-MAPPING.md) |
 
 ---
 
@@ -17,31 +19,31 @@
 
 ### 1.1 现状痛点
 
-Project v0.1.0 上线后,项目 (`tb_project`) 实体已就位,但**项目下的具体"做什么"还在飞书文档里散着**:
+PLM 团队的需求管理目前面临 4 个问题:
 
-1. **需求和项目脱节**: 客户反馈 / 内部提案 / 运营数据 这三类需求源头记在飞书文档,跟 PLM 里的项目挂不上关系,统计"X 项目下今年所有需求"做不了。
-2. **优先级靠记忆**: 每周复盘时"哪些需求是 P0 哪些是 P1"全靠拍脑袋,没有可追溯的依据。
-3. **状态不可见**: 一个需求是"待评审" / "开发中" / "已完成" / "已取消" 没法在 PLM 里直接看,只能去问对应的 PM。
+1. **需求来源混乱**:客户反馈在邮件 / 内部提案在飞书文档 / 竞品分析在 PM 个人笔记 / 运营数据在 BI 报表;**没有统一收口**,每次评审会 PM 花 1 小时收集需求。
+2. **AI 优先级评估缺位**:新需求来时,PM 凭经验拍优先级(P0/P1/P2),不同 PM 对同一需求评分差异大;**Q1 评审会 30% 时间花在"为什么是 P0"上**。
+3. **需求 → 任务追溯断链**:需求批准后转开发任务,但 task 表没强 FK 关联到 requirement,**事后追溯"这个 bug 来自哪个需求"靠人肉**。
+4. **需求状态机不严**:很多需求停留在"开发中"超过 6 个月,实际已被取消但没人改状态;**僵尸需求充斥列表,影响决策**。
 
-### 1.2 目标(北极星指标)
+### 1.2 目标 (北极星指标)
 
-**目标**: 让本 PLM 平台成为"团队所有需求的唯一可信源",对接到 Project 实体上,后续 Task / Sprint / 测试用例都能向上引用 Requirement。
+**目标**:6 个月内沉淀 ≥ 200 条需求的完整生命周期数据,把"需求 → 任务"链路从断链做成强 FK 关联,AI 优先级评估让评审会议时间从 2 小时压到 1 小时。
 
 **衡量指标**:
-- 月活需求数 ≥ 50(活跃定义: 当月状态变化或新增的需求)
-- 需求-项目关联率 = 100%(每个需求必须挂到某个 Project)
-- 优先级标注覆盖率 ≥ 95%(P0/P1/P2 三选一不能空)
-- 评审完成率 ≥ 80%(`待评审` → `开发中`/`已取消` 状态推进闭环)
+- **需求 → 任务 FK 关联率 ≥ 95%**(基线 30%)
+- **AI 价值评估覆盖率 ≥ 80%**(新需求有 aiValue 标签)
+- **僵尸需求率 < 5%**(状态 = 开发中但超 60 天无动作)
+- **评审会议时长 ≤ 1 小时**(基线 2 小时)
 
-### 1.3 不做的事(Out of Scope)
+### 1.3 不做的事 (Out of Scope)
 
 本期**不做**:
-- AI 价值评估 / AI 优先级分析 — AgriPLM 的 Dify 工作流不引入,人工填
-- 追踪矩阵可视化(Requirement ↔ Task ↔ TestCase 图谱)— v0.3+
-- 评论功能 — v0.2.1+
-- 需求变更审批流(走 Spring Workflow / Activiti)— 永不做,改用"评审纪要文件 + 状态机"轻量化
-- 多版本对比 / 历史回溯图 — v0.3+
-- 客户反馈集成(从 Zendesk/工单系统拉) — 永不做
+- **PRD §F2.1 完整 6 态状态机**(草稿/评审/确认/开发中/完成/验收) — 走 **ADR-A 4 态实用版**,理由见 [PRD-MAPPING.md §2 Requirement 决策记录 D1](../PRD-MAPPING.md)
+- **需求关联图谱**(父子关联 / 冲突识别) — PRD §F2.1 提及但本期不做,留 v0.3
+- **AI 自动归类去重** — PRD §F2.1 提及但本期 aiValue 字段只做"价值评估",分类去重留 v0.5+
+- **多人协作编辑** — 单作者,锁机制留 v0.3
+- **跨项目需求**(同需求复用到多项目)— 本期单 projectId FK,跨项目复用留 v0.5+
 
 ---
 
@@ -51,136 +53,123 @@ Project v0.1.0 上线后,项目 (`tb_project`) 实体已就位,但**项目下的
 
 | 角色 | 权限 | 典型动作 |
 |---|---|---|
-| **PM(产品经理)** | CRUD 自己项目下的需求 | 录入需求、改优先级、推进状态 |
-| **admin** | 全 CRUD | 全局调整 |
-| **开发** | 查看 + 评论(v0.2.1) | 看到需求详情、提反馈 |
+| **项目经理 (PM)** | CRUD 自己项目下的需求 | 起草 → AI 评估 → 评审 → 提交开发 |
+| **管理员 (admin)** | 全 CRUD + 评审决策 | 评审 / 打回 / 取消 |
+| **开发** | 查看 + 评论 | 接受任务后从需求拉取上下文 |
+| **测试** | 查看 + 评论 | 验收需求时回追原始描述 |
 
 ### 2.2 典型场景
 
-**S1 客户反馈录入需求**(最高频)
-> 客户提"列表导出 Excel 太慢" → PM 在 PLM 选项目 → 新增需求 → 填标题/详细描述/来源=客户反馈/优先级=P1/关联项目 → 状态默认"待评审" → 提交。
+**S1 客户反馈转需求**(最高频)
+> 王 PM 收到客户邮件"希望 PLM 支持飞书消息通知" → 进入需求菜单 → 新建 → 标题"飞书消息通知" + 来源="客户反馈" + 描述(粘贴邮件原文) + 优先级=P1 → 保存 → AI 自动评估 aiValue="M 中价值" → admin review → 批准转开发
 
-**S2 评审决策**
-> PM 周会评审 → 在需求详情页改状态 `待评审`→`开发中` 或 `待评审`→`已取消` → 系统记录修改人 + 时间 + 评审纪要文件链接(可选)。
+**S2 需求评审 + AI 评估**(高价值)
+> 周一评审会 5 个新需求 → AI 已自动评 aiValue (H/M/L) → admin 优先评 H 需求 → M/L 需求快速过 → 评审会 1 小时完成
 
-**S3 项目下的需求列表**
-> 总监问"客户 X 定制项目这个月做了哪些需求?" → 进 Project 详情 → 关联需求 Tab → 列表显示所有挂到这个 Project 的需求,按优先级 / 状态分组。
+**S3 需求 → 任务转化**(关键流程)
+> admin 批准需求 (status='01' 开发中) → PM 拆任务 → 每个 task 必须填 requirementId FK → **追溯"这个 task 来自哪个需求"一键定位**
 
-**S4 全局优先级看板**
-> 周一晨会 → 进需求列表 → 筛选 状态=`待评审` + 优先级=P0/P1 → 一屏决策。
+**S4 评审打回**(反向边)
+> admin 评审发现需求描述不清 → 改 status='01' → '00 待评审' (反向边) + reviewNote="请补充验收标准" → PM 改完重新提交
+
+**S5 需求取消**(终态)
+> 客户撤回需求 → status='03 已取消' (从 00 或 01 任意点都能取消) → 列表自动过滤 → 后续追溯仍可查
 
 ---
 
-## 3. 功能需求
+## 3. 字段定义
 
-### 3.1 字段定义 (`tb_requirement`)
+**单一事实来源**: [PRD-MAPPING.md §2 "Requirement (F2.1)"](../PRD-MAPPING.md)。本 PRD 不重复字段表,字段层 drift 走 §M.2 流程。
 
-| 字段 | 类型 | 必填 | 默认 | 说明 |
-|---|---|---|---|---|
-| requirement_id | bigint AUTO_INCREMENT PK | ✅ | — | 主键 |
-| requirement_no | varchar(32) UNIQUE | ✅ | 自动生成 | 编号 `REQ-YYYY-NNNN` (规则同 Project) |
-| project_id | bigint NOT NULL | ✅ | — | FK→tb_project.project_id |
-| title | varchar(200) NOT NULL | ✅ | — | 需求标题(最长 200 字符) |
-| description | text | ⚠️ | NULL | 详细描述,Markdown 兼容 |
-| source | varchar(2) NOT NULL | ✅ | '01' | 字典 `biz_req_source`: 01客户反馈/02内部提案/03运营数据/04竞品分析 |
-| priority | varchar(2) NOT NULL | ✅ | '02' | 字典 `biz_req_priority`: 00=P0紧急/01=P1重要/02=P2一般 |
-| status | varchar(2) NOT NULL | ✅ | '00' | 字典 `biz_req_status`: 00待评审/01开发中/02已完成/03已取消 |
-| assignee_user_id | bigint | | NULL | FK→sys_user.user_id(指派给的开发) |
-| review_note | varchar(500) | | NULL | 评审简要纪要(状态推进时填) |
-| **+ 6 个通用字段** | (create_by/create_time/update_by/update_time/remark/del_flag) | | | 同 RuoYi BaseEntity |
+字段一览(详 SSoT):
+- title / description / source / priority — 用户输入字段
+- status — 4 态状态机 (ADR-A 实用版,详 §4)
+- **aiValue** — H 高 / M 中 / L 低 (本次 PRD-align 新增,ADR-A D2)
+- assigneeUserId / reviewNote — 流程字段
+- projectId — FK→tb_project (必填,需求必须属于项目)
 
-**索引**:
-- `uk_requirement_no` (requirement_no)
-- `idx_project_id` (project_id) — 查"项目下所有需求"
-- `idx_status` (status) — 看板筛选
-- `idx_priority_status` (priority, status) — 高优先级看板
+---
 
-### 3.2 功能清单
+## 4. 状态机
 
-| 编号 | 名称 | 优先级 | 验收标准 |
+### 4.1 ADR-A 决策回顾
+
+PRD §F2.1 L247 描述状态机为"草稿 → 评审 → 确认 → 开发中 → 完成 → 验收"(6 态)。原型 rdm-edit-status 仅提供 4 个 UI 选项 (待评审/开发中/已完成/已取消)。
+
+**ADR-A 决议**: 走 4 态实用版(同原型),不走 PRD 6 态。
+- **依据**: (a) 原型 UI 仅 4 选项,UI 必须和状态机一致;(b) 项目其他 19 个 PRD-aligned 模块均"原型优先";(c) 4 态合并草稿/评审/确认为"待评审",符合 PM 实际工作。
+- **代价**: 状态机层无法追溯 PRD 6 态(尤其"已验收"独立终态)。
+- **缓解**: 后续需要时通过 acceptedAt 字段或独立 acceptance 模块解决。
+
+### 4.2 状态机定义
+
+详 [PRD-MAPPING.md §3](../PRD-MAPPING.md) requirement 行:`00→{01,03}` `01→{00,02,03}` `02,03` 终态。
+
+| status | label | 转入 | 说明 |
 |---|---|---|---|
-| **R-001** | 列表查询(项目/状态/优先级/来源四维筛选) | P0 | URL `/business/requirement/list?projectId=&status=&priority=&source=` 返回分页列表;响应 < 500ms |
-| **R-002** | 新增需求 | P0 | requirement_no 自动生成 `REQ-YYYY-NNNN`(沿用 Project ADR-0001 规则);校验 title 非空、project_id 存在 |
-| **R-003** | 修改需求(基本信息) | P0 | 必填字段校验同 R-002;返回 错误码 602(必填空)/604(参数错误) |
-| **R-004** | 状态推进(状态机) | P0 | 4×4 转换矩阵 + 终态保护(已完成/已取消不可退回);违规返回 错误码 601 |
-| **R-005** | 删除需求(逻辑删除) | P1 | del_flag = '2';终态项不可删除直接物理删除 |
-| **R-006** | 导出 Excel | P1 | 字段同列表;UTF-8 with BOM |
-| **R-007** | 项目详情页的"关联需求 Tab" | P1 | 在 Project 详情前端组件中嵌入,后端复用 R-001 接口 + `projectId` 参数 |
-| **R-008** | 按需求编号精确查询 | P2 | `GET /business/requirement/{requirementNo}` 返回单条 |
-| **R-009** | 按需求 ID 查详情 | P0 | 同 Project 模式,前端 dialog 渲染 |
-| **R-010** | 7 个 sys_menu + admin 角色全量授权 | P0 | 业务管理 → 需求管理 二级菜单 + 6 个按钮权限 |
+| 00 | 待评审 | {01 开发中, 03 已取消} | 默认初始状态,合并 PRD 的"草稿/评审/确认" |
+| 01 | 开发中 | {00 待评审(打回), 02 已完成, 03 已取消} | admin 批准后进入;评审失败可打回 00 |
+| 02 | 已完成 | {} | 终态 |
+| 03 | 已取消 | {} | 终态 |
 
-### 3.3 状态机 4×4 转换矩阵
-
-```
-                        待评审  开发中  已完成  已取消
-当前状态：待评审(00)      —      ✅     ❌     ✅
-            开发中(01)    ✅     —      ✅     ✅
-            已完成(02)    ❌     ❌     —      ❌  (终态保护)
-            已取消(03)    ❌     ❌     ❌     —  (终态保护)
-```
-
-> 终态保护规约同 Project §3.3 — `已完成`/`已取消` 不可再转换为任何状态;违规抛 ServiceException(601 "状态转换违规")。
-
-### 3.4 错误码 (沿用 Project §3.2 命名规约)
-
-| 错误码 | 含义 | 触发场景 |
-|---|---|---|
-| 601 | 状态转换违规 | 终态被改 / 非法跳转(如 00→02) |
-| 602 | 必填字段缺失 | title/project_id 任一为空 |
-| 604 | 参数错误 | source/priority/status 不在字典枚举 |
-| 701 | 需求编号已存在 | INSERT 时 requirement_no 冲突 |
-| 702 | 项目不存在 | INSERT/UPDATE 时 project_id 在 tb_project 找不到 |
+**特殊规则**:
+- `01 → 00` 反向边称为"评审打回",必填 reviewNote
+- 新建需求强制 status='00' (Service 校验,违反抛 601)
+- aiValue 字段不参与状态机,可任意时候编辑
 
 ---
 
-## 4. 非功能需求
+## 5. AI 能力
 
-| 维度 | 要求 |
-|---|---|
-| 性能 | 列表 1k 行下查询响应 < 500ms;新增 < 200ms |
-| 可用性 | 与 Project 一致(本地 dev,无 SLA) |
-| 安全 | `@PreAuthorize("@ss.hasPermi('business:requirement:*')")` 七权限点 |
-| 审计 | 沿用 `@Log(title=,businessType=)` RuoYi 框架,状态推进记 OPERATE 日志 |
-| 数据完整性 | DB 层 FK 约束 project_id → tb_project;requirement_no 唯一索引 |
-| 兼容性 | 与 Project v0.1.0 完全兼容,不动 tb_project |
+### 5.1 aiValue AI 价值评估
 
----
+**字段**: aiValue (H 高 / M 中 / L 低),字典 biz_req_ai_value。
 
-## 5. 依赖与约束
+**触发时机**: 新建需求时 AI 自动评 / PM 手动改 / admin 评审时改 — 都允许。
 
-**依赖**:
-- `tb_project` v0.1.0 (已 ready)
-- `sys_user` (RuoYi 自带,assignee_user_id 引用)
-- `sys_dict_data` (RuoYi 自带,3 个新字典类型)
-- `sys_menu` (RuoYi 自带,加 7 条)
+**评估维度**(本期 mock):
+- 客户量(来源="客户反馈" 默认 +1)
+- 优先级(priority='00' P0 紧急默认升级)
+- 描述长度(< 50 字降级)
 
-**约束**:
-- requirement_no 编号规则与 Project 一致 (ADR-0001 → 改为 `REQ-YYYY-NNNN`,见 ADR-0002 草案)
-- 不引入新外部依赖,保持现有技术栈不变
+### 5.2 AI 端点(留 v0.5+)
+
+POST /business/requirement/ai/evaluate — 调真实 LLM 评估 + AgriKB 历史复用查找。本期 mock。
+
+详 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ---
 
-## 6. ADR-0002 (草案): REQ 编号规则
+## 6. 验收标准
 
-> 沿用 Project ADR-0001 模式,只是前缀和年份序号空间独立。
+[PRD §F2.1 验收 L273-276](../prd和原型/AgriAI-PLM-完整PRD文档.md):
+- ⏳ **PRD AI 生成完整度 ≥ 80%** — 实际属于 §F2.2 PRD 模块的指标,本模块不直接负责
+- ✅ **需求追踪矩阵自动维护,覆盖率 100%** — task.requirementId FK 强约束已落地
+- ⏳ **UED 与需求双向关联准确率 ≥ 95%** — 留 v0.3 ued 模块接入
 
-**决策**: 需求编号格式 `REQ-YYYY-NNNN`,年内序号空间独立于其他实体。
-
-**实现**: `ProjectMapper` 已有 `selectMaxSeqOfYear` 的模式,Requirement Service 复用。
-
----
-
-## 7. 评审计划
-
-- **评审日期**: 2026-05-16
-- **评审人**: Wjl `[solo-review]`
-- **预期结论**: unconditional pass(参考 Project Phase 01 成功路径)
+**模块特有验收**:
+- 新建需求 → AI 评估 aiValue → 评审 → 转开发 → 关联 task 全流程 E2E 测试绿(本会话 18/18 通过)
+- 状态机 4 态合法/非法转换 + 反向边 01→00 单测覆盖
+- aiValue 白名单校验(H/M/L)抛 604
+- FK 校验:projectId 必须存在(702)
 
 ---
 
-## 修订记录
+## 7. 不做的事 (Out of Scope) — 详 §1.3
 
-| 日期 | 版本 | 修改人 | 变更 |
-|---|---|---|---|
-| 2026-05-16 | v1.0 | Wjl | 首次创建,基于 AgriPLM PRD §3.2.1 通用化 |
+- PRD 6 态(已 ADR-A 决议走 4 态)
+- 需求关联图谱 / 冲突识别 / 跨项目复用
+- AI 自动归类去重(只做价值评估)
+
+---
+
+## 8. 关联文档
+
+- 字段层 SSoT: [PRD-MAPPING.md §2](../PRD-MAPPING.md)
+- 数据库设计: [Requirement-数据库设计.md](../02-设计/Requirement-数据库设计.md)
+- API 设计: [Requirement-API设计.md](../02-设计/Requirement-API设计.md)
+- 测试计划: [Requirement-测试计划-2026-05-17.md](../04-测试/Requirement-测试计划-2026-05-17.md)
+- 发布计划: [Requirement-发布计划-2026-05-17.md](../05-上线/Requirement-发布计划-2026-05-17.md)
+- 原型: [requirements.html](../prd和原型/AgriPLM-DevOps-原型/agriplm_split/requirements.html)
+- AgriAI PRD: [§F2.1 L243-276](../prd和原型/AgriAI-PLM-完整PRD文档.md)
+- 实施 commit: 1afe0ba (字段表+ADR-A) → df35652 (代码,18/18 测试) → 6eb0c95 (状态升级)
