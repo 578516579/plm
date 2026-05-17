@@ -80,7 +80,7 @@
 | 工具 | 用途 | 状态 |
 |---|---|---|
 | [`/reflect-weekly`](../../.claude/skills/reflect-weekly/SKILL.md) | 周度反思（半自动: 数据采集自动 + 写报告半人工）| ✅ v0.1 (2026-05-17) |
-| `/reflect-monthly` | 自动月报（汇总当月 signals + 4 周周报）| ⏳ Phase B 待 |
+| [`/reflect-monthly`](../../.claude/skills/reflect-monthly/SKILL.md) | 月度反思 + tracking 7 步终结判定 + MUST/SHOULD 规则健康度审计 | ✅ v0.1 (2026-05-17) |
 | `/reflect-quarterly` | 手动触发的季度报告（12 周 + ADR 一致性）| ⏳ Phase B 待 |
 | `/proposal` | 候选 → proposal 一命令全链路 | ⏳ Phase C 待 |
 | `/loop` skill（系统级，已有）| 调度上述命令 | — |

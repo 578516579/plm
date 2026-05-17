@@ -175,7 +175,7 @@ Roadmap (current = Phase B kicked off 2026-05-17):
 - ✅ Phase A — passive substrate: directories, templates, Stop/PreToolUse hooks
 - 🟡 Phase B — skill 层半自动化:
   - ✅ `reflect-weekly` skill v0.1 ([.claude/skills/reflect-weekly/](.claude/skills/reflect-weekly/)) — 数据采集自动 + 写报告半人工
-  - ⏳ `reflect-monthly` skill (待；月初触发, 自动汇总当月 signals + 4 周周报)
+  - ✅ `reflect-monthly` skill v0.1 ([.claude/skills/reflect-monthly/](.claude/skills/reflect-monthly/)) — 含 tracking 终结 7 步判定 + MUST/SHOULD 规则健康度审计
   - ⏳ `reflect-quarterly` skill (待；季度末手动, 综合 12 周周报 + ADR 一致性)
 - ⏳ Phase C — `/proposal` skill (one-command proposal lifecycle, 从候选到 merged 全链路)
 - ⏳ Phase D — metrics-driven rule tuning (auto-suggest MUST↔SHOULD downgrades based on signals)
