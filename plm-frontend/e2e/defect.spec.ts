@@ -73,7 +73,7 @@ test.describe('Defect 模块 E2E', () => {
     expect(d.category).toBe('01')
   })
 
-  test('TC-Defect-F003 反向边 03→01 (回归打回)', async () => {
+  test('TC-Defect-F003 反向边 03→00 重开 (ADR-D)', async () => {
     const data = makeDefectData(projectId, `reverse-${RUN_ID}`)
     const c = await api.post('/business/defect', data)
     expect(c.code).toBe(200)
@@ -81,23 +81,24 @@ test.describe('Defect 模块 E2E', () => {
     const d = list.rows.find((x: any) => x.title === data.title)
     const id = d.defectId
 
-    // 推 00 → 01 → 02
+    // 推 00 待确认 → 01 修复中
     let r = await api.put('/business/defect', { defectId: id, status: '01' })
     expect(r.code).toBe(200)
+    // 01 修复中 → 02 待验证 必填 resolution
     r = await api.put('/business/defect', { defectId: id, status: '02' })
+    expect(r.code, '进入 02 待验证 无 resolution → 705').toBe(705)
+    r = await api.put('/business/defect', { defectId: id, status: '02', resolution: '已修复,通过 commit abc123' })
     expect(r.code).toBe(200)
-    // 02 → 03 必填 resolution
+    // 02 待验证 → 03 已关闭
     r = await api.put('/business/defect', { defectId: id, status: '03' })
-    expect(r.code, '进入 03 无 resolution → 705').toBe(705)
-    r = await api.put('/business/defect', { defectId: id, status: '03', resolution: '已修复,通过 commit abc123' })
     expect(r.code).toBe(200)
 
-    // 反向边 03 → 01 (回归打回)
-    r = await api.put('/business/defect', { defectId: id, status: '01' })
-    expect(r.code, '反向边 03→01 (回归打回) 应允许').toBe(200)
+    // 反向边 03 已关闭 → 00 待确认 (重开)
+    r = await api.put('/business/defect', { defectId: id, status: '00' })
+    expect(r.code, '反向边 03→00 (重开) 应允许').toBe(200)
   })
 
-  test('TC-Defect-F004 进入 03 必填 resolution', async () => {
+  test('TC-Defect-F004 进入 02 待验证 必填 resolution (ADR-D D3)', async () => {
     const data = makeDefectData(projectId, `res-${RUN_ID}`)
     const c = await api.post('/business/defect', data)
     expect(c.code).toBe(200)
@@ -105,17 +106,16 @@ test.describe('Defect 模块 E2E', () => {
     const d = list.rows.find((x: any) => x.title === data.title)
     const id = d.defectId
 
-    // 推 00 → 01 → 02
+    // 推 00 → 01
     await api.put('/business/defect', { defectId: id, status: '01' })
-    await api.put('/business/defect', { defectId: id, status: '02' })
 
-    // 不填 resolution 推 03 应失败 705
-    let r = await api.put('/business/defect', { defectId: id, status: '03' })
+    // 不填 resolution 推 02 应失败 705
+    let r = await api.put('/business/defect', { defectId: id, status: '02' })
     expect(r.code).toBe(705)
     expect(r.msg).toContain('解决说明')
 
-    // 带 resolution 推 03 应成功
-    r = await api.put('/business/defect', { defectId: id, status: '03', resolution: '修复说明' })
+    // 带 resolution 推 02 应成功
+    r = await api.put('/business/defect', { defectId: id, status: '02', resolution: '修复说明' })
     expect(r.code).toBe(200)
   })
 
@@ -129,12 +129,15 @@ test.describe('Defect 模块 E2E', () => {
       const id = d.defectId
 
       // 推到 from 状态 (00 已是,其他需中间步骤)
+      // ADR-D 新 4 态:00 待确认 / 01 修复中 / 02 待验证 / 03 已关闭
       if (tc.from === '01') {
         await api.put('/business/defect', { defectId: id, status: '01' })
-      } else if (tc.from === '04') {
-        // 00 → 01 → 04 (无效缺陷快关)
+      } else if (tc.from === '02') {
         await api.put('/business/defect', { defectId: id, status: '01' })
-        await api.put('/business/defect', { defectId: id, status: '04' })
+        await api.put('/business/defect', { defectId: id, status: '02', resolution: 'auto' })
+      } else if (tc.from === '03') {
+        // 00 → 03 直接关闭 (重复/无效快关,合法转换)
+        await api.put('/business/defect', { defectId: id, status: '03' })
       }
 
       // 非法转换

@@ -19,21 +19,24 @@ export function makeDefectData(projectId: number, suffix?: string) {
   }
 }
 
+/**
+ * Defect 状态机测试矩阵 (v2 ADR-D Option A,4 主态 + 反向边 03→00)
+ * 引用 PRD-MAPPING.md §2 Requirement / Defect (proposal 0302)
+ */
 export const DEFECT_STATUS_TRANSITIONS = {
   legal: [
-    { from: '00', to: '01', name: '新建→已确认' },
-    { from: '01', to: '02', name: '已确认→处理中' },
-    { from: '01', to: '04', name: '已确认→已关闭 (无效)' },
-    { from: '02', to: '01', name: '处理中→已确认 (重新分析)' },
-    { from: '02', to: '03', name: '处理中→已解决' }, // 需带 resolution
-    { from: '03', to: '01', name: '已解决→已确认 (反向边·回归打回)' },
-    { from: '03', to: '04', name: '已解决→已关闭' }
+    { from: '00', to: '01', name: '待确认→修复中' },
+    { from: '00', to: '03', name: '待确认→已关闭 (重复/无效快关)' },
+    { from: '01', to: '00', name: '修复中→待确认 (回退)' },
+    { from: '01', to: '02', name: '修复中→待验证 (需带 resolution)' },
+    { from: '02', to: '01', name: '待验证→修复中 (验证失败打回)' },
+    { from: '02', to: '03', name: '待验证→已关闭' },
+    { from: '03', to: '00', name: '已关闭→待确认 (反向边·重开)' }
   ],
   illegal: [
-    { from: '00', to: '02', name: '新建→处理中 (跨级)' },
-    { from: '00', to: '03', name: '新建→已解决 (跨级)' },
-    { from: '00', to: '04', name: '新建→已关闭 (跨级)' },
-    { from: '01', to: '03', name: '已确认→已解决 (跨级)' },
-    { from: '04', to: '01', name: '已关闭→已确认 (终态保护)' }
+    { from: '00', to: '02', name: '待确认→待验证 (跨级)' },
+    { from: '01', to: '03', name: '修复中→已关闭 (跨级,必须经待验证)' },
+    { from: '03', to: '01', name: '已关闭→修复中 (跨级反向,只允许 03→00)' },
+    { from: '03', to: '02', name: '已关闭→待验证 (跨级反向)' }
   ]
 }

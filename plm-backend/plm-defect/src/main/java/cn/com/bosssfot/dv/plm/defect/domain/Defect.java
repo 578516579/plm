@@ -51,9 +51,13 @@ public class Defect extends BaseEntity
     @Excel(name = "分类", dictType = "biz_defect_category")
     private String category;
 
-    /** 状态（字典 biz_defect_status） */
+    /** 状态（字典 biz_defect_status,4 态 ADR-D Option A） */
     @Excel(name = "状态", dictType = "biz_defect_status")
     private String status;
+
+    /** 所属业务模块 (原型 dem-module,自由文本,ADR-D D2) */
+    @Excel(name = "所属模块")
+    private String module;
 
     /** 指派开发 user_id */
     @Excel(name = "指派用户ID")
@@ -113,6 +117,9 @@ public class Defect extends BaseEntity
     public void setStatus(String status) { this.status = status; }
     public String getStatus() { return status; }
 
+    public void setModule(String module) { this.module = module; }
+    public String getModule() { return module; }
+
     public void setAssigneeUserId(Long assigneeUserId) { this.assigneeUserId = assigneeUserId; }
     public Long getAssigneeUserId() { return assigneeUserId; }
 
@@ -149,6 +156,7 @@ public class Defect extends BaseEntity
             .append("severity", getSeverity())
             .append("category", getCategory())
             .append("status", getStatus())
+            .append("module", getModule())
             .append("assigneeUserId", getAssigneeUserId())
             .append("reporterUserId", getReporterUserId())
             .append("resolution", getResolution())

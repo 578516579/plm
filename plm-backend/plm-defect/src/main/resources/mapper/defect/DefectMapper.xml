@@ -13,6 +13,7 @@
         <result property="severity"        column="severity"         />
         <result property="category"        column="category"         />
         <result property="status"          column="status"           />
+        <result property="module"          column="module"           />
         <result property="assigneeUserId"  column="assignee_user_id" />
         <result property="reporterUserId"  column="reporter_user_id" />
         <result property="reproduceSteps"  column="reproduce_steps"  />
@@ -30,7 +31,7 @@
 
     <sql id="selectDefectVo">
         select defect_id, defect_no, project_id, sprint_id, task_id, title, description,
-               severity, category, status, assignee_user_id, reporter_user_id,
+               severity, category, status, module, assignee_user_id, reporter_user_id,
                reproduce_steps, expected_result, actual_result, resolution, tags,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_defect
@@ -48,6 +49,7 @@
             <if test="severity != null and severity != ''">and severity = #{severity}</if>
             <if test="category != null and category != ''">and category = #{category}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="module != null and module != ''">and module like concat('%', #{module}, '%')</if>
             <if test="assigneeUserId != null">and assignee_user_id = #{assigneeUserId}</if>
             <if test="reporterUserId != null">and reporter_user_id = #{reporterUserId}</if>
             <if test="tags != null and tags != ''">and tags like concat('%', #{tags}, '%')</if>
@@ -72,6 +74,7 @@
             <if test="severity != null">severity,</if>
             <if test="category != null">category,</if>
             <if test="status != null">status,</if>
+            <if test="module != null">module,</if>
             <if test="assigneeUserId != null">assignee_user_id,</if>
             <if test="reporterUserId != null">reporter_user_id,</if>
             <if test="reproduceSteps != null">reproduce_steps,</if>
@@ -93,6 +96,7 @@
             <if test="severity != null">#{severity},</if>
             <if test="category != null">#{category},</if>
             <if test="status != null">#{status},</if>
+            <if test="module != null">#{module},</if>
             <if test="assigneeUserId != null">#{assigneeUserId},</if>
             <if test="reporterUserId != null">#{reporterUserId},</if>
             <if test="reproduceSteps != null">#{reproduceSteps},</if>
@@ -118,6 +122,7 @@
             <if test="severity != null">severity = #{severity},</if>
             <if test="category != null">category = #{category},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="module != null">module = #{module},</if>
             <if test="assigneeUserId != null">assignee_user_id = #{assigneeUserId},</if>
             <if test="reporterUserId != null">reporter_user_id = #{reporterUserId},</if>
             <if test="reproduceSteps != null">reproduce_steps = #{reproduceSteps},</if>
