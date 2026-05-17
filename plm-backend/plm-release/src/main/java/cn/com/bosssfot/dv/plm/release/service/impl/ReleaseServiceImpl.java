@@ -38,7 +38,7 @@ public class ReleaseServiceImpl implements IReleaseService
 {
     private static final Logger log = LoggerFactory.getLogger(ReleaseServiceImpl.class);
 
-    private static final Set<String> ALLOWED_STRATEGY = Set.of("blue_green", "canary", "rolling");
+    private static final Set<String> ALLOWED_STRATEGY = Set.of("blue_green", "canary", "rolling", "direct_replace");
 
     private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
     static {
@@ -83,7 +83,7 @@ public class ReleaseServiceImpl implements IReleaseService
         if (StringUtils.isBlank(t.getStrategy())) {
             t.setStrategy("rolling");
         } else if (!ALLOWED_STRATEGY.contains(t.getStrategy())) {
-            throw new ServiceException("策略仅支持 blue_green/canary/rolling", 604);
+            throw new ServiceException("策略仅支持 blue_green/canary/rolling/direct_replace", 604);
         }
         if (StringUtils.isBlank(t.getEnvironment())) {
             t.setEnvironment("prod");
@@ -137,7 +137,7 @@ public class ReleaseServiceImpl implements IReleaseService
         }
 
         if (StringUtils.isNotBlank(t.getStrategy()) && !ALLOWED_STRATEGY.contains(t.getStrategy())) {
-            throw new ServiceException("策略仅支持 blue_green/canary/rolling", 604);
+            throw new ServiceException("策略仅支持 blue_green/canary/rolling/direct_replace", 604);
         }
         if (t.getProjectId() != null && !t.getProjectId().equals(old.getProjectId())) {
             Project project = projectMapper.selectProjectById(t.getProjectId());

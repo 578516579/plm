@@ -38,13 +38,14 @@ CREATE TABLE tb_release (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='发布单（Release）';
 
 INSERT INTO sys_dict_type (dict_name, dict_type, status, create_by, create_time, remark) VALUES
-('发布策略', 'biz_release_strategy', '0', 'admin', SYSDATE(), '蓝绿/金丝雀/滚动'),
+('发布策略', 'biz_release_strategy', '0', 'admin', SYSDATE(), '蓝绿/金丝雀/滚动/直接替换 — 4 值对齐原型 nr-strategy'),
 ('发布状态', 'biz_release_status',   '0', 'admin', SYSDATE(), '5 状态机');
 
 INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time, remark) VALUES
-(1, '蓝绿',   'blue_green', 'biz_release_strategy', '', 'primary', 'N', '0', 'admin', SYSDATE(), ''),
-(2, '金丝雀', 'canary',     'biz_release_strategy', '', 'warning', 'N', '0', 'admin', SYSDATE(), ''),
-(3, '滚动',   'rolling',    'biz_release_strategy', '', 'success', 'Y', '0', 'admin', SYSDATE(), '');
+(1, '蓝绿部署', 'blue_green',     'biz_release_strategy', '', 'primary', 'N', '0', 'admin', SYSDATE(), ''),
+(2, '金丝雀',   'canary',         'biz_release_strategy', '', 'warning', 'N', '0', 'admin', SYSDATE(), '原型 10% 灰度'),
+(3, '滚动更新', 'rolling',        'biz_release_strategy', '', 'success', 'Y', '0', 'admin', SYSDATE(), '默认'),
+(4, '直接替换', 'direct_replace', 'biz_release_strategy', '', 'danger',  'N', '0', 'admin', SYSDATE(), '高风险,需 AI 评审通过 — 对齐原型 nr-strategy 第 4 选项');
 
 INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time, remark) VALUES
 (1, '计划中',   '00', 'biz_release_status', '', 'info',    'Y', '0', 'admin', SYSDATE(), ''),
