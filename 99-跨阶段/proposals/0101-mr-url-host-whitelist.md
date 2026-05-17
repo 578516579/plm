@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0101 |
 | 标题 | Task / Defect / 其他业务模块的"外部 URL" 字段（MR / PR / issue link 等）必须走 host 白名单校验 |
-| 状态 | **proposed** |
+| 状态 | **merged → tracking** |
 | 类型 | 编码规范（安全相关）|
 | 提出人 | Wjl + Claude（reflect/2026-W21 批量升格）|
 | 提出日期 | 2026-05-17 |
@@ -106,12 +106,18 @@ PLM 适用场景：MR URL 只应指向团队 git 平台（GitLab / Gitee / GitHu
 
 ```
 [x] Step 1: 写 proposal
-[ ] Step 2: 评审（后端 lead + 安全角度）
-[ ] Step 3: 实现 UrlValidator 工具类（plm-common）
-[ ] Step 4: 改 03-开发/开发规范.md §Y + .claude/rules.md §C
-[ ] Step 5: Task / Defect / Document Service 加 host 校验
-[ ] Step 6: 配 application*.yml 白名单（dev / staging / prod 各自）
-[ ] Step 7: tracking 期 grep 是否还有未校验 URL 字段
+[x] Step 2: 评审 — 2026-05-17 [solo-review] (per 0040 §3.5)
+[x] Step 3a: 按 0041 §3.1 第 4 checkbox 执行 grep 现存 URL 字段:
+    - Task.mrUrl ✓ (proposal §Y 字段名错 - 实际 mrUrl 非 mergeRequestUrl)
+    - ManualProduct.screenshotsUrls ✓ (proposal §Y 未列, CSV 形态)
+    - Defect.referenceUrl ❌ (不存在)
+    - Document.externalLink ❌ (不存在)
+[x] Step 3b: 落地规范 (含 grep 修正后的实际字段表):
+    - 03-开发/开发规范.md §1.10 (单值 + CSV 两种校验形态)
+    - .claude/rules.md §C 加 1 行
+[ ] Step 4: 实现 UrlValidator 工具类 + Task/ManualProduct Service 加校验 → BL-2026-007 (P1, W22)
+[ ] Step 5: 配 application*.yml 白名单 → BL-2026-008 (P1, W22, 与 007 同 Sprint)
+[ ] Step 6: tracking 期看新业务模块 URL 字段是否 100% 加校验
 ```
 
 ---
@@ -131,13 +137,35 @@ Tracking 期: merged 后 2 周。
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| _(待)_ | | | |
+| Wjl `[solo-review]` | ✅ 通过 | 2026-05-17 | 编码规范-安全类首落地; 同次 commit 验证 0041 §3.1 第 4 checkbox (grep 现存代码), 捕获 spec drift (3 个想象字段 → 2 个真实字段); 规范层通过, 代码实施延后 BL |
+| Claude | ✅ 实施 (规范层) | 2026-05-17 | 按 0040 §3.1 先 Read 03-开发/开发规范.md (§1.9 后/§2 前) + .claude/rules.md §C 起首行。**按 0041 §3.1 第 4 checkbox 先 grep 现存代码** → 修正 §Y 适用清单 |
+
+> Solo 单签理由：URL 白名单是显然必要的安全规范，无争议；W21 grep 验证现存代码后清单从想象走向事实。UrlValidator 实现 + Task/ManualProduct host 校验依赖运维白名单决策 → 延后 BL，规范本身 W21 就 lock。
 
 ---
 
-## 10. 实施后跟踪
+## 10. 实施后跟踪（已 merged 规范层）
 
-待 merged 后回填。
+### 实际合入
+- 合入 commit: 待 commit 后回填
+- 实际 merged 日期：2026-05-17（规范层；代码实施延后）
+
+### 派生迁移项 (per 0041 §3.1 第 4 checkbox)
+
+| BL ID | 任务 | 优先级 | 工作量估 | 责任人 |
+|---|---|---|---|---|
+| BL-2026-007 | 实现 `cn.com.bosssfot.dv.plm.common.utils.UrlValidator` + Task/ManualProduct Service 加 host 校验 | P1 | M (含 unit test) | TBD |
+| BL-2026-008 | 配 application-dev/staging/prod.yml 的 `plm.url.allowed-hosts.task` / `.manualProduct` 白名单 | P1 | S (含与运维同步) | TBD |
+
+### Tracking 数据
+
+| 信号 | 基线 | 目标 | W21 | W22 | W23 |
+|---|---|---|---|---|---|
+| 业务实体 URL 字段含 host 校验比例 | 0% (Task/ManualProduct 当前 0) | 100% | 规范已建, 代码待 BL | 待填 | 待填 |
+| 错误码 708 命中次数 | 0 | ≥ 1 (验证白名单生效) | 0 (UrlValidator 待实现) | 待填 | 待填 |
+| 新业务模块 URL 字段加校验比例 | N/A | 100% | 业务模块生成器待更新 | 待填 | 待填 |
+
+Tracking 期: 2026-05-17 ~ 2026-05-31。
 
 ---
 
@@ -146,3 +174,4 @@ Tracking 期: merged 后 2 周。
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 首版从 signals 候选 0025 升格 |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | 同日 solo-review accept + apply (规范层) per 0040 §3.5. **按 0041 §3.1 第 4 checkbox grep 现存代码捕获 drift**: §Y 原列 Defect.referenceUrl + Document.externalLink **均不存在**; Task 字段名 mergeRequestUrl 实为 mrUrl; 漏列 ManualProduct.screenshotsUrls (CSV)。03-开发/开发规范.md §1.10 含 grep 修正后的事实字段表 + CSV 形态校验; .claude/rules.md §C 加 1 行。代码实施 → BL-2026-007/008 (W22)。状态 proposed → merged → tracking |

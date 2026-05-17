@@ -30,6 +30,7 @@
 ## C. Secret / 凭据（MUST）
 
 - **永远不要**把真实 password / token / API key / JWT secret 写进 yml 或代码。
+- **业务实体含外部 URL 字段（命名后缀 Url/Link/Href/Urls）必须 host 白名单校验** (per [proposal 0101](../99-跨阶段/proposals/0101-mr-url-host-whitelist.md))。错误码 708。CSV 多 URL split + 逐 host 校验。
 - 任何敏感值都走 `${VAR:默认值}` 占位符；同步更新 [plm-backend/.env.example](../plm-backend/.env.example) 文档化。
 - 用户在对话中提供了凭据（如本会话之前的 `aa8945163`）→ 只在当次 shell 命令里使用，**不要**落地到任何文件（包括 `.env` 实际值文件）。
 - 发现凭据已经误入 git → 立刻警示用户，建议轮换并 `git filter-repo` 清理历史。

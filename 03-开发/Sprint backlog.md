@@ -16,6 +16,8 @@
 | BL-2026-004 | [proposal 0100](../99-跨阶段/proposals/0100-fk-validation-via-service-checkexists.md) §10 Step 4 + W20 audit F-AUDIT-F2 | 审计 8 active 模块 ServiceImpl 的 FK 校验代码 + 迁移现存 `boolean checkExists` 签名到 `void/throw 702`（ISprintService 等）| P1 | TBD | TBD | 规范变更 (0100) 已 merged；scope 扩展含历史签名迁移（见 0100 §1.9 注） |
 | BL-2026-005 | [proposal 0100](../99-跨阶段/proposals/0100-fk-validation-via-service-checkexists.md) §10 Step 5 | 更新 `plm-backend/scripts/new-business-module.sh` 业务模块生成器, 默认产 `Service.checkExists()` 调用（void/throw 签名）| P1 | TBD | TBD | 与 BL-2026-004 同源；先做生成器再批量审计可节省工作量 |
 | BL-2026-006 | [W20 tracking audit F-AUDIT-F1](../99-跨阶段/reflect/2026-W20-tracking-audit-mid.md) | 24 个 Phase 0X Gate instance 文件补 "溯及 proposal NNNN" 注 (per 0007/0008/0010/0011/0012/0013/0016/0032 §7 Step 4 集体承诺)| P2 | TBD | TBD | 单纯文本回标，无技术风险；建议批量脚本辅助 |
+| BL-2026-007 | [proposal 0101](../99-跨阶段/proposals/0101-mr-url-host-whitelist.md) §10 派生 | 实现 `cn.com.bosssfot.dv.plm.common.utils.UrlValidator` (含 checkHost + CSV 多值版本 + Guava InternetDomainName); Task / ManualProduct ServiceImpl add+edit 调用 | P1 | TBD | TBD | per 0041 grep 后确认 2 个字段; 含 unit test |
+| BL-2026-008 | [proposal 0101](../99-跨阶段/proposals/0101-mr-url-host-whitelist.md) §10 派生 | 配 application-dev/staging/prod.yml 的 `plm.url.allowed-hosts.task` + `.manualProduct` 白名单 | P1 | TBD | TBD | 与运维同步具体白名单后做 |
 
 ## 已完成（归档）
 
