@@ -221,12 +221,12 @@ public class TaskServiceImpl implements ITaskService
     }
 
     @Override
-    public Map<String, Object> kanban(Long projectId, Long sprintId)
+    public Map<String, Object> kanban(Long projectId, Long sprintId, String priority, Long assigneeUserId)
     {
         if (projectId == null) {
             throw new ServiceException("projectId 不能为空", 602);
         }
-        List<Task> all = taskMapper.selectKanbanTasks(projectId, sprintId);
+        List<Task> all = taskMapper.selectKanbanTasks(projectId, sprintId, priority, assigneeUserId);
 
         // 按状态分组（保持顺序 00-04，05 已取消不显示）
         String[] statuses = {"00", "01", "02", "03", "04"};

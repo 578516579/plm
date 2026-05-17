@@ -2,14 +2,22 @@
   <div class="app-container">
     <el-form :inline="true" class="kanban-toolbar">
       <el-form-item label="项目ID">
-        <el-input v-model="projectId" placeholder="必填" clearable style="width: 160px" />
+        <el-input v-model="projectId" placeholder="必填" clearable style="width: 140px" @keyup.enter="loadKanban" />
       </el-form-item>
       <el-form-item label="迭代ID">
-        <el-input v-model="sprintId" placeholder="可空，全部迭代" clearable style="width: 160px" />
+        <el-input v-model="sprintId" placeholder="可空，全部迭代" clearable style="width: 140px" @keyup.enter="loadKanban" />
+      </el-form-item>
+      <el-form-item label="优先级">
+        <el-select v-model="priority" placeholder="全部" clearable style="width: 120px">
+          <el-option v-for="dict in priority_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="负责人">
+        <el-input v-model="assigneeUserId" placeholder="user_id 可空" clearable style="width: 120px" @keyup.enter="loadKanban" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="loadKanban">加载</el-button>
-        <el-button icon="Refresh" @click="loadKanban">刷新</el-button>
+        <el-button icon="Refresh" @click="resetFilter">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -32,6 +40,7 @@
               <dict-tag :options="priority_options" :value="task.priority" />
               <span class="hours">{{ task.estimatedHours || '-' }}h</span>
             </div>
+            <div v-if="task.assigneeUserId" class="card-assignee">负责人 #{{ task.assigneeUserId }}</div>
           </el-card>
           <div v-if="col.tasks.length === 0" class="kanban-empty">暂无任务</div>
         </div>
@@ -49,6 +58,8 @@ const { biz_task_priority: priority_options } = toRefs<any>(proxy.useDict('biz_t
 
 const projectId = ref<string>('')
 const sprintId = ref<string>('')
+const priority = ref<string>('')
+const assigneeUserId = ref<string>('')
 const loading = ref(false)
 const columns = ref<KanbanColumn[]>([])
 
@@ -58,13 +69,25 @@ function loadKanban() {
     return
   }
   loading.value = true
-  kanbanTasks(projectId.value, sprintId.value || undefined)
+  kanbanTasks({
+    projectId: projectId.value,
+    sprintId: sprintId.value || undefined,
+    priority: priority.value || undefined,
+    assigneeUserId: assigneeUserId.value || undefined
+  })
     .then((res: any) => {
       columns.value = res.data.columns
     })
     .finally(() => {
       loading.value = false
     })
+}
+
+function resetFilter() {
+  sprintId.value = ''
+  priority.value = ''
+  assigneeUserId.value = ''
+  if (projectId.value) loadKanban()
 }
 </script>
 
@@ -137,6 +160,12 @@ function loadKanban() {
 
 .card-meta .hours {
   font-family: monospace;
+}
+
+.card-assignee {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #909399;
 }
 
 .kanban-empty {

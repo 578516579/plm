@@ -102,13 +102,15 @@ public class TaskController extends BaseController
         return getDataTable(list);
     }
 
-    /** 看板视图（T-006） */
+    /** 看板视图（T-006）— 支持可选 priority / assigneeUserId 过滤 */
     @PreAuthorize("@ss.hasPermi('business:task:kanban')")
     @GetMapping("/kanban")
     public AjaxResult kanban(@RequestParam("projectId") Long projectId,
-                             @RequestParam(value = "sprintId", required = false) Long sprintId)
+                             @RequestParam(value = "sprintId", required = false) Long sprintId,
+                             @RequestParam(value = "priority", required = false) String priority,
+                             @RequestParam(value = "assigneeUserId", required = false) Long assigneeUserId)
     {
-        Map<String, Object> data = taskService.kanban(projectId, sprintId);
+        Map<String, Object> data = taskService.kanban(projectId, sprintId, priority, assigneeUserId);
         return success(data);
     }
 }
