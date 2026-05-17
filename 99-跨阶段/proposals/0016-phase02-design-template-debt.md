@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0016 |
 | 标题 | Phase 02 §B 设计文档加 6 项必填项 — 主键命名 / 反向边提示 / 并发选型 / 复合视图决策 / 父项目沿用 / 聚合详情决策 |
-| 状态 | **proposed** |
+| 状态 | **merged → tracking** |
 | 类型 | 流程 |
 | 提出人 | Wjl + Claude（reflect/2026-W21 批量升格）|
 | 提出日期 | 2026-05-17 |
@@ -141,13 +141,26 @@ Tracking 期: merged 后 2 周。
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| _(待)_ | | | |
+| Wjl `[solo-review]` | ✅ 通过 | 2026-05-17 | 6-候选合一最大单提案；scope 注：proposal §3.4 误写 "改 §C API"，实际 §B.3 是 API 设计（已修正 apply 路径）|
+| Claude | ✅ 实施 | 2026-05-17 | 同 W21 apply 批次落地 |
 
 ---
 
-## 10. 实施后跟踪
+## 10. 实施后跟踪（已 merged）
 
-待 merged 后回填。
+### 实际合入
+- 合入 commit: 同 W21 apply 批次（待 commit 后回填 hash）
+- 实际 merged 日期：2026-05-17
+- 实际改动: Phase02-设计-Gate.md §B.1 (架构沿用) + §B.2 (主键命名 + 并发选型) + §B.3 (REST/聚合决策树) + §B.3.2 状态机端点 (反向边 UI 提示)。原 proposal 文本写 §C 是笔误，已按 §B.3 应用。
+
+### Tracking 数据
+
+| 信号 | 基线 | 目标 | W20 末 | W21 | W22 |
+|---|---|---|---|---|---|
+| Phase 02 §G "设计盲区 friction" | 6 (3 实例×2 平均) | ≤ 1 | 已改, 旧实例待 W21 标"溯及 0016" | 待填 | 待填 |
+| Phase 03 "modify Phase 02 设计文档" commit 数 | ≥ 1 | 0 | 已改 (rule), 待 W21+ 新模块 Phase 02 验证 | 待填 | 待填 |
+
+Tracking 期: 2026-05-17 ~ 2026-05-31。
 
 ---
 
@@ -156,3 +169,4 @@ Tracking 期: merged 后 2 周。
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 首版从 signals 候选 0016-0021 bundle 升格（6 候选合 1 提案）|
+| 2026-05-17 | Wjl `[solo-review]` + Claude | 同日 solo-review accept + 落地 Phase02-设计-Gate.md §B.1 + §B.2 + §B.3 + §B.3.2 状态机端点段。Scope 修正：原 proposal §3.4 写 "§C API" 应为 "§B.3 API"，按 §B.3 落地。状态 proposed → merged → tracking |

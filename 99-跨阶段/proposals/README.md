@@ -66,13 +66,13 @@ proposed    完成填写、关联数据，等 review
 | [0027](0027-business-module-scaffold-script.md) | 业务模块生成器 `new-business-module.sh` | **merged → tracking** (retro, User-requested-bypass) | 2026-05-17 追溯 | reflect F-W20-02 / signals 0027+0034 | `75b3233` (2026-05-16) | 2026-05-17 → 05-30 |
 | [0028](0028-encoding-runtime-hardrules.md) | rules.md §D #5-7 编码硬规则 + check-encoding 脚本 | **merged → tracking** (retro, User-requested-bypass) | 2026-05-17 追溯 | reflect F-W20-02 / signals 0028 / 周六编码事故 | `913d431` (2026-05-16) | 2026-05-17 → 05-30 |
 | [0029](0029-curl-data-binary-cn-body.md) | curl 中文 body 强制 `--data-binary @file` | **merged → tracking** (retro, User-requested-bypass) | 2026-05-17 追溯 | reflect F-W20-02 / signals 0029 / 同 0028 事故 | `913d431` (2026-05-16) | 2026-05-17 → 05-30 |
-| [0008](0008-phase05-early-solo-simplification.md) | Phase 05 §B.1 上线 Checklist / §C 凭据红线在 early+solo 简化 | **proposed** | 2026-05-17 | reflect W21 批次 / signals bundle 0008+0009 | — | （待 merged）|
-| [0013](0013-phase01-sub-entity-template.md) | Phase 01 加子实体扩展模式 + 立项时序字段 + 风险/技术债拆表 | **proposed** | 2026-05-17 | reflect W21 批次 / signals bundle 0013+0014+0015 | — | （待 merged）|
-| [0016](0016-phase02-design-template-debt.md) | Phase 02 §B 设计文档加 6 项必填（架构沿用/主键/反向边/并发/复合视图/聚合）| **proposed** | 2026-05-17 | reflect W21 批次 / signals bundle 0016-0021 | — | （待 merged）|
-| [0100](0100-fk-validation-via-service-checkexists.md) | FK 跨表校验走 `Service.checkExists()`，禁 Mapper 直读 | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0022 | — | （待 merged）|
-| [0101](0101-mr-url-host-whitelist.md) | 业务 URL 字段 host 白名单校验（防钓鱼）| **proposed** | 2026-05-17 | reflect W21 批次 / signals 0025 | — | （待 merged）|
-| [0200](0200-encoding-pretooluse-hook.md) | 编码自检脚本接入 git pre-commit + Claude PreToolUse hook | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0030（派生自 0028）| — | （待 merged）|
-| [0032](0032-early-deploy-ergonomics.md) | early 部署链路 — 目标环境字段 + 演练路径 + deploy.sh | **proposed** | 2026-05-17 | reflect W21 批次 / signals bundle 0032+0033 | — | （待 merged）|
+| [0008](0008-phase05-early-solo-simplification.md) | Phase 05 §B.1 上线 Checklist / §C 凭据红线在 early+solo 简化 | **merged → tracking** | 2026-05-17 | reflect W21 批次 / signals bundle 0008+0009 | apply W21 process batch（2026-05-17）| 2026-05-17 → 05-31 |
+| [0013](0013-phase01-sub-entity-template.md) | Phase 01 加子实体扩展模式 + 立项时序字段 + 风险/技术债拆表 | **merged → tracking** (partial; §D 拆表延后) | 2026-05-17 | reflect W21 批次 / signals bundle 0013+0014+0015 | 同上 | 同上 |
+| [0016](0016-phase02-design-template-debt.md) | Phase 02 §B 设计文档加 6 项必填（架构沿用/主键/反向边/并发/复合视图/聚合）| **merged → tracking** | 2026-05-17 | reflect W21 批次 / signals bundle 0016-0021 | 同上 | 同上 |
+| [0032](0032-early-deploy-ergonomics.md) | early 部署链路 — 目标环境字段 + 演练路径 + deploy.sh | **merged → tracking** (partial; deploy.sh 实现延后) | 2026-05-17 | reflect W21 批次 / signals bundle 0032+0033 | 同上 | 同上 |
+| [0100](0100-fk-validation-via-service-checkexists.md) | FK 跨表校验走 `Service.checkExists()`，禁 Mapper 直读 | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0022 | — | （待 merged，需改 rules.md / 开发规范.md，独立 apply）|
+| [0101](0101-mr-url-host-whitelist.md) | 业务 URL 字段 host 白名单校验（防钓鱼）| **proposed** | 2026-05-17 | reflect W21 批次 / signals 0025 | — | （待 merged，独立 apply）|
+| [0200](0200-encoding-pretooluse-hook.md) | 编码自检脚本接入 git pre-commit + Claude PreToolUse hook | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0030（派生自 0028）| — | （待 merged，需改 settings.json/githooks，独立 apply）|
 
 ### 候选堆积处置回顾（W21 批量升格已清空）
 

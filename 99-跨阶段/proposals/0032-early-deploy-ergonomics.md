@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0032 |
 | 标题 | early 阶段无独立 staging 时模板的明确路径 + 沉淀 `deploy.sh` 自动化上线脚本 |
-| 状态 | **proposed** |
+| 状态 | **merged → tracking**（部分；deploy.sh 实际脚本实现留 W22）|
 | 类型 | 流程 + 工具链（混合）|
 | 提出人 | Wjl + Claude（reflect/2026-W21 批量升格）|
 | 提出日期 | 2026-05-17 |
@@ -155,13 +155,27 @@ Tracking 期: merged 后 2 周。
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| _(待)_ | | | |
+| Wjl `[solo-review]` | ✅ 通过（部分）| 2026-05-17 | 模板部分落地（头部"目标环境"字段 + §B.0 演练环境段 + §E 表加 deploy.sh 行）；deploy.sh 实际脚本实现需基础设施细节，留 W22 独立 |
+| Claude | ✅ 实施（部分）| 2026-05-17 | 同 W21 apply 批次落地 |
 
 ---
 
-## 10. 实施后跟踪
+## 10. 实施后跟踪（部分 merged）
 
-待 merged 后回填。
+### 实际合入
+- 合入 commit: 同 W21 apply 批次（待 commit 后回填 hash）
+- 实际 merged 日期：2026-05-17（模板部分）
+- 延后: 实际 deploy.sh 实现（依赖基础设施形态 - VM/K8s/容器），留 W22+ 独立 apply
+
+### Tracking 数据
+
+| 信号 | 基线 | 目标 | W20 末 | W21 | W22 |
+|---|---|---|---|---|---|
+| Phase 05 §J "部署环境 friction" | 2 (W20 Project)| 0 | 已改 (rule), 待 W21+ 验证 | 待填 | 待填 |
+| deploy.sh 调用次数 | 0 | ≥ 3 | 0（脚本尚未实现）| 待填 | 待填 |
+| early → stable 转型独立 Gate 实例 | 0 | 1 | N/A | 待填 | 待填 |
+
+Tracking 期: 2026-05-17 ~ 2026-05-31（模板部分）。
 
 ---
 
@@ -170,3 +184,4 @@ Tracking 期: merged 后 2 周。
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 首版从 signals 候选 0032+0033 bundle 升格 |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | 同日 solo-review accept + 部分落地 Phase05-上线-Gate.md 头部加"目标环境" + §B.0 新增"演练环境约定" + §E 表加 deploy.sh 行。脚本实现延后 W22。状态 proposed → merged (partial) → tracking |

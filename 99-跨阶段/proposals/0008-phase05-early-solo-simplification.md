@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0008 |
 | 标题 | Phase 05 §B.1 上线 Checklist 在 early+solo 可合并到发布计划；§C 凭据红线对 dev 环境标 N/A |
-| 状态 | **proposed** |
+| 状态 | **merged → tracking** |
 | 类型 | 流程 |
 | 提出人 | Wjl + Claude（reflect/2026-W21 批量升格批次）|
 | 提出日期 | 2026-05-17 |
@@ -126,13 +126,25 @@ Tracking 期: merged 后 2 周。
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| _(待)_ | | | |
+| Wjl `[solo-review]` | ✅ 通过 | 2026-05-17 | 与 0007/0010/0011 同源风格——early+solo 三/二条件叠加豁免，与已有 4 维参数化完全对齐 |
+| Claude | ✅ 实施 | 2026-05-17 | 同 W21 apply 批次落地 |
 
 ---
 
-## 10. 实施后跟踪
+## 10. 实施后跟踪（已 merged）
 
-待 merged 后回填。
+### 实际合入
+- 合入 commit: 同 W21 apply 批次（待 commit 后回填 hash）
+- 实际 merged 日期：2026-05-17
+
+### Tracking 数据
+
+| 信号 | 基线 | 目标 | W20 末 | W21 | W22 |
+|---|---|---|---|---|---|
+| Phase 05 §I/§K "B.1/§C friction" | 7 (W20 instances) | 0 | rule 已改, 旧实例待溯及 | 待填 | 待填 |
+| stable 转型挂账 issue 关闭率 | N/A | 100% | N/A (尚未首次 staging 部署)| 待填 | 待填 |
+
+Tracking 期: 2026-05-17 ~ 2026-05-31。
 
 ---
 
@@ -141,3 +153,4 @@ Tracking 期: merged 后 2 周。
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 首版从 signals 候选 0008+0009 bundle 升格 |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | 同日 solo-review accept + 落地 Phase05-上线-Gate.md §B.1 拆 B.1.standard/B.1.solo-early + §C 加适用范围段，状态 proposed → merged → tracking |
