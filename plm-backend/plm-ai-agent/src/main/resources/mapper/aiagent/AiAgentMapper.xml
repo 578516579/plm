@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.aiagent.mapper.AiAgentMapper">
+
+    <resultMap type="AiAgent" id="AiAgentResult">
+        <result property="id"           column="id"            />
+        <result property="agentNo"      column="agent_no"      />
+        <result property="agentName"    column="agent_name"    />
+        <result property="agentRole"    column="agent_role"    />
+        <result property="agentType"    column="agent_type"    />
+        <result property="modelName"    column="model_name"    />
+        <result property="difyFlowId"   column="dify_flow_id"  />
+        <result property="toolsJson"    column="tools_json"    />
+        <result property="status"       column="status"        />
+        <result property="callsToday"   column="calls_today"   />
+        <result property="successRate"  column="success_rate"  />
+        <result property="avgLatency"   column="avg_latency"   />
+        <result property="description"  column="description"   />
+        <result property="createBy"     column="create_by"     />
+        <result property="createTime"   column="create_time"   />
+        <result property="updateBy"     column="update_by"     />
+        <result property="updateTime"   column="update_time"   />
+        <result property="remark"       column="remark"        />
+        <result property="delFlag"      column="del_flag"      />
+    </resultMap>
+
+    <sql id="selectAiAgentVo">
+        select id, agent_no, agent_name, agent_role, agent_type, model_name,
+               dify_flow_id, tools_json, status, calls_today, success_rate, avg_latency,
+               description, create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_ai_agent
+    </sql>
+
+    <select id="selectAiAgentList" parameterType="AiAgent" resultMap="AiAgentResult">
+        <include refid="selectAiAgentVo"/>
+        <where>
+            del_flag = '0'
+            <if test="agentNo != null and agentNo != ''">
+                and agent_no like concat('%', #{agentNo}, '%')
+            </if>
+            <if test="agentName != null and agentName != ''">
+                and agent_name like concat('%', #{agentName}, '%')
+            </if>
+            <if test="agentRole != null and agentRole != ''">
+                and agent_role = #{agentRole}
+            </if>
+            <if test="agentType != null and agentType != ''">
+                and agent_type = #{agentType}
+            </if>
+            <if test="modelName != null and modelName != ''">
+                and model_name like concat('%', #{modelName}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectAiAgentById" parameterType="Long" resultMap="AiAgentResult">
+        <include refid="selectAiAgentVo"/>
+        where id = #{id} and del_flag = '0'
+    </select>
+
+    <insert id="insertAiAgent" parameterType="AiAgent" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_ai_agent
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="agentNo != null">agent_no,</if>
+            <if test="agentName != null">agent_name,</if>
+            <if test="agentRole != null">agent_role,</if>
+            <if test="agentType != null">agent_type,</if>
+            <if test="modelName != null">model_name,</if>
+            <if test="difyFlowId != null">dify_flow_id,</if>
+            <if test="toolsJson != null">tools_json,</if>
+            <if test="status != null">status,</if>
+            <if test="callsToday != null">calls_today,</if>
+            <if test="successRate != null">success_rate,</if>
+            <if test="avgLatency != null">avg_latency,</if>
+            <if test="description != null">description,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="agentNo != null">#{agentNo},</if>
+            <if test="agentName != null">#{agentName},</if>
+            <if test="agentRole != null">#{agentRole},</if>
+            <if test="agentType != null">#{agentType},</if>
+            <if test="modelName != null">#{modelName},</if>
+            <if test="difyFlowId != null">#{difyFlowId},</if>
+            <if test="toolsJson != null">#{toolsJson},</if>
+            <if test="status != null">#{status},</if>
+            <if test="callsToday != null">#{callsToday},</if>
+            <if test="successRate != null">#{successRate},</if>
+            <if test="avgLatency != null">#{avgLatency},</if>
+            <if test="description != null">#{description},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateAiAgent" parameterType="AiAgent">
+        update tb_ai_agent
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="agentNo != null">agent_no = #{agentNo},</if>
+            <if test="agentName != null">agent_name = #{agentName},</if>
+            <if test="agentRole != null">agent_role = #{agentRole},</if>
+            <if test="agentType != null">agent_type = #{agentType},</if>
+            <if test="modelName != null">model_name = #{modelName},</if>
+            <if test="difyFlowId != null">dify_flow_id = #{difyFlowId},</if>
+            <if test="toolsJson != null">tools_json = #{toolsJson},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="callsToday != null">calls_today = #{callsToday},</if>
+            <if test="successRate != null">success_rate = #{successRate},</if>
+            <if test="avgLatency != null">avg_latency = #{avgLatency},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deleteAiAgentByIds" parameterType="Long">
+        update tb_ai_agent set del_flag = '2' where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(agent_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_ai_agent
+        where agent_no like concat(#{prefix}, '%')
+    </select>
+
+</mapper>

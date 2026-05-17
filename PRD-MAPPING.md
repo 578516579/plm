@@ -35,7 +35,7 @@
 | 24 | 运维手册 ManualOps | F5.3 | opsmanual.html | plm-manual-ops | 🟡 空壳 |
 | 25 | 效能分析 Analytics | - | analytics.html | plm-analytics | 🟡 空壳 |
 | 26 | 工作台 Dashboard | - | dashboard.html | plm-dashboard | 🟡 空壳 |
-| 27 | AI Agent | - | aiagents.html | plm-ai-agent | 🟡 空壳 |
+| 27 | AI Agent | §2.3/§3.1 | aiagents.html | plm-ai-agent | 🟢 PRD-aligned |
 | 28 | OpenSpec | - | aispec.html | plm-openspec | 🟡 空壳 |
 | 29 | Pipeline | - | pipeline.html | plm-pipeline | 🟡 空壳 |
 | 30 | Feature Flag | - | featureflag.html | plm-feature-flag | 🟡 空壳 |
@@ -127,6 +127,30 @@
 | createTime / processTime | (RuoYi 标准) | | | 不可删除（审计） |
 | sourceIp | source_ip | VARCHAR(64) | - | 调用方 IP（防滥用） |
 
+### §34. AI Agent 编排（plm-ai-agent）
+
+**领域**: 管理开发过程中各个岗位的 AI Agent，包括需求分析/PRD生成/代码审查/测试用例/发布评审/运维巡检 6 类 Agent。
+**PRD 出处**: §2.3 AI能力矩阵（18个Dify工作流）/ §3.1 目标用户（7个产研岗位）/ 原型 [aiagents.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/aiagents.html) `state.aiAgents`
+
+#### 表 `tb_ai_agent` —— AI Agent 配置表
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| id | id | BIGINT | - | 主键 |
+| agentNo | agent_no | VARCHAR(32) | 原型 `a.id` AGT-001 | 唯一编号 AGT-YYYY-NNNN |
+| agentName | agent_name | VARCHAR(128) | 原型 `a.name` | 如「需求分析Agent」 |
+| agentRole | agent_role | VARCHAR(32) | §3.1 7个产研岗位 | 字典 `biz_agent_role` |
+| agentType | agent_type | VARCHAR(32) | §2.3 工作流分类 | 字典 `biz_agent_type` |
+| modelName | model_name | VARCHAR(128) | 原型 `a.model` | DeepSeek-V3 / Claude Sonnet 4.6 / DeepSeek-R1 |
+| difyFlowId | dify_flow_id | VARCHAR(128) | §2.3 18个工作流ID | 如 `requirements-flow` |
+| toolsJson | tools_json | TEXT | 原型 `a.tools` | JSON数组，如 `["agrikb_search","req_template"]` |
+| status | status | CHAR(1) | 原型 `a.status` 运行中/待机 | 字典 `biz_agent_status`：0=运行中 1=待机 2=异常 |
+| callsToday | calls_today | INT | 原型 `a.calls_today` | 今日调用次数（每日凌晨重置） |
+| successRate | success_rate | DECIMAL(5,2) | 原型 `a.success_rate` | 成功率 0.00~100.00 |
+| avgLatency | avg_latency | VARCHAR(32) | 原型 `a.avg_latency` | 平均响应时长，如 1.8s |
+| description | description | VARCHAR(500) | 原型 `a.desc` | 功能描述 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
 ---
 
 ## 3. 状态机汇总
@@ -162,6 +186,24 @@
 
 非法转换 → `ServiceException(701)`。
 
+### §34 AI Agent 状态机（tb_ai_agent.status）
+
+```
+运行中(0) → 待机(1)   [人工暂停]
+待机(1)   → 运行中(0) [人工启动]
+运行中(0) → 异常(2)   [系统写入，心跳失败]
+异常(2)   → 运行中(0) [人工恢复]
+异常(2)   → 待机(1)   [人工关停]
+```
+
+| 当前 | 人工操作允许目标 |
+|---|---|
+| 0 运行中 | 1 待机 |
+| 1 待机 | 0 运行中 |
+| 2 异常 | 0 运行中 / 1 待机 |
+
+非法转换 → `ServiceException(701)`。
+
 ---
 
 ## 4. 错误码登记表
@@ -181,6 +223,8 @@
 | **808** | **外部 API 速率限制** | 429 | 本提案 | `飞书 OpenAPI 触发限流，请稍候` |
 | **809** | **凭据加密 key 未配置** | 500 | 本提案（启动期 fail-fast） | `MCP_ENCRYPT_KEY 未设置，拒绝启动` |
 | **810** | **不支持的 connector_type** | 400 | 本提案 | `connector_type = xxx 暂不支持，仅支持: feishu/gitlab/...` |
+| **811** | **AI Agent 不存在** | 404 | §34 | `Agent [id] 不存在` |
+| **812** | **AI Agent 非法状态转换** | 400 | §34 | `状态「运行中」不能转为「异常」（系统写入）` |
 
 ---
 
@@ -198,6 +242,8 @@
 | Webhook 事件 | `GET /business/integration/webhook/list` | `GET /business/integration/webhook/{id}` | (只读) | (只读，仅重试) | (只读) |
 | Webhook 入站 - 飞书 | `POST /integration/webhook/feishu/{connectorId}` | - | - | - | - |
 | Webhook 入站 - GitLab | `POST /integration/webhook/gitlab/{connectorId}` | - | - | - | - |
+| AI Agent | `GET /business/ai-agent/list` | `GET /business/ai-agent/{id}` | `POST /business/ai-agent` | `PUT /business/ai-agent` | `DELETE /business/ai-agent/{ids}` |
+| AI Agent 状态切换 | - | - | - | `PUT /business/ai-agent/{id}/status` | - |
 
 **注意**：
 - `/business/*` 走 Spring Security JWT + `@PreAuthorize("@ss.hasPermi('business:<entity>:<action>')")`
@@ -217,6 +263,9 @@
     - 查询 2511 / 新增 2512 / 修改 2513 / 删除 2514 / 测试 2516
   - Webhook 事件 = 2520
     - 查询 2521 / 重试 2522 / 导出 2525
+- **AI 能力 = 2600**（一级目录）
+  - AI Agent 编排 = 2610
+    - 查询 2611 / 新增 2612 / 修改 2613 / 删除 2614 / 导出 2615
 
 ### 权限串
 
@@ -224,6 +273,7 @@
 - `business:mcp:audit:list/query/export`
 - `business:integration:connector:list/add/edit/remove/test/query`
 - `business:integration:webhook:list/retry/query/export`
+- `business:ai-agent:list/add/edit/remove/export/query`
 
 ---
 
@@ -239,6 +289,9 @@
 | `biz_integration_auth` | 集成鉴权 | integration_connector.auth_type | app_secret / access_token / oauth2 / pat |
 | `biz_integration_status` | 集成状态 | integration_connector.status | 0=启用 1=停用 2=异常 |
 | `biz_webhook_status` | Webhook 处理状态 | integration_webhook_event.process_status | 0=待 1=中 2=成 3=败 4=略 |
+| `biz_agent_role` | AI Agent 岗位 | ai_agent.agent_role | product_manager / ued / dev / test / pm / impl / dept_head |
+| `biz_agent_type` | AI Agent 类型 | ai_agent.agent_type | requirement / prd_gen / code_review / test_case / release / ops |
+| `biz_agent_status` | AI Agent 状态 | ai_agent.status | 0=运行中 1=待机 2=异常 |
 
 ---
 
@@ -271,3 +324,4 @@
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 初版；初始化 SSoT；按 Proposal 0007 加入 §32 MCP / §33 Integration |
+| 2026-05-18 | Wjl + Claude | §34 AI Agent 编排模块 PRD-aligned；补字段对照表/状态机/错误码/URL/字典 |

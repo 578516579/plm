@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
     path: '/business/ai-agent',
     name: 'AiAgent',
     component: () => import('./views/index.vue'),
-    meta: { title: 'AI Agent 编排', icon: 'cpu', stub: true }
+    meta: { title: 'AI Agent 编排', icon: 'robot' }
   }
 ]
 

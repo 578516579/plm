@@ -129,6 +129,9 @@
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-mcp</artifactId></dependency>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-integration</artifactId></dependency>
 
+        <!-- AI 能力 -->
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-ai-agent</artifactId></dependency>
+
     </dependencies>
 
     <build>
