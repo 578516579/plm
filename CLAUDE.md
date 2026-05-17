@@ -171,11 +171,14 @@ Key entry points:
 - [99-跨阶段/reflect/README.md](99-跨阶段/reflect/README.md) — how reflection runs (weekly/monthly/quarterly)
 - [99-跨阶段/proposals/README.md](99-跨阶段/proposals/README.md) — how a rule change actually lands
 
-Roadmap (current = Phase A complete):
+Roadmap (current = Phase B kicked off 2026-05-17):
 - ✅ Phase A — passive substrate: directories, templates, Stop/PreToolUse hooks
-- ⏳ Phase B — `/reflect-weekly` & `/reflect-monthly` skills (auto-generate reports)
-- ⏳ Phase C — `/proposal` skill (one-command proposal lifecycle)
-- ⏳ Phase D — metrics-driven rule tuning (auto-suggest MUST↔SHOULD downgrades)
+- 🟡 Phase B — skill 层半自动化:
+  - ✅ `reflect-weekly` skill v0.1 ([.claude/skills/reflect-weekly/](.claude/skills/reflect-weekly/)) — 数据采集自动 + 写报告半人工
+  - ⏳ `reflect-monthly` skill (待；月初触发, 自动汇总当月 signals + 4 周周报)
+  - ⏳ `reflect-quarterly` skill (待；季度末手动, 综合 12 周周报 + ADR 一致性)
+- ⏳ Phase C — `/proposal` skill (one-command proposal lifecycle, 从候选到 merged 全链路)
+- ⏳ Phase D — metrics-driven rule tuning (auto-suggest MUST↔SHOULD downgrades based on signals)
 
 ## Memory references
 

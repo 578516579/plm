@@ -2,9 +2,20 @@
 .claude/*
 !.claude/*.md
 !.claude/settings.json
+# Phase B skills 是仓库共享 playbook 资产, 显式 unignore (proposal 0040/0041 + reflect-weekly skill 起)
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/*/
+.claude/skills/*/*
+!.claude/skills/*/*.md
+!.claude/skills/*/references/
+.claude/skills/*/references/*
+!.claude/skills/*/references/*.md
 # Notes:
 #   settings.json      → shared (team-wide hooks/policies, in git)
 #   settings.local.json → user-specific permissions cache, stays ignored
+#   .claude/skills/*/SKILL.md + references/*.md → shared playbook
+#   .claude/skills/*/scripts/ / other → opt-in via additional rules if needed
 
 # Environment files with secrets
 .env

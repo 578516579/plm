@@ -18,18 +18,23 @@
 
 ## 周度反思（`/reflect-weekly`）— 工作模式
 
-每周一上午，Claude 自动执行：
+> **Phase B v0.1 已上线**（2026-05-17）→ [`.claude/skills/reflect-weekly/SKILL.md`](../../.claude/skills/reflect-weekly/SKILL.md)
+> 调用方式：用户说 `/reflect-weekly` / "周度反思" / "周报反思" / "W{NN} reflect" → Claude 自动加载 skill 走 Step 1-7.
 
-1. **扫输入**
-   - `git log --since "1 week ago" --pretty=format:"%h %s"`（看 commit 规范）
-   - `find gate-checklists/instances -newer .git/last-reflect.timestamp`（看新增 Gate）
-   - `git log --since "1 week ago" -- 99-跨阶段/风险登记册.md`（看风险变动）
-   - 上周会话的 memory 摘要
-2. **找模式**（对照 [signals/README.md](../signals/README.md) 的 5 类触发条件）
-3. **写报告**（用 `YYYY-WW.md` 模板）
-4. **生成种子提案**（可选：在报告"建议"段，标 `→ 可转 proposals/XXXX`）
+每周一上午（或事件触发后 24h 内），Claude 按 skill 执行：
 
-人类干预：审报告 → 通过的建议手动转 proposal（或让 `/proposal` skill 自动转）。
+1. **扫输入**（见 [skill checks.md §A](../../.claude/skills/reflect-weekly/references/checks.md) 5 类信号 Bash）
+   - `git log --since="$WEEK_START" --until="$WEEK_END"` (commit 健康度)
+   - `find 99-跨阶段/gate-checklists/instances` (Gate 实例新增)
+   - `git log -- 99-跨阶段/风险登记册.md` (风险变动)
+   - signals / proposals / Sprint backlog 当周流动
+2. **找模式**（对照 [skill checks.md §B](../../.claude/skills/reflect-weekly/references/checks.md) 6 种 friction）
+3. **写报告**（用 [skill references/template.md](../../.claude/skills/reflect-weekly/references/template.md) 模板）
+4. **显式呼出候选**（每条 friction 必标 → proposal / BL / 直接改 / 观察, 防"心理按摩"反模式）
+
+人类干预（solo 模式下精简）：审报告 → 通过的建议**当次同 commit** 升格为 proposal（per [proposal 0040 §3.5](../proposals/0040-self-evolution-v2-meta-rules.md) solo same-day 路径）。
+
+**示例参考**（按场景）：[skill examples.md](../../.claude/skills/reflect-weekly/references/examples.md) 列出 4 类模式 (周末闭合 / dogfood / meta / audit)。
 
 ---
 
@@ -72,12 +77,13 @@
 
 ## 工具与脚本
 
-| 工具 | 用途 |
-|---|---|
-| `/reflect-weekly` | Phase B 实现，自动周报 |
-| `/reflect-monthly` | Phase B 实现，自动月报 |
-| `/reflect-quarterly` | Phase B 实现，手动触发的季度报告 |
-| `/loop` skill（已有）| 调度上述命令 |
+| 工具 | 用途 | 状态 |
+|---|---|---|
+| [`/reflect-weekly`](../../.claude/skills/reflect-weekly/SKILL.md) | 周度反思（半自动: 数据采集自动 + 写报告半人工）| ✅ v0.1 (2026-05-17) |
+| `/reflect-monthly` | 自动月报（汇总当月 signals + 4 周周报）| ⏳ Phase B 待 |
+| `/reflect-quarterly` | 手动触发的季度报告（12 周 + ADR 一致性）| ⏳ Phase B 待 |
+| `/proposal` | 候选 → proposal 一命令全链路 | ⏳ Phase C 待 |
+| `/loop` skill（系统级，已有）| 调度上述命令 | — |
 
 ---
 
