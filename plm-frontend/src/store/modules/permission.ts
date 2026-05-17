@@ -140,6 +140,13 @@ export const loadView = (view: string): any => {
       }
     }
   }
+  // 3. 兜底: business/<entity>/index 未实现 → 显示 placeholder (后端 API 已就位但 UI 待开发)
+  if (m) {
+    const placeholderKey = './../../views/business/_placeholder.vue'
+    if (modules[placeholderKey]) {
+      return () => modules[placeholderKey]()
+    }
+  }
   return undefined
 }
 
