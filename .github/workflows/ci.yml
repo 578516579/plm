@@ -101,11 +101,12 @@ jobs:
         # package-lock.json 未提交（pnpm/yarn workspace 场景），用 npm install
         run: npm install --registry=https://registry.npmmirror.com
 
-      - name: Type-check
+      - name: Build check
         working-directory: plm-frontend
-        run: npm run build
+        run: npm run build:prod
         env:
           VITE_BACKEND_URL: http://localhost:8080
+          VITE_APP_TITLE: PLM
 
       - name: Unit tests
         working-directory: plm-frontend
