@@ -59,6 +59,8 @@ proposed    完成填写、关联数据，等 review
 | [0004](0004-staged-test-dod.md) | 拆 Phase 03 / 04 的 DoD（代码骨架 vs 测试稳定） | **merged → tracking** | 2026-05-15 | [reflect/2026-W20-project-phase03-dogfood](../reflect/2026-W20-project-phase03-dogfood.md) F-P03-01 | apply 0004/0005/0006（2026-05-15）| 2026-05-15 → 05-29 |
 | [0005](0005-solo-sprint-merge.md) | solo 模式 Sprint 文档可并入 Gate 实例 | **merged → tracking** | 2026-05-15 | reflect F-P03-02 | 同上 | 同上 |
 | [0006](0006-project-maturity-stage.md) | 引入"项目成熟度"维度（early/stable/mature），4 维参数化 | **merged → tracking** | 2026-05-15 | reflect F-P03-03 | 同上 | 同上 |
+| [0007](0007-mcp-integration-modules-uplift.md) | 把 MCP/Integration 模块从 v0.5+ 提到当前迭代 | **merged → tracking** (User-requested-bypass) | 2026-05-17 | 用户明确请求 + AgriPLM-模块映射 drift | 0f75294 / eabbbe4 | 2026-05-17 → 06-30 |
+| [0008](0008-parallel-session-collaboration.md) | 并行 Session 协作规范 + 把硬性条款沉淀进 .claude/rules.md § N | **proposed**（Phase 1 已落 99-跨阶段/协作规范.md，Phase 2 改 SSoT 待评审） | 2026-05-17 | 用户明确请求 + `git worktree list` 6 工作树并行 | 待开 | 2026-05-17 → 06-30 |
 
 ---
 
