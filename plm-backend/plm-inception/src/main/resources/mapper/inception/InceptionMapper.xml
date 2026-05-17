@@ -11,9 +11,20 @@
         <result property="background"             column="background"               />
         <result property="estimatedDurationMonths" column="estimated_duration_months" />
         <result property="estimatedTeam"          column="estimated_team"           />
+        <result property="aiBackground"           column="ai_background"            />
+        <result property="aiMarketOpportunity"    column="ai_market_opportunity"    />
+        <result property="aiRoiEstimate"          column="ai_roi_estimate"          />
+        <result property="aiRecommendDecision"    column="ai_recommend_decision"    />
+        <result property="marketSize"             column="market_size"              />
+        <result property="digitalPenetration"     column="digital_penetration"      />
+        <result property="devCostEstimate"        column="dev_cost_estimate"        />
+        <result property="firstYearRevenue"       column="first_year_revenue"       />
+        <result property="roiMultiple"            column="roi_multiple"             />
+        <result property="recommendedPriority"    column="recommended_priority"     />
+        <result property="recommendedStartQuarter" column="recommended_start_quarter" />
+        <result property="deliveryPhases"         column="delivery_phases"          />
+        <result property="aiRisksJson"            column="ai_risks_json"            />
         <result property="aiGenerated"            column="ai_generated"             />
-        <result property="aiProposalContent"      column="ai_proposal_content"      />
-        <result property="aiRisks"                column="ai_risks"                 />
         <result property="aiGeneratedAt"          column="ai_generated_at"          />
         <result property="status"                 column="status"                   />
         <result property="rejectReason"           column="reject_reason"            />
@@ -32,7 +43,10 @@
     <sql id="selectInceptionVo">
         select inception_id, inception_no, project_name, business_line, inception_type,
                background, estimated_duration_months, estimated_team,
-               ai_generated, ai_proposal_content, ai_risks, ai_generated_at,
+               ai_background, ai_market_opportunity, ai_roi_estimate, ai_recommend_decision,
+               market_size, digital_penetration, dev_cost_estimate, first_year_revenue,
+               roi_multiple, recommended_priority, recommended_start_quarter, delivery_phases,
+               ai_risks_json, ai_generated, ai_generated_at,
                status, reject_reason, submitter_user_id, approver_user_id, approved_at, project_id,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_inception
@@ -68,9 +82,20 @@
             <if test="background != null">background,</if>
             <if test="estimatedDurationMonths != null">estimated_duration_months,</if>
             <if test="estimatedTeam != null">estimated_team,</if>
+            <if test="aiBackground != null">ai_background,</if>
+            <if test="aiMarketOpportunity != null">ai_market_opportunity,</if>
+            <if test="aiRoiEstimate != null">ai_roi_estimate,</if>
+            <if test="aiRecommendDecision != null">ai_recommend_decision,</if>
+            <if test="marketSize != null">market_size,</if>
+            <if test="digitalPenetration != null">digital_penetration,</if>
+            <if test="devCostEstimate != null">dev_cost_estimate,</if>
+            <if test="firstYearRevenue != null">first_year_revenue,</if>
+            <if test="roiMultiple != null">roi_multiple,</if>
+            <if test="recommendedPriority != null">recommended_priority,</if>
+            <if test="recommendedStartQuarter != null">recommended_start_quarter,</if>
+            <if test="deliveryPhases != null">delivery_phases,</if>
+            <if test="aiRisksJson != null">ai_risks_json,</if>
             <if test="aiGenerated != null">ai_generated,</if>
-            <if test="aiProposalContent != null">ai_proposal_content,</if>
-            <if test="aiRisks != null">ai_risks,</if>
             <if test="aiGeneratedAt != null">ai_generated_at,</if>
             <if test="status != null">status,</if>
             <if test="rejectReason != null">reject_reason,</if>
@@ -90,9 +115,20 @@
             <if test="background != null">#{background},</if>
             <if test="estimatedDurationMonths != null">#{estimatedDurationMonths},</if>
             <if test="estimatedTeam != null">#{estimatedTeam},</if>
+            <if test="aiBackground != null">#{aiBackground},</if>
+            <if test="aiMarketOpportunity != null">#{aiMarketOpportunity},</if>
+            <if test="aiRoiEstimate != null">#{aiRoiEstimate},</if>
+            <if test="aiRecommendDecision != null">#{aiRecommendDecision},</if>
+            <if test="marketSize != null">#{marketSize},</if>
+            <if test="digitalPenetration != null">#{digitalPenetration},</if>
+            <if test="devCostEstimate != null">#{devCostEstimate},</if>
+            <if test="firstYearRevenue != null">#{firstYearRevenue},</if>
+            <if test="roiMultiple != null">#{roiMultiple},</if>
+            <if test="recommendedPriority != null">#{recommendedPriority},</if>
+            <if test="recommendedStartQuarter != null">#{recommendedStartQuarter},</if>
+            <if test="deliveryPhases != null">#{deliveryPhases},</if>
+            <if test="aiRisksJson != null">#{aiRisksJson},</if>
             <if test="aiGenerated != null">#{aiGenerated},</if>
-            <if test="aiProposalContent != null">#{aiProposalContent},</if>
-            <if test="aiRisks != null">#{aiRisks},</if>
             <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
             <if test="status != null">#{status},</if>
             <if test="rejectReason != null">#{rejectReason},</if>
@@ -116,9 +152,20 @@
             <if test="background != null">background = #{background},</if>
             <if test="estimatedDurationMonths != null">estimated_duration_months = #{estimatedDurationMonths},</if>
             <if test="estimatedTeam != null">estimated_team = #{estimatedTeam},</if>
+            <if test="aiBackground != null">ai_background = #{aiBackground},</if>
+            <if test="aiMarketOpportunity != null">ai_market_opportunity = #{aiMarketOpportunity},</if>
+            <if test="aiRoiEstimate != null">ai_roi_estimate = #{aiRoiEstimate},</if>
+            <if test="aiRecommendDecision != null">ai_recommend_decision = #{aiRecommendDecision},</if>
+            <if test="marketSize != null">market_size = #{marketSize},</if>
+            <if test="digitalPenetration != null">digital_penetration = #{digitalPenetration},</if>
+            <if test="devCostEstimate != null">dev_cost_estimate = #{devCostEstimate},</if>
+            <if test="firstYearRevenue != null">first_year_revenue = #{firstYearRevenue},</if>
+            <if test="roiMultiple != null">roi_multiple = #{roiMultiple},</if>
+            <if test="recommendedPriority != null">recommended_priority = #{recommendedPriority},</if>
+            <if test="recommendedStartQuarter != null">recommended_start_quarter = #{recommendedStartQuarter},</if>
+            <if test="deliveryPhases != null">delivery_phases = #{deliveryPhases},</if>
+            <if test="aiRisksJson != null">ai_risks_json = #{aiRisksJson},</if>
             <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
-            <if test="aiProposalContent != null">ai_proposal_content = #{aiProposalContent},</if>
-            <if test="aiRisks != null">ai_risks = #{aiRisks},</if>
             <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
             <if test="status != null">status = #{status},</if>
             <if test="rejectReason != null">reject_reason = #{rejectReason},</if>

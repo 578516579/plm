@@ -1,5 +1,6 @@
 package cn.com.bosssfot.dv.plm.inception.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
@@ -152,7 +153,12 @@ public class InceptionServiceImpl implements IInceptionService
 
     /**
      * AI 生成立项建议书 (PRD §F1.1 + §2.3 project-inception-flow)
-     * 本期实现:服务端 mock,返回标准化 Markdown 模板 + 风险列表
+     *
+     * 对齐原型 inception.html line 696-723 runInceptionAI() 输出结构:
+     * - 4 块 AI 文本 (aiBackground / aiMarketOpportunity / aiRoiEstimate / aiRecommendDecision)
+     * - 8 个 ROI 数值字段 (marketSize, devCost, firstYearRevenue, roiMultiple, ...)
+     * - aiRisksJson: JSON 数组 [{level: warning|critical, title, description}, ...]
+     *
      * Phase 后续:通过 Dify HTTP API 转发 background + estimated* → 实模型生成
      */
     @Override
@@ -162,23 +168,51 @@ public class InceptionServiceImpl implements IInceptionService
         if (inc == null) {
             throw new ServiceException("立项单不存在", 404);
         }
-        // 本期 mock
-        String proposal = "# 立项建议书:" + inc.getProjectName() + "\n\n"
-            + "## 1. 背景与诉求\n" + (inc.getBackground() == null ? "(待补充)" : inc.getBackground()) + "\n\n"
-            + "## 2. 业务价值\n- 业务线:" + inc.getBusinessLine() + "\n- 项目类型:" + inc.getInceptionType() + "\n\n"
-            + "## 3. 资源预估\n- 预计工期:" + inc.getEstimatedDurationMonths() + " 个月\n"
-            + "- 团队规模:" + inc.getEstimatedTeam() + "\n\n"
-            + "## 4. 建议结论\n建议立项,进入产品设计阶段。\n";
-        String risks = "1. 农业季节性强,需对齐农时窗口\n"
-            + "2. 弱网/离线场景比例较高,需评估离线能力\n"
-            + "3. 跨部门协同 (产品/算法/实施) 沟通成本";
+
+        // 4 段文本 (跟原型 runInceptionAI 的 4 个 <h4> 对应)
+        inc.setAiBackground(
+            "农业病虫害每年造成全国农作物减产约 **20-30%**,经济损失超千亿元。"
+          + "现有人工识别方式依赖专家经验,响应时间长,专家资源严重匮乏。"
+          + "项目背景:" + (inc.getBackground() == null ? "(待补充)" : inc.getBackground())
+        );
+        inc.setAiMarketOpportunity(
+            "全国植保服务市场规模约 **580 亿元**(2025 年),数字化渗透率不足 **8%**,市场空间巨大。"
+          + "AI 视觉识别技术已达商用级别,准确率可达 95%+。"
+          + "业务线:" + inc.getBusinessLine()
+        );
+        Integer months = inc.getEstimatedDurationMonths() != null ? inc.getEstimatedDurationMonths() : 6;
+        inc.setAiRoiEstimate(
+            "- 开发成本:约 **180 万元**(" + months + " 个月," + (inc.getEstimatedTeam() != null ? inc.getEstimatedTeam() : "10 人团队") + ")\n"
+          + "- 目标付费用户:首年 1 万家农场,客单价 3000 元/年\n"
+          + "- 预计首年营收:**3000 万元**,ROI 达 **16.7 倍**"
+        );
+        inc.setAiRecommendDecision(
+            "✅ 建议立项,优先级 P1,计划 Q3 启动,分 3 期交付。"
+        );
+
+        // 8 个结构化数值 (跟原型 ROI 段硬编码数对齐)
+        inc.setMarketSize(new BigDecimal("580.00"));
+        inc.setDigitalPenetration(new BigDecimal("8.00"));
+        inc.setDevCostEstimate(new BigDecimal("180.00"));
+        inc.setFirstYearRevenue(new BigDecimal("3000.00"));
+        inc.setRoiMultiple(new BigDecimal("16.70"));
+        inc.setRecommendedPriority("P1");
+        inc.setRecommendedStartQuarter("Q3-" + LocalDate.now().getYear());
+        inc.setDeliveryPhases(3);
+
+        // 风险数组 — JSON,跟原型 incRisks innerHTML 的 2 条 risk 对齐
+        inc.setAiRisksJson(
+            "[{\"level\":\"warning\",\"title\":\"数据集风险\","
+          + "\"description\":\"病虫害图像训练数据集可能不足,需提前采购或与农科院合作。\"},"
+          + "{\"level\":\"critical\",\"title\":\"监管合规风险\","
+          + "\"description\":\"农药推荐功能需取得相关资质,建议提前咨询法务。\"}]"
+        );
+
         inc.setAiGenerated("Y");
-        inc.setAiProposalContent(proposal);
-        inc.setAiRisks(risks);
         inc.setAiGeneratedAt(new Date());
         inc.setUpdateBy(SecurityUtils.getUsername());
         inceptionMapper.updateInception(inc);
-        return inc;
+        return inceptionMapper.selectInceptionById(inceptionId);
     }
 
     private String generateInceptionNo() {
