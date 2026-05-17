@@ -59,9 +59,9 @@ proposed    完成填写、关联数据，等 review
 | [0004](0004-staged-test-dod.md) | 拆 Phase 03 / 04 的 DoD（代码骨架 vs 测试稳定） | **merged → tracking** | 2026-05-15 | [reflect/2026-W20-project-phase03-dogfood](../reflect/2026-W20-project-phase03-dogfood.md) F-P03-01 | apply 0004/0005/0006（2026-05-15）| 2026-05-15 → 05-29 |
 | [0005](0005-solo-sprint-merge.md) | solo 模式 Sprint 文档可并入 Gate 实例 | **merged → tracking** | 2026-05-15 | reflect F-P03-02 | 同上 | 同上 |
 | [0006](0006-project-maturity-stage.md) | 引入"项目成熟度"维度（early/stable/mature），4 维参数化 | **merged → tracking** | 2026-05-15 | reflect F-P03-03 | 同上 | 同上 |
-| [0300](0300-adr-b-testcase-category-dict.md) | **ADR-B**: TestCase `category` 字典口径 (SQL 7 vs 原型 4 → 推荐融合 8 值) | **proposed** | 2026-05-17 | [audits/2026-05-17 §TestCase](../audits/2026-05-17-12-modules-drift-audit.md);用户请求 | _(待评审)_ | _(merged 后 2 周)_ |
-| [0301](0301-adr-c-document-vs-knowledge-base.md) | **ADR-C**: Document 与 PRD §F5.5 "知识库" 概念错位 (推荐拆出 knowledge-base 模块) | **proposed** | 2026-05-17 | [audits/2026-05-17 §Document](../audits/2026-05-17-12-modules-drift-audit.md);用户请求 | _(待评审)_ | _(merged 后 4 周)_ |
-| [0302](0302-adr-d-defect-state-machine.md) | **ADR-D**: Defect 状态机统一 (PRD/原型/Domain/MAPPING 四方分歧 → 推荐原型 4 态+反向边) | **proposed** | 2026-05-17 | [audits/2026-05-17 §Defect](../audits/2026-05-17-12-modules-drift-audit.md);用户请求 | _(待评审)_ | _(merged 后 2 周)_ |
+| [0300](0300-adr-b-testcase-category-dict.md) | **ADR-B**: TestCase `category` 字典口径 (Option B 8 值字符串编码已落地) | **merged → tracking** | 2026-05-17 | [audits/2026-05-17 §TestCase](../audits/2026-05-17-12-modules-drift-audit.md) | `9baac4c`→`534c67e`→`7c83e11` (2026-05-17) | 2026-05-17 → 05-31 |
+| [0301](0301-adr-c-document-vs-knowledge-base.md) | **ADR-C**: Document 与 PRD §F5.5 "知识库" 概念错位 (Option B 阶段 1 落地;阶段 2 因路线图剥离清单 superseded) | **merged → tracking** (阶段 1) | 2026-05-17 | [audits/2026-05-17 §Document](../audits/2026-05-17-12-modules-drift-audit.md) | `cc14ee6` (2026-05-17) | 2026-05-17 → 06-14 |
+| [0302](0302-adr-d-defect-state-machine.md) | **ADR-D**: Defect 状态机统一 (Option A 4 主态 + 反向边 03→00 + module 字段已落地) | **merged → tracking** | 2026-05-17 | [audits/2026-05-17 §Defect](../audits/2026-05-17-12-modules-drift-audit.md) | `657c8a8`→`e0a9a21`→`e55fe63` (2026-05-17) | 2026-05-17 → 05-31 |
 
 ---
 
