@@ -69,7 +69,7 @@
 |---|---|---|---|
 | 周度 | `YYYY-WW.md` | 周一 09:00 / 事件触发 | [reflect-weekly](../.claude/skills/reflect-weekly/SKILL.md) v0.1 ✅ |
 | 月度 | `YYYY-MM.md` | 月初 / tracking ≤ 3 天 | [reflect-monthly](../.claude/skills/reflect-monthly/SKILL.md) v0.1 ✅ |
-| 季度 | `YYYY-QN.md` | 季末手动 | reflect-quarterly ⏳ Phase B 待 |
+| 季度 | `YYYY-QN.md` | 季末 / ADR ≥ 20 / 规范增 > 50% | [reflect-quarterly](../.claude/skills/reflect-quarterly/SKILL.md) v0.1 ✅ |
 
 类型 (灵活组合):
 
@@ -160,7 +160,7 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | `.claude/settings.json` UserPromptSubmit | 接收用户指令时提示 |
 | **Skills** | [reflect-weekly](../.claude/skills/reflect-weekly/) v0.1 | 周度反思半自动 |
 | | [reflect-monthly](../.claude/skills/reflect-monthly/) v0.1 | 月度 + tracking 终结 + 规则健康度 |
-| | reflect-quarterly | Phase B 待 |
+| | [reflect-quarterly](../.claude/skills/reflect-quarterly/) v0.1 | 季度 + ADR 一致性 + 跨文档 coherence + 重构建议 |
 | | [proposal](../.claude/skills/proposal/) v0.1 | 候选升格 / apply / 状态管理 |
 | | [ruoyi-bootstrap](~/.claude/skills/ruoyi-bootstrap/) | 业务模块脚手架 (与自进化无直接关系, 但产 dogfood 数据) |
 
@@ -210,10 +210,10 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 ✅ Phase A (passive substrate) — 2026-05-15 完成
    directories / templates / Stop+PreToolUse hooks / commit-msg hook
 
-🟡 Phase B (skill 半自动) — kicked off 2026-05-17, 2/3
+✅ Phase B (skill 半自动) — kicked off 2026-05-17, 3/3 完成同日
    ✅ reflect-weekly v0.1
    ✅ reflect-monthly v0.1
-   ⏳ reflect-quarterly (Q3 起触发, 暂可手工)
+   ✅ reflect-quarterly v0.1 (Q3 起首次触发)
 
 🟡 Phase C (proposal lifecycle) — kicked off 2026-05-17
    ✅ proposal skill v0.1 — 候选升格 / apply / status / bundle 判定一站式
