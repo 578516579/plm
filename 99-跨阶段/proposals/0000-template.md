@@ -55,6 +55,10 @@
 - [ ] 已 `Read` 上表每个目标文件的**当前完整内容**
 - [ ] §3 写的"段号 / 字段名 / sub-section 编号"**逐字与目标文件当前版本一致**（不依赖记忆 / 不依赖 outdated 版本）
 - [ ] Diff 草案在目标文件实际段位置**精确可应用**（没有"先重排段再改"的隐含前提）
+- [ ] **若 proposal 约束代码层**（开发规范 / `.claude/rules.md` §A-§I / API 签名 等）：已 `Grep` 被约束的**现存代码**，确认现状合规或评估迁移成本（per [proposal 0041](0041-meta-rule-grep-existing-code.md) — 扩展 0040 §3.1）
+  - **适用**：proposal 改 `03-开发/开发规范.md` / `.claude/rules.md` §A-§I / `02-设计/API设计.md`
+  - **不适用**：proposal 仅改 Gate Checklist 模板 / proposals 元规则（无对应代码层）
+  - Grep 后若发现**现状不合规** → 在 §10 列**迁移项**（路径 / 工作量 / 责任人），同次 commit 派生 `BL-NNNN-XXX` 入 [Sprint backlog](../../03-开发/Sprint%20backlog.md)
 
 > 若 apply 时发现 scope 错位 → 本 proposal 在 §修订记录 写"scope 修正"，并把修正过程文档化（不许悄悄改 §3 抹掉痕迹）。
 
