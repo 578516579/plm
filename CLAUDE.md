@@ -135,7 +135,8 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 
 **实现进度速览** (2026-05-17 重核,详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
 - 🟢 真 PRD-aligned (§2 字段对照表 + 代码 + mvn test 绿) **19 个**: inception / **project** / competitive / prd / ued / arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora
-- 🟢 早期对齐 (代码已跑通,§2 字段表待补,**drift 审计已完成**) **12 个**: requirement / sprint / task / testcase / defect / document / testplan / submission / testreport / apidoc / manual-product / release
+- 🟢 早期对齐 (代码已跑通,§2 字段表待补,**drift 审计已完成**) **11 个**: sprint / task / testcase / defect / document / testplan / submission / testreport / apidoc / manual-product / release
+- 🟡 字段表已提案 / 代码待对齐 **1 个**: requirement (本次,ADR-A 4 态实用版 + 加 aiValue)
 - 🔴 缺模块 0 个
 
 **12 个早期模块 drift 审计** ([99-跨阶段/audits/2026-05-17-12-modules-drift-audit.md](99-跨阶段/audits/2026-05-17-12-modules-drift-audit.md)):
