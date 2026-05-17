@@ -134,8 +134,7 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 4. 详细硬规则见 [.claude/rules.md §M](.claude/rules.md)
 
 **实现进度速览** (2026-05-17 重核,详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
-- 🟢 真 PRD-aligned (§2 字段对照表 + 代码) **29 个**: 含 project / requirement / sprint / task / testcase / testplan / testreport / apidoc / manual-product / release / submission (本会话) + 原 18 个
-- 🟡 字段表已提案 / 代码待对齐 **1 个**: defect (ADR-D Option A 实施中)
+- 🟢 真 PRD-aligned (§2 字段对照表 + 代码) **30 个**: 含 project / requirement / sprint / task / testcase / defect / testplan / testreport / apidoc / manual-product / release / submission (本会话) + 原 18 个
 - 🟢 早期对齐 (待 ADR-C 决策) **1 个**: document
 - 🔴 缺模块 0 个
 
