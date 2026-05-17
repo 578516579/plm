@@ -47,7 +47,7 @@
 
 ## 2. 字段对照表（Domain ↔ 原型表单元素 ↔ DB 列）
 
-> 每个 PRD-aligned 模块一节。当前已填 §1-4（最早 4 模块）+ §32-33（MCP/Integration）。其他 PRD-aligned 模块的对照表参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
+> 每个 PRD-aligned 模块一节。当前已填 §1-7（最早 7 模块）+ §32-33（MCP/Integration）。其他 PRD-aligned 模块的对照表参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
 
 ### §1. Project（plm-project）
 
@@ -134,6 +134,84 @@
 | actualHours | actual_hours | DECIMAL | 原型 "实际工时" | 进入"已完成"必填 (601) |
 | mrUrl | mr_url | VARCHAR | 原型 "关联MR" | 格式 http(s)://（604 校验） |
 | mrBranch | mr_branch | VARCHAR | - | 分支名 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §5. Defect（plm-defect）
+
+**领域**: 缺陷条目。**PRD 出处**: F4.6 / 原型 [defects.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/defects.html)
+
+#### 表 `tb_defect`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| defectId | id | BIGINT | - | 主键 |
+| defectNo | defect_no | VARCHAR | ADR-0005 | 编号 DEFECT-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.6 | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | F4.6 | FK→tb_sprint.id（可空） |
+| taskId | task_id | BIGINT | F4.6 | FK→tb_task.id（可空） |
+| title | title | VARCHAR | 原型 defects.html "标题" | 必填 |
+| description | description | TEXT | 原型 "详细描述" | |
+| severity | severity | VARCHAR | 字典 `biz_defect_severity` | 严重级别 |
+| category | category | VARCHAR | 字典 `biz_defect_category` | 分类 |
+| status | status | VARCHAR | 字典 `biz_defect_status` | 00=新建 01=已确认 02=处理中 03=已解决 04=已关闭 |
+| assigneeUserId | assignee_user_id | BIGINT | 原型 "指派人" | FK→sys_user.user_id |
+| reporterUserId | reporter_user_id | BIGINT | 原型 "报告人" | FK→sys_user.user_id (默认当前用户) |
+| reproduceSteps | reproduce_steps | TEXT | 原型 "重现步骤" | |
+| expectedResult | expected_result | TEXT | 原型 "期望结果" | |
+| actualResult | actual_result | TEXT | 原型 "实际结果" | |
+| resolution | resolution | VARCHAR | - | 进入 03(已解决) 必填 → 705 |
+| tags | tags | VARCHAR | - | CSV |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §6. TestCase（plm-testcase）
+
+**领域**: 测试用例。**PRD 出处**: F4.2 / 原型 [testcase.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/testcase.html)
+
+#### 表 `tb_testcase`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| testcaseId | id | BIGINT | - | 主键 |
+| testcaseNo | testcase_no | VARCHAR | ADR-0006 | 编号 TC-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.2 | FK→tb_project.id（必填） |
+| requirementId | requirement_id | BIGINT | F4.2 | FK→tb_requirement.id（可空，关联需求） |
+| title | title | VARCHAR | 原型 testcase.html "标题" | 必填 |
+| description | description | TEXT | - | |
+| category | category | VARCHAR | 字典 `biz_testcase_category` | 分类 |
+| priority | priority | VARCHAR | 字典 `biz_testcase_priority` | |
+| status | status | VARCHAR | 字典 `biz_testcase_status` | 00=草稿 01=待执行 02=执行中 03=已通过 04=已失败 |
+| preconditions | preconditions | TEXT | 原型 "前置条件" | |
+| steps | steps | TEXT | 原型 "测试步骤" | 必填 |
+| expectedResult | expected_result | TEXT | 原型 "期望结果" | 必填 |
+| actualResult | actual_result | TEXT | 原型 "实际结果" | execute 端点回填 |
+| isAutomated | is_automated | CHAR(1) | 原型 "自动化" | Y/N |
+| automationScriptPath | automation_script_path | VARCHAR | - | is_automated='Y' 时必填 → 706 |
+| executionCount | execution_count | INT | - | /execute 自增 |
+| lastExecutedAt | last_executed_at | DATETIME | - | /execute 自动填 |
+| tags | tags | VARCHAR | - | |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §7. Document（plm-document）
+
+**领域**: 单表合并 5 种文档 (PRD/Arch/DbDesign/ApiDesign/Proposal/UED 等) — 用 doc_type 字段区分。**PRD 出处**: F2.2/F3.1/F3.2 / 原型 [prd.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/prd.html) / [archdesign.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/archdesign.html) / [dbdesign.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/dbdesign.html)
+
+#### 表 `tb_document`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| documentId | id | BIGINT | - | 主键 |
+| documentNo | document_no | VARCHAR | ADR-0007 | 编号 DOC-<TYPE>-YYYY-NNNN（按 type 分别累加） |
+| projectId | project_id | BIGINT | - | FK→tb_project.id（必填） |
+| relatedEntityType | related_entity_type | VARCHAR | - | 关联实体类型 (e.g. project / requirement / sprint) |
+| relatedEntityId | related_entity_id | BIGINT | - | 关联实体主键 (与 relatedEntityType 联用) |
+| docType | doc_type | VARCHAR | 字典 `biz_doc_type` | prd/arch/db_design/api_design/proposal/ued/test_plan/test_report/api_doc/manual_product/manual_impl/manual_ops (12 种, 校验 604) |
+| title | title | VARCHAR | 原型各 doc 页 "标题" | 必填 |
+| content | content | TEXT | 原型 "正文" | Markdown |
+| version | version | VARCHAR | 原型 "版本" | e.g. v1.0 |
+| status | status | VARCHAR | 字典 `biz_doc_status` | 00=草稿 01=待评审 02=已发布 03=已归档 |
+| authorUserId | author_user_id | BIGINT | 原型 "作者" | FK→sys_user.user_id |
+| reviewerUserId | reviewer_user_id | BIGINT | 原型 "审核人" | 进入 02(已发布) 必填 → 707 |
+| tags | tags | VARCHAR | 原型 "标签" | |
 | createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
 
 ### §32. MCP Server（plm-mcp）
@@ -260,6 +338,38 @@
 05已取消 (终态)
 ```
 非法转换 → `ServiceException(601)`。落地: [TaskServiceImpl:48](plm-backend/plm-task/src/main/java/cn/com/bosssfot/dv/plm/task/service/impl/TaskServiceImpl.java)。
+
+### §5 Defect 状态机（tb_defect.status, 5×5 含反向边）
+
+```
+00新建    → 01已确认
+01已确认  → 02处理中 / 04已关闭(重复/无效直接关)
+02处理中  → 01已确认(重新分析) / 03已解决
+03已解决  → 01已确认(反向打回) / 04已关闭          [进入 03 强制要求 resolution]
+04已关闭 (终态)
+```
+非法转换 → `ServiceException(701)`;resolution 缺失 → `ServiceException(705)`。落地: [DefectServiceImpl:49](plm-backend/plm-defect/src/main/java/cn/com/bosssfot/dv/plm/defect/service/impl/DefectServiceImpl.java)。
+
+### §6 TestCase 状态机（tb_testcase.status, 5×5 含反向边）
+
+```
+00草稿   → 01待执行
+01待执行 → 00草稿(回退) / 02执行中
+02执行中 → 01待执行(撤回) / 03已通过 / 04已失败
+03已通过 → 01待执行(重测)
+04已失败 → 01待执行(重测)
+```
+非法转换 → `ServiceException(701)`;is_automated='Y' 缺 automation_script_path → 706。/execute 端点专属:status 02→03|04 + execution_count+1 + last_executed_at。落地: [TestCaseServiceImpl:47](plm-backend/plm-testcase/src/main/java/cn/com/bosssfot/dv/plm/testcase/service/impl/TestCaseServiceImpl.java)。
+
+### §7 Document 状态机（tb_document.status, 4×4 含反向边）
+
+```
+00草稿   → 01待评审
+01待评审 → 00草稿(反向打回) / 02已发布                [进入 02 强制要求 reviewerUserId]
+02已发布 → 01待评审(反向重审) / 03已归档
+03已归档 (终态)
+```
+非法转换 → `ServiceException(701)`;reviewerUserId 缺失 → `ServiceException(707)`;doc_type 不在 12 种枚举内 → 604。落地: [DocumentServiceImpl:37](plm-backend/plm-document/src/main/java/cn/com/bosssfot/dv/plm/document/service/impl/DocumentServiceImpl.java)。
 
 ### §32 MCP Server 状态机（tb_mcp_server.status）
 
@@ -402,3 +512,4 @@
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 初版；初始化 SSoT；按 Proposal 0007 加入 §32 MCP / §33 Integration |
 | 2026-05-17 | Wjl + Claude | §2 补全 §1-4 Project/Requirement/Sprint/Task 字段对照表；§3 补全 4 模块状态机；配合 Vue 前端补缺(managerUserId / projectType filter / kanban priority+assignee filter+卡片负责人 / requirement 指派人搜索)与 ServiceImpl 现代化(Map.of + enhanced switch) |
+| 2026-05-17 | Wjl + Claude | 第二批: §2 补 §5 Defect / §6 TestCase / §7 Document 字段对照表;§3 补 3 模块状态机;Vue 解锁(Defect 报告人+指派人搜索 / TestCase 需求ID 搜索 / Document 关联类型+ID+作者+审核人 4 项搜索) + 后端 Document Mapper 加 reviewerUserId 过滤;3 个 ServiceImpl 现代化同样模式 |
