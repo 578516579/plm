@@ -187,6 +187,7 @@ test.describe('字符编码回归 (Mojibake guard)', () => {
     const badTag = `bad-${RUN_ID}`
     const proj = await api.createProject({
       projectName: `BadCheck-${badTag}`,
+      businessLine: 'precision_agri',
       projectType: 'rnd',
       managerUserId: 1
     })

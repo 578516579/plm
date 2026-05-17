@@ -21,16 +21,9 @@ import cn.com.bosssfot.dv.plm.project.domain.Project;
 import cn.com.bosssfot.dv.plm.project.mapper.ProjectMapper;
 
 /**
- * "轻"集成测试 — Service ↔ Mapper 协作验证（用 Mockito 模拟 Mapper）。
+ * "轻"集成测试 — Service ↔ Mapper 协作验证 (Mockito 模拟 Mapper)
  *
- * 为什么不是真集成测试（@SpringBootTest + 真 DB）？
- *   Phase 04 选择 standalone MockMvc + Mockito 而非 @SpringBootTest，原因：
- *   - 不需启动 Spring 上下文，单测速度快（< 1s vs > 30s）
- *   - Controller 真实集成（含权限、Filter、Web 上下文）已在 Phase 03 的 E2E
- *     curl 验证中覆盖（[cb195a7]），等价于跑了一遍真集成测试
- *   - 业务逻辑层（Service ↔ Mapper 契约）由本类覆盖
- *
- * 若 Phase 06 引入 staging / 真 DB 测试需求，再升级为 @SpringBootTest。
+ * v2 PRD-align:状态值改两位数,加 businessLine 必填,加 lifecyclePhase 状态机。
  */
 @ExtendWith(MockitoExtension.class)
 class ProjectServiceImplLightIntegrationTest {
@@ -42,11 +35,12 @@ class ProjectServiceImplLightIntegrationTest {
     private ProjectServiceImpl service;
 
     @Test
-    @DisplayName("完整生命周期：insert → update(0→1) → update(1→3) → 终态")
+    @DisplayName("完整生命周期:insert → status 00→01→00 → phase 00→01 → 完成 02")
     void fullLifecycle() {
-        // 1) Insert: 未传 projectNo → 自动生成
+        // 1) Insert:必填字段齐 + 自动 projectNo + 默认 status=00 / phase=00 / progress=0
         Project newProject = new Project();
         newProject.setProjectName("生命周期测试");
+        newProject.setBusinessLine("precision_agri");
         when(projectMapper.selectMaxSeqOfYear(anyString())).thenReturn(null);
         when(projectMapper.insertProject(any())).thenReturn(1);
 
@@ -55,37 +49,58 @@ class ProjectServiceImplLightIntegrationTest {
             service.insertProject(newProject);
         }
         assertThat(newProject.getProjectNo()).startsWith("PRJ-");
-        assertThat(newProject.getStatus()).isEqualTo("0");
+        assertThat(newProject.getStatus()).isEqualTo("00");
+        assertThat(newProject.getLifecyclePhase()).isEqualTo("00");
+        assertThat(newProject.getProgress()).isEqualTo(0);
 
-        // 2) Update: 0→1 启动
+        // 2) Update:status 00→01 (暂停)
         Project current = newProject;
         current.setId(1L);
         when(projectMapper.selectProjectById(1L)).thenReturn(current);
         when(projectMapper.updateProject(any())).thenReturn(1);
 
-        Project to1 = new Project();
-        to1.setId(1L);
-        to1.setStatus("1");
+        Project to01 = new Project();
+        to01.setId(1L);
+        to01.setStatus("01");
         try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUsername).thenReturn("admin");
-            service.updateProject(to1);
+            service.updateProject(to01);
         }
 
-        // 3) 模拟 status 已更新（mock 已设的 current 在第 2 步未自动改 status，重新设置）
-        current.setStatus("1");
-        Project to3 = new Project();
-        to3.setId(1L);
-        to3.setStatus("3");
+        // 3) status 01→00 反向边恢复
+        current.setStatus("01");
+        Project to00 = new Project();
+        to00.setId(1L);
+        to00.setStatus("00");
         try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUsername).thenReturn("admin");
-            service.updateProject(to3);
+            service.updateProject(to00);
         }
 
-        // 4) 终态保护：3→1 应失败
-        current.setStatus("3");
+        // 4) phase 00→01 推进
+        current.setStatus("00");
+        Project phaseTo01 = new Project();
+        phaseTo01.setId(1L);
+        phaseTo01.setLifecyclePhase("01");
+        try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+            service.updateProject(phaseTo01);
+        }
+
+        // 5) status 00→02 完成 (终态)
+        Project toDone = new Project();
+        toDone.setId(1L);
+        toDone.setStatus("02");
+        try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+            service.updateProject(toDone);
+        }
+
+        // 6) 终态保护:02→00 应失败
+        current.setStatus("02");
         Project illegal = new Project();
         illegal.setId(1L);
-        illegal.setStatus("1");
+        illegal.setStatus("00");
         assertThatThrownBy(() -> service.updateProject(illegal))
             .isInstanceOf(ServiceException.class)
             .hasMessageContaining("已完成");

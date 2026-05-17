@@ -48,16 +48,19 @@ export const ENCODING_HEX_PREFIX = {
 /** 编码替换符（U+FFFD）的 UTF-8 字节 — 出现就代表乱码 */
 export const MOJIBAKE_HEX = 'EFBFBD'
 
-/** 业务模块测试数据生成器 */
+/** 业务模块测试数据生成器 (v2 PRD-align,引用 PRD-MAPPING §2 commit 20b5bb6) */
 export function makeProjectData(suffix?: string) {
   const tag = suffix || RUN_ID
   return {
     projectName: `E2E 测试项目-${tag}`,
-    projectType: 'rnd',
+    businessLine: 'precision_agri',     // PRD §F1.2 必填,4 值之一
+    projectType: 'rnd',                 // PRD §F1.2 可选
+    priority: 'P2',                     // PRD §F1.2 可选
     managerUserId: 1,
     startDate: '2026-05-16',
     endDate: '2026-12-31',
-    budget: 100.5,
+    progress: 0,
+    health: 'green',
     description: `E2E 自动化测试-${tag} αβγ`
   }
 }
@@ -98,19 +101,36 @@ export function makeTaskData(projectId: number, sprintId?: number, requirementId
   }
 }
 
-/** 状态机测试用例 */
+/** Project 总状态机测试用例 (v2 PRD-align,4 态 + 两位数,PRD-MAPPING §3) */
 export const PROJECT_STATUS_TRANSITIONS = {
   legal: [
-    { from: '0', to: '1', name: '未启动→进行中' },
-    { from: '1', to: '2', name: '进行中→暂停' },
-    { from: '2', to: '1', name: '暂停→进行中' },
-    { from: '1', to: '3', name: '进行中→已完成' },
-    { from: '1', to: '4', name: '进行中→已取消' }
+    { from: '00', to: '01', name: '进行中→暂停' },
+    { from: '01', to: '00', name: '暂停→进行中(反向边)' },
+    { from: '00', to: '02', name: '进行中→已完成' },
+    { from: '00', to: '03', name: '进行中→已取消' },
+    { from: '01', to: '03', name: '暂停→已取消' }
   ],
   illegal: [
-    { from: '0', to: '3', name: '未启动→已完成（跨级）' },
-    { from: '3', to: '1', name: '已完成→进行中（终态保护）' },
-    { from: '4', to: '0', name: '已取消→未启动（终态保护）' }
+    { from: '01', to: '02', name: '暂停→已完成(需先恢复)' },
+    { from: '02', to: '00', name: '已完成→进行中(终态保护)' },
+    { from: '03', to: '00', name: '已取消→进行中(终态保护)' }
+  ]
+}
+
+/** Project 交付阶段状态机测试用例 (仅 status=00 时演进) */
+export const PROJECT_PHASE_TRANSITIONS = {
+  legal: [
+    { from: '00', to: '01', name: '规划→研发' },
+    { from: '01', to: '00', name: '研发→规划(反向边)' },
+    { from: '01', to: '02', name: '研发→测试' },
+    { from: '02', to: '01', name: '测试→研发(反向边)' },
+    { from: '02', to: '03', name: '测试→验收' },
+    { from: '03', to: '02', name: '验收→测试(反向边)' }
+  ],
+  illegal: [
+    { from: '00', to: '02', name: '规划→测试(跨级)' },
+    { from: '00', to: '03', name: '规划→验收(跨级)' },
+    { from: '03', to: '00', name: '验收→规划(跨级反向)' }
   ]
 }
 

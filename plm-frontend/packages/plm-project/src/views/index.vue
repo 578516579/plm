@@ -8,6 +8,16 @@
       <el-form-item label="项目名称" prop="projectName">
         <el-input v-model="queryParams.projectName" placeholder="请输入项目名称" clearable @keyup.enter="handleQuery" />
       </el-form-item>
+      <el-form-item label="业务线" prop="businessLine">
+        <el-select v-model="queryParams.businessLine" placeholder="全部" clearable>
+          <el-option v-for="dict in business_line_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="阶段" prop="lifecyclePhase">
+        <el-select v-model="queryParams.lifecyclePhase" placeholder="全部" clearable>
+          <el-option v-for="dict in phase_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
           <el-option v-for="dict in status_options" :key="dict.value" :label="dict.label" :value="dict.value" />
@@ -36,28 +46,41 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
     </el-row>
 
-    <!-- 表格 -->
+    <!-- 表格(列序与原型 projects.html 表头对齐:项目名称/业务线/阶段/进度/健康度/负责人/截止日期) -->
     <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="项目ID" align="center" prop="id" width="80" />
-      <el-table-column label="项目编号" align="center" prop="projectNo" />
+      <el-table-column label="项目编号" align="center" prop="projectNo" width="140" />
       <el-table-column label="项目名称" align="center" prop="projectName" :show-overflow-tooltip="true" />
-      <el-table-column label="类型" align="center" prop="projectType">
+      <el-table-column label="业务线" align="center" prop="businessLine" width="110">
         <template #default="scope">
-          <dict-tag :options="project_type_options" :value="scope.row.projectType" />
+          <dict-tag :options="business_line_options" :value="scope.row.businessLine" />
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="阶段" align="center" prop="lifecyclePhase" width="100">
+        <template #default="scope">
+          <dict-tag :options="phase_options" :value="scope.row.lifecyclePhase" />
+        </template>
+      </el-table-column>
+      <el-table-column label="进度" align="center" prop="progress" width="120">
+        <template #default="scope">
+          <el-progress :percentage="Number(scope.row.progress) || 0" :stroke-width="10" />
+        </template>
+      </el-table-column>
+      <el-table-column label="健康度" align="center" prop="health" width="90">
+        <template #default="scope">
+          <dict-tag :options="health_options" :value="scope.row.health" />
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" align="center" prop="status" width="90">
         <template #default="scope">
           <dict-tag :options="status_options" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="起止日期" align="center" width="220">
+      <el-table-column label="起止日期" align="center" width="200">
         <template #default="scope">
           <span>{{ parseTime(scope.row.startDate, '{y}-{m}-{d}') }} ~ {{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预算" align="right" prop="budget" width="120" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="180">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['business:project:edit']">修改</el-button>
@@ -68,32 +91,39 @@
 
     <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
 
-    <!-- 新增/修改对话框 -->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="640px" append-to-body>
+    <!-- 新增/修改对话框(字段顺序贴 PRD/原型:名称→业务线→类型→优先级→负责人→起止日期→阶段→进度→健康度→状态→描述) -->
+    <el-dialog :title="dialog.title" v-model="dialog.visible" width="720px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-row>
-          <el-col :span="12">
-            <el-form-item label="项目编号" prop="projectNo">
-              <el-input v-model="form.projectNo" placeholder="请输入项目编号" />
-            </el-form-item>
-          </el-col>
           <el-col :span="12">
             <el-form-item label="项目名称" prop="projectName">
               <el-input v-model="form.projectName" placeholder="请输入项目名称" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
+            <el-form-item label="业务线" prop="businessLine">
+              <el-select v-model="form.businessLine" placeholder="请选择业务线" style="width: 100%">
+                <el-option v-for="dict in business_line_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
             <el-form-item label="类型" prop="projectType">
-              <el-select v-model="form.projectType" placeholder="请选择类型">
+              <el-select v-model="form.projectType" placeholder="请选择类型" clearable style="width: 100%">
                 <el-option v-for="dict in project_type_options" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="状态" prop="status">
-              <el-select v-model="form.status" placeholder="请选择状态">
-                <el-option v-for="dict in status_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+            <el-form-item label="优先级" prop="priority">
+              <el-select v-model="form.priority" placeholder="请选择优先级" clearable style="width: 100%">
+                <el-option v-for="dict in priority_options" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="负责人ID" prop="managerUserId">
+              <el-input-number v-model="form.managerUserId as any" :min="1" style="width: 100%" placeholder="sys_user.user_id" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -107,8 +137,29 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="预算" prop="budget">
-              <el-input-number v-model="form.budget" :min="0" :precision="2" style="width: 100%" />
+            <el-form-item label="阶段" prop="lifecyclePhase">
+              <el-select v-model="form.lifecyclePhase" placeholder="规划中" style="width: 100%">
+                <el-option v-for="dict in phase_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="进度(%)" prop="progress">
+              <el-input-number v-model="form.progress as any" :min="0" :max="100" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="健康度" prop="health">
+              <el-select v-model="form.health" placeholder="请选择" clearable style="width: 100%">
+                <el-option v-for="dict in health_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="状态" prop="status">
+              <el-select v-model="form.status" placeholder="进行中" style="width: 100%">
+                <el-option v-for="dict in status_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -133,7 +184,21 @@ import { listProject, getProject, addProject, updateProject, delProject } from '
 import type { ProjectForm, ProjectQuery } from '../types'
 
 const { proxy } = getCurrentInstance() as any
-const { biz_project_type: project_type_options, biz_project_status: status_options } = toRefs<any>(proxy.useDict('biz_project_type', 'biz_project_status'))
+const {
+  biz_project_type: project_type_options,
+  biz_project_status: status_options,
+  biz_project_business_line: business_line_options,
+  biz_project_priority: priority_options,
+  biz_project_phase: phase_options,
+  biz_project_health: health_options
+} = toRefs<any>(proxy.useDict(
+  'biz_project_type',
+  'biz_project_status',
+  'biz_project_business_line',
+  'biz_project_priority',
+  'biz_project_phase',
+  'biz_project_health'
+))
 
 const list = ref<ProjectForm[]>([])
 const loading = ref(true)
@@ -151,13 +216,14 @@ const queryParams = ref<ProjectQuery>({
   pageSize: 10,
   projectNo: undefined,
   projectName: undefined,
-  projectType: undefined,
+  businessLine: undefined,
+  lifecyclePhase: undefined,
   status: undefined
 })
 
 const rules = {
-  projectNo: [{ required: true, message: '项目编号不能为空', trigger: 'blur' }],
-  projectName: [{ required: true, message: '项目名称不能为空', trigger: 'blur' }]
+  projectName: [{ required: true, message: '项目名称不能为空', trigger: 'blur' }],
+  businessLine: [{ required: true, message: '业务线不能为空', trigger: 'change' }]
 }
 
 function getList() {
@@ -170,7 +236,17 @@ function getList() {
 }
 
 function reset() {
-  form.value = { projectNo: undefined, projectName: undefined, projectType: undefined, status: '0', budget: undefined, description: undefined }
+  form.value = {
+    projectName: undefined,
+    businessLine: undefined,
+    projectType: undefined,
+    priority: undefined,
+    lifecyclePhase: '00',
+    status: '00',
+    progress: 0,
+    health: undefined,
+    description: undefined
+  }
   proxy.resetForm('formRef')
 }
 
