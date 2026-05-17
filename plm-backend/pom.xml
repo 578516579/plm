@@ -255,6 +255,9 @@
             <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-testreport</artifactId><version>${plm.version}</version></dependency>
             <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-apidoc</artifactId><version>${plm.version}</version></dependency>
             <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-product</artifactId><version>${plm.version}</version></dependency>
+            <!-- v0.x MCP + Integration (Proposal 0007) -->
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-mcp</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-integration</artifactId><version>${plm.version}</version></dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -308,6 +311,9 @@
         <!-- H AI -->
         <module>plm-openspec</module>
         <module>plm-ai-agent</module>
+        <!-- I 集成 (Proposal 0007: MCP + 飞书/GitLab/钉钉/Jira/Figma/禅道/ZTF) -->
+        <module>plm-mcp</module>
+        <module>plm-integration</module>
     </modules>
     <packaging>pom</packaging>
 

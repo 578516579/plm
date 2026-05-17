@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.integration.mapper.IntegrationWebhookEventMapper">
+
+    <resultMap type="IntegrationWebhookEvent" id="IntegrationWebhookEventResult">
+        <result property="id"                column="id"/>
+        <result property="connectorId"       column="connector_id"/>
+        <result property="eventType"         column="event_type"/>
+        <result property="externalEventId"   column="external_event_id"/>
+        <result property="payloadJson"       column="payload_json"/>
+        <result property="signature"         column="signature"/>
+        <result property="signatureVerified" column="signature_verified"/>
+        <result property="processStatus"     column="process_status"/>
+        <result property="processError"      column="process_error"/>
+        <result property="retryCount"        column="retry_count"/>
+        <result property="sourceIp"          column="source_ip"/>
+        <result property="processTime"       column="process_time"/>
+        <result property="createBy"          column="create_by"/>
+        <result property="createTime"        column="create_time"/>
+        <result property="remark"            column="remark"/>
+    </resultMap>
+
+    <sql id="selectVo">
+        select id, connector_id, event_type, external_event_id, payload_json,
+               signature, signature_verified, process_status, process_error,
+               retry_count, source_ip, process_time, create_by, create_time, remark
+        from tb_integration_webhook_event
+    </sql>
+
+    <select id="selectEventList" parameterType="IntegrationWebhookEvent" resultMap="IntegrationWebhookEventResult">
+        <include refid="selectVo"/>
+        <where>
+            <if test="connectorId != null">and connector_id = #{connectorId}</if>
+            <if test="eventType != null and eventType != ''">and event_type like concat('%', #{eventType}, '%')</if>
+            <if test="signatureVerified != null and signatureVerified != ''">and signature_verified = #{signatureVerified}</if>
+            <if test="processStatus != null and processStatus != ''">and process_status = #{processStatus}</if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and create_time &gt;= #{params.beginTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and create_time &lt;= #{params.endTime}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectEventById" parameterType="Long" resultMap="IntegrationWebhookEventResult">
+        <include refid="selectVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectByConnectorAndExternalId" resultMap="IntegrationWebhookEventResult">
+        <include refid="selectVo"/>
+        where connector_id = #{connectorId} and external_event_id = #{externalEventId}
+        limit 1
+    </select>
+
+    <insert id="insertEvent" parameterType="IntegrationWebhookEvent" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_integration_webhook_event
+        (connector_id, event_type, external_event_id, payload_json, signature,
+         signature_verified, process_status, retry_count, source_ip, create_time)
+        values
+        (#{connectorId}, #{eventType}, #{externalEventId}, #{payloadJson}, #{signature},
+         #{signatureVerified}, #{processStatus},
+         <choose><when test="retryCount != null">#{retryCount}</when><otherwise>0</otherwise></choose>,
+         #{sourceIp}, sysdate())
+    </insert>
+
+    <update id="updateEvent" parameterType="IntegrationWebhookEvent">
+        update tb_integration_webhook_event
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="signatureVerified != null">signature_verified = #{signatureVerified},</if>
+            <if test="processStatus != null">process_status = #{processStatus},</if>
+            <if test="processError != null">process_error = #{processError},</if>
+            <if test="retryCount != null">retry_count = #{retryCount},</if>
+            <if test="processTime != null">process_time = #{processTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+</mapper>

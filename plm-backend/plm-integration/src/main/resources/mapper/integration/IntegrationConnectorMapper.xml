@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.integration.mapper.IntegrationConnectorMapper">
+
+    <resultMap type="IntegrationConnector" id="IntegrationConnectorResult">
+        <result property="id"               column="id"/>
+        <result property="connectorCode"    column="connector_code"/>
+        <result property="connectorName"    column="connector_name"/>
+        <result property="connectorType"    column="connector_type"/>
+        <result property="endpoint"         column="endpoint"/>
+        <result property="authType"         column="auth_type"/>
+        <result property="credentialEnc"    column="credential_enc"/>
+        <result property="webhookSecret"    column="webhook_secret"/>
+        <result property="configJson"       column="config_json"/>
+        <result property="status"           column="status"/>
+        <result property="lastSyncAt"       column="last_sync_at"/>
+        <result property="createBy"         column="create_by"/>
+        <result property="createTime"       column="create_time"/>
+        <result property="updateBy"         column="update_by"/>
+        <result property="updateTime"       column="update_time"/>
+        <result property="remark"           column="remark"/>
+        <result property="delFlag"          column="del_flag"/>
+    </resultMap>
+
+    <sql id="selectVo">
+        select id, connector_code, connector_name, connector_type, endpoint, auth_type,
+               credential_enc, webhook_secret, config_json, status, last_sync_at,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_integration_connector
+    </sql>
+
+    <select id="selectConnectorList" parameterType="IntegrationConnector" resultMap="IntegrationConnectorResult">
+        <include refid="selectVo"/>
+        <where>
+            del_flag = '0'
+            <if test="connectorCode != null and connectorCode != ''">
+                and connector_code like concat('%', #{connectorCode}, '%')
+            </if>
+            <if test="connectorName != null and connectorName != ''">
+                and connector_name like concat('%', #{connectorName}, '%')
+            </if>
+            <if test="connectorType != null and connectorType != ''">
+                and connector_type = #{connectorType}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectConnectorById" parameterType="Long" resultMap="IntegrationConnectorResult">
+        <include refid="selectVo"/>
+        where id = #{id} and del_flag = '0'
+    </select>
+
+    <select id="selectConnectorByCode" parameterType="String" resultMap="IntegrationConnectorResult">
+        <include refid="selectVo"/>
+        where connector_code = #{connectorCode} and del_flag = '0'
+        limit 1
+    </select>
+
+    <insert id="insertConnector" parameterType="IntegrationConnector" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_integration_connector
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="connectorCode != null">connector_code,</if>
+            <if test="connectorName != null">connector_name,</if>
+            <if test="connectorType != null">connector_type,</if>
+            <if test="endpoint != null">endpoint,</if>
+            <if test="authType != null">auth_type,</if>
+            <if test="credentialEnc != null">credential_enc,</if>
+            <if test="webhookSecret != null">webhook_secret,</if>
+            <if test="configJson != null">config_json,</if>
+            <if test="status != null">status,</if>
+            <if test="lastSyncAt != null">last_sync_at,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="connectorCode != null">#{connectorCode},</if>
+            <if test="connectorName != null">#{connectorName},</if>
+            <if test="connectorType != null">#{connectorType},</if>
+            <if test="endpoint != null">#{endpoint},</if>
+            <if test="authType != null">#{authType},</if>
+            <if test="credentialEnc != null">#{credentialEnc},</if>
+            <if test="webhookSecret != null">#{webhookSecret},</if>
+            <if test="configJson != null">#{configJson},</if>
+            <if test="status != null">#{status},</if>
+            <if test="lastSyncAt != null">#{lastSyncAt},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateConnector" parameterType="IntegrationConnector">
+        update tb_integration_connector
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="connectorCode != null">connector_code = #{connectorCode},</if>
+            <if test="connectorName != null">connector_name = #{connectorName},</if>
+            <if test="connectorType != null">connector_type = #{connectorType},</if>
+            <if test="endpoint != null">endpoint = #{endpoint},</if>
+            <if test="authType != null">auth_type = #{authType},</if>
+            <if test="credentialEnc != null">credential_enc = #{credentialEnc},</if>
+            <if test="webhookSecret != null">webhook_secret = #{webhookSecret},</if>
+            <if test="configJson != null">config_json = #{configJson},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="lastSyncAt != null">last_sync_at = #{lastSyncAt},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deleteConnectorByIds" parameterType="Long">
+        update tb_integration_connector set del_flag = '2' where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+</mapper>
