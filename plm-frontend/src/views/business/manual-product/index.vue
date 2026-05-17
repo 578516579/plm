@@ -9,7 +9,7 @@
         <h2 class="page-title">📖 产品手册</h2>
         <p class="page-subtitle">AI 一键生成,支持截图上传自动描述,多格式导出</p>
       </div>
-      <el-button type="success" :loading="aiLoading" :disabled="!current.manualProductId" @click="triggerAi">
+      <el-button type="success" :loading="aiLoading" :disabled="!current.manualproductId" @click="triggerAi">
         <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 生成产品手册
       </el-button>
     </div>
@@ -32,26 +32,11 @@
             </el-form-item>
             <el-form-item label="包含模块">
               <div class="modules-checklist">
-                <el-checkbox
-                  :model-value="form.includeOverview === 'Y'"
-                  @change="form.includeOverview = ($event ? 'Y' : 'N')"
-                >系统概述与功能清单</el-checkbox>
-                <el-checkbox
-                  :model-value="form.includeQuickStart === 'Y'"
-                  @change="form.includeQuickStart = ($event ? 'Y' : 'N')"
-                >快速上手指南</el-checkbox>
-                <el-checkbox
-                  :model-value="form.includeFeatureDetail === 'Y'"
-                  @change="form.includeFeatureDetail = ($event ? 'Y' : 'N')"
-                >功能详细说明</el-checkbox>
-                <el-checkbox
-                  :model-value="form.includeFaq === 'Y'"
-                  @change="form.includeFaq = ($event ? 'Y' : 'N')"
-                >常见问题 FAQ</el-checkbox>
-                <el-checkbox
-                  :model-value="form.includeVideoTutorial === 'Y'"
-                  @change="form.includeVideoTutorial = ($event ? 'Y' : 'N')"
-                >视频教程链接</el-checkbox>
+                <el-checkbox v-model="modOverview">系统概述与功能清单</el-checkbox>
+                <el-checkbox v-model="modQuickStart">快速上手指南</el-checkbox>
+                <el-checkbox v-model="modFeatureDetail">功能详细说明</el-checkbox>
+                <el-checkbox v-model="modFaq">常见问题 FAQ</el-checkbox>
+                <el-checkbox v-model="modVideo">视频教程链接</el-checkbox>
               </div>
             </el-form-item>
             <el-form-item label="界面截图">
@@ -81,7 +66,7 @@
               <el-tag :type="statusTag.type" size="small">{{ statusTag.label }}</el-tag>
             </div>
           </template>
-          <div v-if="!current.manualProductId" class="empty-state">
+          <div v-if="!current.manualproductId" class="empty-state">
             <el-icon :size="48" color="#9ca3af"><Notebook /></el-icon>
             <p>选择模块后点击「开始生成」</p>
           </div>
@@ -89,9 +74,9 @@
             <el-icon class="rotate" :size="36" color="#3b82f6"><Loading /></el-icon>
             <p>AI 正在生成产品手册,预计 10-25 秒……</p>
           </div>
-          <div v-else-if="current.generatedContent" class="manual-content">
+          <div v-else-if="current.content" class="manual-content">
             <el-descriptions :column="2" size="small" border style="margin-bottom: 12px">
-              <el-descriptions-item label="编号"><code>{{ current.manualProductNo }}</code></el-descriptions-item>
+              <el-descriptions-item label="编号"><code>{{ current.manualproductNo }}</code></el-descriptions-item>
               <el-descriptions-item label="版本">{{ current.productVersion || '-' }}</el-descriptions-item>
             </el-descriptions>
             <el-divider content-position="left">📝 内容</el-divider>
@@ -106,7 +91,7 @@
           </div>
           <div v-else class="ai-not-yet">
             <el-icon :size="40" color="#f59e0b"><InfoFilled /></el-icon>
-            <p>草稿已保存 ({{ current.manualProductNo }}),点击生成</p>
+            <p>草稿已保存 ({{ current.manualproductNo }}),点击生成</p>
             <el-button type="success" :loading="aiLoading" @click="triggerAi">✨ 立即生成</el-button>
           </div>
         </el-card>
@@ -116,7 +101,7 @@
     <el-card shadow="never" style="margin-top: 20px">
       <template #header><span class="card-title">📚 历史产品手册 ({{ total }})</span></template>
       <el-table v-loading="listLoading" :data="list" stripe>
-        <el-table-column label="编号" prop="manualProductNo" width="160" />
+        <el-table-column label="编号" prop="manualproductNo" width="160" />
         <el-table-column label="手册名" prop="title" min-width="200" show-overflow-tooltip />
         <el-table-column label="版本" prop="productVersion" width="100" align="center" />
         <el-table-column label="AI" width="80" align="center">
@@ -164,7 +149,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { MagicStick, Picture, Notebook, Loading, InfoFilled, Plus } from '@element-plus/icons-vue'
 import {
@@ -180,24 +165,41 @@ const listLoading = ref(false)
 const uploadVisible = ref(false)
 const screenshotList = ref<any[]>([])
 
+// 5 包含模块 checkbox 独立绑定 → 合成 includeModules CSV
+const modOverview = ref(true)
+const modQuickStart = ref(true)
+const modFeatureDetail = ref(true)
+const modFaq = ref(true)
+const modVideo = ref(false)
+
 const emptyForm = (): ManualProduct => ({
   projectId: 0, title: '', productVersion: 'v1.0',
-  includeOverview: 'Y', includeQuickStart: 'Y', includeFeatureDetail: 'Y',
-  includeFaq: 'Y', includeVideoTutorial: 'N', authorUserId: 1
+  includeModules: 'overview,quickstart,feature_detail,faq',
+  outputFormats: 'word,pdf', authorUserId: 1
 })
 const form = reactive<ManualProduct>(emptyForm())
-const current = reactive<ManualProduct>({ projectId: 0, title: '' })
+const current = reactive<ManualProduct>({ title: '' })
 const rules = {
   projectId: [{ required: true, message: '请选择项目', trigger: 'change' }],
   title: [{ required: true, message: '请输入名称', trigger: 'blur' }]
 }
+
+watch([modOverview, modQuickStart, modFeatureDetail, modFaq, modVideo], () => {
+  form.includeModules = [
+    modOverview.value && 'overview',
+    modQuickStart.value && 'quickstart',
+    modFeatureDetail.value && 'feature_detail',
+    modFaq.value && 'faq',
+    modVideo.value && 'video'
+  ].filter(Boolean).join(',')
+}, { immediate: true })
 
 const list = ref<ManualProduct[]>([])
 const total = ref(0)
 const queryParams = reactive<ManualProductQuery>({ pageNum: 1, pageSize: 10 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
-const screenshotCount = computed(() => (form.screenshotUrls || '').split(',').filter(Boolean).length)
+const screenshotCount = computed(() => (form.screenshotsUrls || '').split(',').filter(Boolean).length)
 
 const statusMap: Record<string, { label: string; type: any }> = {
   '00': { label: '草稿', type: 'info' }, '01': { label: '评审中', type: 'warning' },
@@ -207,7 +209,7 @@ const statusTagFor = (s?: string) => statusMap[s || '00'] || { label: s || '-', 
 const statusTag = computed(() => statusTagFor(current.status))
 
 const renderedManual = computed(() => {
-  const md = current.generatedContent || ''
+  const md = current.content || ''
   return md
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/^### (.+)$/gm, '<h4>$1</h4>')
@@ -231,42 +233,49 @@ async function handleSubmit(triggerAfter: boolean) {
   await formRef.value.validate()
   saving.value = true
   try {
-    if (current.manualProductId) { await updateManualProduct({ ...form, manualProductId: current.manualProductId }); ElMessage.success('更新成功') }
+    if (current.manualproductId) { await updateManualProduct({ ...form, manualproductId: current.manualproductId }); ElMessage.success('更新成功') }
     else {
       await addManualProduct(form); ElMessage.success('保存成功'); await getList()
       const latest = list.value.find(x => x.title === form.title)
-      if (latest?.manualProductId) Object.assign(current, latest)
+      if (latest?.manualproductId) Object.assign(current, latest)
     }
-    if (triggerAfter && current.manualProductId) await triggerAi()
+    if (triggerAfter && current.manualproductId) await triggerAi()
   } catch (e: any) { ElMessage.error(e?.msg || '保存失败') } finally { saving.value = false }
 }
 
 async function triggerAi() {
-  if (!current.manualProductId) return
+  if (!current.manualproductId) return
   aiLoading.value = true
   try {
-    const res: any = await aiGenerateManualProduct(current.manualProductId)
+    const res: any = await aiGenerateManualProduct(current.manualproductId)
     if (res.code === 200 && res.data) { Object.assign(current, res.data); ElMessage.success('产品手册已生成'); await getList() }
   } catch (e: any) { ElMessage.error(e?.msg || 'AI 失败') } finally { aiLoading.value = false }
 }
 
 async function quickAi(row: ManualProduct) {
-  if (!row.manualProductId) return
+  if (!row.manualproductId) return
   aiLoading.value = true
-  try { await aiGenerateManualProduct(row.manualProductId); ElMessage.success('已生成'); await getList() } finally { aiLoading.value = false }
+  try { await aiGenerateManualProduct(row.manualproductId); ElMessage.success('已生成'); await getList() } finally { aiLoading.value = false }
 }
 
 async function loadM(row: ManualProduct) {
-  if (!row.manualProductId) return
-  const res: any = await getManualProduct(row.manualProductId)
-  if (res.code === 200 && res.data) { Object.assign(form, res.data); Object.assign(current, res.data); ElMessage.info(`已载入 ${res.data.manualProductNo}`) }
+  if (!row.manualproductId) return
+  const res: any = await getManualProduct(row.manualproductId)
+  if (res.code === 200 && res.data) {
+    Object.assign(form, res.data); Object.assign(current, res.data)
+    const mods = (res.data.includeModules || '').split(',')
+    modOverview.value = mods.includes('overview'); modQuickStart.value = mods.includes('quickstart')
+    modFeatureDetail.value = mods.includes('feature_detail'); modFaq.value = mods.includes('faq')
+    modVideo.value = mods.includes('video')
+    ElMessage.info(`已载入 ${res.data.manualproductNo}`)
+  }
 }
 
 async function handleDelete(row: ManualProduct) {
-  if (!row.manualProductId) return
-  await ElMessageBox.confirm(`删除 "${row.manualProductNo}"?`, '提示', { type: 'warning' })
-  await delManualProduct(row.manualProductId); ElMessage.success('删除成功')
-  if (current.manualProductId === row.manualProductId) Object.keys(current).forEach(k => delete (current as any)[k])
+  if (!row.manualproductId) return
+  await ElMessageBox.confirm(`删除 "${row.manualproductNo}"?`, '提示', { type: 'warning' })
+  await delManualProduct(row.manualproductId); ElMessage.success('删除成功')
+  if (current.manualproductId === row.manualproductId) Object.keys(current).forEach(k => delete (current as any)[k])
   await getList()
 }
 
@@ -277,25 +286,25 @@ function openScreenshotUpload() {
 function onScreenshotChange(file: any) {
   // Mock: 仅记录文件名
   if (file && file.name) {
-    const urls = (form.screenshotUrls || '').split(',').filter(Boolean)
+    const urls = (form.screenshotsUrls || '').split(',').filter(Boolean)
     urls.push(file.name)
-    form.screenshotUrls = urls.join(',')
+    form.screenshotsUrls = urls.join(',')
   }
 }
 
 function confirmScreenshots() {
-  form.screenshotUrls = screenshotList.value.map(x => x.name || x.url || '').filter(Boolean).join(',')
+  form.screenshotsUrls = screenshotList.value.map(x => x.name || x.url || '').filter(Boolean).join(',')
   uploadVisible.value = false
   ElMessage.success(`已记录 ${screenshotList.value.length} 张截图`)
 }
 
 function exportFormat(fmt: string) {
-  if (!current.generatedContent) return
-  const blob = new Blob([current.generatedContent], { type: 'text/plain' })
+  if (!current.content) return
+  const blob = new Blob([current.content], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${current.manualProductNo}.${fmt === 'docx' ? 'md' : fmt === 'html' ? 'html' : 'pdf'}.md`
+  a.download = `${current.manualproductNo}.${fmt === 'docx' ? 'md' : fmt === 'html' ? 'html' : 'pdf'}.md`
   a.click(); URL.revokeObjectURL(url)
   ElMessage.success(`导出 ${fmt.toUpperCase()} (mock,实际转换 v0.6)`)
 }
