@@ -51,7 +51,9 @@ instances/
 | **TestCase**（测试用例管理）| ✅ Phase 01-03 完成 / ⏳ Phase 04 | L1 | `internal-tool` | `solo` | `early` (v0.3) | 2026-05-16 | [P01](testcase/Phase01-立项-Gate-2026-05-16.md) · [P02](testcase/Phase02-设计-Gate-2026-05-16.md) · [P03](testcase/Phase03-开发-Gate-2026-05-16.md) | Wjl |
 | **Document**（文档管理 合并 5 stub）| ✅ Phase 01-03 完成 / ⏳ Phase 04 | L1 | `internal-tool` | `solo` | `early` (v0.4) | 2026-05-16 | [P01](document/Phase01-立项-Gate-2026-05-16.md) · [P02](document/Phase02-设计-Gate-2026-05-16.md) · [P03](document/Phase03-开发-Gate-2026-05-16.md) | Wjl |
 | **Project / Req / Sprint / Task** P04+P05+P06 cycle1 | ✅ Phase 04 + ✅ Phase 05 上线 + ✅ **Phase 06 cycle 1 day 7 closure** (72 case E2E 全过) | L1 | `internal-tool` | `solo` | `early` | 2026-05-22 | [P04](project/Phase04-测试-Gate-2026-05-16.md) · [P05](project/Phase05-上线-Gate-2026-05-16.md) · [P06-c1-d7](project/Phase06-运营-Gate-cycle1-day7-2026-05-22.md) | Wjl |
-| **23 stub 业务模块** | 🟡 空壳骨架已建（pom + package.json + README + 占位 view）；剩余 23 个待启动（document 已激活替代 5 stub）；v0.4 排期 6 个（剩余）/ v0.5 排期 6 个 / deferred 7 个；可用 [生成器](../../../plm-backend/scripts/new-business-module.sh)一键脚手架 | — | — | — | — | 2026-05-16 | 见 [Stubs-Roadmap.md](../../../03-开发/Stubs-Roadmap.md) | — |
+| **PRD-align 批次 18 模块** （inception · prd · competitive · ued · arch · dbdesign · apidesign · testdata · autotest · manual-impl · manual-ops · analytics · dashboard · ai-agent · openspec · pipeline · feature-flag · dora）| ✅ Phase 03 开发完成（批次签字 9 项 DoD 全过）/ ⏳ Phase 04 待开始 | L1 | `internal-tool` | `solo` | `early` | 2026-05-17 | [P03-batch](prd-align-batch-2026-05-17/Phase03-开发-Gate-2026-05-17.md) | Wjl |
+| **🎉 整体 PLM 进度** | **31/31 业务模块 PRD-aligned**（13 历史 + 18 本批）/ 178 业务路由全部注册 / 120 E2E case 全过 | — | — | — | — | 2026-05-17 | 见 [PRD-MAPPING.md §1](../../../PRD-MAPPING.md) | Wjl |
+| ~~23 stub 业务模块~~ | ✅ 全部出 stub 状态（见上一行 18 个新对齐 + 5 个已并入 document）| — | — | — | — | 2026-05-17 | 见 [Stubs-Roadmap.md](../../../03-开发/Stubs-Roadmap.md) (history) | — |
 
 > 列说明（4 维参数化）：
 > - **分级** L1/L2/L3 — 见 [../README §维度 1](../README.md)
