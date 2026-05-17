@@ -22,7 +22,7 @@
 | 11 | 测试报告 TestReport | F4.7 | testreport.html | plm-testreport | 🟢 PRD-aligned |
 | 12 | API 文档 ApiDoc | F5.4 | apidoc.html | plm-apidoc | 🟢 PRD-aligned |
 | 13 | 产品手册 ManualProduct | F5.1 | productmanual.html | plm-manual-product | 🟢 PRD-aligned |
-| 14 | 立项 Inception | F1.1 | inception.html | plm-inception | 🔴 缺模块 |
+| 14 | 立项 Inception | F1.1 | inception.html | plm-inception | 🟢 PRD-aligned |
 | 15 | UED | F2.3 | ued.html | plm-ued | 🟡 空壳 |
 | 16 | 竞品 Competitive | F1.3 | competitive.html | plm-competitive | 🟡 空壳 |
 | 17 | PRD 文档 | F2.2 | prd.html | plm-prd | 🟡 空壳 |
