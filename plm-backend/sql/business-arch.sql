@@ -12,9 +12,17 @@ CREATE TABLE IF NOT EXISTS `tb_arch` (
   `ai_orchestration` VARCHAR(50)     DEFAULT NULL                    COMMENT 'AI 编排方案 (biz_arch_ai)',
   `deploy_mode`      VARCHAR(30)     DEFAULT NULL                    COMMENT '部署模式 (biz_arch_deploy)',
   `iot_protocol`     VARCHAR(30)     DEFAULT NULL                    COMMENT 'IoT 协议 (biz_arch_iot)',
-  `arch_content`     LONGTEXT        DEFAULT NULL                    COMMENT '架构方案 Markdown 文档',
-  `c4_diagram`       LONGTEXT        DEFAULT NULL                    COMMENT 'C4 容器图 (Mermaid/PlantUML)',
-  `nfr_content`      TEXT            DEFAULT NULL                    COMMENT '非功能需求说明',
+  `arch_content`     LONGTEXT        DEFAULT NULL                    COMMENT '架构方案 Markdown 文档 (导出用)',
+  `c4_diagram`       LONGTEXT        DEFAULT NULL                    COMMENT 'C4 容器图 JSON (跟原型 C4 渲染对齐)',
+  `nfr_content`      TEXT            DEFAULT NULL                    COMMENT '非功能需求说明 (旧字段, 渐进迁移到 4 个子项)',
+  -- NFR 4 个子项 (原型右栏 NFR 卡片 1:1)
+  `nfr_performance`  VARCHAR(500)    DEFAULT NULL                    COMMENT '性能 (原型: API P99<200ms, IoT 并发 10万设备)',
+  `nfr_availability` VARCHAR(500)    DEFAULT NULL                    COMMENT '可用性 (原型: SLA 99.9%)',
+  `nfr_security`     VARCHAR(500)    DEFAULT NULL                    COMMENT '安全 (原型: TLS 1.3, 数据加密)',
+  `nfr_scalability`  VARCHAR(500)    DEFAULT NULL                    COMMENT '扩展性 (原型: 支持 5 年 10 倍增长)',
+  -- AI timeline 4 步骤 JSON (原型 genArchDesign 的 4 个 timeline items)
+  -- [{step:1, name:'架构模式', status:'pass', description}, ...]
+  `ai_timeline_json` TEXT            DEFAULT NULL                    COMMENT 'AI 设计 timeline 4 步骤 JSON',
   `review_report`    LONGTEXT        DEFAULT NULL                    COMMENT 'AI 架构评审报告',
   `ai_generated`     CHAR(1)         NOT NULL DEFAULT 'N'            COMMENT 'AI 生成标志 Y/N',
   `ai_generated_at`  DATETIME        DEFAULT NULL                    COMMENT 'AI 生成时间',

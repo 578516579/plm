@@ -14,6 +14,7 @@
         <result property="version"          column="version"            />
         <result property="description"      column="description"        />
         <result property="reviewReport"     column="review_report"      />
+        <result property="reviewItemsJson"  column="review_items_json"  />
         <result property="complianceScore"  column="compliance_score"   />
         <result property="aiGenerated"      column="ai_generated"       />
         <result property="aiGeneratedAt"    column="ai_generated_at"    />
@@ -32,7 +33,7 @@
     <sql id="selectUedVo">
         select ued_id, ued_no, project_id, title, design_type, platform,
                figma_file_key, figma_url, version, description,
-               review_report, compliance_score, ai_generated, ai_generated_at,
+               review_report, review_items_json, compliance_score, ai_generated, ai_generated_at,
                requirement_id, status, designer_user_id, reviewer_user_id,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_ued
@@ -74,6 +75,7 @@
             <if test="version != null">version,</if>
             <if test="description != null">description,</if>
             <if test="reviewReport != null">review_report,</if>
+            <if test="reviewItemsJson != null">review_items_json,</if>
             <if test="complianceScore != null">compliance_score,</if>
             <if test="aiGenerated != null">ai_generated,</if>
             <if test="aiGeneratedAt != null">ai_generated_at,</if>
@@ -96,6 +98,7 @@
             <if test="version != null">#{version},</if>
             <if test="description != null">#{description},</if>
             <if test="reviewReport != null">#{reviewReport},</if>
+            <if test="reviewItemsJson != null">#{reviewItemsJson},</if>
             <if test="complianceScore != null">#{complianceScore},</if>
             <if test="aiGenerated != null">#{aiGenerated},</if>
             <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
@@ -122,6 +125,7 @@
             <if test="version != null">version = #{version},</if>
             <if test="description != null">description = #{description},</if>
             <if test="reviewReport != null">review_report = #{reviewReport},</if>
+            <if test="reviewItemsJson != null">review_items_json = #{reviewItemsJson},</if>
             <if test="complianceScore != null">compliance_score = #{complianceScore},</if>
             <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
             <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>

@@ -14,8 +14,11 @@ CREATE TABLE tb_ued (
     figma_url           VARCHAR(500)  DEFAULT NULL             COMMENT 'Figma 链接',
     version             VARCHAR(20)   NOT NULL DEFAULT 'v1.0'  COMMENT '版本号',
     description         TEXT                                   COMMENT '设计说明',
-    review_report       LONGTEXT                               COMMENT 'AI 设计评审报告 Markdown',
-    compliance_score    DECIMAL(5,2)  DEFAULT NULL             COMMENT '规范遵从度 0-100,≥80 通过',
+    review_report       LONGTEXT                               COMMENT 'AI 设计评审报告 Markdown (导出用)',
+    -- 评审项数组 JSON (原型 runUEDCheck 输出的 timeline items)
+    -- 格式: [{status:'pass'|'warning'|'fail', category, message, suggestion}, ...]
+    review_items_json   TEXT                                   COMMENT 'AI 评审项 JSON 数组,跟原型 timeline 1:1',
+    compliance_score    DECIMAL(5,2)  DEFAULT NULL             COMMENT '规范遵从度 0-100,≥80 通过,原型 88',
     ai_generated        CHAR(1)       DEFAULT 'N'              COMMENT 'Y=AI 已评审',
     ai_generated_at     DATETIME      DEFAULT NULL             COMMENT 'AI 评审时间',
     requirement_id      BIGINT(20)    DEFAULT NULL             COMMENT 'FK→tb_requirement (可选双向关联)',

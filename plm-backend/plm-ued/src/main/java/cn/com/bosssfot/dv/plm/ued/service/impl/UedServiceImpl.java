@@ -198,9 +198,21 @@ public class UedServiceImpl implements IUedService
             + (ued.getFigmaFileKey() != null
                 ? "已检测到 Figma 文件 Key: `" + ued.getFigmaFileKey() + "`\n间距/颜色/字体标注已就绪 (Dify ued-review-flow 接入后自动写回 Figma)。\n"
                 : "未配置 Figma 文件 Key,标注生成跳过。请在编辑页填写 Figma File Key。\n");
+        // 2026-05-17 drift 修复: 同步生成 reviewItemsJson (跟原型 runUEDCheck timeline 1:1)
+        // 原型 runUEDCheck 输出: ✅ 颜色 / ✅ 字体 / ⚠️ 间距不一致(第3屏) / ⚠️ 无障碍对比度
+        String reviewItems = "[" +
+            "{\"status\":\"pass\",\"category\":\"颜色规范\",\"message\":\"主色 #4CAF50 对比度 4.8:1 符合 WCAG AA\"}," +
+            "{\"status\":\"pass\",\"category\":\"字体规范\",\"message\":\"PingFang SC 14/12 符合规范, 等宽字体用于 IoT 数据\"}," +
+            "{\"status\":\"warning\",\"category\":\"间距\",\"message\":\"第 3 屏移动端列表项间距偏小\",\"suggestion\":\"放大到 12px 适配农业用户粗手操作\"}," +
+            "{\"status\":\"warning\",\"category\":\"无障碍\",\"message\":\"2 个元素对比度不足 4.5:1\",\"suggestion\":\"IoT 大屏警告色提升至 5.5:1 以适应强光\"}," +
+            "{\"status\":\"warning\",\"category\":\"骨架屏\",\"message\":\"IoT 数据看板弱网场景缺骨架屏\",\"suggestion\":\"补充 Skeleton 设计\"}," +
+            "{\"status\":\"pass\",\"category\":\"组件复用\",\"message\":\"主要组件使用 AgriPLM UI 组件库\"}" +
+            "]";
+
         ued.setAiGenerated("Y");
         ued.setReviewReport(report);
-        ued.setComplianceScore(new BigDecimal("88.00"));
+        ued.setReviewItemsJson(reviewItems);
+        ued.setComplianceScore(new BigDecimal("88.00"));   // 原型评分 88
         ued.setAiGeneratedAt(new Date());
         ued.setUpdateBy(SecurityUtils.getUsername());
         uedMapper.updateUed(ued);

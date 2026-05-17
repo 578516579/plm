@@ -48,6 +48,22 @@ public class Arch extends BaseEntity {
 
     private String nfrContent;
 
+    // 4 个 NFR 子项 (原型右栏 NFR 卡片 1:1) — 2026-05-17 drift 修复
+    /** NFR 性能 (原型: API P99<200ms, IoT 并发 10万设备) */
+    private String nfrPerformance;
+    /** NFR 可用性 (原型: SLA 99.9%) */
+    private String nfrAvailability;
+    /** NFR 安全 (原型: TLS 1.3, 数据加密) */
+    private String nfrSecurity;
+    /** NFR 扩展性 (原型: 支持 5 年 10 倍增长) */
+    private String nfrScalability;
+
+    /**
+     * AI 设计 timeline 4 步骤 JSON (原型 genArchDesign 的 4 个 timeline items)
+     * 格式: [{step:1, name:'架构模式', status:'pass', description}, ...]
+     */
+    private String aiTimelineJson;
+
     private String reviewReport;
 
     @Excel(name = "AI生成")
@@ -102,6 +118,17 @@ public class Arch extends BaseEntity {
 
     public String getNfrContent() { return nfrContent; }
     public void setNfrContent(String nfrContent) { this.nfrContent = nfrContent; }
+
+    public String getNfrPerformance() { return nfrPerformance; }
+    public void setNfrPerformance(String v) { this.nfrPerformance = v; }
+    public String getNfrAvailability() { return nfrAvailability; }
+    public void setNfrAvailability(String v) { this.nfrAvailability = v; }
+    public String getNfrSecurity() { return nfrSecurity; }
+    public void setNfrSecurity(String v) { this.nfrSecurity = v; }
+    public String getNfrScalability() { return nfrScalability; }
+    public void setNfrScalability(String v) { this.nfrScalability = v; }
+    public String getAiTimelineJson() { return aiTimelineJson; }
+    public void setAiTimelineJson(String v) { this.aiTimelineJson = v; }
 
     public String getReviewReport() { return reviewReport; }
     public void setReviewReport(String reviewReport) { this.reviewReport = reviewReport; }

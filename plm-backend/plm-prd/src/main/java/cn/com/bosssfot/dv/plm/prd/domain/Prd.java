@@ -27,6 +27,15 @@ public class Prd extends BaseEntity
     @Excel(name = "业务场景") private String sceneTemplate;
     @Excel(name = "目标用户") private String targetUser;
     private String content;
+    // 4 段 AI 结构化输出 (原型 generatePRD 的 4 个命名 <h4>) — 2026-05-17 drift 修复
+    /** AI 一、背景与目标 (含硬数值如灌溉用水降低 20%) */
+    private String aiBackground;
+    /** AI 二、用户故事 JSON 数组 [{role, want, why}, ...] */
+    private String aiUserStories;
+    /** AI 三、核心功能 JSON 数组 [{code: F1, name, description}, ...] */
+    private String aiCoreFeatures;
+    /** AI 四、验收标准 JSON 数组 [{category, criterion, target}, ...] */
+    private String aiAcceptance;
     @Excel(name = "完整度%") private BigDecimal completenessScore;
     @Excel(name = "版本") private String version;
     private String aiGenerated;
@@ -52,6 +61,14 @@ public class Prd extends BaseEntity
     public void setTargetUser(String v) { this.targetUser = v; }
     public String getContent() { return content; }
     public void setContent(String v) { this.content = v; }
+    public String getAiBackground() { return aiBackground; }
+    public void setAiBackground(String v) { this.aiBackground = v; }
+    public String getAiUserStories() { return aiUserStories; }
+    public void setAiUserStories(String v) { this.aiUserStories = v; }
+    public String getAiCoreFeatures() { return aiCoreFeatures; }
+    public void setAiCoreFeatures(String v) { this.aiCoreFeatures = v; }
+    public String getAiAcceptance() { return aiAcceptance; }
+    public void setAiAcceptance(String v) { this.aiAcceptance = v; }
     public BigDecimal getCompletenessScore() { return completenessScore; }
     public void setCompletenessScore(BigDecimal v) { this.completenessScore = v; }
     public String getVersion() { return version; }

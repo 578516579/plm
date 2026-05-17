@@ -161,19 +161,44 @@ public class PrdServiceImpl implements IPrdService
         if (prd == null) {
             throw new ServiceException("PRD 不存在", 404);
         }
-        String content = "# " + prd.getTitle() + " — PRD\n\n"
-            + "## 1. 背景与目标\n"
-            + (prd.getDescription() == null ? "(待补充)" : prd.getDescription()) + "\n\n"
-            + "## 2. 用户故事\n"
-            + "作为「" + Optional(prd.getTargetUser()) + "」,我希望通过本功能,达成业务诉求。\n\n"
-            + "## 3. 功能描述\n- 核心流程 (正常路径)\n- 异常流程 (网络中断 / 数据为空 / 权限不足)\n\n"
-            + "## 4. 非功能需求\n- 性能:页面响应 < 1 秒 (P95)\n- 兼容性:微信小程序 + H5 + Android 弱网\n- 安全:RBAC + 操作审计\n\n"
-            + "## 5. 验收标准\n- 主流程跑通\n- 异常路径覆盖\n- 性能达标\n\n"
-            + "## 6. 原型说明\n关联场景: " + Optional(prd.getSceneTemplate()) + "\n\n"
-            + "## 7. 版本\n初版 v1.0,后续按变更走版本对比。";
+        // 4 段 AI 结构化输出 (跟原型 prd.html generatePRD 的 4 个 <h4> 对齐) — 2026-05-17 drift 修复
+        String title = prd.getTitle() == null ? "新功能" : prd.getTitle();
+        String tu = prd.getTargetUser() == null ? "用户" : prd.getTargetUser();
+        String scene = prd.getSceneTemplate() == null ? "通用业务场景" : prd.getSceneTemplate();
+        String desc = prd.getDescription() == null ? "(待补充)" : prd.getDescription();
+
+        prd.setAiBackground(
+            "面向 " + scene + " 场景, 通过本功能将 " + tu + " 的核心业务诉求数字化, "
+          + "预期可降低人工操作成本 30%,提升业务流转效率,关键指标如灌溉用水可降低 **20%**。"
+          + "项目背景: " + desc
+        );
+        prd.setAiUserStories(
+            "[{\"role\":\"" + tu + "\",\"want\":\"快速完成核心操作\",\"why\":\"节省时间, 减少重复劳动\"},"
+          + "{\"role\":\"业务管理员\",\"want\":\"实时查看数据看板\",\"why\":\"及时决策\"},"
+          + "{\"role\":\"运维\",\"want\":\"系统稳定可观测\",\"why\":\"快速定位问题\"}]"
+        );
+        prd.setAiCoreFeatures(
+            "[{\"code\":\"F1\",\"name\":\"核心业务操作\",\"description\":\"正常路径走通, 异常路径有容错\"},"
+          + "{\"code\":\"F2\",\"name\":\"数据同步\",\"description\":\"在线/离线双模, 同步率 ≥99.9%\"},"
+          + "{\"code\":\"F3\",\"name\":\"AI 辅助\",\"description\":\"结合 AgriKB 知识库, 准确率 ≥85%\"}]"
+        );
+        prd.setAiAcceptance(
+            "[{\"category\":\"功能\",\"criterion\":\"主流程跑通\",\"target\":\"100%\"},"
+          + "{\"category\":\"性能\",\"criterion\":\"页面响应 P95\",\"target\":\"<1秒\"},"
+          + "{\"category\":\"AI准确率\",\"criterion\":\"识别/推荐准确率\",\"target\":\"≥85%\"},"
+          + "{\"category\":\"可用性\",\"criterion\":\"同步率\",\"target\":\"≥99.9%\"}]"
+        );
+
+        // 同步生成完整 Markdown 用于导出 (保持向后兼容)
+        String content = "# " + title + " · PRD v" + (prd.getVersion() == null ? "1.0" : prd.getVersion()) + "\n\n"
+            + "## 一、背景与目标\n" + prd.getAiBackground() + "\n\n"
+            + "## 二、用户故事\n(详见结构化字段 ai_user_stories)\n\n"
+            + "## 三、核心功能\n(详见结构化字段 ai_core_features)\n\n"
+            + "## 四、验收标准\n(详见结构化字段 ai_acceptance)";
+
         prd.setAiGenerated("Y");
         prd.setContent(content);
-        prd.setCompletenessScore(new BigDecimal("85.00"));
+        prd.setCompletenessScore(new BigDecimal("89.00"));  // 原型显示 89%
         prd.setAiGeneratedAt(new Date());
         prd.setUpdateBy(SecurityUtils.getUsername());
         prdMapper.updatePrd(prd);

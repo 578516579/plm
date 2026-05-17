@@ -30,6 +30,11 @@ public class Ued extends BaseEntity
     @Excel(name = "版本") private String version;
     private String description;
     private String reviewReport;
+    /**
+     * AI 评审项数组 JSON (原型 runUEDCheck 的 timeline items) — 2026-05-17 drift 修复
+     * 格式: [{status:'pass'|'warning'|'fail', category:'颜色规范'|'字体规范'|'间距'|'无障碍'|..., message, suggestion}, ...]
+     */
+    private String reviewItemsJson;
     @Excel(name = "规范遵从度%") private BigDecimal complianceScore;
     private String aiGenerated;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") private Date aiGeneratedAt;
@@ -61,6 +66,8 @@ public class Ued extends BaseEntity
     public void setDescription(String v) { this.description = v; }
     public String getReviewReport() { return reviewReport; }
     public void setReviewReport(String v) { this.reviewReport = v; }
+    public String getReviewItemsJson() { return reviewItemsJson; }
+    public void setReviewItemsJson(String v) { this.reviewItemsJson = v; }
     public BigDecimal getComplianceScore() { return complianceScore; }
     public void setComplianceScore(BigDecimal v) { this.complianceScore = v; }
     public String getAiGenerated() { return aiGenerated; }

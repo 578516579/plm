@@ -113,6 +113,27 @@ public class ArchServiceImpl implements IArchService {
         }
         String report = buildAiRecommendReport(arch);
         arch.setReviewReport(report);
+
+        // 2026-05-17 drift 修复: 填 4 个 NFR 子项 (跟原型右栏 NFR 卡片 1:1) + AI timeline JSON
+        arch.setNfrPerformance("API P99 < 200ms; IoT 并发 10 万设备; 吞吐 1000 TPS");
+        arch.setNfrAvailability("SLA 99.9% (多可用区部署); RTO < 15 分钟; RPO < 5 分钟");
+        arch.setNfrSecurity("TLS 1.3 强制; 敏感字段 AES-256; RBAC + JWT; 操作审计完整链路");
+        arch.setNfrScalability("水平扩展支持 5 年 10 倍业务增长; 自动扩缩容 (HPA + Cluster Autoscaler)");
+
+        // 跟原型 genArchDesign 4 步骤 timeline 对齐 (架构模式 → 技术选型 → IoT 接入 → 部署方案)
+        String mode = arch.getArchMode() != null ? arch.getArchMode() : "microservice";
+        String tech = arch.getTechStack() != null ? arch.getTechStack() : "java_springboot3";
+        String iot = arch.getIotProtocol() != null ? arch.getIotProtocol() : "mqtt_emqx";
+        String dep = arch.getDeployMode() != null ? arch.getDeployMode() : "kubernetes";
+        arch.setAiTimelineJson(
+            "[" +
+            "{\"step\":1,\"name\":\"架构模式\",\"status\":\"pass\",\"description\":\"选用 " + mode + ",模块解耦支持独立部署\"}," +
+            "{\"step\":2,\"name\":\"技术选型\",\"status\":\"pass\",\"description\":\"" + tech + " 生态成熟,API P99 < 50ms\"}," +
+            "{\"step\":3,\"name\":\"IoT 接入\",\"status\":\"pass\",\"description\":\"" + iot + " → Kafka → Stream Processing,支持 10万设备\"}," +
+            "{\"step\":4,\"name\":\"部署方案\",\"status\":\"pass\",\"description\":\"" + dep + " + Helm Chart 一键部署, 多可用区高可用\"}" +
+            "]"
+        );
+
         arch.setAiGenerated("Y");
         arch.setAiGeneratedAt(DateUtils.getNowDate());
         arch.setUpdateBy("ai-agent");

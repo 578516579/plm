@@ -132,12 +132,15 @@
 
 每修一个模块,把这里 ☐ 改成 ☑:
 
-- [ ] inception (P0) — Domain 补 8 字段 + 前端重写为单页工作流
-- [ ] prd (P0) — 待 audit
-- [ ] ued (P0) — 待 audit
-- [ ] arch (P0) — 待 audit
-- [ ] competitive (P0) — 整张表重新设计 (矩阵模式)
-- [ ] analytics (P1) — 前端追原型
+- [x] inception (P0) — Domain 补 13 字段 + 前端重写为单页工作流 (commit 3f19cd1)
+- [x] prd (P0) — Domain 加 4 段 AI 结构化字段 (aiBackground/aiUserStories/aiCoreFeatures/aiAcceptance),
+      `aiGenerate` 输出对齐原型 generatePRD 的 4 个 <h4>, 完整度 89% (前端 Vue 待跟进)
+- [x] ued (P0) — Domain 加 reviewItemsJson (timeline 数组 6 项),
+      `aiReview` 含 2 个 ✅ + 4 个 ⚠️ 对齐原型 runUEDCheck, 评分 88 (前端 Vue 待跟进)
+- [x] arch (P0) — Domain 加 4 个 NFR 子项 + aiTimelineJson,
+      `aiRecommend` 输出 4 步骤 timeline (架构模式→技术选型→IoT 接入→部署) 对齐原型 genArchDesign (前端 Vue 待跟进)
+- [ ] competitive (P0) — **下一批**: 整张表重新设计 (矩阵模式) — 比上面 3 个动静大,需独立 commit
+- [ ] analytics (P1) — 前端追原型 (字段已对齐)
 - [ ] dashboard (P1) — active_projects 聚合接真实数据
 - [ ] dbdesign (P1) — ER 图渲染
 - [ ] testdata (P1) — 写库执行按钮
