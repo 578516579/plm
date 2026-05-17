@@ -18,6 +18,11 @@ CREATE TABLE tb_competitive (
     opportunities         TEXT                                   COMMENT 'SWOT-O 机会',
     threats               TEXT                                   COMMENT 'SWOT-T 威胁',
     ai_analysis_report    LONGTEXT                               COMMENT 'AI 综合报告 Markdown',
+    -- 2026-05-17 drift 修复: 跟原型 competitive.html renderCompetitive 1:1 对齐 (3 个项目级视图)
+    -- 这 3 个字段仅在"矩阵分析"主记录上填,常规 per-competitor 记录可空
+    matrix_json           LONGTEXT                               COMMENT '矩阵 JSON {dimensions:[{name,order}], vendors:[{name,isOurProduct}], scores:[[0/0.5/1, ...]]}; 跟原型 15 维度×5 竞品对齐',
+    monitors_json         LONGTEXT                               COMMENT '竞品动态监控 JSON [{vendor,news,threatLevel(low/mid/high),date}, ...]',
+    our_swot_json         LONGTEXT                               COMMENT '本品 SWOT JSON {strengths:[],weaknesses:[],opportunities:[],threats:[]}; 跟原型 4 色块对齐',
     ai_generated          CHAR(1)       DEFAULT 'N'              COMMENT 'Y=AI 生成',
     ai_generated_at       DATETIME      DEFAULT NULL             COMMENT 'AI 生成时间',
     monitor_enabled       CHAR(1)       DEFAULT 'N'              COMMENT 'Y=订阅竞品动态推送',

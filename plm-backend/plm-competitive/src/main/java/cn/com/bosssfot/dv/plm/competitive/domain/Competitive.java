@@ -31,6 +31,13 @@ public class Competitive extends BaseEntity
     private String opportunities;
     private String threats;
     private String aiAnalysisReport;
+    // 2026-05-17 drift 修复: 跟原型 competitive.html renderCompetitive 1:1 对齐 — 3 个项目级 JSON 字段
+    /** 竞品对比矩阵 JSON `{dimensions:[{name,order}], vendors:[{name,isOurProduct}], scores:[[0|0.5|1, ...]]}` */
+    private String matrixJson;
+    /** 竞品动态监控 JSON `[{vendor,news,threatLevel:'low'|'mid'|'high',date}, ...]` */
+    private String monitorsJson;
+    /** 本品 SWOT JSON `{strengths:[...],weaknesses:[...],opportunities:[...],threats:[...]}` */
+    private String ourSwotJson;
     private String aiGenerated;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") private Date aiGeneratedAt;
     private String monitorEnabled;
@@ -68,6 +75,12 @@ public class Competitive extends BaseEntity
     public void setThreats(String v) { this.threats = v; }
     public String getAiAnalysisReport() { return aiAnalysisReport; }
     public void setAiAnalysisReport(String v) { this.aiAnalysisReport = v; }
+    public String getMatrixJson() { return matrixJson; }
+    public void setMatrixJson(String v) { this.matrixJson = v; }
+    public String getMonitorsJson() { return monitorsJson; }
+    public void setMonitorsJson(String v) { this.monitorsJson = v; }
+    public String getOurSwotJson() { return ourSwotJson; }
+    public void setOurSwotJson(String v) { this.ourSwotJson = v; }
     public String getAiGenerated() { return aiGenerated; }
     public void setAiGenerated(String v) { this.aiGenerated = v; }
     public Date getAiGeneratedAt() { return aiGeneratedAt; }

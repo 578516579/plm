@@ -17,6 +17,9 @@
         <result property="opportunities"      column="opportunities"        />
         <result property="threats"            column="threats"              />
         <result property="aiAnalysisReport"   column="ai_analysis_report"   />
+        <result property="matrixJson"         column="matrix_json"          />
+        <result property="monitorsJson"       column="monitors_json"        />
+        <result property="ourSwotJson"        column="our_swot_json"        />
         <result property="aiGenerated"        column="ai_generated"         />
         <result property="aiGeneratedAt"      column="ai_generated_at"      />
         <result property="monitorEnabled"     column="monitor_enabled"      />
@@ -36,7 +39,8 @@
         select competitive_id, competitive_no, project_id, competitor_name, vendor, website,
                pricing_model, pricing_tier, feature_matrix,
                strengths, weaknesses, opportunities, threats,
-               ai_analysis_report, ai_generated, ai_generated_at,
+               ai_analysis_report, matrix_json, monitors_json, our_swot_json,
+               ai_generated, ai_generated_at,
                monitor_enabled, monitor_keywords, last_monitored_at,
                status, author_user_id,
                create_by, create_time, update_by, update_time, remark, del_flag
@@ -78,6 +82,9 @@
             <if test="opportunities != null">opportunities,</if>
             <if test="threats != null">threats,</if>
             <if test="aiAnalysisReport != null">ai_analysis_report,</if>
+            <if test="matrixJson != null">matrix_json,</if>
+            <if test="monitorsJson != null">monitors_json,</if>
+            <if test="ourSwotJson != null">our_swot_json,</if>
             <if test="aiGenerated != null">ai_generated,</if>
             <if test="aiGeneratedAt != null">ai_generated_at,</if>
             <if test="monitorEnabled != null">monitor_enabled,</if>
@@ -103,6 +110,9 @@
             <if test="opportunities != null">#{opportunities},</if>
             <if test="threats != null">#{threats},</if>
             <if test="aiAnalysisReport != null">#{aiAnalysisReport},</if>
+            <if test="matrixJson != null">#{matrixJson},</if>
+            <if test="monitorsJson != null">#{monitorsJson},</if>
+            <if test="ourSwotJson != null">#{ourSwotJson},</if>
             <if test="aiGenerated != null">#{aiGenerated},</if>
             <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
             <if test="monitorEnabled != null">#{monitorEnabled},</if>
@@ -132,6 +142,9 @@
             <if test="opportunities != null">opportunities = #{opportunities},</if>
             <if test="threats != null">threats = #{threats},</if>
             <if test="aiAnalysisReport != null">ai_analysis_report = #{aiAnalysisReport},</if>
+            <if test="matrixJson != null">matrix_json = #{matrixJson},</if>
+            <if test="monitorsJson != null">monitors_json = #{monitorsJson},</if>
+            <if test="ourSwotJson != null">our_swot_json = #{ourSwotJson},</if>
             <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
             <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
             <if test="monitorEnabled != null">monitor_enabled = #{monitorEnabled},</if>

@@ -168,6 +168,71 @@ public class CompetitiveServiceImpl implements ICompetitiveService
             + "3. **私有化**:满足农业客户数据合规要求\n"
             + "4. **离线支持**:适应农村/农场弱网场景\n";
         comp.setAiAnalysisReport(report);
+
+        // 2026-05-17 drift 修复: 填项目级 3 视图 JSON (跟原型 competitive.html renderCompetitive 1:1)
+        // matrix_json: 15 维度 × 5 竞品矩阵 (原型 agriplm.js line 733-738 硬编码数据)
+        comp.setMatrixJson(
+            "{\"dimensions\":["
+          + "{\"name\":\"立项管理\",\"order\":1},"
+          + "{\"name\":\"AI竞品分析\",\"order\":2},"
+          + "{\"name\":\"AI PRD生成\",\"order\":3},"
+          + "{\"name\":\"UED协同\",\"order\":4},"
+          + "{\"name\":\"AI设计文档\",\"order\":5},"
+          + "{\"name\":\"任务看板\",\"order\":6},"
+          + "{\"name\":\"AI编码辅助\",\"order\":7},"
+          + "{\"name\":\"AI测试用例\",\"order\":8},"
+          + "{\"name\":\"测试数据工厂\",\"order\":9},"
+          + "{\"name\":\"自动化测试\",\"order\":10},"
+          + "{\"name\":\"AI文档生成\",\"order\":11},"
+          + "{\"name\":\"MCP集成\",\"order\":12},"
+          + "{\"name\":\"Dify编排\",\"order\":13},"
+          + "{\"name\":\"农业知识库\",\"order\":14},"
+          + "{\"name\":\"私有化部署\",\"order\":15}"
+          + "],\"vendors\":["
+          + "{\"name\":\"禅道\",\"isOurProduct\":false},"
+          + "{\"name\":\"LigaAI\",\"isOurProduct\":false},"
+          + "{\"name\":\"Jira+Rovo\",\"isOurProduct\":false},"
+          + "{\"name\":\"Copilot WS\",\"isOurProduct\":false},"
+          + "{\"name\":\"本品\",\"isOurProduct\":true}"
+          + "],\"scores\":["
+          + "[1,0,0.5,0,1],[1,0,0.5,0,1],[1,0.5,0.5,0,1],[0,0,0.5,0,1],[0,0,0.5,0,1],"
+          + "[1,1,1,0,1],[0.5,0,1,1,1],[0.5,0.5,0,0,1],[0.5,0,0,0,1],[0.5,0,0.5,0,1],"
+          + "[0,0,0,0,1],[0,0,1,1,1],[0,0,0,0,1],[0,0,0,0,1],[1,0,0.5,0,1]"
+          + "]}"
+        );
+
+        // monitors_json: 竞品动态监控 (原型 4 行 line 763-767)
+        comp.setMonitorsJson(
+            "["
+          + "{\"vendor\":\"禅道\",\"news\":\"发布 AI 助手 Beta,支持代码评审辅助\",\"threatLevel\":\"mid\",\"date\":\"2026-04-10\"},"
+          + "{\"vendor\":\"LigaAI\",\"news\":\"新增测试用例 AI 生成功能\",\"threatLevel\":\"mid\",\"date\":\"2026-04-08\"},"
+          + "{\"vendor\":\"PingCode\",\"news\":\"集成通义千问,推出 AI 需求分析模块\",\"threatLevel\":\"high\",\"date\":\"2026-04-12\"},"
+          + "{\"vendor\":\"Jira+Rovo\",\"news\":\"Rovo Dev 新增更多 MCP 工具支持\",\"threatLevel\":\"low\",\"date\":\"2026-04-05\"}"
+          + "]"
+        );
+
+        // our_swot_json: 本品 SWOT (原型 4 色块 line 772-775 本品视角)
+        comp.setOurSwotJson(
+            "{\"strengths\":["
+          + "\"唯一覆盖农业全生命周期的平台\","
+          + "\"Dify 编排深度集成\","
+          + "\"AgriKB 农业专业知识库\","
+          + "\"MCP+CLI 生态完整\""
+          + "],\"weaknesses\":["
+          + "\"品牌知名度较低\","
+          + "\"销售渠道有限\","
+          + "\"初期功能有待完善\""
+          + "],\"opportunities\":["
+          + "\"农业数字化转型加速\","
+          + "\"AI 技术降低门槛\","
+          + "\"国产化替代需求旺盛\""
+          + "],\"threats\":["
+          + "\"通用竞品快速 AI 化\","
+          + "\"大厂可能切入垂直赛道\","
+          + "\"农业客户付费意愿有限\""
+          + "]}"
+        );
+
         comp.setAiGenerated("Y");
         comp.setAiGeneratedAt(new Date());
         comp.setUpdateBy(SecurityUtils.getUsername());
