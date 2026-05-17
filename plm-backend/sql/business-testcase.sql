@@ -11,7 +11,7 @@ CREATE TABLE tb_testcase (
     requirement_id           BIGINT(20)    DEFAULT NULL             COMMENT '关联需求（可空）',
     title                    VARCHAR(200)  NOT NULL                 COMMENT '用例标题',
     description              TEXT                                   COMMENT '概述',
-    category                 VARCHAR(2)    NOT NULL DEFAULT '01'    COMMENT 'biz_testcase_category',
+    category                 VARCHAR(20)   NOT NULL DEFAULT 'functional' COMMENT 'biz_testcase_category 8 值字符串(ADR-B Option B),proposal 0300',
     priority                 VARCHAR(2)    NOT NULL DEFAULT '01'    COMMENT 'biz_testcase_priority',
     status                   VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_testcase_status',
     preconditions            TEXT                                   COMMENT '前置条件',
@@ -39,19 +39,21 @@ CREATE TABLE tb_testcase (
 
 -- 字典类型
 INSERT INTO sys_dict_type (dict_name, dict_type, status, create_by, create_time, remark) VALUES
-('用例分类',     'biz_testcase_category', '0', 'admin', SYSDATE(), '7 种用例类型'),
+('用例分类',     'biz_testcase_category', '0', 'admin', SYSDATE(), '8 值融合 — 原型 4 (功能/边界/异常/农业) + SQL 4 (接口/性能/安全/兼容性);ADR-B Option B / proposal 0300'),
 ('用例优先级',   'biz_testcase_priority', '0', 'admin', SYSDATE(), 'P0-P2'),
 ('用例状态',     'biz_testcase_status',   '0', 'admin', SYSDATE(), '5 状态机');
 
--- category (7)
+-- category (8 值字符串编码,ADR-B Option B)
+-- 注:旧 dict_value '06'/'07' (E2E/烟雾) 转入 tags 字段承载,不再作分类
 INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time, remark) VALUES
-(1, '功能',    '01', 'biz_testcase_category', '', 'primary', 'Y', '0', 'admin', SYSDATE(), ''),
-(2, '接口',    '02', 'biz_testcase_category', '', 'success', 'N', '0', 'admin', SYSDATE(), ''),
-(3, '性能',    '03', 'biz_testcase_category', '', 'warning', 'N', '0', 'admin', SYSDATE(), ''),
-(4, '安全',    '04', 'biz_testcase_category', '', 'danger',  'N', '0', 'admin', SYSDATE(), ''),
-(5, '兼容性',  '05', 'biz_testcase_category', '', 'info',    'N', '0', 'admin', SYSDATE(), ''),
-(6, 'E2E',     '06', 'biz_testcase_category', '', 'success', 'N', '0', 'admin', SYSDATE(), ''),
-(7, '烟雾',    '07', 'biz_testcase_category', '', '',        'N', '0', 'admin', SYSDATE(), '');
+(1, '功能',     'functional',    'biz_testcase_category', '', 'primary', 'Y', '0', 'admin', SYSDATE(), '默认值;原型 + SQL 共有'),
+(2, '边界',     'boundary',      'biz_testcase_category', '', 'warning', 'N', '0', 'admin', SYSDATE(), '原型独有 — 边界测试'),
+(3, '异常',     'exception',     'biz_testcase_category', '', 'danger',  'N', '0', 'admin', SYSDATE(), '原型独有 — 异常场景'),
+(4, '农业专项', 'agri',          'biz_testcase_category', '', 'success', 'N', '0', 'admin', SYSDATE(), 'AgriPLM 业务场景专项 — 灌溉/植保/IoT(PRD §F4.2)'),
+(5, '接口',     'api',           'biz_testcase_category', '', 'info',    'N', '0', 'admin', SYSDATE(), '接口测试'),
+(6, '性能',     'performance',   'biz_testcase_category', '', 'warning', 'N', '0', 'admin', SYSDATE(), '性能 / 负载'),
+(7, '安全',     'security',      'biz_testcase_category', '', 'danger',  'N', '0', 'admin', SYSDATE(), '安全 / 渗透'),
+(8, '兼容性',   'compatibility', 'biz_testcase_category', '', 'info',    'N', '0', 'admin', SYSDATE(), '浏览器 / 设备 / 系统版本兼容');
 
 -- priority (3)
 INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time, remark) VALUES

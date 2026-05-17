@@ -53,6 +53,18 @@ public class TestCaseServiceImpl implements ITestCaseService
         STATUS_TRANSITIONS.put("04", Set.of("01"));   // 反向边 重测
     }
 
+    /** category 白名单(biz_testcase_category 8 值,ADR-B Option B,proposal 0300) */
+    private static final Set<String> VALID_CATEGORY = Set.of(
+        "functional", "boundary", "exception", "agri",
+        "api", "performance", "security", "compatibility"
+    );
+
+    /** priority 白名单(biz_testcase_priority,两位数) */
+    private static final Set<String> VALID_PRIORITY = Set.of("00", "01", "02");
+
+    /** status 白名单(biz_testcase_status,5 态) */
+    private static final Set<String> VALID_STATUS = Set.of("00", "01", "02", "03", "04");
+
     @Autowired private TestCaseMapper testcaseMapper;
     @Autowired private ProjectMapper projectMapper;
     @Autowired private RequirementMapper requirementMapper;
@@ -67,13 +79,17 @@ public class TestCaseServiceImpl implements ITestCaseService
         if (StringUtils.isBlank(t.getSteps())) throw new ServiceException("测试步骤不能为空", 602);
         if (StringUtils.isBlank(t.getExpectedResult())) throw new ServiceException("期望结果不能为空", 602);
         if (t.getProjectId() == null) throw new ServiceException("关联项目不能为空", 602);
+
+        // 字段白名单 (604) — 在 FK 校验前,字段级错误优先级高于关联资源不存在
+        validateWhitelist(t);
+
         if (projectMapper.selectProjectById(t.getProjectId()) == null) throw new ServiceException("关联项目不存在", 702);
         if (t.getRequirementId() != null && requirementMapper.selectRequirementById(t.getRequirementId()) == null) {
             throw new ServiceException("关联需求不存在", 702);
         }
 
         // 默认值
-        if (StringUtils.isBlank(t.getCategory())) t.setCategory("01");
+        if (StringUtils.isBlank(t.getCategory())) t.setCategory("functional");
         if (StringUtils.isBlank(t.getPriority())) t.setPriority("01");
         if (StringUtils.isBlank(t.getIsAutomated())) t.setIsAutomated("N");
         if (t.getExecutionCount() == null) t.setExecutionCount(0);
@@ -102,6 +118,9 @@ public class TestCaseServiceImpl implements ITestCaseService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int updateTestCase(TestCase t) {
+        // 字段白名单 (604)
+        validateWhitelist(t);
+
         TestCase old = testcaseMapper.selectTestCaseById(t.getTestcaseId());
         if (old == null) throw new ServiceException("用例不存在", 404);
 
@@ -159,6 +178,19 @@ public class TestCaseServiceImpl implements ITestCaseService
         upd.setLastExecutedAt(new Date());
         upd.setUpdateBy(SecurityUtils.getUsername());
         return testcaseMapper.updateTestCase(upd);
+    }
+
+    private void validateWhitelist(TestCase t) {
+        if (StringUtils.isNotBlank(t.getCategory()) && !VALID_CATEGORY.contains(t.getCategory())) {
+            throw new ServiceException("非法 category 值: " + t.getCategory()
+                + " (合法值: functional/boundary/exception/agri/api/performance/security/compatibility)", 604);
+        }
+        if (StringUtils.isNotBlank(t.getPriority()) && !VALID_PRIORITY.contains(t.getPriority())) {
+            throw new ServiceException("非法 priority 值: " + t.getPriority(), 604);
+        }
+        if (StringUtils.isNotBlank(t.getStatus()) && !VALID_STATUS.contains(t.getStatus())) {
+            throw new ServiceException("非法 status 值: " + t.getStatus(), 604);
+        }
     }
 
     private String generateTestCaseNo() {

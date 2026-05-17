@@ -7,7 +7,7 @@ export function makeTestCaseData(projectId: number, requirementId?: number, suff
     requirementId,
     title: `E2E 用例-${tag}`,
     description: `自动化测试 ${tag}`,
-    category: '06',  // E2E
+    category: 'agri',  // 农业专项 (ADR-B Option B / proposal 0300);旧 '06' E2E 已转入 tags 字段
     priority: '01',  // P1 主要
     preconditions: '后端 + 前端启动 + admin 登录',
     steps: '1. POST /business/testcase\n2. 验证返回 200',
