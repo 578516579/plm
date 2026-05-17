@@ -30,7 +30,7 @@
 
 - **永远不要**把真实 password / token / API key / JWT secret 写进 yml 或代码。
 - 任何敏感值都走 `${VAR:默认值}` 占位符；同步更新 [plm-backend/.env.example](../plm-backend/.env.example) 文档化。
-- 用户在对话中提供了凭据（如本会话之前的 `aa8945163`）→ 只在当次 shell 命令里使用，**不要**落地到任何文件（包括 `.env` 实际值文件）。
+- 用户在对话中提供了凭据（例如本机 DB 密码）→ 只在当次 shell 命令里使用，**不要**落地到任何文件（包括 `.env` 实际值文件、helpers fallback、Gate 审计记录、文档示例）。
 - 发现凭据已经误入 git → 立刻警示用户，建议轮换并 `git filter-repo` 清理历史。
 
 ## D. 4 个已知坑（MUST 警觉，参见根 CLAUDE.md "Gotchas"）

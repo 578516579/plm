@@ -195,7 +195,8 @@ test.describe('字符编码回归 (Mojibake guard)', () => {
     // 手动改成包含 EFBFBD 字节的乱码
     const { execSync } = await import('child_process')
     const MYSQL = process.env.MYSQL_CLI || 'C:/Program Files/MySQL/MySQL Server 8.0/bin/mysql.exe'
-    const DB_PWD = process.env.DB_PASSWORD || 'aa8945163'
+    const DB_PWD = process.env.DB_PASSWORD
+    if (!DB_PWD) throw new Error('DB_PASSWORD env var required for encoding mojibake test')
     // UNHEX('EFBFBD') = U+FFFD
     execSync(
       `"${MYSQL}" -uroot -p${DB_PWD} --default-character-set=utf8mb4 plm -e "UPDATE tb_project SET description = CONCAT('badbyte-', UNHEX('EFBFBD'), '-end') WHERE project_name='BadCheck-${badTag}'"`,

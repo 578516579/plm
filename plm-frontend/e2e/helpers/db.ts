@@ -7,13 +7,18 @@ import { execSync } from 'child_process'
 const MYSQL = process.env.MYSQL_CLI || 'C:/Program Files/MySQL/MySQL Server 8.0/bin/mysql.exe'
 const DB_NAME = process.env.DB_NAME || 'plm'
 const DB_USER = process.env.DB_USER || 'root'
-const DB_PWD = process.env.DB_PASSWORD || 'aa8945163'
+
+function requireDbPwd(): string {
+  const pwd = process.env.DB_PASSWORD
+  if (!pwd) throw new Error('DB_PASSWORD env var required for e2e db helpers')
+  return pwd
+}
 
 /**
  * 执行 SQL 返回单值（-Nse 模式,silent + no-header）
  */
 export function querySingleValue(sql: string): string {
-  const cmd = `"${MYSQL}" -u${DB_USER} -p${DB_PWD} --default-character-set=utf8mb4 ${DB_NAME} -Nse "${sql.replace(/"/g, '\\"')}"`
+  const cmd = `"${MYSQL}" -u${DB_USER} -p${requireDbPwd()} --default-character-set=utf8mb4 ${DB_NAME} -Nse "${sql.replace(/"/g, '\\"')}"`
   try {
     return execSync(cmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim()
   } catch (e: any) {
@@ -48,7 +53,7 @@ export function assertNoMojibake(table: string, column: string, whereClause: str
 
 /** 直接 DELETE 清理数据,用于测试 teardown */
 export function execDelete(table: string, whereClause: string): void {
-  const cmd = `"${MYSQL}" -u${DB_USER} -p${DB_PWD} --default-character-set=utf8mb4 ${DB_NAME} -e "DELETE FROM ${table} WHERE ${whereClause}"`
+  const cmd = `"${MYSQL}" -u${DB_USER} -p${requireDbPwd()} --default-character-set=utf8mb4 ${DB_NAME} -e "DELETE FROM ${table} WHERE ${whereClause}"`
   try {
     execSync(cmd, { stdio: 'pipe' })
   } catch (e: any) {
