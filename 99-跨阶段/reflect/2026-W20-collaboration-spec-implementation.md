@@ -26,7 +26,7 @@
 |---|---|---|
 | `0fc27a3` | docs(collab) Phase 1：协作规范.md §0-§12 / 在途任务.md / proposal 0008 初版 / proposals/README 索引 | +509 |
 | `2d7308d` | docs(collab) Phase 2 项目文档：模块工作流.md "多 Session 协作"段 / 开发规范.md §4.2 Worktree / 根 CLAUDE.md / signals §8 | +62 / -16 |
-| `e2a35f9` | docs(collab) Phase 2 收尾：.claude/rules.md § N + gotchas §6 + proposal 0008 状态 → merged | +27 / -9 |
+| `e2a35f9` | docs(collab) Phase 2 收尾：.claude/rules.md § O + gotchas §6 + proposal 0008 状态 → merged | +27 / -9 |
 | `df88229` | docs(collab) Phase 3：协作规范 §13-§18 团队执行细则扩充 + 4 个同步 | +333 / -3 |
 
 - **Conventional Commits 合规率**：4/4 = 100%（全部 `docs(collab):` scope）
@@ -73,7 +73,7 @@
 5. Q: 根本原因？→ **Solo 模式下的角色重叠会让规范的"评审"环节退化成"形式"，需要外部 classifier 兜底**
 
 **涉及规范文件**：
-- [.claude/rules.md § N.2](../../.claude/rules.md)（已加 "Claude 不允许自批自审" 硬条款）
+- [.claude/rules.md § O.2](../../.claude/rules.md)（已加 "Claude 不允许自批自审" 硬条款）
 - [协作规范.md §18.4](../协作规范.md)（已加 "自批自审禁令"）
 - [proposal 0008 §5 风险](../proposals/0008-parallel-session-collaboration.md)（隐性 self-modification 已记入）
 
@@ -85,7 +85,7 @@
 
 **涉及规范文件**：
 - [~/.claude/skills/ruoyi-bootstrap/references/gotchas.md §6](../../.claude/skills/ruoyi-bootstrap/references/gotchas.md)（已沉淀）
-- [.claude/rules.md § N.7](../../.claude/rules.md)（已写硬条款：首次 push 必走显式 refspec）
+- [.claude/rules.md § O.7](../../.claude/rules.md)（已写硬条款：首次 push 必走显式 refspec）
 - [协作规范.md §1 + §12](../协作规范.md)（开工速查表已含）
 - [开发规范.md §4.2 Worktree 段](../../03-开发/开发规范.md)（已加引用）
 
@@ -96,7 +96,7 @@
 **根因**：自然语言授权的"颗粒度"模糊，需要明确的"选项明示 + 任务范围"两段绑定。
 
 **涉及规范文件**：
-- [.claude/rules.md § N.2 + 协作规范.md §18.4](../../.claude/rules.md)（已写明"AskUserQuestion 模糊问题不能诱导用户简单'继续'作为 SSoT 改动的具体授权"）
+- [.claude/rules.md § O.2 + 协作规范.md §18.4](../../.claude/rules.md)（已写明"AskUserQuestion 模糊问题不能诱导用户简单'继续'作为 SSoT 改动的具体授权"）
 
 ---
 
@@ -106,8 +106,8 @@
 
 | # | 建议 | 涉及 | 转 Proposal? | 当前状态 |
 |---|---|---|---|---|
-| 1 | 写明 Claude "自批自审禁令" + classifier 兜底说明 | `.claude/rules.md § N.2` + 协作规范 §18.4 | proposal 0008 内（merged）| ✅ 已落地 (e2a35f9 + df88229) |
-| 2 | 沉淀 worktree upstream gotcha 进 gotchas.md §6 + 多份文档交叉引用 | gotchas.md §6 + rules.md § N.7 + 协作规范 §1/§12 + 开发规范 §4.2 | proposal 0008 内（merged）| ✅ 已落地 (e2a35f9 + 2d7308d) |
+| 1 | 写明 Claude "自批自审禁令" + classifier 兜底说明 | `.claude/rules.md § O.2` + 协作规范 §18.4 | proposal 0008 内（merged）| ✅ 已落地 (e2a35f9 + df88229) |
+| 2 | 沉淀 worktree upstream gotcha 进 gotchas.md §6 + 多份文档交叉引用 | gotchas.md §6 + rules.md § O.7 + 协作规范 §1/§12 + 开发规范 §4.2 | proposal 0008 内（merged）| ✅ 已落地 (e2a35f9 + 2d7308d) |
 | 3 | 把 classifier 3 次拦截 + 1 次自主回滚记入 signals §5 Claude 行为 + §8 并行协作 block_count | signals/2026-05.md §5 + §8 | proposal 0008 内（merged）| ✅ 已落地 (2d7308d + e2a35f9) |
 | 4 | 验证协作规范在多 session 真实场景下的可用性 | 跟踪期 2026-05-17 ~ 06-30 观察 §11 + §14 指标 | proposal 0008 tracking | 📋 跟踪中 |
 | 5 | 在 `.claude/settings.json` UserPromptSubmit hook 加协作规范触发词（"新会话"、"接手"、"转交"等）| `.claude/settings.json` | → 候选 proposal 0035 | 📋 候选 |

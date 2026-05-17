@@ -1,12 +1,12 @@
-# Proposal 0008: 并行 Session 协作规范 + 把硬性条款沉淀进 .claude/rules.md § N
+# Proposal 0008: 并行 Session 协作规范 + 把硬性条款沉淀进 .claude/rules.md § O
 
 ## 元信息
 
 | 字段 | 值 |
 |---|---|
 | 编号 | 0008 |
-| 标题 | 并行 Session 协作规范 + 把硬性条款沉淀进 `.claude/rules.md` § N |
-| 状态 | **merged → tracking**（Phase 1 + Phase 2 全部落地；用户 settings.local.json 加 Edit 白名单后 § N 与 §6 补完） |
+| 标题 | 并行 Session 协作规范 + 把硬性条款沉淀进 `.claude/rules.md` § O |
+| 状态 | **merged → tracking**（Phase 1 + Phase 2 全部落地；用户 settings.local.json 加 Edit 白名单后 § O 与 §6 补完） |
 | 类型 | 流程 |
 | 提出人 | Wjl + Claude (sleepy-hellman-5a3950) |
 | 提出日期 | 2026-05-17 |
@@ -59,7 +59,7 @@
 
 | 文件 | 改动 |
 |---|---|
-| [.claude/rules.md](../../.claude/rules.md) | **新增 § N 章节** — "并行 session 协作（MUST）"，10 行硬条款，链回协作规范.md |
+| [.claude/rules.md](../../.claude/rules.md) | **新增 § O 章节** — "并行 session 协作（MUST）"，10 行硬条款，链回协作规范.md |
 | [99-跨阶段/模块工作流.md](../模块工作流.md) | **新增章节** — "多 session 协作"段，提示 §4 同模块串行 + §6 PR 合入顺序 |
 | [03-开发/开发规范.md](../../03-开发/开发规范.md) | **§4.2 分支模型** 增补 worktree 段落，链协作规范.md |
 | 根 [CLAUDE.md](../../CLAUDE.md) | "Rules & playbooks" 表新增一行链到协作规范.md |
@@ -80,12 +80,12 @@
 +
 +多 session（多 Claude / 多人 / 人机混合）同时在本仓库工作时，遵守 [99-跨阶段/协作规范.md](../99-跨阶段/协作规范.md) 全文。Claude 视角额外硬条款：
 +
-+- **N.1** 启动即报到：第一轮响应前必跑 `git worktree list && git status && git log --oneline -3`
-+- **N.2** 写规范前查 §L.2：要改任何 SSoT 文件（[协作规范.md §2](../99-跨阶段/协作规范.md) 列表）→ 先开 proposal，不直接动
-+- **N.3** 任务上台账：开工前先在 [99-跨阶段/在途任务.md](../99-跨阶段/在途任务.md) "进行中"加一行
-+- **N.4** 同模块串行：[协作规范.md §4](../99-跨阶段/协作规范.md) — 任一业务模块同一时刻只允许一个 session 改代码 + SQL
-+- **N.5** 见冲突即停：[协作规范.md §8](../99-跨阶段/协作规范.md) "停下 AskUserQuestion"场景，禁止自作主张取舍；不许 `git push --force` 覆盖他人工作
-+- **N.6** 跨 session 边界：[协作规范.md §9](../99-跨阶段/协作规范.md) — 其他 session 的 worktree / 分支视作"不可触碰区 §B 扩展"
++- **O.1** 启动即报到：第一轮响应前必跑 `git worktree list && git status && git log --oneline -3`
++- **O.2** 写规范前查 §L.2：要改任何 SSoT 文件（[协作规范.md §2](../99-跨阶段/协作规范.md) 列表）→ 先开 proposal，不直接动
++- **O.3** 任务上台账：开工前先在 [99-跨阶段/在途任务.md](../99-跨阶段/在途任务.md) "进行中"加一行
++- **O.4** 同模块串行：[协作规范.md §4](../99-跨阶段/协作规范.md) — 任一业务模块同一时刻只允许一个 session 改代码 + SQL
++- **O.5** 见冲突即停：[协作规范.md §8](../99-跨阶段/协作规范.md) "停下 AskUserQuestion"场景，禁止自作主张取舍；不许 `git push --force` 覆盖他人工作
++- **O.6** 跨 session 边界：[协作规范.md §9](../99-跨阶段/协作规范.md) — 其他 session 的 worktree / 分支视作"不可触碰区 §B 扩展"
 +
 +本章节是协作规范的强制摘要，详尽规则与示例在协作规范.md。
 
@@ -125,7 +125,7 @@
 ## 6. 备选方案（Alternatives Considered）
 
 - **方案 A（本提案）**：独立 `99-跨阶段/协作规范.md` + 台账 + Phase 2 硬化进 rules.md。**优点**：人 / Claude 同源；新规则与 self-evolution L 机制对齐。**缺点**：3 个新文件 + 后续 rules.md 改动，两批 commit。
-- **方案 B**：只在 `.claude/rules.md` 加 § N，不开独立文档。**不选**：内容 200+ 行，rules.md 会过度膨胀；且本规范"人机共用"，rules.md 是 Claude 专属视角不合适。
+- **方案 B**：只在 `.claude/rules.md` 加 § O，不开独立文档。**不选**：内容 200+ 行，rules.md 会过度膨胀；且本规范"人机共用"，rules.md 是 Claude 专属视角不合适。
 - **方案 C**：扩展 `03-开发/开发规范.md` §4 一段。**不选**：协作规范是跨阶段的（所有 phase 都需要），不该归到 03-开发 单阶段下。
 - **方案 D**：先用飞书文档 / Wiki 写，仓库不落文件。**不选**：Claude 不自动加载外部文档；违反 [CLAUDE.md "文档落位 §H"](../../.claude/rules.md) 要求项目过程文档进仓库。
 
@@ -138,7 +138,7 @@
 ```
 [x] Step 1 (commit 0fc27a3, 2026-05-17): 写 proposal 0008 + 协作规范.md + 在途任务.md（独立新增，无 SSoT 改动）
 [x] Step 2 (2026-05-17): 用户 AskUserQuestion 明确 solo-review approve（选项"批 Phase 2 + gotcha"）
-[x] Step 3 (follow-up commit, 2026-05-17): 改 .claude/rules.md 加 § N 章节（N.1-N.7 硬条款）— 经用户加 settings.local.json Edit 白名单后落地
+[x] Step 3 (follow-up commit, 2026-05-17): 改 .claude/rules.md 加 § O 章节（O.1-O.7 硬条款）— 经用户加 settings.local.json Edit 白名单后落地
 [x] Step 4 (Phase 2 commit, 2026-05-17): 改 99-跨阶段/模块工作流.md 加"多 Session 协作"段
 [x] Step 5 (Phase 2 commit, 2026-05-17): 改 03-开发/开发规范.md §4.2 增补 Worktree 段
 [x] Step 6 (Phase 2 commit, 2026-05-17): 改根 CLAUDE.md "Rules & playbooks" 表加一行
@@ -174,7 +174,7 @@ Tracking 期内（merged 后 6 周）观察的信号：
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| Wjl | ✅ 通过 (solo-review) | 2026-05-17 | 用户 AskUserQuestion 明确选择"批 Phase 2 + gotcha"；Phase 2 项目文档 SSoT (4 项) 落地后 `.claude/rules.md § N` 与 `~/.claude/skills/.../gotchas.md §6` 经 classifier 拦截 2 次 → 用户路径 A 加 settings.local.json 白名单 → follow-up commit 全部补完；tracking 期 2026-05-17 → 06-30 若指标恶化走回滚 |
+| Wjl | ✅ 通过 (solo-review) | 2026-05-17 | 用户 AskUserQuestion 明确选择"批 Phase 2 + gotcha"；Phase 2 项目文档 SSoT (4 项) 落地后 `.claude/rules.md § O` 与 `~/.claude/skills/.../gotchas.md §6` 经 classifier 拦截 2 次 → 用户路径 A 加 settings.local.json 白名单 → follow-up commit 全部补完；tracking 期 2026-05-17 → 06-30 若指标恶化走回滚 |
 
 ---
 
@@ -183,7 +183,7 @@ Tracking 期内（merged 后 6 周）观察的信号：
 ### 实际 PR / commit
 
 - PR: 见 https://github.com/578516579/plm/pull/new/claude/sleepy-hellman-5a3950
-- 合入 commit: `0fc27a3` (Phase 1 — 协作规范.md / 在途任务.md / proposal 0008 / README) + `2d7308d` (Phase 2 项目文档 4 项 — 模块工作流.md / 开发规范.md / CLAUDE.md / signals §8) + 本 commit (Phase 2 收尾 — .claude/rules.md § N + ~/.claude/skills/.../gotchas.md §6 + 状态字段收尾)
+- 合入 commit: `0fc27a3` (Phase 1 — 协作规范.md / 在途任务.md / proposal 0008 / README) + `2d7308d` (Phase 2 项目文档 4 项 — 模块工作流.md / 开发规范.md / CLAUDE.md / signals §8) + 本 commit (Phase 2 收尾 — .claude/rules.md § O + ~/.claude/skills/.../gotchas.md §6 + 状态字段收尾)
 - 实际 merged 日期：2026-05-17（完整）
 
 ### Tracking 数据
@@ -208,6 +208,6 @@ Tracking 期内（merged 后 6 周）观察的信号：
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Claude (Wjl 会话, worktree sleepy-hellman-5a3950) | 初版（Phase 1 同次落地，Phase 2 待评审） |
-| 2026-05-17 | Wjl (AskUserQuestion solo-approve) + Claude | Phase 2 部分落地：99-跨阶段/模块工作流.md "多 Session 协作"段 / 03-开发/开发规范.md §4.2 Worktree / 根 CLAUDE.md "Rules & playbooks" / 99-跨阶段/signals/2026-05.md §8 + 修订；状态 proposed → partial merged → tracking；.claude/rules.md § N 与 ~/.claude/skills/.../gotchas.md §6 因 classifier 拦截 agent-self-modification 未落地（Step 3 / Step 8 标 [!]） |
-| 2026-05-17 | Wjl (settings.local.json 加白名单, 路径 A) + Claude | Phase 2 收尾：.claude/rules.md § N (N.1-N.7) + ~/.claude/skills/.../gotchas.md §6 落地；状态 partial merged → **merged → tracking**；Step 3 / Step 8 [!] → [x]；所有 Phase 2 改动合规完成 |
+| 2026-05-17 | Wjl (AskUserQuestion solo-approve) + Claude | Phase 2 部分落地：99-跨阶段/模块工作流.md "多 Session 协作"段 / 03-开发/开发规范.md §4.2 Worktree / 根 CLAUDE.md "Rules & playbooks" / 99-跨阶段/signals/2026-05.md §8 + 修订；状态 proposed → partial merged → tracking；.claude/rules.md § O 与 ~/.claude/skills/.../gotchas.md §6 因 classifier 拦截 agent-self-modification 未落地（Step 3 / Step 8 标 [!]） |
+| 2026-05-17 | Wjl (settings.local.json 加白名单, 路径 A) + Claude | Phase 2 收尾：.claude/rules.md § O (O.1-O.7) + ~/.claude/skills/.../gotchas.md §6 落地；状态 partial merged → **merged → tracking**；Step 3 / Step 8 [!] → [x]；所有 Phase 2 改动合规完成 |
 | 2026-05-17 | Wjl + Claude (sleepy-hellman) | **协作规范 §13-§18 团队执行细则扩充**（forward enrich, 本提案范围内, 不另起 proposal）：§13 角色 / 职责矩阵（SSoT 守门员表 + 阶段 Owner + main 守门员）/ §14 同步节奏（日 / 周 / 月 / 季）/ §15 冲突升级路径（L0-L4）/ §16 入退场流程 + 转交 + worktree 清理 / §17 回滚剧本（SSoT / proposal / Gate / 上线 / worktree 5 种）/ §18 Claude-Claude 协作专项（礼让 / 仲裁 / 交接笔记 / 自批自审禁令 / hand-off vs spawn-task）；协作规范.md ~300 → ~700 行 |
