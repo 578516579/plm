@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cn.com.bosssfot.dv.plm.common.ai.AiInvocationRecorder;
 import cn.com.bosssfot.dv.plm.common.ai.AiProperties;
 import cn.com.bosssfot.dv.plm.common.ai.AiProvider;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
@@ -28,6 +29,8 @@ public class AiServiceImpl implements AiService {
 
     private final Map<String, AiProvider> providers;
     private final AiProperties props;
+    /** 可选的审计 SPI;无实现则跳过审计 */
+    private AiInvocationRecorder recorder;
 
     public AiServiceImpl(List<AiProvider> providerList, AiProperties props) {
         this.props = props;
@@ -37,6 +40,12 @@ public class AiServiceImpl implements AiService {
         }
         log.info("[AiService] 装配完成,providers={}, default={}",
                 this.providers.keySet(), props.getDefaultProvider());
+    }
+
+    /** Setter — 在 AiAutoConfiguration 中按需注入 */
+    public void setRecorder(AiInvocationRecorder recorder) {
+        this.recorder = recorder;
+        log.info("[AiService] 审计 recorder 已接入: {}", recorder == null ? "(none)" : recorder.getClass().getSimpleName());
     }
 
     @Override
@@ -52,7 +61,13 @@ public class AiServiceImpl implements AiService {
         // 把实际选中的 provider 名回写,便于上游审计
         request.setProvider(p.name());
         log.debug("[AiService] route → {} (want={})", p.name(), want);
-        return p.chat(request);
+        AiChatResult result = p.chat(request);
+        // 审计 — 失败/异常不影响业务主链路
+        if (recorder != null) {
+            try { recorder.record(request, result); }
+            catch (Exception e) { log.warn("[AiService] 审计记录失败(已吞掉): {}", e.toString()); }
+        }
+        return result;
     }
 
     /** 路由优先级:精确匹配 → 默认 → mock 兜底 */

@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -47,6 +49,7 @@ public class ManualOpsServiceImpl implements IManualOpsService {
     }
 
     @Autowired private ManualOpsMapper manualopsMapper;
+    @Autowired private AiService aiService;
     @Autowired private ProjectMapper projectMapper;
 
     @Override
@@ -126,6 +129,10 @@ public class ManualOpsServiceImpl implements IManualOpsService {
     public ManualOps aiGenerate(Long id) {
         ManualOps t = manualopsMapper.selectManualOpsById(id);
         if (t == null) throw new ServiceException("运维手册不存在", 404);
+        aiService.chat(AiChatRequest.builder("")
+            .system("你是 PLM 运维专家,擅长监控告警、IoT 设备巡检与排障流程")
+            .user("请生成 [" + t.getTitle() + "] 运维手册")
+            .callerTag("manual-ops#" + id).build());
 
         String content = buildAiContent(t);
         t.setContent(content);

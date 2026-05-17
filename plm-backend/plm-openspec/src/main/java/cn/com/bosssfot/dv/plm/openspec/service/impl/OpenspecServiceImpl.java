@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -37,6 +39,7 @@ public class OpenspecServiceImpl implements IOpenspecService {
     }
 
     @Autowired private OpenspecMapper openspecMapper;
+    @Autowired private AiService aiService;
 
     @Override
     public List<Openspec> selectOpenspecList(Openspec t) { return openspecMapper.selectOpenspecList(t); }
@@ -99,6 +102,10 @@ public class OpenspecServiceImpl implements IOpenspecService {
     public Openspec aiGenerate(Long id) {
         Openspec t = openspecMapper.selectOpenspecById(id);
         if (t == null) throw new ServiceException("OpenSpec 不存在", 404);
+        aiService.chat(AiChatRequest.builder("")
+            .system("你是 PLM AI 规约专家,擅长 OpenAPI/JSON Schema/TypeScript 类型生成与农业 IoT 数据建模")
+            .user("请为 [" + t.getSpecName() + "] (" + t.getSpecType() + ") 生成规约")
+            .callerTag("openspec#" + id).build());
 
         String specType = t.getSpecType() != null ? t.getSpecType() : "openapi";
         t.setSpecContent(buildAiSpec(specType, t.getSpecName(), t.getVersion(), t.getAgriKbRef()));

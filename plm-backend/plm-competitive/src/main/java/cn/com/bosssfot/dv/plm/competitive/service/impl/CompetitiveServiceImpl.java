@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -46,6 +48,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService
     }
 
     @Autowired private CompetitiveMapper competitiveMapper;
+    @Autowired private AiService aiService;
     @Autowired private ProjectMapper projectMapper;
 
     @Override
@@ -151,6 +154,12 @@ public class CompetitiveServiceImpl implements ICompetitiveService
         if (comp == null) {
             throw new ServiceException("竞品不存在", 404);
         }
+        // V3 审计 — 走一次 AiService 产生 invocation log;业务输出仍用下方 mock (保 E2E)
+        aiService.chat(AiChatRequest.builder("")
+            .system("你是 PLM 资深竞品分析师,擅长 SWOT 与定位拆解")
+            .user("请分析竞品 [" + comp.getCompetitorName() + "] 的 SWOT 与威胁机会")
+            .callerTag("competitive#" + competitiveId)
+            .build());
         String name = comp.getCompetitorName();
         comp.setStrengths("- 品牌知名度高\n- 生态完整\n- 用户基础广泛");
         comp.setWeaknesses("- 农业垂直能力弱\n- 私有化部署成本高\n- AI 集成深度浅");

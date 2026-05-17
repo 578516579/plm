@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -47,6 +49,7 @@ public class ManualImplServiceImpl implements IManualImplService {
     }
 
     @Autowired private ManualImplMapper manualimplMapper;
+    @Autowired private AiService aiService;
     @Autowired private ProjectMapper projectMapper;
 
     @Override
@@ -126,6 +129,10 @@ public class ManualImplServiceImpl implements IManualImplService {
     public ManualImpl aiGenerate(Long id) {
         ManualImpl t = manualimplMapper.selectManualImplById(id);
         if (t == null) throw new ServiceException("实施手册不存在", 404);
+        aiService.chat(AiChatRequest.builder("")
+            .system("你是 PLM 实施工程师,擅长部署步骤与环境配置文档撰写")
+            .user("请生成 [" + t.getTitle() + "] 实施手册")
+            .callerTag("manual-impl#" + id).build());
 
         String content = buildAiContent(t);
         t.setContent(content);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,11 +68,16 @@ public class AiAutoConfiguration {
     }
 
     @Bean
-    public AiService aiService(List<AiProvider> providers, AiProperties props) {
+    public AiService aiService(List<AiProvider> providers, AiProperties props,
+                                ObjectProvider<AiInvocationRecorder> recorderProvider) {
         // 拷贝列表防外部修改
         List<AiProvider> copy = new ArrayList<>(providers);
         log.info("[AiService] init — providers={}, default={}",
                 copy.stream().map(AiProvider::name).toList(), props.getDefaultProvider());
-        return new AiServiceImpl(copy, props);
+        AiServiceImpl svc = new AiServiceImpl(copy, props);
+        // 审计 recorder 可选注入 — 若 plm-ai-agent 等模块实现了,自动接上;没有也不会报错
+        AiInvocationRecorder recorder = recorderProvider.getIfAvailable();
+        if (recorder != null) svc.setRecorder(recorder);
+        return svc;
     }
 }

@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -43,6 +45,7 @@ public class AutoTestServiceImpl implements IAutoTestService
     }
 
     @Autowired private AutoTestMapper autotestMapper;
+    @Autowired private AiService aiService;
     @Autowired private ProjectMapper projectMapper;
 
     @Override public List<AutoTest> selectAutoTestList(AutoTest t) { return autotestMapper.selectAutoTestList(t); }
@@ -133,6 +136,10 @@ public class AutoTestServiceImpl implements IAutoTestService
     public AutoTest aiGenerate(Long autotestId) {
         AutoTest t = autotestMapper.selectAutoTestById(autotestId);
         if (t == null) throw new ServiceException("自动化套件不存在", 404);
+        aiService.chat(AiChatRequest.builder("")
+            .system("你是 PLM 资深测试架构师,擅长自动化测试框架与脚本生成")
+            .user("请基于 [" + t.getFramework() + "] 为 [" + t.getTargetUrl() + "] 生成自动化脚本")
+            .callerTag("autotest#" + autotestId).build());
 
         // mock: Dify auto-test-flow 占位 — 根据框架生成脚本骨架
         String script = generateMockScript(t.getFramework(), t.getTargetUrl());

@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -54,6 +56,7 @@ public class PrdServiceImpl implements IPrdService
     }
 
     @Autowired private PrdMapper prdMapper;
+    @Autowired private AiService aiService;
     @Autowired private ProjectMapper projectMapper;
 
     @Override
@@ -161,6 +164,10 @@ public class PrdServiceImpl implements IPrdService
         if (prd == null) {
             throw new ServiceException("PRD 不存在", 404);
         }
+        aiService.chat(AiChatRequest.builder("")
+            .system("你是 PLM PRD 资深产品经理,擅长结构化需求文档撰写")
+            .user("请基于标题 [" + prd.getTitle() + "] 生成 PRD")
+            .callerTag("prd#" + prdId).build());
         String content = "# " + prd.getTitle() + " — PRD\n\n"
             + "## 1. 背景与目标\n"
             + (prd.getDescription() == null ? "(待补充)" : prd.getDescription()) + "\n\n"
