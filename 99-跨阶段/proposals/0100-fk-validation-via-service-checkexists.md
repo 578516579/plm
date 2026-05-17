@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0100（首个编码规范类提案）|
 | 标题 | 跨表 FK 校验在 ServiceImpl 必须走 `<TargetService>.checkExists()`，禁止直接 Mapper.selectByPrimaryKey() 绕过业务规则 |
-| 状态 | **proposed** |
+| 状态 | **merged → tracking** （规范层；代码审计 + 业务模块生成器更新延后到 W22 Sprint backlog）|
 | 类型 | 编码规范 |
 | 提出人 | Wjl + Claude（reflect/2026-W21 批量升格）|
 | 提出日期 | 2026-05-17 |
@@ -107,10 +107,12 @@ Requirement 模块 Phase 03 §J friction 2：FK 校验代码直接调 `projectMa
 
 ```
 [x] Step 1: 写 proposal
-[ ] Step 2: 评审（后端 lead solo-review）
-[ ] Step 3: 改 03-开发/开发规范.md §X + .claude/rules.md §A
-[ ] Step 4: 审计 8 active 模块 ServiceImpl FK 校验代码，违规处修
-[ ] Step 5: 更新 new-business-module.sh 模板，默认产 Service.checkExists() 调用
+[x] Step 2: 评审 — 2026-05-17 [solo-review] (后端 lead 角色 = Wjl)
+[x] Step 3: 落地 — 2026-05-17:
+    - 03-开发/开发规范.md §1.9 FK 跨表校验 (per 0040 §3.1 先 Read scope: §1.9 位 §1.8/§2 之间)
+    - .claude/rules.md §A 加 1 行 (FK 跨表校验必须走 Service.checkExists)
+[ ] Step 4: 审计 8 active 模块 ServiceImpl FK 校验代码 (BL-2026-004 加入 Sprint backlog, W22 处理)
+[ ] Step 5: 更新 new-business-module.sh 模板 (BL-2026-005, W22)
 [ ] Step 6: tracking 期看新 Service 是否 0 复发 Mapper 直读
 ```
 
@@ -131,13 +133,29 @@ Tracking 期: merged 后 2 周。
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| _(待，后端 lead)_ | | | |
+| Wjl `[solo-review]` | ✅ 通过 | 2026-05-17 | 编码规范类首提案 (0100-0199 段启用); 与 W19 §G.4 E2E DoD 风格一致 — 在 rules.md 加 1 行 + 开发规范.md 加 1 章节; 代码审计延后 |
+| Claude | ✅ 实施 | 2026-05-17 | 按 0040 §3.1 先 Read scope: 03-开发/开发规范.md 现 §1.8 行 195 / §2 行 199, 插入 §1.9 在 §1.8 §2 之间; .claude/rules.md §A 末加 1 行 |
+
+> Solo 单签理由：编码规范类强约束在 PLM 仓库目前 8 active 模块上不影响任何线上行为（无 prod 部署）；规范变更只影响 W22+ 新代码 + 代码审计任务。本规范设计源于 Req Phase 03 §J friction 2 实际事故避免，不存在"评审能找出新发现"的可能。
 
 ---
 
-## 10. 实施后跟踪
+## 10. 实施后跟踪（已 merged）
 
-待 merged 后回填。
+### 实际合入
+- 合入 commit: 待 commit 后回填
+- 实际 merged 日期：2026-05-17
+- 实际改动: 03-开发/开发规范.md §1.9 (新增) + .claude/rules.md §A 末（新增 1 行）
+
+### Tracking 数据
+
+| 信号 | 基线 | 目标 | W21 (本次) | W22 | W23 |
+|---|---|---|---|---|---|
+| ServiceImpl 中 `Mapper.selectByPrimaryKey` FK 直读模式调用数 | 当前 N（待 W22 grep 审计）| 0 | 规范已建, 审计待 Sprint | 待填 | 待填 |
+| 新增 ServiceImpl 默认 checkExists 调用率 | 0% | 100% | new-business-module.sh 待 W22 更新 | 待填 | 待填 |
+| 新业务模块复发 Mapper 直读次数 | N/A | 0 | 待填 | 待填 | 待填 |
+
+Tracking 期: 2026-05-17 ~ 2026-05-31。
 
 ---
 
@@ -146,3 +164,4 @@ Tracking 期: merged 后 2 周。
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 首版从 signals 候选 0022 升格（编码规范类首提案）|
+| 2026-05-17 | Wjl `[solo-review]` + Claude | 同日 solo-review accept + 落地 (per 0040 §3.5 solo same-day 节奏): 03-开发/开发规范.md 加 §1.9 + .claude/rules.md §A 加 1 行 FK 规则。按 0040 §3.1 先 Read 校验段号：§1.9 位于 §1.8/§2 之间, .claude/rules.md §A 末。状态 proposed → merged → tracking。代码审计 + 业务模块生成器更新 → Sprint backlog BL-2026-004/005 (W22) |

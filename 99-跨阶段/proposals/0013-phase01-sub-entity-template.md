@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0013 |
 | 标题 | Phase 01 模板加"子实体扩展模式"段（沿用父项目）+ 立项时序约束字段 + 风险表"技术债"列 |
-| 状态 | **merged → tracking**（部分；§D 风险表拆分延后到 99-跨阶段/风险登记册.md 独立 apply）|
+| 状态 | **merged → tracking** （全部 — §D 拆 D.1/D.2 已 apply 到 99-跨阶段/风险登记册.md）|
 | 类型 | 流程 |
 | 提出人 | Wjl + Claude（reflect/2026-W21 批量升格）|
 | 提出日期 | 2026-05-17 |
@@ -164,3 +164,4 @@ Tracking 期: 2026-05-17 ~ 2026-05-31（头部部分）。
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 首版从 signals 候选 0013+0014+0015 bundle 升格 |
 | 2026-05-17 | Wjl `[solo-review]` + Claude | 同日 solo-review accept + 部分落地：Phase01-立项-Gate.md 头部加 2 字段（子实体模式/立项时序）+ §B.1 + §B.3 加子实体快通道。§D 风险表拆分发现 scope 错位，延后到 W22 apply 到 99-跨阶段/风险登记册.md，状态 proposed → merged (partial) → tracking |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | partial 续 apply：99-跨阶段/风险登记册.md 拆 D.1 真风险 / D.2 已知技术债。D.2 backfill 3 行 (TD-2026-001 Stage 2 vite 占位 / TD-2026-002 deploy.sh / TD-2026-003 高敏感 proposal 待 apply)。状态从 merged (partial) → merged → tracking (full) |

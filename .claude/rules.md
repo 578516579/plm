@@ -13,6 +13,7 @@
 - 新 SQL 文件 **必须** 命名为 `plm-backend/sql/business-<entity>.sql`，不要混进 `ry_*.sql`。
 - 业务表 **必须** 用 `tb_<entity_snake>` 前缀；业务字典 type **必须** 用 `biz_<entity>_<field>` 前缀，**禁止**用 `sys_` 前缀防止与系统字典冲突。
 - 权限串 **必须** 用 `business:<entity>:<action>`（list / query / add / edit / remove / export），不要混进 `system:*`。
+- **FK 跨表校验必须走** `<TargetService>.checkExists(id)`，**禁用** `Mapper.selectByPrimaryKey` 直读规避业务规则 (per [proposal 0100](../99-跨阶段/proposals/0100-fk-validation-via-service-checkexists.md))。错误码 702。
 
 ## B. 不可触碰区（MUST）
 

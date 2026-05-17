@@ -13,6 +13,8 @@
 | BL-2026-001 | signals 2026-05 候选 0023 | Sprint 健康度统计 `selectSprintStats` 4 次 SQL 改 1 次 GROUP BY | P2 | TBD | TBD | 性能优化；Sprint 看板加载偶发慢 |
 | BL-2026-002 | signals 2026-05 候选 0024 | Task 看板 LIMIT 50 从内存切片改 SQL 分别拉 | P2 | TBD | TBD | 大数据量场景优化；与 BL-2026-001 同源 |
 | BL-2026-003 | signals 2026-05 候选 0026 | Task 看板列从字典 `biz_task_status` 读取，避免 hard-code 5 列 | P3 | TBD | TBD | 重构；解耦字典与 UI 列定义 |
+| BL-2026-004 | [proposal 0100](../99-跨阶段/proposals/0100-fk-validation-via-service-checkexists.md) §10 Step 4 | 审计 8 active 模块 ServiceImpl 的 FK 校验代码，把 `Mapper.selectByPrimaryKey` 直读改成 `Service.checkExists()` | P1 | TBD | TBD | 规范变更 (0100) 已 merged, 存量代码合规化 |
+| BL-2026-005 | [proposal 0100](../99-跨阶段/proposals/0100-fk-validation-via-service-checkexists.md) §10 Step 5 | 更新 `plm-backend/scripts/new-business-module.sh` 业务模块生成器, 默认产 `Service.checkExists()` 调用 | P1 | TBD | TBD | 与 BL-2026-004 同源；先做生成器再批量审计可节省工作量 |
 
 ## 已完成（归档）
 
