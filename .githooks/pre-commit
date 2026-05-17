@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# =============================================================================
+# 静态编码自检 — 阻止 commit 引入非 UTF-8 / BOM 文件
+# proposal 0200 引入；详见 .claude/hooks-design.md
+# =============================================================================
+#
+# 当前实现：调 plm-backend/scripts/check-encoding.sh（扫描整个仓库；慢）
+# 优化路径：BL-2026-009 改成只扫 git diff --cached --name-only（仅 staged）
+#
+# 跳过条件：
+#   - .githooks/pre-commit 不存在或不可执行 → git 自动跳过
+#   - 用户明确 git commit --no-verify → 跳过，但 signals 月度统计会捕到
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT="$REPO_ROOT/plm-backend/scripts/check-encoding.sh"
+
+if [ ! -x "$SCRIPT" ]; then
+    echo "⚠️  pre-commit: check-encoding.sh not found or not executable at $SCRIPT — skipping"
+    exit 0
+fi
+
+echo "[pre-commit] running plm-backend/scripts/check-encoding.sh..."
+exec bash "$SCRIPT"

@@ -124,6 +124,8 @@
 ## F. 上线后验证（强制，观察期长度按 项目成熟度 — proposal 0006）
 
 - [ ] 关键路径 5 个用例已手动 / 自动跑通
+- [ ] **编码运行期自检（proposal 0200）**：`bash plm-backend/scripts/check-encoding-runtime.sh <DB_PWD>` 输出含 `[DB] HEX=...` 且**不含** `EFBFBD` → 截图 / 日志贴本节
+  - early 且 dev 部署：可标 N/A 并在 §I 写"挂账到首次 staging/prod 部署 Gate"（与 §C 凭据红线 N/A 路径一致）
 - [ ] 监控看板 / 日志全绿，观察期按 项目成熟度：
   - [ ] `early`：≥ 30 分钟（接受基础日志监控）
   - [ ] `stable`：≥ 2 小时（看板覆盖错误率 / P99 / 业务转化）
@@ -200,3 +202,4 @@
 | 2026-05-17 | Wjl `[solo-review]` + Claude | [proposal 0007](../proposals/0007-solo-early-dev-self-review.md) accepted | §H 双人签字 solo 段加 `internal-tool + early + dev` 三条件叠加例外（self-review 等价），失效条件明确 |
 | 2026-05-17 | Wjl `[solo-review]` + Claude | [proposal 0008](../proposals/0008-phase05-early-solo-simplification.md) accepted | §B.1 拆 B.1.standard / B.1.solo-early — solo+early 可合并到发布计划；§C 加"适用范围"段（dev+early 可整体标 N/A 并挂账 staging/prod Gate）|
 | 2026-05-17 | Wjl `[solo-review]` + Claude | [proposal 0032](../proposals/0032-early-deploy-ergonomics.md) accepted (partial) | 头部加"目标环境"字段；新增 §B.0 演练环境约定段（early=dev/stable+=staging+prod）；§E 表加 deploy.sh 行。deploy.sh 实际脚本实现延后 W22 |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | [proposal 0200](../proposals/0200-encoding-pretooluse-hook.md) accepted | §F 加"编码运行期自检"必填项 (early+dev 可挂账); 与 §C 凭据红线 N/A 路径一致, 转 stable 时自动恢复强制 |

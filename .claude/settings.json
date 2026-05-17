@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "command=\"$CLAUDE_TOOL_INPUT_command\"; case \"$command\" in *'DROP DATABASE'*|*'DROP TABLE'*|*'TRUNCATE TABLE'*|*'git push --force'*|*'git push -f'*|*'git reset --hard'*|*'rm -rf /'*|*'rm -rf ~'*) echo '⚠️  HIGH-RISK COMMAND DETECTED' >&2; echo '   Command: '\"$command\" >&2; echo '   This command is normally blocked. If user explicitly authorised, proceed.' >&2; echo '   Otherwise, STOP and ask for confirmation via AskUserQuestion.' >&2 ;; esac; exit 0"
+            "command": "command=\"$CLAUDE_TOOL_INPUT_command\"; case \"$command\" in *'git commit'*) echo '💡 pre-commit hook will run plm-backend/scripts/check-encoding.sh (proposal 0200). To bypass: git commit --no-verify (records to signals).' >&2 ;; *'DROP DATABASE'*|*'DROP TABLE'*|*'TRUNCATE TABLE'*|*'git push --force'*|*'git push -f'*|*'git reset --hard'*|*'rm -rf /'*|*'rm -rf ~'*) echo '⚠️  HIGH-RISK COMMAND DETECTED' >&2; echo '   Command: '\"$command\" >&2; echo '   This command is normally blocked. If user explicitly authorised, proceed.' >&2; echo '   Otherwise, STOP and ask for confirmation via AskUserQuestion.' >&2 ;; esac; exit 0"
           }
         ]
       },

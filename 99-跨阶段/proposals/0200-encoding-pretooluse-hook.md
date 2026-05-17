@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0200（首个工具链类提案）|
 | 标题 | 把 check-encoding.sh / check-encoding-runtime.sh 从手工运行升级为自动化 hook，杜绝乱码事故复发 |
-| 状态 | **proposed** |
+| 状态 | **merged → tracking** (check-encoding.sh staged 优化延后 BL-2026-009) |
 | 类型 | 工具链 |
 | 提出人 | Wjl + Claude（reflect/2026-W21 批量升格）|
 | 提出日期 | 2026-05-17 |
@@ -116,11 +116,11 @@ CLAUDE.md 已说"First-time setup per clone: `git config core.hooksPath .githook
 
 ```
 [x] Step 1: 写 proposal
-[ ] Step 2: 评审（DevOps + 提出方 solo-review）
-[ ] Step 3: 优化 check-encoding.sh 只扫 staged files
-[ ] Step 4: 加 .githooks/pre-commit
-[ ] Step 5: 改 .claude/settings.json PreToolUse Bash matcher
-[ ] Step 6: 改 Phase05-上线-Gate.md §F 加 1 必填
+[x] Step 2: 评审 — 2026-05-17 [solo-review] (DevOps 角色 = Wjl)
+[ ] Step 3: 优化 check-encoding.sh 只扫 staged files → BL-2026-009 (W22, P2, 性能优化)
+[x] Step 4: 加 .githooks/pre-commit — 2026-05-17 (调全仓库扫描版本)
+[x] Step 5: 改 .claude/settings.json PreToolUse Bash matcher 加 git commit 提示 — 2026-05-17
+[x] Step 6: 改 Phase05-上线-Gate.md §F 加"编码运行期自检"必填 — 2026-05-17
 [ ] Step 7: tracking 期看 commit_bypass_count + 编码事故复发
 ```
 
@@ -143,13 +143,40 @@ Tracking 期: merged 后 2 周。
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| _(待，DevOps + 提出方)_ | | | |
+| Wjl `[solo-review]` | ✅ 通过 | 2026-05-17 | 工具链类首落地; 高敏感 (改 .claude/settings.json 影响每次会话); 已有 0028 事故根治为先例, 本提案是事故防御自动化 |
+| Claude | ✅ 实施 | 2026-05-17 | 按 0040 §3.1 先 Read settings.json/pre-commit/Phase05 §F 当前文本; pre-commit 走全仓库扫描 (慢但可靠), staged 优化派生 BL-2026-009 |
+
+> Solo 单签理由：0028 事故已修, 0200 是把"事故防御从手工 commit-msg hook 扩展到 pre-commit + Claude 提示 + Phase 05 §F 必填"——三层防御对应已发生事故的根因, 不存在评审能找出新发现的可能。pre-commit 全仓库扫描的性能问题靠 BL-2026-009 W22 优化, 不阻塞规范本身。
 
 ---
 
-## 10. 实施后跟踪
+## 10. 实施后跟踪（已 merged）
 
-待 merged 后回填。
+### 实际合入
+- 合入 commit: 待 commit 后回填
+- 实际 merged 日期：2026-05-17
+
+### 实际改动
+- `.githooks/pre-commit` (新建, +24 行 bash)
+- `.claude/settings.json` PreToolUse Bash matcher 加 `git commit` case (提示式, 不阻断)
+- `99-跨阶段/gate-checklists/Phase05-上线-Gate.md` §F 加"编码运行期自检"必填项 + early/dev 挂账路径
+
+### 派生迁移项
+
+| BL ID | 任务 | 优先级 | 估期 |
+|---|---|---|---|
+| BL-2026-009 | 改造 `check-encoding.sh` 加 `--staged` 模式, pre-commit 只扫 `git diff --cached --name-only` | P2 | S | TBD |
+
+### Tracking 数据
+
+| 信号 | 基线 | 目标 | W21 (本次) | W22 | W23 |
+|---|---|---|---|---|---|
+| 编码事故复发次数 (EFBFBD/BOM) | 1 (W20 周六事故 → 0 复发) | 0 | 已建多层防御 | 待填 | 待填 |
+| `commit_bypass_count` (`--no-verify`) | 0 (W19-W21) | ≤ 1 / 月 | 0 | 待填 | 待填 |
+| Phase 05 §F.编码运行期检测 通过率 | N/A | 100% (新 instance) | 0 (尚无新 Phase 05 实例) | 待填 | 待填 |
+| pre-commit 平均耗时 | N/A | < 3s (BL-2026-009 优化后) | 当前未优化, 估全仓库扫 5-10s | 待填 | 待填 |
+
+Tracking 期: 2026-05-17 ~ 2026-05-31。
 
 ---
 
@@ -158,3 +185,4 @@ Tracking 期: merged 后 2 周。
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 首版从 signals 候选 0030 升格；首个 0200-0299 工具链类 proposal |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | 同日 solo-review accept + 落地 per 0040 §3.5: 新建 .githooks/pre-commit + 改 .claude/settings.json PreToolUse 加 git commit 提示 + Phase05-上线-Gate.md §F 加编码运行期自检必填 (early+dev 可挂账, 同 §C 凭据路径)。check-encoding.sh staged 优化 → BL-2026-009 (W22)。状态 proposed → merged → tracking |
