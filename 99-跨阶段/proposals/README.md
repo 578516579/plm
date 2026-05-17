@@ -66,20 +66,35 @@ proposed    完成填写、关联数据，等 review
 | [0027](0027-business-module-scaffold-script.md) | 业务模块生成器 `new-business-module.sh` | **merged → tracking** (retro, User-requested-bypass) | 2026-05-17 追溯 | reflect F-W20-02 / signals 0027+0034 | `75b3233` (2026-05-16) | 2026-05-17 → 05-30 |
 | [0028](0028-encoding-runtime-hardrules.md) | rules.md §D #5-7 编码硬规则 + check-encoding 脚本 | **merged → tracking** (retro, User-requested-bypass) | 2026-05-17 追溯 | reflect F-W20-02 / signals 0028 / 周六编码事故 | `913d431` (2026-05-16) | 2026-05-17 → 05-30 |
 | [0029](0029-curl-data-binary-cn-body.md) | curl 中文 body 强制 `--data-binary @file` | **merged → tracking** (retro, User-requested-bypass) | 2026-05-17 追溯 | reflect F-W20-02 / signals 0029 / 同 0028 事故 | `913d431` (2026-05-16) | 2026-05-17 → 05-30 |
+| [0008](0008-phase05-early-solo-simplification.md) | Phase 05 §B.1 上线 Checklist / §C 凭据红线在 early+solo 简化 | **proposed** | 2026-05-17 | reflect W21 批次 / signals bundle 0008+0009 | — | （待 merged）|
+| [0013](0013-phase01-sub-entity-template.md) | Phase 01 加子实体扩展模式 + 立项时序字段 + 风险/技术债拆表 | **proposed** | 2026-05-17 | reflect W21 批次 / signals bundle 0013+0014+0015 | — | （待 merged）|
+| [0016](0016-phase02-design-template-debt.md) | Phase 02 §B 设计文档加 6 项必填（架构沿用/主键/反向边/并发/复合视图/聚合）| **proposed** | 2026-05-17 | reflect W21 批次 / signals bundle 0016-0021 | — | （待 merged）|
+| [0100](0100-fk-validation-via-service-checkexists.md) | FK 跨表校验走 `Service.checkExists()`，禁 Mapper 直读 | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0022 | — | （待 merged）|
+| [0101](0101-mr-url-host-whitelist.md) | 业务 URL 字段 host 白名单校验（防钓鱼）| **proposed** | 2026-05-17 | reflect W21 批次 / signals 0025 | — | （待 merged）|
+| [0200](0200-encoding-pretooluse-hook.md) | 编码自检脚本接入 git pre-commit + Claude PreToolUse hook | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0030（派生自 0028）| — | （待 merged）|
+| [0032](0032-early-deploy-ergonomics.md) | early 部署链路 — 目标环境字段 + 演练路径 + deploy.sh | **proposed** | 2026-05-17 | reflect W21 批次 / signals bundle 0032+0033 | — | （待 merged）|
 
-### 候选堆积（signals 中等待批量升格，下次周末闭合反思处理）
+### 候选堆积处置回顾（W21 批量升格已清空）
 
-> 来源 [signals/2026-05.md](../signals/2026-05.md)。规则: 候选超过 14 天或超过 10 条时触发批量升格。
+> W20 周末闭合反思识别 28 候选；W21 批次后**0 个候选 deferred**。
 
-| 候选号 | 标题摘要 | 处置 |
+| 候选号 | 处置 | 去向 |
 |---|---|---|
-| 0008 / 0009 | Phase 05 §B.1 / §C 在 early+solo 简化 | 留 W21 升格 |
-| 0013 / 0014 / 0015 | Phase 01 子实体 / 立项时序 / 技术债列 | 留 W21 升格 |
-| 0016 ~ 0021 | Phase 02 6 处设计模板债务（架构沿用 / 主键规范 / REST vs 复合视图 / 反向边 UI / 聚合详情 / 并发选型）| 留 W21 升格（建议合并为 1-2 个总提案）|
-| 0022 ~ 0026 | Phase 03 5 处实现细节（FK 校验 / Sprint stats SQL / Task 看板 LIMIT / MR URL 白名单 / 看板列字典化）| 留 W21 升格 |
-| 0030 | check-encoding-runtime.sh 纳入 PreToolUse hook 自动跑 | 留 W21 升格（独立于 0028 的运维提升）|
-| 0032 / 0033 | early 阶段 staging 路径 / `bash deploy.sh` 自动化 | 留 W21 升格 |
-| 0034 | 业务模块生成器（同 0027，重复编号）| **superseded by 0027**，不再单独升格 |
+| 0007 / 0010 / 0011 / 0012 | ✅ W20 批次同日升格 + apply | proposals 0007/0010/0011/0012 (merged → tracking) |
+| 0027 / 0028 / 0029 | ✅ W20 批次追溯补录 | proposals 0027/0028/0029 (merged → tracking, retro) |
+| 0008 / 0009 | ✅ W21 批次 bundle 升格 | [0008](0008-phase05-early-solo-simplification.md) (proposed) |
+| 0013 / 0014 / 0015 | ✅ W21 批次 bundle 升格 | [0013](0013-phase01-sub-entity-template.md) (proposed) |
+| 0016 ~ 0021 | ✅ W21 批次 6-候选合一 | [0016](0016-phase02-design-template-debt.md) (proposed) |
+| 0022 | ✅ W21 批次升格（编码规范类首）| [0100](0100-fk-validation-via-service-checkexists.md) (proposed) |
+| 0023 / 0024 / 0026 | ➡ 降级为 Sprint backlog code TODO | 不走 proposal 流程（性能/重构纯代码改造）|
+| 0025 | ✅ W21 批次升格（编码规范-安全类）| [0101](0101-mr-url-host-whitelist.md) (proposed) |
+| 0030（派生）| ✅ W21 批次升格（工具链类首）| [0200](0200-encoding-pretooluse-hook.md) (proposed) |
+| 0032 / 0033 | ✅ W21 批次 bundle 升格 | [0032](0032-early-deploy-ergonomics.md) (proposed) |
+| 0034 | ✅ superseded by 0027 | 重复编号 |
+
+**总账**：W19-W21 共产出 **20 个正式 proposal** (6 W19 dogfood-direct + 7 W20 + 7 W21)；27 个候选**全部处置完毕** (14 个 lift → 14 proposal 文件 [部分 bundle] + 3 个降级 Sprint TODO + 1 个 superseded + 9 个跨批次 1-to-1 lift)；**0 deferred**。下次"候选堆积"计数重置，由 W21+ 新的 Gate 实例 friction 重新触发。
+
+> **回顾意义**：自进化机制经 2 周连续运行，处理速率 (lift+下沉+合并) ≈ 27/2 ≈ 13.5/周，可持续支撑 dogfood 速率 (W20 含 25+ Gate 实例)。
 
 ---
 
