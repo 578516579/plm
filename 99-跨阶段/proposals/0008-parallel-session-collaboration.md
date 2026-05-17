@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0008 |
 | 标题 | 并行 Session 协作规范 + 把硬性条款沉淀进 `.claude/rules.md` § N |
-| 状态 | **partial merged → tracking**（Phase 1 + Phase 2 ¾；.claude/rules.md § N 和 ~/.claude/skills/.../gotchas.md §6 被 classifier 拦截待补） |
+| 状态 | **merged → tracking**（Phase 1 + Phase 2 全部落地；用户 settings.local.json 加 Edit 白名单后 § N 与 §6 补完） |
 | 类型 | 流程 |
 | 提出人 | Wjl + Claude (sleepy-hellman-5a3950) |
 | 提出日期 | 2026-05-17 |
@@ -138,16 +138,16 @@
 ```
 [x] Step 1 (commit 0fc27a3, 2026-05-17): 写 proposal 0008 + 协作规范.md + 在途任务.md（独立新增，无 SSoT 改动）
 [x] Step 2 (2026-05-17): 用户 AskUserQuestion 明确 solo-review approve（选项"批 Phase 2 + gotcha"）
-[!] Step 3 (Phase 2 commit, 2026-05-17): 改 .claude/rules.md 加 § N 章节 — **被 classifier 拦截**（agent-self-modification scope，需用户在 .claude/settings.json 加 Edit 白名单或后续显式文字授权）
+[x] Step 3 (follow-up commit, 2026-05-17): 改 .claude/rules.md 加 § N 章节（N.1-N.7 硬条款）— 经用户加 settings.local.json Edit 白名单后落地
 [x] Step 4 (Phase 2 commit, 2026-05-17): 改 99-跨阶段/模块工作流.md 加"多 Session 协作"段
 [x] Step 5 (Phase 2 commit, 2026-05-17): 改 03-开发/开发规范.md §4.2 增补 Worktree 段
 [x] Step 6 (Phase 2 commit, 2026-05-17): 改根 CLAUDE.md "Rules & playbooks" 表加一行
 [x] Step 7 (Phase 2 commit, 2026-05-17): 把 6 个并行协作指标加入 99-跨阶段/signals/2026-05.md §8 + 修订记录
-[!] Step 8: 沉淀 worktree upstream gotcha 到 ~/.claude/skills/ruoyi-bootstrap/references/gotchas.md §6 — **被 classifier 拦截**（全局 skill 文件 scope，同上需更明确授权）
+[x] Step 8 (follow-up commit, 2026-05-17): 沉淀 worktree upstream gotcha 到 ~/.claude/skills/ruoyi-bootstrap/references/gotchas.md §6 — 同上经 settings.local.json 白名单后落地
 [ ] Step 9 (可选, 后续): 在 .claude/settings.json UserPromptSubmit hook 加协作规范提示触发词
 [ ] Step 10: 进入 tracking 期，6 周后回看 §8 指标（2026-06-30）
 
-未完成的 Step 3 / Step 8 都属 agent-self-modification，需要用户在 `.claude/settings.json` 加 Edit 白名单 OR 在下一轮消息中明确写出"授权改 .claude/rules.md 和 gotchas.md"再补 follow-up commit。
+~~未完成的 Step 3 / Step 8 都属 agent-self-modification~~ — **已于 follow-up commit 落地**：用户路径 A 在 `.claude/settings.local.json` 加 `Edit(D:/.../plm/**/.claude/rules.md)` 与 `Edit(C:/Users/Wjl/.claude/skills/ruoyi-bootstrap/references/gotchas.md)` 两条白名单 → 重新 Edit 即过。
 ```
 
 ---
@@ -174,7 +174,7 @@ Tracking 期内（merged 后 6 周）观察的信号：
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| Wjl | ✅ 通过 (solo-review) | 2026-05-17 | 用户在 sleepy-hellman 会话中 AskUserQuestion 明确选择"批 Phase 2 + gotcha"；Phase 2 项目文档 SSoT (99-跨阶段/模块工作流.md / 03-开发/开发规范.md / 根 CLAUDE.md / 99-跨阶段/signals/2026-05.md) 已落地；`.claude/rules.md § N` 与 `~/.claude/skills/.../gotchas.md §6` 因 classifier agent-self-modification scope 被拦截 (2 次)，需用户在 `.claude/settings.json` 加 Edit 白名单或后续显式文字授权；tracking 期 2026-05-17 → 06-30 若指标恶化走回滚 |
+| Wjl | ✅ 通过 (solo-review) | 2026-05-17 | 用户 AskUserQuestion 明确选择"批 Phase 2 + gotcha"；Phase 2 项目文档 SSoT (4 项) 落地后 `.claude/rules.md § N` 与 `~/.claude/skills/.../gotchas.md §6` 经 classifier 拦截 2 次 → 用户路径 A 加 settings.local.json 白名单 → follow-up commit 全部补完；tracking 期 2026-05-17 → 06-30 若指标恶化走回滚 |
 
 ---
 
@@ -183,8 +183,8 @@ Tracking 期内（merged 后 6 周）观察的信号：
 ### 实际 PR / commit
 
 - PR: 见 https://github.com/578516579/plm/pull/new/claude/sleepy-hellman-5a3950
-- 合入 commit: `0fc27a3` (Phase 1) + 本 commit (Phase 2 部分 — 模块工作流.md / 开发规范.md / CLAUDE.md / signals/2026-05.md)；待 follow-up commit (Phase 2 剩余 — .claude/rules.md § N + gotchas.md §6)
-- 实际 merged 日期：2026-05-17（部分）
+- 合入 commit: `0fc27a3` (Phase 1 — 协作规范.md / 在途任务.md / proposal 0008 / README) + `2d7308d` (Phase 2 项目文档 4 项 — 模块工作流.md / 开发规范.md / CLAUDE.md / signals §8) + 本 commit (Phase 2 收尾 — .claude/rules.md § N + ~/.claude/skills/.../gotchas.md §6 + 状态字段收尾)
+- 实际 merged 日期：2026-05-17（完整）
 
 ### Tracking 数据
 
@@ -209,3 +209,4 @@ Tracking 期内（merged 后 6 周）观察的信号：
 |---|---|---|
 | 2026-05-17 | Claude (Wjl 会话, worktree sleepy-hellman-5a3950) | 初版（Phase 1 同次落地，Phase 2 待评审） |
 | 2026-05-17 | Wjl (AskUserQuestion solo-approve) + Claude | Phase 2 部分落地：99-跨阶段/模块工作流.md "多 Session 协作"段 / 03-开发/开发规范.md §4.2 Worktree / 根 CLAUDE.md "Rules & playbooks" / 99-跨阶段/signals/2026-05.md §8 + 修订；状态 proposed → partial merged → tracking；.claude/rules.md § N 与 ~/.claude/skills/.../gotchas.md §6 因 classifier 拦截 agent-self-modification 未落地（Step 3 / Step 8 标 [!]） |
+| 2026-05-17 | Wjl (settings.local.json 加白名单, 路径 A) + Claude | Phase 2 收尾：.claude/rules.md § N (N.1-N.7) + ~/.claude/skills/.../gotchas.md §6 落地；状态 partial merged → **merged → tracking**；Step 3 / Step 8 [!] → [x]；所有 Phase 2 改动合规完成 |

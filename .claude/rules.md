@@ -337,6 +337,22 @@ gh run watch <run-id>   # 实时等待
 
 ---
 
+## N. 并行 Session 协作（MUST）
+
+多 session（多 Claude / 多人 / 人机混合）同时在本仓库工作时，遵守 [99-跨阶段/协作规范.md](../99-跨阶段/协作规范.md) 全文。Claude 视角额外硬条款：
+
+- **N.1** 启动即报到：第一轮响应前必跑 `git worktree list && git status && git log --oneline -3`，看清自己在哪、相对 main 偏离多少
+- **N.2** 写规范前查 §L.2：要改任何 SSoT 文件（详见 [协作规范.md §2](../99-跨阶段/协作规范.md) 列表）→ 先开 proposal，不直接动；Claude 不允许"自批自审"自己刚写的 proposal 后立刻动 SSoT，必须用户 AskUserQuestion 明确授权
+- **N.3** 任务上台账：开工前先在 [99-跨阶段/在途任务.md](../99-跨阶段/在途任务.md) "进行中"加一行；状态变化原地改
+- **N.4** 同模块串行：任一业务模块同一时刻只允许一个 session 改代码 + SQL（详见 [协作规范.md §4](../99-跨阶段/协作规范.md)）
+- **N.5** 见冲突即停：[协作规范.md §8](../99-跨阶段/协作规范.md) "停下 AskUserQuestion"场景禁止自作主张取舍；**禁止** `git push --force` 覆盖他人工作
+- **N.6** 跨 session 边界：其他 session 的 worktree / 分支视作 §B 不可触碰区扩展（不 cd 进入、不 edit、不 git 操作）
+- **N.7** Push 前显式 refspec：worktree 默认上游可能指向"父分支"（见 ruoyi-bootstrap skill gotchas §6），首次 push 必走 `git push -u origin <branch>:<branch>`，确认 `git rev-parse --abbrev-ref @{u}` 等于 `origin/<本地分支>`
+
+本章节是协作规范的强制摘要，详尽规则与示例在 [协作规范.md](../99-跨阶段/协作规范.md)。
+
+---
+
 ## 索引：相关规则文件
 
 | 文件 | 受众 | 强制层 |
