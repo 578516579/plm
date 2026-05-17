@@ -1,158 +1,116 @@
-# TestCase 测试用例管理 — PRD
+# PRD: TestCase 模块 — 测试用例 (F4.2)
+
+## 文档信息
 
 | 字段 | 值 |
 |---|---|
-| 版本 | v1.0 |
-| AgriPLM 来源 | 模块 #13 测试用例 Test Case |
-| 模块定位 | `plm-testcase` Maven + `@plm/testcase` npm |
-| 路线图 | v0.3 P0（与 Defect 并列） |
-| 撰写人 | Wjl |
-| 日期 | 2026-05-16 |
+| 版本 | v1.1 (半实质,2026-05-17 由 Claude 派生于 PRD-MAPPING §2 + AgriAI PRD §F4.2 + 原型 testcase.html) |
+| 作者 | Wjl |
+| PRD § | F4.2 (AgriAI-PLM-完整PRD文档.md §F4.2 测试用例) |
+| 原型 HTML | [testcase.html](../prd和原型/AgriPLM-DevOps-原型/agriplm_split/testcase.html) (用例列表 + Excel 导入导出) |
+| 评审状态 | skeleton-plus(头部+字段+状态机+AI 已填,业务深度段落待人工) |
+| 字段 SSoT | [PRD-MAPPING.md §2 "TestCase (F4.2)"](../PRD-MAPPING.md) |
 
 ---
 
-## 1. 模块定位
+## 1. 背景与目标
 
-测试体系的核心一环。当前 `04-测试/测试用例库/` 维护 markdown 文件（Project-functional.md / E2E-测试矩阵.md 等），现在入数据库便于查询、统计、关联缺陷。
+### 1.1 现状痛点
+<待人工填写>:类似 Inception-PRD §1.1 的 3-4 个具体痛点(测试用例散在 Excel / 与需求 FK 断链 / AI 生成用例缺失 / 多用例集版本难管)。
 
-### 1.1 必做 v0.3
+### 1.2 目标 (北极星指标)
+<待人工填写>:类似 Inception-PRD §1.2,引用 PRD §F4.2 验收标准 + 模块特有衡量指标(用例 → 需求 FK 关联率 ≥ 95% / AI 生成用例采纳率)。
 
-- 用例编号自动生成（TC-YYYY-NNNN, ADR-0006）
-- 用例分类（功能 / 接口 / 性能 / 安全 / 兼容性 / E2E / 烟雾）
-- 优先级（P0 / P1 / P2）
-- 关联 Project + Requirement（验证哪个需求）
-- 用例状态 5×5（草稿 / 待执行 / 执行中 / 已通过 / 已失败）
-- 重复执行：每次跑用例结果可累加（execution_count + last_status + last_executed_at）
-- 步骤 / 预期结果 / 实际结果（每次执行可更新 actual_result）
-- 自动化标识（is_automated, automation_script_path）
-
-### 1.2 显式不做 v0.4+
-
-- 测试套件（多用例组合）— 用 tags CSV 实现简版
-- 用例版本化历史 — 当前 update_time 简版即可
+### 1.3 不做的事 (Out of Scope)
+本期**不做**:
+- **用例自动执行** — 仅文本步骤,自动执行留 autotest 模块
+- **用例评审打分** — 仅 priority,评分留 v0.3
+- **多版本用例对比** — 仅版本字段,对比留 v0.3
+- **用例与缺陷反向关联追溯** — 留 v0.5+
 
 ---
 
-## 2. 数据模型
+## 2. 用户与场景
 
-### 2.1 字段（18 个 + 6 通用）
+### 2.1 角色
+<待人工填写>:QA / 测试 / PM / 开发(评审参与)。
 
-| 字段 | 类型 | 必填 | 说明 |
+### 2.2 典型场景
+
+**S1 AI 辅助生成用例**(最高频)
+<待人工填写>:从 requirement / prd 输入 → AI 生成测试步骤 + 预期结果
+
+**S2 用例归档**(终态)
+<待人工填写>:用例稳定后 02 已归档,保留历史可查
+
+**S3 用例 ↔ 需求关联**(强 FK)
+<待人工填写>:requirementId FK 必填,追溯完整
+
+---
+
+## 3. 字段定义
+
+**单一事实来源**: [PRD-MAPPING.md §2 "TestCase (F4.2)"](../PRD-MAPPING.md)。本 PRD 不重复字段表,字段层 drift 走 §M.2 流程。
+
+字段一览(详 SSoT 与 sql/business-testcase.sql):
+- 基础: testcaseId / testcaseNo(TC-YYYY-NNNN)/ projectId(FK)/ requirementId(FK)
+- 用户输入: title / preconditions / steps / expectedResult / priority / caseType
+- AI 输出: aiGenerated / aiGeneratedAt
+- 流程: status(3 态) / authorUserId
+
+---
+
+## 4. 状态机
+
+详 [PRD-MAPPING.md §3](../PRD-MAPPING.md) testcase 行:`00→01→02` (3 态)。
+
+| status | label | 转入 | 说明 |
 |---|---|---|---|
-| `testcase_id` | bigint PK | | 主键 |
-| `testcase_no` | varchar(32) unique | ✅ | `TC-YYYY-NNNN` |
-| `project_id` | bigint | ✅ | FK→tb_project |
-| `requirement_id` | bigint | ⬜ | FK→tb_requirement，可空 |
-| `title` | varchar(200) | ✅ | 用例标题 |
-| `description` | text | ⬜ | 概述 |
-| `category` | varchar(2) | ✅ | 用例类型（biz_testcase_category） |
-| `priority` | varchar(2) | ✅ | 优先级（biz_testcase_priority） |
-| `status` | varchar(2) | ✅ | 状态（biz_testcase_status） |
-| `preconditions` | text | ⬜ | 前置条件 |
-| `steps` | text | ✅ | 测试步骤 |
-| `expected_result` | text | ✅ | 期望结果 |
-| `actual_result` | text | ⬜ | 实际结果（最近一次） |
-| `is_automated` | char(1) | ✅ | Y/N |
-| `automation_script_path` | varchar(500) | ⬜ | 如 `plm-frontend/e2e/project.spec.ts` |
-| `execution_count` | int | ✅ | 累计执行次数（默认 0） |
-| `last_executed_at` | datetime | ⬜ | 最近一次执行时间 |
-| `tags` | varchar(200) | ⬜ | CSV 标签 |
-| + 通用 6 字段 | | | |
+| 00 | 草稿 | {01 已评审} | 默认初始状态 |
+| 01 | 已评审 | {02 已归档} | — |
+| 02 | 已归档 | {} | 终态 |
 
-### 2.2 字典
-
-#### `biz_testcase_category`（7）
-
-| 值 | 标签 |
-|---|---|
-| 01 | 功能 |
-| 02 | 接口 |
-| 03 | 性能 |
-| 04 | 安全 |
-| 05 | 兼容性 |
-| 06 | E2E |
-| 07 | 烟雾 |
-
-#### `biz_testcase_priority`（3）
-
-| 值 | 标签 |
-|---|---|
-| 00 | P0 关键 |
-| 01 | P1 主要 |
-| 02 | P2 次要 |
-
-#### `biz_testcase_status`（5×5 状态机）
-
-| 值 | 标签 |
-|---|---|
-| 00 | 草稿 |
-| 01 | 待执行 |
-| 02 | 执行中 |
-| 03 | 已通过 |
-| 04 | 已失败 |
-
-### 2.3 状态机 5×5
-
-```
-            00 草稿   01 待执行  02 执行中  03 已通过  04 已失败
-00 草稿       —       ✅        ❌         ❌         ❌
-01 待执行    ✅        —        ✅         ❌         ❌
-02 执行中    ❌       ✅        —          ✅         ✅
-03 已通过    ❌       ✅ (重测) ❌         —          ❌
-04 已失败    ❌       ✅ (重测) ❌         ❌         —
-```
-
-**关键边**:
-- 02 → 03/04 (执行完成定结果)
-- 03/04 → 01 (反向边: **重新执行**,如修复后重测)
+**特殊规则**:
+- 新建强制 status='00'(违反抛 601)
+- requirementId FK 强约束(702)
+- priority / caseType 字典白名单(604)
 
 ---
 
-## 3. 错误码
+## 5. AI 能力
 
-| Code | 场景 |
-|---|---|
-| 200 | 成功 |
-| 404 | 用例不存在 |
-| 601 | 状态机违规 |
-| 602 | 必填字段空 (title / steps / expectedResult) |
-| 604 | 字典/格式不合法 |
-| 701 | testcase_no 重复 |
-| 702 | 关联项目/需求不存在 |
-| 706 | is_automated=Y 时必须填 automation_script_path |
+### 5.1 AI 端点
+POST /business/testcase/ai/generate — Dify 工作流 testcase-gen-flow(详 PRD-MAPPING §6)
+
+### 5.2 当前阶段实现
+🟡 字段已留位(aiGenerated),Dify 实接入留 v0.5+。本期占位 mock(按 requirement 描述生成 3-5 个测试步骤模板)。
+
+### 5.3 mock 输出 / Dify 工作流
+<待人工填写>:类似 Inception-PRD §5.3-5.4。
 
 ---
 
-## 4. 端点清单（7 个）
+## 6. 验收标准
 
-| # | Method | Path | 权限串 |
-|---|---|---|---|
-| 1 | GET | `/business/testcase/list` | `business:testcase:list` |
-| 2 | POST | `/business/testcase/export` | `business:testcase:export` |
-| 3 | GET | `/business/testcase/{id}` | `business:testcase:query` |
-| 4 | POST | `/business/testcase` | `business:testcase:add` |
-| 5 | PUT | `/business/testcase` | `business:testcase:edit` |
-| 6 | DELETE | `/business/testcase/{ids}` | `business:testcase:remove` |
-| 7 | POST | `/business/testcase/{id}/execute` | `business:testcase:execute` |
+**PRD §F4.2 验收**:
+- ⏳ AI 生成用例采纳率 ≥ 60%
+- ⏳ 用例 ↔ 需求 FK 关联率 ≥ 95%
 
-**`/execute` 端点**（独有）：
-- body: `{ status: "03"|"04", actualResult: "..." }`
-- 服务端: 自动 `execution_count += 1`, `last_executed_at = now`,推状态机 02→{03,04}
+**模块特有验收**:
+<待人工填写>:E2E 测试 / FK 校验 / 字典白名单 / 状态机校验。
 
 ---
 
-## 5. 验收
-
-- [ ] 创建用例自动生成 TC-YYYY-NNNN
-- [ ] 5×5 状态机含反向边 (03/04→01 重测) 全覆盖
-- [ ] is_automated=Y 必填 automation_script_path (706)
-- [ ] /execute 端点自动累加 execution_count
-- [ ] E2E 8 case 全过
+## 7. 不做的事 — 详 §1.3
 
 ---
 
-## 6. 修订记录
+## 8. 关联文档
 
-| 版本 | 日期 | 变更 |
-|---|---|---|
-| v1.0 | 2026-05-16 | 首次创建 |
+- 字段层 SSoT: [PRD-MAPPING.md §2](../PRD-MAPPING.md)
+- 数据库设计: [TestCase-数据库设计.md](../02-设计/TestCase-数据库设计.md)
+- API 设计: [TestCase-API设计.md](../02-设计/TestCase-API设计.md)
+- 测试计划: [TestCase-测试计划-2026-05-17.md](../04-测试/TestCase-测试计划-2026-05-17.md)
+- 发布计划: [TestCase-发布计划-2026-05-17.md](../05-上线/TestCase-发布计划-2026-05-17.md)
+- 原型: [testcase.html](../prd和原型/AgriPLM-DevOps-原型/agriplm_split/testcase.html)
+- AgriAI PRD: [§F4.2](../prd和原型/AgriAI-PLM-完整PRD文档.md)
