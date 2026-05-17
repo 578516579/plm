@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0040 |
 | 标题 | proposal 写前 Read + partial 状态形式化 + bundle 判据 + 降级通道 + solo 评审节奏 |
-| 状态 | **proposed** |
+| 状态 | **merged → tracking** |
 | 类型 | 流程（meta — 关于 proposal 机制本身的规则）|
 | 提出人 | Wjl + Claude（reflect/2026-W20-self-evolution-process-meta）|
 | 提出日期 | 2026-05-17 |
@@ -219,13 +219,13 @@ W19/W20/W21 三周连续跑自进化机制后，[reflect/2026-W20-self-evolution
 ## 7. 实施计划
 
 ```
-[x] Step 1: 写 proposal（本文件）
-[ ] Step 2: 评审 — 2026-05-24 之前 (solo-review per F-META-05 即时通过)
-[ ] Step 3: accepted → 改 5 个文件:
-    - .claude/proposals/0000-template.md (§3 加校验段)
-    - 99-跨阶段/proposals/README.md (生命周期段 + bundle 判据 + 评审节奏 solo 段)
-    - 03-开发/Sprint backlog.md (新建)
-[ ] Step 4: tracking 期看新 proposal 写作错误率 + bundle 决策可重现性
+[x] Step 1: 写 proposal（本文件）— 2026-05-17
+[x] Step 2: 评审 — 2026-05-17 [solo-review]（递归即时验证 F-META-05 新规则）
+[x] Step 3: 落地 5 段 diff — 2026-05-17:
+    - 99-跨阶段/proposals/0000-template.md (§3 加"写前 Read"校验段)
+    - 99-跨阶段/proposals/README.md (生命周期加 partial / 文件命名加 bundle 判据 / 评审节奏加 solo 段)
+    - 03-开发/Sprint backlog.md (新建, backfill 3 行 BL-2026-001/002/003)
+[ ] Step 4: tracking 期看新 proposal 写作错误率 + bundle 决策可重现性 (W22+)
 ```
 
 ---
@@ -247,13 +247,30 @@ Tracking 期: merged 后 2 周。
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| _(待 solo-review)_ | | | |
+| Wjl `[solo-review]` | ✅ 通过 | 2026-05-17 | 5 friction 全有具体 commit/文件证据；本 proposal 既是规则、又是首次执行该规则的 demo（解 §3.5 同日 propose-accept-merge 路径）|
+| Claude | ✅ 实施 | 2026-05-17 | 同日 5 段 diff 落地，含新建 03-开发/Sprint backlog.md |
+
+> Solo 单签理由：本 proposal 5 处变更都是 README/template 级元规则，无业务影响、无外部依赖；W19-W21 三周连续 dogfood 后的事实 friction 总结，定义都基于已发生的 2 次 scope 错 + 2 次 partial 硬塞 + 3 次降级断头 + 100% 评审 SLA 失效 — 不存在"评审窗口能等到新发现"的可能。
 
 ---
 
-## 10. 实施后跟踪
+## 10. 实施后跟踪（已 merged）
 
-待 merged 后回填。
+### 实际合入
+- 合入 commit: W20 自进化 0040 apply (待 commit 后回填 hash)
+- 实际 merged 日期：2026-05-17
+
+### Tracking 数据
+
+| 信号 | 基线 | 目标 | W21 (本次) | W22 | W23 |
+|---|---|---|---|---|---|
+| proposal scope 错率 | 2/20 = 10% (W19-W21) | ≤ 5% | rule 已加, 待下一份新 proposal 验证 | 待填 | 待填 |
+| partial 状态正式使用 | 2 硬塞 (0013/0032) | 正式状态 | 已正式化 | 待填 | 待填 |
+| signals 降级 → Sprint backlog 入文件率 | 0% (无文件) | 100% | **100%** (3/3 backfill BL-2026-001/002/003) | 待填 | 待填 |
+| Sprint backlog 中 P0/P1 项每周被吸纳 | N/A | ≥ 1 | 0 (无 P0/P1, 3 项都是 P2/P3) | 待填 | 待填 |
+| solo 单签 proposal 含"为何 solo 足够"段比例 | 0% (未要求) | 100% | 100% (本 proposal 已含, §9 段后注) | 待填 | 待填 |
+
+Tracking 期: 2026-05-17 ~ 2026-05-31。
 
 ---
 
@@ -262,3 +279,4 @@ Tracking 期: merged 后 2 周。
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 首版从 reflect/2026-W20-self-evolution-process-meta 5 个 F-META friction bundle 升格 |
+| 2026-05-17 | Wjl `[solo-review]` + Claude | 同日 solo-review accept + 5 段 diff 全部落地 (0000-template.md §3 / proposals/README.md 生命周期+文件命名+评审节奏 / 03-开发/Sprint backlog.md 新建)。状态 proposed → merged → tracking。本提案既定义了 solo same-day 规则，又首次执行该规则 — 递归元升级完成 |

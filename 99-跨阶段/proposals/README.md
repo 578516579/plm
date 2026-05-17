@@ -28,6 +28,19 @@ proposed    完成填写、关联数据，等 review
    └─→  superseded  被更新的提案替代（指向新提案）
 ```
 
+### "partially-merged" 状态（proposal 0040 引入）
+
+当 proposal 含 N 个改动点，只有 K < N 落地时：
+
+- **首选策略（拆）**: 把 proposal 拆为 N 个子 proposal（编号 `NNNN-a` / `NNNN-b` ...），已落地的 sub-proposal 走 merged 路径，未落地的留 proposed
+- **次选策略（标 partial）**: 整个 proposal 标 `merged → tracking (partial)`，在 §10 实施跟踪段明确列：
+  - 已落地子项清单
+  - 延后子项 + 截止日期 + 负责人
+- **拆/标 选择标准**:
+  - 子项 ≥ 3 且各自需独立 review 周期 → **拆**
+  - 子项 ≤ 2 或同源同次评审 → **标 partial**
+- partial 状态在本表 [状态索引](#状态索引手动维护) 显示为 `merged → tracking (partial)`
+
 ---
 
 ## 文件命名
@@ -44,6 +57,22 @@ proposed    完成填写、关联数据，等 review
 - `0200-0299`：工具链 / hook 类
 - `0300-0399`：架构 / 技术债类
 - `0900-0999`：实验性提案（高失败容忍）
+
+### Bundle 判据（proposal 0040 引入）
+
+多个 signals 候选可以 bundle 成 1 个 proposal 文件，**前提满足任一**：
+
+- **同目标文件**: 全部候选改的是同一个目标规范文件的连续段（例: 0016-0021 全在 Phase 02 §B）
+- **同语义簇**: 候选有同一根因（例: 0008+0009 都是 "Phase 05 early+solo 简化"）
+- **同评审人**: 所有候选评审人完全一致
+
+**禁止 bundle 的情况**：
+
+- 跨号段范围（0001-0099 流程 vs 0100+ 编码 vs 0200+ 工具链）→ **拆**
+- 评审节奏不同（流程类 1 周 vs 编码规范 3 天）→ **拆**
+- 实施 PR 不能合并到同次 commit → **拆**
+
+Bundle 后的 proposal 在 §元信息 加 "Bundle" 字段，列出合并的 signals 候选号。
 
 ---
 
@@ -73,7 +102,7 @@ proposed    完成填写、关联数据，等 review
 | [0100](0100-fk-validation-via-service-checkexists.md) | FK 跨表校验走 `Service.checkExists()`，禁 Mapper 直读 | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0022 | — | （待 merged，需改 rules.md / 开发规范.md，独立 apply）|
 | [0101](0101-mr-url-host-whitelist.md) | 业务 URL 字段 host 白名单校验（防钓鱼）| **proposed** | 2026-05-17 | reflect W21 批次 / signals 0025 | — | （待 merged，独立 apply）|
 | [0200](0200-encoding-pretooluse-hook.md) | 编码自检脚本接入 git pre-commit + Claude PreToolUse hook | **proposed** | 2026-05-17 | reflect W21 批次 / signals 0030（派生自 0028）| — | （待 merged，需改 settings.json/githooks，独立 apply）|
-| [0040](0040-self-evolution-v2-meta-rules.md) | self-evolution v2 元规则：写前 Read / partial 状态 / bundle 判据 / Sprint backlog 通道 / solo 评审节奏 | **proposed** | 2026-05-17 | [reflect/2026-W20-self-evolution-process-meta](../reflect/2026-W20-self-evolution-process-meta.md) F-META-01~05 (5-friction bundle) | — | （待 merged，meta 层升级）|
+| [0040](0040-self-evolution-v2-meta-rules.md) | self-evolution v2 元规则：写前 Read / partial 状态 / bundle 判据 / Sprint backlog 通道 / solo 评审节奏 | **merged → tracking** | 2026-05-17 | [reflect/2026-W20-self-evolution-process-meta](../reflect/2026-W20-self-evolution-process-meta.md) F-META-01~05 (5-friction bundle) | apply 0040 元规则升级（2026-05-17 `[solo-review]`）| 2026-05-17 → 05-31 |
 
 ### 候选堆积处置回顾（W21 批量升格已清空）
 
@@ -125,6 +154,20 @@ proposed    完成填写、关联数据，等 review
 | 架构类（0300-0399） | 技术 lead + 必要 ADR | 2 周内 |
 
 超出上限 → 自动升到下次"流程 Sprint"必须决议。
+
+### Solo 模式简化（proposal 0040 引入）
+
+当团队规模 = `solo` 时，按 Phase 05 / 06 §I `[solo-review]` 同款节奏：
+
+- 评审耗时上限 → **0 天（当日 OK）**
+- 评审人 = 提出方自评（commit message 必须带 `[solo-review]` 标签）
+- 同日 propose-accept-merge **不算违规**，但同次（或下一次）commit 必须含：
+  1. **proposal 文件**（status 从 proposed → merged → tracking，§修订记录 体现双状态）
+  2. **实际规范文件 diff**（templates / rules.md / .claude/settings.json / 等）
+- 转入 `small+` 团队后**自动恢复**多人评审节奏（上表）；本豁免不溯及历史 solo 单签的 proposal
+
+> 这条规则解决了 W19/W20/W21 期间评审 SLA 100% 失效的形式主义问题。
+> 反过来：solo 单签 proposal 必须在评审记录段说明"为什么 solo 单签足够"——可以一句话，但不能空。
 
 ---
 
