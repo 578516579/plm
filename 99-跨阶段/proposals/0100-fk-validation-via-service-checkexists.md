@@ -165,3 +165,4 @@ Tracking 期: 2026-05-17 ~ 2026-05-31。
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 首版从 signals 候选 0022 升格（编码规范类首提案）|
 | 2026-05-17 | Wjl `[solo-review]` + Claude | 同日 solo-review accept + 落地 (per 0040 §3.5 solo same-day 节奏): 03-开发/开发规范.md 加 §1.9 + .claude/rules.md §A 加 1 行 FK 规则。按 0040 §3.1 先 Read 校验段号：§1.9 位于 §1.8/§2 之间, .claude/rules.md §A 末。状态 proposed → merged → tracking。代码审计 + 业务模块生成器更新 → Sprint backlog BL-2026-004/005 (W22) |
+| 2026-05-17 | Wjl + Claude | **W20 audit F-AUDIT-F2 修复**：W20 tracking 审计发现 ISprintService 现存 `boolean checkExists(Long)` 签名与 §1.9 约定 `void/throw 702` 冲突。03-开发/开发规范.md §1.9 加"现存代码兼容性"注，标记历史签名为已知技术债; BL-2026-004 scope 扩大含签名迁移 (per [audit report](../reflect/2026-W20-tracking-audit-mid.md))。**审计教训: 0040 §3.1 "写前 Read" 应扩展含 "grep 现存代码合规性"** — 派生新 friction 留 W21 升格 |
