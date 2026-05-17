@@ -17,6 +17,18 @@
           <el-option v-for="d in status_options" :key="d.value" :label="d.label" :value="d.value" />
         </el-select>
       </el-form-item>
+      <el-form-item label="关联类型">
+        <el-input v-model="queryParams.relatedEntityType" placeholder="如 project/requirement" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
+      <el-form-item label="关联ID">
+        <el-input v-model="queryParams.relatedEntityId" placeholder="实体 ID" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
+      <el-form-item label="作者">
+        <el-input v-model="queryParams.authorUserId" placeholder="user_id" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
+      <el-form-item label="审核人">
+        <el-input v-model="queryParams.reviewerUserId" placeholder="user_id" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -113,7 +125,9 @@ const form = ref<DocumentForm>({})
 
 const queryParams = ref<DocumentQuery>({
   pageNum: 1, pageSize: 10,
-  documentNo: undefined, projectId: undefined, docType: undefined, status: undefined
+  documentNo: undefined, projectId: undefined, docType: undefined, status: undefined,
+  relatedEntityType: undefined, relatedEntityId: undefined,
+  authorUserId: undefined, reviewerUserId: undefined
 })
 
 const rules = {

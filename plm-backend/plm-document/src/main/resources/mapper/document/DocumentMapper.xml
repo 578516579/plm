@@ -43,6 +43,7 @@
             <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
             <if test="status != null and status != ''">and status = #{status}</if>
             <if test="authorUserId != null">and author_user_id = #{authorUserId}</if>
+            <if test="reviewerUserId != null">and reviewer_user_id = #{reviewerUserId}</if>
             <if test="tags != null and tags != ''">and tags like concat('%', #{tags}, '%')</if>
         </where>
         order by create_time desc
