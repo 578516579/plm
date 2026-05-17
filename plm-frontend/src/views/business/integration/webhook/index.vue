@@ -53,9 +53,10 @@
 <script setup name="IntegrationWebhook" lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useDict } from '@/utils/dict'
 import { listEvents, retryEvent, exportEvents, type WebhookEvent } from '@/api/business/integration/webhook'
 
-const { biz_webhook_status } = (window as any).proxy?.useDict?.('biz_webhook_status') ?? { biz_webhook_status: ref([]) }
+const { biz_webhook_status } = useDict('biz_webhook_status')
 
 const loading = ref(false)
 const showSearch = ref(true)

@@ -91,14 +91,15 @@
 <script setup name="IntegrationConnector" lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useDict } from '@/utils/dict'
 import {
   listConnectors, getConnector, addConnector, updateConnector, delConnector,
   testConnector, exportConnector, type IntegrationConnector
 } from '@/api/business/integration/connector'
 
-const { biz_integration_type, biz_integration_auth, biz_integration_status } = (window as any).proxy?.useDict?.(
+const { biz_integration_type, biz_integration_auth, biz_integration_status } = useDict(
   'biz_integration_type', 'biz_integration_auth', 'biz_integration_status'
-) ?? { biz_integration_type: ref([]), biz_integration_auth: ref([]), biz_integration_status: ref([]) }
+)
 
 const loading = ref(false)
 const showSearch = ref(true)

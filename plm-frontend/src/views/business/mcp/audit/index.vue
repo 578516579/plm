@@ -38,9 +38,10 @@
 
 <script setup name="McpAudit" lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useDict } from '@/utils/dict'
 import { listAudits, exportAudit, type McpToolAudit } from '@/api/business/mcp/audit'
 
-const { biz_audit_result } = (window as any).proxy?.useDict?.('biz_audit_result') ?? { biz_audit_result: ref([]) }
+const { biz_audit_result } = useDict('biz_audit_result')
 
 const loading = ref(false)
 const showSearch = ref(true)
