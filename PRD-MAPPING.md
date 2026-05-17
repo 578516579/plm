@@ -47,7 +47,94 @@
 
 ## 2. 字段对照表（Domain ↔ 原型表单元素 ↔ DB 列）
 
-> 每个 PRD-aligned 模块一节。当前只填了 §32-33 两个新模块；其他已 PRD-aligned 模块的对照表参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
+> 每个 PRD-aligned 模块一节。当前已填 §1-4（最早 4 模块）+ §32-33（MCP/Integration）。其他 PRD-aligned 模块的对照表参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
+
+### §1. Project（plm-project）
+
+**领域**: 项目主数据。**PRD 出处**: F1.2 / 原型 [projects.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/projects.html)
+
+#### 表 `tb_project`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| id | id | BIGINT | - | 主键 |
+| projectNo | project_no | VARCHAR | ADR-0001 | 编号 PRJ-YYYY-NNNN，自动生成 |
+| projectName | project_name | VARCHAR | 原型 projects.html 表单 "项目名称" | 必填 |
+| projectType | project_type | VARCHAR | 字典 `biz_project_type` | 类型 |
+| status | status | VARCHAR | 字典 `biz_project_status` | 0=未启动 1=进行中 2=暂停 3=已完成 4=已取消 |
+| managerUserId | manager_user_id | BIGINT | F1.2 负责人 | FK→sys_user.user_id |
+| startDate | start_date | DATE | 原型 "开始日期" | |
+| endDate | end_date | DATE | 原型 "结束日期" | |
+| budget | budget | DECIMAL | 原型 "预算" | |
+| description | description | VARCHAR | - | 详细描述 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §2. Requirement（plm-requirement）
+
+**领域**: 需求条目。**PRD 出处**: F2.1 / 原型 [requirements.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/requirements.html)
+
+#### 表 `tb_requirement`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| requirementId | id | BIGINT | - | 主键 |
+| requirementNo | requirement_no | VARCHAR | ADR-0002 | 编号 REQ-YYYY-NNNN |
+| projectId | project_id | BIGINT | F2.1 所属项目 | FK→tb_project.id（必填） |
+| title | title | VARCHAR | 原型 requirements.html "需求标题" | 必填 |
+| description | description | TEXT | 原型 "详细描述" | Markdown 兼容 |
+| source | source | VARCHAR | 字典 `biz_req_source` | 来源 |
+| priority | priority | VARCHAR | 字典 `biz_req_priority` | |
+| status | status | VARCHAR | 字典 `biz_req_status` | 00=待评审 01=开发中 02=已完成 03=已取消 |
+| assigneeUserId | assignee_user_id | BIGINT | F2.1 指派人 | FK→sys_user.user_id（可空） |
+| reviewNote | review_note | VARCHAR | 状态推进时简要纪要 | |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §3. Sprint（plm-sprint）
+
+**领域**: 迭代/Sprint。**PRD 出处**: F3.4 / 原型 [kanban.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/kanban.html) 迭代部分
+
+#### 表 `tb_sprint`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| sprintId | id | BIGINT | - | 主键 |
+| sprintNo | sprint_no | VARCHAR | ADR-0004 | 编号 SPR-YYYY-NNNN |
+| projectId | project_id | BIGINT | F3.4 | FK→tb_project.id（必填） |
+| name | name | VARCHAR | 原型 sprint modal "迭代名称" | 必填，如 "Sprint 26W21" |
+| goal | goal | VARCHAR | 原型 "目标" | 一句话目标 |
+| status | status | VARCHAR | 字典 `biz_sprint_status` | 00=计划中 01=进行中 02=已完成 03=已取消 |
+| plannedStartDate | planned_start_date | DATE | 原型 "开始日期" | 必填 |
+| plannedEndDate | planned_end_date | DATE | - | 由 plannedStartDate + durationDays 推算 |
+| actualStartDate | actual_start_date | DATE | - | 状态 00→01 时自动填（不由用户输入） |
+| actualEndDate | actual_end_date | DATE | - | 状态 01→02 时自动填 |
+| durationDays | duration_days | INT | 原型 "工期(天)" | 默认 14 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+**业务硬规则 703**: 同一 project_id 下 status='01' (进行中) 的迭代必须唯一。
+
+### §4. Task（plm-task）
+
+**领域**: 任务条目。**PRD 出处**: F3.4 / 原型 [kanban.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/kanban.html) 任务部分
+
+#### 表 `tb_task`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| taskId | id | BIGINT | - | 主键 |
+| taskNo | task_no | VARCHAR | ADR-0003 | 编号 TASK-YYYY-NNNN |
+| projectId | project_id | BIGINT | F3.4 | FK→tb_project.id（必填） |
+| requirementId | requirement_id | BIGINT | F3.4 | FK→tb_requirement.id（可空） |
+| sprintId | sprint_id | BIGINT | F3.4 | FK→tb_sprint.id（可空） |
+| title | title | VARCHAR | 原型 task modal "任务标题" | 必填 |
+| description | description | TEXT | 原型 "详细描述" | |
+| status | status | VARCHAR | 字典 `biz_task_status` | 00=待开发 01=开发中 02=代码评审 03=测试中 04=已完成 05=已取消 |
+| priority | priority | VARCHAR | 字典 `biz_task_priority` | |
+| assigneeUserId | assignee_user_id | BIGINT | 原型 "负责人" | FK→sys_user.user_id |
+| estimatedHours | estimated_hours | DECIMAL | 原型 "预估工时" | |
+| actualHours | actual_hours | DECIMAL | 原型 "实际工时" | 进入"已完成"必填 (601) |
+| mrUrl | mr_url | VARCHAR | 原型 "关联MR" | 格式 http(s)://（604 校验） |
+| mrBranch | mr_branch | VARCHAR | - | 分支名 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
 
 ### §32. MCP Server（plm-mcp）
 
@@ -130,6 +217,49 @@
 ---
 
 ## 3. 状态机汇总
+
+### §1 Project 状态机（tb_project.status）
+
+```
+0未启动 → 1进行中 / 4已取消
+1进行中 → 2暂停 / 3已完成 / 4已取消
+2暂停   → 1进行中 / 4已取消
+3已完成 (终态)
+4已取消 (终态)
+```
+非法转换 → `ServiceException(701)`。落地: [ProjectServiceImpl:33](plm-backend/plm-project/src/main/java/cn/com/bosssfot/dv/plm/project/service/impl/ProjectServiceImpl.java)。
+
+### §2 Requirement 状态机（tb_requirement.status, 4×4）
+
+```
+00待评审 → 01开发中 / 03已取消
+01开发中 → 00待评审(打回) / 02已完成 / 03已取消
+02已完成 (终态)
+03已取消 (终态)
+```
+非法转换 → `ServiceException(601)`。落地: [RequirementServiceImpl:44](plm-backend/plm-requirement/src/main/java/cn/com/bosssfot/dv/plm/requirement/service/impl/RequirementServiceImpl.java)。
+
+### §3 Sprint 状态机（tb_sprint.status, 4×4）
+
+```
+00计划中 → 01进行中 / 03已取消    [01→ 自动填 actualStartDate]
+01进行中 → 02已完成 / 03已取消    [02→ 自动填 actualEndDate]
+02已完成 (终态)
+03已取消 (终态)
+```
+非法转换 → `ServiceException(601)`。**业务硬规则 703**: 同一 project 下进行中迭代唯一。落地: [SprintServiceImpl:50](plm-backend/plm-sprint/src/main/java/cn/com/bosssfot/dv/plm/sprint/service/impl/SprintServiceImpl.java)。
+
+### §4 Task 状态机（tb_task.status, 6×6 含反向边）
+
+```
+00待开发  → 01开发中 / 05已取消
+01开发中  → 00待开发(回退) / 02代码评审 / 05已取消
+02代码评审 → 01开发中(打回) / 03测试中 / 05已取消
+03测试中  → 02代码评审(打回) / 04已完成 / 05已取消    [04→ 强制要求 actualHours]
+04已完成 (终态)
+05已取消 (终态)
+```
+非法转换 → `ServiceException(601)`。落地: [TaskServiceImpl:48](plm-backend/plm-task/src/main/java/cn/com/bosssfot/dv/plm/task/service/impl/TaskServiceImpl.java)。
 
 ### §32 MCP Server 状态机（tb_mcp_server.status）
 
@@ -271,3 +401,4 @@
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 初版；初始化 SSoT；按 Proposal 0007 加入 §32 MCP / §33 Integration |
+| 2026-05-17 | Wjl + Claude | §2 补全 §1-4 Project/Requirement/Sprint/Task 字段对照表；§3 补全 4 模块状态机；配合 Vue 前端补缺(managerUserId / projectType filter / kanban priority+assignee filter+卡片负责人 / requirement 指派人搜索)与 ServiceImpl 现代化(Map.of + enhanced switch) |
