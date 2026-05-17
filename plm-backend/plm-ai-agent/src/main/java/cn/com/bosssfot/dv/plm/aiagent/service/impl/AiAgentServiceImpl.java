@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.aiagent.domain.AiAgent;
 import cn.com.bosssfot.dv.plm.aiagent.mapper.AiAgentMapper;
 import cn.com.bosssfot.dv.plm.aiagent.service.IAiAgentService;
+import cn.com.bosssfot.dv.plm.common.dify.DifyService;
+import cn.com.bosssfot.dv.plm.common.dify.dto.DifyWorkflowResult;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -38,6 +41,7 @@ public class AiAgentServiceImpl implements IAiAgentService {
     }
 
     @Autowired private AiAgentMapper aiAgentMapper;
+    @Autowired private DifyService difyService;
 
     @Override
     public List<AiAgent> selectAiAgentList(AiAgent t) { return aiAgentMapper.selectAiAgentList(t); }
@@ -96,17 +100,43 @@ public class AiAgentServiceImpl implements IAiAgentService {
         if (!"00".equals(t.getStatus()))
             throw new ServiceException("Agent 当前状态不可调用 (需运行中)", 601);
 
+        // === 1. 走 Dify (若可用) === —— Mock 实现也实现了 DifyService 接口,所以始终非空
+        Map<String, Object> inputs = new LinkedHashMap<>();
+        inputs.put("agent_no",   t.getAgentNo());
+        inputs.put("agent_name", t.getAgentName());
+        inputs.put("agent_type", t.getAgentType());
+        inputs.put("description", t.getDescription() == null ? "" : t.getDescription());
+        inputs.put("prompt_template", t.getPromptTemplate() == null ? "" : t.getPromptTemplate());
+
+        DifyWorkflowResult result;
+        if (StringUtils.isNotBlank(t.getDifyWorkflowId())) {
+            // 优先用 Agent 上配置的 workflow_id
+            result = difyService.runWorkflow(t.getDifyWorkflowId(), inputs);
+        } else {
+            // 否则按 agent_type 走 plm.dify.workflows 兜底路由
+            result = difyService.runWorkflowByType(t.getAgentType(), inputs);
+        }
+
+        // === 2. 真实成功率统计 (移动平均) ===
         long calls = (t.getTotalCalls() == null ? 0L : t.getTotalCalls()) + 1;
         BigDecimal oldRate = t.getSuccessRate() != null ? t.getSuccessRate() : BigDecimal.ZERO;
-        // 模拟: 95% 成功率, 用移动平均更新
+        BigDecimal thisCall = result.isSuccess() ? BigDecimal.valueOf(100) : BigDecimal.ZERO;
         BigDecimal newRate = oldRate.multiply(BigDecimal.valueOf(calls - 1))
-                .add(BigDecimal.valueOf(95.0))
+                .add(thisCall)
                 .divide(BigDecimal.valueOf(calls), 2, RoundingMode.HALF_UP);
         t.setTotalCalls(calls);
         t.setSuccessRate(newRate);
         t.setLastInvokedAt(new Date());
         t.setUpdateBy("ai-agent");
         aiAgentMapper.updateAiAgent(t);
+
+        // === 3. 失败抛 708,业务层/前端按 PRD 错误码处理 ===
+        if (!result.isSuccess()) {
+            log.warn("[AiAgent#{}] Dify 调用失败: {}", t.getAgentNo(), result.getErrorMessage());
+            throw new ServiceException("AI 调用失败: " + result.getErrorMessage(), 708);
+        }
+        log.info("[AiAgent#{}] Dify 调用成功,runId={},elapsed={}s,tokens={}",
+                t.getAgentNo(), result.getWorkflowRunId(), result.getElapsedSeconds(), result.getTotalTokens());
         return aiAgentMapper.selectAiAgentById(id);
     }
 

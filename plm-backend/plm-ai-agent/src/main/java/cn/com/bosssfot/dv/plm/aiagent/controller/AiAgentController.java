@@ -11,6 +11,8 @@ import cn.com.bosssfot.dv.plm.common.annotation.Log;
 import cn.com.bosssfot.dv.plm.common.core.controller.BaseController;
 import cn.com.bosssfot.dv.plm.common.core.domain.AjaxResult;
 import cn.com.bosssfot.dv.plm.common.core.page.TableDataInfo;
+import cn.com.bosssfot.dv.plm.common.dify.DifyProperties;
+import cn.com.bosssfot.dv.plm.common.dify.DifyService;
 import cn.com.bosssfot.dv.plm.common.enums.BusinessType;
 import cn.com.bosssfot.dv.plm.common.utils.poi.ExcelUtil;
 
@@ -20,6 +22,8 @@ import cn.com.bosssfot.dv.plm.common.utils.poi.ExcelUtil;
 public class AiAgentController extends BaseController {
 
     @Autowired private IAiAgentService aiAgentService;
+    @Autowired private DifyService difyService;
+    @Autowired private DifyProperties difyProperties;
 
     @PreAuthorize("@ss.hasPermi('business:ai-agent:list')")
     @GetMapping("/list")
@@ -63,11 +67,24 @@ public class AiAgentController extends BaseController {
         return toAjax(aiAgentService.deleteAiAgentByIds(ids));
     }
 
-    /** PRD §F3.5 调用 Agent (模拟 Dify 工作流转发) */
+    /** PRD §F3.5 调用 Agent — 真调 Dify workflow (enabled=false 时降级 mock) */
     @PreAuthorize("@ss.hasPermi('business:ai-agent:edit')")
     @Log(title = "AI Agent-调用", businessType = BusinessType.OTHER)
     @PostMapping("/invoke/{id}")
     public AjaxResult invoke(@PathVariable("id") Long id) {
         return success(aiAgentService.invoke(id));
+    }
+
+    /** Dify 集成健康状态 — 运维/前端可读,不暴露 api-key */
+    @GetMapping("/dify/health")
+    public AjaxResult difyHealth() {
+        AjaxResult r = AjaxResult.success();
+        r.put("enabled",  difyProperties.isEnabled());
+        r.put("usable",   difyProperties.isUsable());
+        r.put("live",     difyService.isLive());
+        r.put("baseUrl",  difyProperties.getBaseUrl());
+        r.put("workflowsMapped", difyProperties.getWorkflows().size());
+        r.put("mode",     difyService.isLive() ? "http" : "mock");
+        return r;
     }
 }

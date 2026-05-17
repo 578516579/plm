@@ -12,6 +12,24 @@ plm:
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
+  # ==================== Dify AI 编排集成 (PRD §2.3) ====================
+  # 默认 enabled=false → 全部走 mock,本地启动零依赖、CI E2E 不抖动。
+  # 生产开启:export DIFY_ENABLED=true 且 DIFY_API_KEY=<Dify Service API Key>
+  dify:
+    enabled: ${DIFY_ENABLED:false}
+    base-url: ${DIFY_BASE_URL:https://api.dify.ai/v1}
+    api-key: ${DIFY_API_KEY:}
+    connect-timeout-ms: ${DIFY_CONNECT_TIMEOUT_MS:5000}
+    read-timeout-ms: ${DIFY_READ_TIMEOUT_MS:60000}
+    default-user: ${DIFY_DEFAULT_USER:plm-system}
+    # agent_type → workflow_id 兜底路由 (tb_ai_agent.dify_workflow_id 优先)
+    workflows:
+      requirement: ${DIFY_WF_REQUIREMENT:}
+      prd:         ${DIFY_WF_PRD:}
+      code:        ${DIFY_WF_CODE:}
+      test:        ${DIFY_WF_TEST:}
+      release:     ${DIFY_WF_RELEASE:}
+      ops:         ${DIFY_WF_OPS:}
 
 # 开发环境配置
 server:
