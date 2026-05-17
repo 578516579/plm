@@ -133,10 +133,13 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 3. PRD-align 落地走 [PRD-MAPPING.md §8 9 项 DoD](PRD-MAPPING.md)
 4. 详细硬规则见 [.claude/rules.md §M](.claude/rules.md)
 
-**实现进度速览** (详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
-- 🟢 PRD-aligned 17 个: inception / project / competitive / requirement / prd / **ued** / sprint / task / defect / testcase / document / submission / release / testplan / testreport / apidoc / manual-product
-- 🟡 空壳 13 个: arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora
+**实现进度速览** (2026-05-17 重核,详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
+- 🟢 真 PRD-aligned (§2 字段对照表 + 代码) **18 个**: inception / competitive / prd / ued / arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora
+- 🟢 早期对齐 (代码已跑通,§2 字段表待补,**字段对齐度待审计**) **12 个**: requirement / sprint / task / testcase / defect / document / testplan / submission / testreport / apidoc / manual-product / release
+- 🟡 字段表已提案 / 代码待对齐 **1 个**: project (本次 — 已发现 5 处字段 drift,PRD-MAPPING §2 已加字段表提案,代码 commit 跟进中)
 - 🔴 缺模块 0 个
+
+旧"PRD-aligned 17 + 空壳 13"统计是早期 Phase 03 末状态,已过时。空壳模块在 Phase 04 全部上线,但部分早期模块的字段未走过 §M.2 PRD-align 流程,见 [PRD-MAPPING.md §1 "审计待办"](PRD-MAPPING.md)。
 
 ## Rules & playbooks
 
