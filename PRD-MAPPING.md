@@ -47,7 +47,7 @@
 
 ## 2. 字段对照表（Domain ↔ 原型表单元素 ↔ DB 列）
 
-> 每个 PRD-aligned 模块一节。当前已填 §1-10（10 模块）+ §32-33（MCP/Integration）。其他 PRD-aligned 模块的对照表参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
+> 每个 PRD-aligned 模块一节。当前已填 §1-13（**全部 13 个 PRD-aligned 模块**）+ §32-33（MCP/Integration）。16 个空壳模块（competitive/prd/ued/arch/dbdesign/apidesign/testdata 等）的对照表暂参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
 
 ### §1. Project（plm-project）
 
@@ -299,6 +299,89 @@
 | authorUserId | author_user_id | BIGINT | - | FK→sys_user |
 | createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
 
+### §11. ApiDoc（plm-apidoc）
+
+**领域**: API 文档 — 从代码注释自动提取 + OpenAPI 规范 + 在线调试。**PRD 出处**: F5.4 / 原型 [apidoc.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/apidoc.html)
+
+#### 表 `tb_apidoc`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| apidocId | id | BIGINT | - | 主键 |
+| apidocNo | apidoc_no | VARCHAR | ADR | 编号 API-YYYY-NNNN |
+| projectId | project_id | BIGINT | F5.4 | FK→tb_project.id（必填） |
+| title | title | VARCHAR | 原型 "接口标题" | 必填 |
+| httpMethod | http_method | VARCHAR | 原型 "HTTP方法" | GET / POST / PUT / DELETE / PATCH / HEAD / OPTIONS (校验集合) |
+| path | path | VARCHAR | 原型 "接口路径" | 如 /business/xxx |
+| description | description | TEXT | 原型 "描述" | Markdown |
+| requestSchema | request_schema | TEXT | 原型 "请求 Schema" | JSON Schema |
+| responseSchema | response_schema | TEXT | 原型 "响应 Schema" | JSON Schema |
+| openapiSpec | openapi_spec | TEXT | 原型 "OpenAPI 规范" | OpenAPI 3.0 片段 |
+| sourceClass | source_class | VARCHAR | - | 源 Controller 类全限定名 |
+| sourceMethod | source_method | VARCHAR | - | 源方法名 |
+| version | version | VARCHAR | 原型 "版本" | 如 v1,必填 |
+| status | status | VARCHAR | 字典 `biz_apidoc_status` | 00=草稿 01=已发布 02=已废弃 |
+| lastSyncedAt | last_synced_at | DATETIME | - | autoExtracted='Y' 时自动填 |
+| autoExtracted | auto_extracted | CHAR(1) | - | Y/N |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+**唯一键**: (http_method, path, version) → 重复抛 701。
+
+### §12. ManualProduct（plm-manual-product）
+
+**领域**: 产品手册 — AI 一键生成 + 截图自动描述 + 多格式导出。**PRD 出处**: F5.1 / 原型 [productmanual.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/productmanual.html)
+
+#### 表 `tb_manual_product`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| manualproductId | id | BIGINT | - | 主键 |
+| manualproductNo | manualproduct_no | VARCHAR | ADR | 编号 MP-YYYY-NNNN |
+| projectId | project_id | BIGINT | F5.1 | FK→tb_project.id（必填） |
+| title | title | VARCHAR | 原型 "手册标题" | 必填 |
+| productVersion | product_version | VARCHAR | 原型 "产品版本" | 如 v1.0.0,必填 |
+| includeModules | include_modules | VARCHAR | 原型 "包含模块" | CSV 模块列表 |
+| content | content | LONGTEXT | 原型 "正文" | Markdown,AI 一键生成 |
+| screenshotsUrls | screenshots_urls | TEXT | 原型 "截图 URL 列表" | CSV/换行分隔 |
+| screenshotsCount | screenshots_count | INT | 原型 "截图数" | |
+| outputFormats | output_formats | VARCHAR | 原型 "导出格式" | word / pdf / html / h5 (CSV) |
+| aiGenerated | ai_generated | CHAR(1) | 原型 "AI 生成" | Y/N |
+| generatedAt | generated_at | DATETIME | - | 进入 02(已生成) 时自动填 |
+| status | status | VARCHAR | 字典 `biz_manualproduct_status` | 00=草稿 01=生成中 02=已生成 03=已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §13. TestReport（plm-testreport）
+
+**领域**: 测试报告 — AI 自动生成 + 上线风险评级 (绿/黄/红)。**PRD 出处**: F4.7 / 原型 [testreport.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/testreport.html)
+
+#### 表 `tb_testreport`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| testreportId | id | BIGINT | - | 主键 |
+| testreportNo | testreport_no | VARCHAR | ADR | 编号 TR-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.7 | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | F4.7 | FK→tb_sprint.id（可空） |
+| testplanId | testplan_id | BIGINT | F4.7 | FK→tb_testplan.id（可空） |
+| title | title | VARCHAR | 原型 "报告标题" | 必填 |
+| totalCases | total_cases | INT | 原型 "总用例数" | |
+| passedCases | passed_cases | INT | 原型 "通过用例" | |
+| failedCases | failed_cases | INT | 原型 "失败用例" | |
+| coverageRate | coverage_rate | DECIMAL(5,2) | 原型 "覆盖率%" | 0-100 |
+| defectSummary | defect_summary | TEXT | 原型 "缺陷摘要" | |
+| p0Defects | p0_defects | INT | 原型 "P0 缺陷数" | 严重 |
+| p1Defects | p1_defects | INT | 原型 "P1 缺陷数" | 重要 |
+| p2Defects | p2_defects | INT | 原型 "P2 缺陷数" | 一般 |
+| riskLevel | risk_level | VARCHAR | 字典 `biz_testreport_risk` | green / yellow / red (校验集合) |
+| riskEvaluation | risk_evaluation | TEXT | 原型 "风险评价" | 详细说明 |
+| recommendations | recommendations | TEXT | 原型 "改进建议" | 后续措施 |
+| aiGenerated | ai_generated | CHAR(1) | 原型 "AI 生成" | Y/N |
+| status | status | VARCHAR | 字典 `biz_testreport_status` | 00=草稿 01=审核中 02=已发布 |
+| generatedAt | generated_at | DATETIME | - | AI 生成时自动填 |
+| reviewerUserId | reviewer_user_id | BIGINT | - | FK→sys_user |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
 ### §32. MCP Server（plm-mcp）
 
 **领域**: 把 PLM 自己的业务能力（项目/需求/任务/用例/文档/数据）通过 MCP 协议暴露给外部 LLM Agent（Claude Code、Cursor、Copilot 等）。
@@ -488,6 +571,34 @@
 ```
 非法转换 → `ServiceException(701)`;testCycleDays 默认 10;aiGenerated 默认 N。落地: [TestPlanServiceImpl:37](plm-backend/plm-testplan/src/main/java/cn/com/bosssfot/dv/plm/testplan/service/impl/TestPlanServiceImpl.java)。
 
+### §11 ApiDoc 状态机（tb_apidoc.status, 3 态）
+
+```
+00草稿   → 01已发布
+01已发布 → 02已废弃
+02已废弃 (终态)
+```
+非法转换 → `ServiceException(701)`;唯一键 (http_method, path, version) 重复 → 701;httpMethod ∉ {GET/POST/PUT/DELETE/PATCH/HEAD/OPTIONS} → 604;autoExtracted='Y' 自动填 lastSyncedAt。落地: [ApiDocServiceImpl:41](plm-backend/plm-apidoc/src/main/java/cn/com/bosssfot/dv/plm/apidoc/service/impl/ApiDocServiceImpl.java)。
+
+### §12 ManualProduct 状态机（tb_manual_product.status, 4 态含反向边）
+
+```
+00草稿   → 01生成中
+01生成中 → 02已生成                                  [02 自动填 generatedAt]
+02已生成 → 00草稿(重新编辑) / 03已发布
+03已发布 (终态)
+```
+非法转换 → `ServiceException(701)`。落地: [ManualProductServiceImpl:38](plm-backend/plm-manual-product/src/main/java/cn/com/bosssfot/dv/plm/manualproduct/service/impl/ManualProductServiceImpl.java)。
+
+### §13 TestReport 状态机（tb_testreport.status, 3 态含反向边）
+
+```
+00草稿   → 01审核中
+01审核中 → 00草稿(打回) / 02已发布
+02已发布 (终态)
+```
+非法转换 → `ServiceException(701)`;riskLevel ∉ {green, yellow, red} → 604;AI 生成时自动填 generatedAt。落地: [TestReportServiceImpl:39](plm-backend/plm-testreport/src/main/java/cn/com/bosssfot/dv/plm/testreport/service/impl/TestReportServiceImpl.java)。
+
 ### §32 MCP Server 状态机（tb_mcp_server.status）
 
 ```
@@ -631,3 +742,4 @@
 | 2026-05-17 | Wjl + Claude | §2 补全 §1-4 Project/Requirement/Sprint/Task 字段对照表；§3 补全 4 模块状态机；配合 Vue 前端补缺(managerUserId / projectType filter / kanban priority+assignee filter+卡片负责人 / requirement 指派人搜索)与 ServiceImpl 现代化(Map.of + enhanced switch) |
 | 2026-05-17 | Wjl + Claude | 第二批: §2 补 §5 Defect / §6 TestCase / §7 Document 字段对照表;§3 补 3 模块状态机;Vue 解锁(Defect 报告人+指派人搜索 / TestCase 需求ID 搜索 / Document 关联类型+ID+作者+审核人 4 项搜索) + 后端 Document Mapper 加 reviewerUserId 过滤;3 个 ServiceImpl 现代化同样模式 |
 | 2026-05-18 | Wjl + Claude | 第三批: §2 补 §8 Submission / §9 Release / §10 TestPlan 字段对照表(含 AI 门禁 4 项 / DORA 4 指标);§3 补 3 模块状态机(含 04→00 反向+回滚必填);3 个 Vue 由空壳 stub(11 行)重写为完整 CRUD ~280 行均;3 个 TS types 由 5 字段扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式 |
+| 2026-05-18 | Wjl + Claude | **第四批: 全部 13 个 PRD-aligned 模块字段对照表/状态机完工!** §2 补 §11 ApiDoc / §12 ManualProduct / §13 TestReport(含 OpenAPI Schema / 截图/导出格式 / 风险评级+缺陷统计);§3 补 3 模块状态机(ApiDoc 3 态+唯一键 / ManualProduct 4 态含 02→00 反向 / TestReport 3 态含 01→00 反向);3 个 Vue 由 stub 重写为完整 CRUD ~300+ 行;3 个 TS types 扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式。**10 个 ServiceImpl 全部完成现代化收尾**。 |
