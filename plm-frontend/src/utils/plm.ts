@@ -114,7 +114,7 @@ export function selectDictLabels(datas: any, value: any, separator?: string): st
 
 // 字符串格式化(%s )
 export function sprintf(str: string, ...args: any[]): string {
-  let flag = true, i = 1
+  let flag = true, i = 0
   str = str.replace(/%s/g, function () {
     const arg = args[i++]
     if (typeof arg === 'undefined') {
