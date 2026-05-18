@@ -146,15 +146,25 @@
 - `01-立项/README.md` / `02-设计/README.md` / `04-测试/README.md` / `05-上线/README.md` / `06-运营/README.md` / `99-跨阶段/README.md`
 - 03-开发/README.md 既有,不动
 
-### PRD 实质化分层
+### PRD 实质化分层 (2026-05-17 末次更新)
 
 | 层级 | 行数范围 | 数量 | 模块 |
 |---|---|---|---|
-| 完整实质 | 170+ | **3** | Project (既有 v0.1.0 范本) / Inception (本会话 commit `bd63cd8`,166 行,F1.1 范本) / Requirement (本会话 commit `f20b4a5`,175 行,ADR-A 上下文) |
-| 半实质 (v1.1) | 110-130 | **28** | 其余全部模块,本会话 commit `ae40ae1` 由 Agent 用 Inception/Requirement 范本批量提质 |
+| **完整实质** | 150-185 | **9** | Project (既有) + Inception/Requirement (commit bd63cd8/f20b4a5) + Defect/Sprint/Task (commit 17187e3) + Competitive/Submission/TestCase (commit 3326a54) |
+| 半实质 (v1.1) | 110-130 | **22** | 其余模块,Agent 批量提质 (commit ae40ae1) |
 | 骨架 (v1.0) | 50 | **0** 🎉 | — |
 
-**31/31 模块 PRD 全部至少半实质级**。半实质级**头部/字段/状态机/AI/验收/关联文档**已结构填充,**业务深度段落(痛点/目标/场景/OOS)留 `<待人工填写>` 占位**(因 Agent 难产业务深度内容)。
+**31/31 模块 PRD 全部至少半实质级,9 个核心模块达完整实质级**。
+
+**9 个完整实质 PRD 的 6 大功能域覆盖**:
+- 立项域 (3/3): **Inception** / **Project** / **Competitive**
+- 设计域 (1/3): **Requirement** (PRD/Ued 留半实质)
+- 研发域 (2/7): **Sprint** / **Task** (Arch/DbDesign/ApiDesign/AiAgent/Openspec 留半实质)
+- 质量域 (3/7): **Defect** / **Submission** / **TestCase** (TestPlan/TestData/AutoTest/TestReport 留半实质)
+- 文档域 (0/5): 全留半实质
+- 效能/DevOps (0/6): 全留半实质
+
+半实质级**头部/字段/状态机/AI/验收/关联文档**已结构填充,**业务深度段落(痛点/目标/场景/OOS)留 `<待人工填写>` 占位**(因 Agent 难产业务深度内容)。
 
 ### 本日骨架累计
 
