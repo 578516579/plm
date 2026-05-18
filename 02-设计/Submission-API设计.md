@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/submission/{id}/transit` | `business:submission:edit` | 状态机推进 (00→01→{02,04} / 02→{03,04} / 04→00 反向),违反抛 601;进入 04 必填 reject_reason(602);进入 03 必 quality_gate_passed=Y(708) |
+| POST | `/business/submission/{id}/quality-gate` | `business:submission:edit` | 质量门禁评估 (服务端重算:单测覆盖率≥60 ∧ codeScanPassed ∧ prdCompleted ∧ apiDocUpdated → quality_gate_passed='Y'/'N',不接受前端写入) |
+| POST | `/business/submission/{id}/approve` | `business:submission:edit` | 测试经理审批通过 (02→03,自动填 approved_at) |
+| POST | `/business/submission/{id}/reject` | `business:submission:edit` | 退回 (转 04,必填 reject_reason,反向边 04→00 重写) |

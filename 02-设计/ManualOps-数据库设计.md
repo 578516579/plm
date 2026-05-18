@@ -22,11 +22,35 @@
 详见 SQL 文件 `PRIMARY KEY` / `UNIQUE KEY` / `KEY` 定义。
 
 ## 4. 关系图 (ER)
-<待人工填写>:简单 mermaid ER 图,标注 FK 关联
+
+```mermaid
+erDiagram
+    sys_user ||--o{ tb_manual_ops : "author"
+    sys_dict_data ||--o{ tb_manual_ops : "monitoring/alert/iot/status"
+    tb_project ||--o{ tb_manual_ops : "belongs_to"
+    tb_manual_ops {
+        bigint manualops_id PK
+        varchar manualops_no UK "OM-YYYY-NNNN"
+        bigint project_id FK
+        varchar title
+        varchar monitoring_plan "字典 biz_manualops_monitoring"
+        varchar alert_channels "CSV"
+        varchar iot_device_types "CSV"
+        longtext content "Markdown"
+        varchar output_formats "CSV"
+        char ai_generated "Y/N"
+        datetime generated_at
+        varchar status "字典 biz_manualops_status 4态"
+        bigint author_user_id FK
+        datetime create_time
+        char del_flag "0/2"
+    }
+```
 
 ## 5. 数据迁移
 dev 环境:`mysql plm < sql/business-manual-ops-rollback.sql && mysql plm < sql/business-manual-ops.sql`。
 生产部署:留 v1.0 GA 前补。
 
 ## 6. 容量预估
-<待人工填写>
+
+**分级**: 小规模(文档类)。按 5 个项目 × 3 运维手册版本/项目 = 15 行/年估算,5 年累计 < 100 行,表大小 < 50 MB。`content` LONGTEXT 单行 30-80KB(含 IoT 巡检 SLA + 应急预案 Markdown)。无需分区。

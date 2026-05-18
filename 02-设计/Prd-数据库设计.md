@@ -22,11 +22,37 @@
 详见 SQL 文件 `PRIMARY KEY` / `UNIQUE KEY` / `KEY` 定义。
 
 ## 4. 关系图 (ER)
-<待人工填写>:简单 mermaid ER 图,标注 FK 关联
+
+```mermaid
+erDiagram
+    sys_user ||--o{ tb_prd : "author / reviewer"
+    sys_dict_data ||--o{ tb_prd : "scene/target_user/status"
+    tb_project ||--o{ tb_prd : "belongs_to"
+    tb_prd {
+        bigint prd_id PK
+        varchar prd_no UK "PRD-YYYY-NNNN"
+        bigint project_id FK
+        varchar title "功能名称"
+        text description
+        varchar scene_template "字典 biz_prd_scene"
+        varchar target_user "字典 biz_prd_target_user"
+        longtext content "AI 7 段 Markdown"
+        decimal completeness_score "0-100"
+        varchar version "v1.0"
+        char ai_generated "Y/N"
+        datetime ai_generated_at
+        varchar status "字典 biz_prd_status 4态"
+        bigint author_user_id FK
+        bigint reviewer_user_id FK
+        datetime create_time
+        char del_flag "0/2"
+    }
+```
 
 ## 5. 数据迁移
 dev 环境:`mysql plm < sql/business-prd-rollback.sql && mysql plm < sql/business-prd.sql`。
 生产部署:留 v1.0 GA 前补。
 
 ## 6. 容量预估
-<待人工填写>
+
+**分级**: 小规模(立项类)。按 5 个项目 × 20 PRD/项目 = 100 行/年估算,5 年累计 < 1 万行,表大小 < 100 MB。`content` LONGTEXT 单行平均 20-50KB,`completeness_score` 派生字段无需独立索引。无需分区。

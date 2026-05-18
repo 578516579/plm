@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/prd/{id}/transit` | `business:prd:edit` | 状态机推进 (00→01→{00,02} `02→{03}`),含 01→00 评审打回反向边 |
+| POST | `/business/prd/ai/generate/{id}` | `business:prd:edit` | AI PRD 生成 (调用 §6 `prd-generation-flow`,7 段 Markdown + `completeness_score`,本期 mock 固定 85.0) |
+| GET  | `/business/prd/{id}/diff?against=v0.9` | `business:prd:query` | 与历史版本对比 (基于 `version` 字段,返回 Markdown diff) |
+| GET  | `/business/prd/export-template` | `business:prd:export` | 导出 Excel PRD 模板 |

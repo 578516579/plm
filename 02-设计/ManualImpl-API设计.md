@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/manual-impl/{id}/transit` | `business:manual-impl:edit` | 状态机推进 (00→01→02→{00,03} 含反向边 02→00 重新草稿) |
+| POST | `/business/manual-impl/ai/generate/{id}` | `business:manual-impl:edit` | AI 生成实施手册 (调用 §6 `impl-manual-flow`,按 `deploy_mode` + `os_type` + `db_type` 三维度生成 5 章节 Markdown) |
+| GET  | `/business/manual-impl/{id}/export?format=pdf` | `business:manual-impl:export` | 导出实施手册 (支持 word/pdf/html/markdown 四格式) |
+| GET  | `/business/manual-impl/{id}/versions` | `business:manual-impl:query` | 取手册历史版本列表 |

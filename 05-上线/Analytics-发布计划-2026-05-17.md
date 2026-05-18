@@ -23,7 +23,37 @@ Analytics 模块 v1.0 — 字段 + 状态机 + API + 字典 + 菜单全部就绪
 - 菜单/字典:rollback SQL 自动清理
 
 ## 4. 监控
-<待人工填写>:监控点 / 告警阈值 / 日志关键字
+
+### 4.1 监控点 (3 维)
+
+| 维度 | 指标 | 数据源 | 健康阈值 |
+|---|---|---|---|
+| **业务** | `tb_analytics` 日新增行数 | MySQL count(create_time>=今日) | 中模块 50-500 / 日 |
+| **业务** | 数据快照生成延迟 (job_finished_time - job_start_time) | 调度日志 | < 15 分钟 |
+| **业务** | 快照生成失败数 | 应用日志 + Prometheus | ≤ 3 / 日 |
+| **接口** | `/business/analytics/*` 错误率 | Spring Actuator + Prometheus | 错误率 ≤ 1% |
+| **接口** | `/business/analytics/list` P95 响应时间 | APM | < 1000 ms |
+| **接口** | `/business/analytics/query` 聚合 P95 | APM | < 3000 ms |
+| **资源** | tb_analytics 表 size 增长率 | MySQL information_schema | 月增 < 20% |
+
+### 4.2 告警阈值
+
+| 等级 | 触发条件 | 通知渠道 | 处理 SLA |
+|---|---|---|---|
+| P0 | 接口 5xx 持续 > 5 分钟 | PagerDuty + 飞书 | 30 分钟响应 |
+| P1 | 快照生成延迟 > 30 分钟 | 飞书 | 2 小时响应 |
+| P1 | 快照生成失败数 > 5 / 天 | 飞书 | 工作日响应 |
+| P1 | 列表查询 P95 > 3s 连续 10 分钟 | 飞书 | 2 小时响应 |
+| P2 | 表行数月增 > 50% (异常增长) | 邮件 | 工作日响应 |
+
+### 4.3 日志关键字
+
+后端 Logback 输出, ELK / Loki 索引:
+- `ERROR.*AnalyticsService` — Service 层异常
+- `WARN.*AnalyticsController.*RejectedException` — 业务规则拒绝
+- `INFO.*Analytics.*snapshot-generate` — 快照生成审计 (含开始 / 结束 / 数据量)
+- `ERROR.*Analytics.*snapshot-failed` — 快照生成失败
+- `WARN.*Analytics.*deadlock` — MySQL 死锁
 
 ## 5. Changelog
 追加到 [Changelog.md](Changelog.md) - Analytics 模块 v1.0 上线 (2026-05-17)

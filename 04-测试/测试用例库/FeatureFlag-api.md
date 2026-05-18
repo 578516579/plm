@@ -13,16 +13,16 @@
 
 | 用例 ID | 接口 | 入参 | 期望响应 | 验证 | 状态 |
 |---|---|---|---|---|---|
-| TC-FeatureFlag-API-001 | GET /business/feature-flag/list | (none) | code=200, rows=[] | 路由 + 权限 | <待补> |
-| TC-FeatureFlag-API-002 | GET /business/feature-flag/list?pageSize=10 | pageSize | code=200, rows ≤ 10 | 分页 | <待补> |
-| TC-FeatureFlag-API-003 | POST /business/feature-flag | 完整必填字段 | code=200 + 自动编号 | 新建 | <待补> |
-| TC-FeatureFlag-API-004 | POST /business/feature-flag | (缺必填) | code=602 | 必填校验 | <待补> |
-| TC-FeatureFlag-API-005 | POST /business/feature-flag | (非字典值) | code=604 | 白名单 | <待补> |
-| TC-FeatureFlag-API-006 | GET /business/feature-flag/{id} | id=1 | code=200, data={..} | 详情 | <待补> |
-| TC-FeatureFlag-API-007 | PUT /business/feature-flag | { id, status: 合法 } | code=200 | 状态机 | <待补> |
-| TC-FeatureFlag-API-008 | PUT /business/feature-flag | { id, status: 非法 } | code=601 | 状态机非法 | <待补> |
-| TC-FeatureFlag-API-009 | DELETE /business/feature-flag/{ids} | path ids CSV | code=200 | 逻辑删除 | <待补> |
-| TC-FeatureFlag-API-010 | * 端点 + 无 token | — | code=401 | 鉴权 | <待补> |
+| TC-FeatureFlag-API-001 | GET /business/feature-flag/list | (none) | code=200, rows=[] | 路由 + 权限 | 待执行 |
+| TC-FeatureFlag-API-002 | GET /business/feature-flag/list?pageSize=10 | pageSize | code=200, rows ≤ 10 | 分页 | 待执行 |
+| TC-FeatureFlag-API-003 | POST /business/feature-flag | 完整必填字段 | code=200 + 自动编号 | 新建 | 待执行 |
+| TC-FeatureFlag-API-004 | POST /business/feature-flag | (缺必填) | code=602 | 必填校验 | 待执行 |
+| TC-FeatureFlag-API-005 | POST /business/feature-flag | (非字典值) | code=604 | 白名单 | 待执行 |
+| TC-FeatureFlag-API-006 | GET /business/feature-flag/{id} | id=1 | code=200, data={..} | 详情 | 待执行 |
+| TC-FeatureFlag-API-007 | PUT /business/feature-flag | { id, status: 合法 } | code=200 | 状态机 | 待执行 |
+| TC-FeatureFlag-API-008 | PUT /business/feature-flag | { id, status: 非法 } | code=601 | 状态机非法 | 待执行 |
+| TC-FeatureFlag-API-009 | DELETE /business/feature-flag/{ids} | path ids CSV | code=200 | 逻辑删除 | 待执行 |
+| TC-FeatureFlag-API-010 | * 端点 + 无 token | — | code=401 | 鉴权 | 待执行 |
 
 ## 权限拦截
 

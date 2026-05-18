@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/testplan/{id}/transit` | `business:testplan:edit` | 状态机推进 (00→01→02→03 单向) |
+| POST | `/business/testplan/ai/generate` | `business:testplan:edit` | AI 测试方案生成 (调用 §6 `test-plan-flow`,生成 strategy/tools_recommended/resources_plan/risk_assessment 4 字段) |
+| GET  | `/business/testplan/{id}/cases` | `business:testplan:query` | 取关联测试用例列表 (跨模块查询 tb_testcase WHERE testplan_id=?) |
+| POST | `/business/testplan/{id}/cases/bind` | `business:testplan:edit` | 批量挂载用例到方案 (接受 testcaseIds 数组) |

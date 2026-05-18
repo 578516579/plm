@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/ued/{id}/transit` | `business:ued:edit` | 状态机推进 (00→01→{00,02} 含反向边 / `02→{03}`) |
+| POST | `/business/ued/ai/review/{id}` | `business:ued:edit` | AI 设计评审 (调用 §6 `ued-review-flow`,生成 `review_report` + `review_score` + `compliance_check`) |
+| POST | `/business/ued/{id}/figma-sync` | `business:ued:edit` | 从 Figma 同步设计稿 (按 `figma_file_key` 调用 Figma MCP,更新 `preview_url` + `annotation_content`) |
+| GET  | `/business/ued/{id}/versions` | `business:ued:query` | 取设计稿历史版本列表 |

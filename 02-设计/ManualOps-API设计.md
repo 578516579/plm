@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/manual-ops/{id}/transit` | `business:manual-ops:edit` | 状态机推进 (00→01→02→{00,03} 含反向边 02→00) |
+| POST | `/business/manual-ops/ai/generate/{id}` | `business:manual-ops:edit` | AI 生成运维手册 (调用 §6 `ops-manual-flow`,按 `monitoring_plan` + `alert_channels` + `iot_device_types` 生成 5 章节含 IoT 巡检 SLA) |
+| GET  | `/business/manual-ops/{id}/export?format=pdf` | `business:manual-ops:export` | 导出运维手册 (支持 word/pdf/html/markdown) |
+| GET  | `/business/manual-ops/{id}/versions` | `business:manual-ops:query` | 取手册历史版本列表 |

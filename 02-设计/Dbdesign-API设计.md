@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/dbdesign/{id}/transit` | `business:dbdesign:edit` | 状态机推进 (00→01→{00,02} 含反向边 / `02→{03}`),违反抛 601 |
+| POST | `/business/dbdesign/ai/generate/{id}` | `business:dbdesign:edit` | AI 数据库设计生成 (调用 §6 `db-design-flow`,本期 mock 返回 ER + 数据字典 + DDL 模板) |
+| POST | `/business/dbdesign/{id}/validate` | `business:dbdesign:edit` | DDL 规范校验 (命名/索引/范式),回写 `normalization_check` JSON |
+| GET  | `/business/dbdesign/{id}/ddl-export?format=sql` | `business:dbdesign:export` | 导出 DDL 脚本 (.sql 文件) |

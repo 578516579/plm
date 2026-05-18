@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| GET  | `/business/dashboard/aggregate?ownerUserId={uid}` | `business:dashboard:query` | 聚合查询 6 类 widget 数据 (stats / activeProjects / myTodos / qualitySnapshot / aiMetrics / lifecycle),默认刷新间隔 60 秒 |
+| PUT  | `/business/dashboard/{id}/config` | `business:dashboard:edit` | 更新 widget 配置 (`widget_types` CSV / `layout_json` / `refresh_interval`) |
+| POST | `/business/dashboard/{id}/set-default` | `business:dashboard:edit` | 设为默认工作台 (置 `is_default='Y'`,Service 自动清同 owner 其他默认) |
+| GET  | `/business/dashboard/realtime?ownerUserId={uid}` | `business:dashboard:query` | 实时数据流 (SSE / WebSocket 长连接,推送 widget 增量更新) |

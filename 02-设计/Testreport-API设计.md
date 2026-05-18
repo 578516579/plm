@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/testreport/{id}/transit` | `business:testreport:edit` | 状态机推进 (00→01→{00,02} 含反向边 01→00 审核打回) |
+| POST | `/business/testreport/ai/generate` | `business:testreport:edit` | AI 测试报告生成 (调用 §6 `test-report-flow`,输入 testplan_id + 缺陷统计,生成 title/defect_summary/risk_evaluation/recommendations/risk_level) |
+| GET  | `/business/testreport/{id}/export-pdf` | `business:testreport:export` | 导出 PDF (含 KPI 仪表盘 + 缺陷分布饼图 + 风险评估章节) |
+| POST | `/business/testreport/{id}/approve` | `business:testreport:edit` | 审核通过 (01→02 已发布) |

@@ -31,4 +31,11 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/competitive/{id}/transit` | `business:competitive:edit` | 状态机推进 (00→01→02 单向),违反抛 601 |
+| POST | `/business/competitive/ai/analyze/{id}` | `business:competitive:edit` | AI 综合分析 (调用 §6 `competitive-analysis-flow`,生成 SWOT 四字段 + `ai_analysis_report`) |
+| POST | `/business/competitive/{id}/monitor/subscribe` | `business:competitive:edit` | 订阅竞品动态推送 (置 `monitor_enabled=Y`,接受 `monitor_keywords` CSV) |
+| GET  | `/business/competitive/{id}/feature-matrix` | `business:competitive:query` | 取 12 维度功能对比矩阵 JSON |
+| GET  | `/business/competitive/export-template` | `business:competitive:export` | 导出 Excel 竞品分析模板 |

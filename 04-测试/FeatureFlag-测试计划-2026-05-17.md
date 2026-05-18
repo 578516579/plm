@@ -14,9 +14,9 @@
 - 状态机覆盖: 见 [PRD-MAPPING.md §3](../PRD-MAPPING.md) `feature-flag` 行,合法 + 非法转换全覆盖
 
 ## 2. 测试用例库
-- [FeatureFlag-functional.md](测试用例库/FeatureFlag-functional.md) <待人工填写>
-- [FeatureFlag-api.md](测试用例库/FeatureFlag-api.md) <待人工填写>
-- [FeatureFlag-e2e.md](测试用例库/FeatureFlag-e2e.md) <待人工填写>
+- [FeatureFlag-functional.md](测试用例库/FeatureFlag-functional.md) — 功能用例 (用户视角:做什么 + 预期),覆盖 CRUD 主流程 + 状态机推进 + 必填校验
+- [FeatureFlag-api.md](测试用例库/FeatureFlag-api.md) — 接口契约用例 (HTTP code + JSON 字段),覆盖 6 标准 CRUD + 状态机/AI 等特殊端点 + 错误码 601/602/604/702
+- [FeatureFlag-e2e.md](测试用例库/FeatureFlag-e2e.md) — Playwright 端到端,覆盖菜单访问 + 列表分页 + 新增编辑表单 + 角色权限 + 关键状态机
 
 ## 3. 通过标准
 - mvn test 单测全绿
@@ -27,4 +27,11 @@
 fixtures 见 [plm-frontend/e2e/helpers/fixtures.ts](../plm-frontend/e2e/helpers/fixtures.ts) 或 fixtures-feature-flag.ts。
 
 ## 5. 风险
-<待人工填写>
+
+| 等级 | 风险 | 缓解 |
+|---|---|---|
+| P0 | 误触发生产环境部署 / 发布 / Flag 切换造成线上事故 | 二级审批 + dry-run 模式 + 灰度 canary 分阶段切流 + 自动回滚阈值 |
+| P0 | 回滚失败 (流水线已成功 commit / Flag 已切但回滚脚本失败) | 部署前自动快照 + 回滚 playbook 演练 + DB migration 双写双读 |
+| P1 | 状态机非法转换 (pending → running 跳过 approved) | Service 单测覆盖合法+非法 + transitTo() 白名单 + 返 601 |
+| P1 | FK 级联 (删除 Pipeline 时关联 Release 未处理) | 软删 del_flag + E2E 覆盖删除 + DBA review FK |
+| P2 | 高频列表性能 (流水线运行历史 N≥10000) | 分页 + 按时间倒排索引 + 归档冷数据 |

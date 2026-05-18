@@ -31,4 +31,11 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/pipeline/{id}/transit` | `business:pipeline:edit` | 状态机推进 (00↔01 启用/停用),cron 触发未填 cron_expr 抛 602 |
+| POST | `/business/pipeline/{id}/trigger` | `business:pipeline:edit` | 手动触发流水线 (异步执行,85% 成功率模型,自动累加 `total_runs`/`success_count` + 重算 `success_rate`,回写 `last_run_status`/`last_run_at`) |
+| POST | `/business/pipeline/{id}/cancel` | `business:pipeline:edit` | 取消正在运行的流水线 (置 `last_run_status='cancelled'`) |
+| GET  | `/business/pipeline/{id}/runs?limit=20` | `business:pipeline:query` | 取最近 N 次运行历史 (从 tb_pipeline_run 子表) |
+| GET  | `/business/pipeline/{id}/yaml` | `business:pipeline:query` | 取流水线 YAML 定义 (`yaml_content`) |

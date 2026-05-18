@@ -23,10 +23,10 @@ npm run test:e2e                          # 全套
 
 | 场景 | E2E 测试名 | 状态 |
 |---|---|---|
-| CRUD + 编号自动生成 | TC-Testreport-F001 | <待补> |
-| 字段校验 (必填 / 白名单 / FK) | TC-Testreport-F002~003 | <待补> |
-| 状态机合法 / 非法转换 | TC-Testreport-F004~005 | <待补> |
-| 终态保护 | TC-Testreport-F006 | <待补> |
+| CRUD + 编号自动生成 | TC-Testreport-F001 | 待执行 |
+| 字段校验 (必填 / 白名单 / FK) | TC-Testreport-F002~003 | 待执行 |
+| 状态机合法 / 非法转换 | TC-Testreport-F004~005 | 待执行 |
+| 终态保护 | TC-Testreport-F006 | 待执行 |
 
 ## 前置依赖
 
@@ -37,4 +37,4 @@ npm run test:e2e                          # 全套
 
 ## 已知问题
 
-<待人工填写>:运行时发现的 flaky / 跨平台问题
+首轮执行后回填。预计可能遇到的 flaky 类型: Playwright 等待时机 (network idle) / 字典加载竞态 / Chrome vs Edge 渲染差异。

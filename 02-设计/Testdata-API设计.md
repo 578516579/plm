@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/testdata/{id}/transit` | `business:testdata:edit` | 状态机推进 (00→01→02 单向终态),违反抛 601 |
+| POST | `/business/testdata/{id}/generate` | `business:testdata:edit` | 触发数据生成 (调用 §6 `data-gen-flow`,按 `field_semantics` + 4 规则生成 `generated_count` 条数据写入 `generated_content`) |
+| POST | `/business/testdata/{id}/cleanup` | `business:testdata:remove` | 清理生成数据 (清空 `generated_content`,保留元数据,用于循环复用数据集) |
+| GET  | `/business/testdata/{id}/download?format=csv` | `business:testdata:export` | 下载生成数据 (支持 json/sql/csv 三种 `output_format`) |

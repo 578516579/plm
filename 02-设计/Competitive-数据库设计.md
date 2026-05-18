@@ -22,11 +22,43 @@
 详见 SQL 文件 `PRIMARY KEY` / `UNIQUE KEY` / `KEY` 定义。
 
 ## 4. 关系图 (ER)
-<待人工填写>:简单 mermaid ER 图,标注 FK 关联
+
+```mermaid
+erDiagram
+    sys_user ||--o{ tb_competitive : "author"
+    sys_dict_data ||--o{ tb_competitive : "tier/status"
+    tb_project ||--o{ tb_competitive : "belongs_to"
+    tb_competitive {
+        bigint competitive_id PK
+        varchar competitive_no UK "COMP-YYYY-NNNN"
+        bigint project_id FK
+        varchar competitor_name "竞品名称"
+        varchar vendor
+        varchar website
+        varchar pricing_model
+        varchar pricing_tier "字典 biz_competitive_tier"
+        text feature_matrix "12 维度 JSON"
+        text strengths
+        text weaknesses
+        text opportunities
+        text threats
+        longtext ai_analysis_report
+        char ai_generated "Y/N"
+        datetime ai_generated_at
+        char monitor_enabled "Y/N"
+        varchar monitor_keywords "CSV"
+        datetime last_monitored_at
+        varchar status "字典 biz_competitive_status 3态"
+        bigint author_user_id FK
+        datetime create_time
+        char del_flag "0/2"
+    }
+```
 
 ## 5. 数据迁移
 dev 环境:`mysql plm < sql/business-competitive-rollback.sql && mysql plm < sql/business-competitive.sql`。
 生产部署:留 v1.0 GA 前补。
 
 ## 6. 容量预估
-<待人工填写>
+
+**分级**: 小规模(立项类)。按 5 个项目 × 10 竞品/项目 = 50 行/年估算,5 年累计 < 1 万行,表大小 < 100 MB。`ai_analysis_report` LONGTEXT 单行 10-30KB,`feature_matrix`/SWOT 4 字段各 ~1KB。无需分区,单表索引页面 < 50。

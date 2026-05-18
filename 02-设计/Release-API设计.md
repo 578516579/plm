@@ -31,4 +31,11 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/release/{id}/transit` | `business:release:edit` | 状态机推进 (5 态:00→{01,04} / 01→{02,03} / 02→{03,04} / 03→{04}),违反抛 601 |
+| POST | `/business/release/{id}/execute` | `business:release:edit` | 执行发布 (按 `strategy` 触发蓝绿/金丝雀/滚动/直接替换,异步,转 status='01 发布中',成功后置 '02 已发布' + 回写 `released_at`) |
+| POST | `/business/release/{id}/rollback` | `business:release:edit` | 回滚发布 (必填 `rollback_reason`,转 status='03 已回滚',回写 `rollback_at`,违反 602) |
+| POST | `/business/release/{id}/ai-review` | `business:release:edit` | AI 发布评审 (基于代码变更 + 测试报告生成 `ai_review_score` + `ai_review_notes`,direct_replace 策略且 score<7 时强阻断) |
+| GET  | `/business/release/{id}/dora-metrics` | `business:release:query` | 取本次发布的 DORA 4 指标快照 |

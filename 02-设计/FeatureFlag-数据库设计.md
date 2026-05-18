@@ -22,11 +22,34 @@
 详见 SQL 文件 `PRIMARY KEY` / `UNIQUE KEY` / `KEY` 定义。
 
 ## 4. 关系图 (ER)
-<待人工填写>:简单 mermaid ER 图,标注 FK 关联
+
+```mermaid
+erDiagram
+    sys_user ||--o{ tb_feature_flag : "author"
+    sys_dict_data ||--o{ tb_feature_flag : "env/strategy/status"
+    tb_feature_flag {
+        bigint flag_id PK
+        varchar flag_no UK "FF-YYYY-NNNN"
+        varchar flag_key "snake_case"
+        varchar title
+        varchar description
+        varchar environment "test/staging/prod"
+        int rollout_percentage "0-100"
+        varchar rollout_strategy "all_on/canary/all_off"
+        varchar target_user_segment "CSV"
+        varchar status "字典 biz_ff_status 2态"
+        bigint author_user_id FK
+        datetime create_time
+        char del_flag "0/2"
+    }
+```
+
+**唯一键**: `UNIQUE(flag_key, environment)` — 同 Flag Key + 同环境禁重复 (701)。
 
 ## 5. 数据迁移
 dev 环境:`mysql plm < sql/business-feature-flag-rollback.sql && mysql plm < sql/business-feature-flag.sql`。
 生产部署:留 v1.0 GA 前补。
 
 ## 6. 容量预估
-<待人工填写>
+
+**分级**: 小规模(配置类)。按 50 个 Flag × 3 环境 = 150 行总量,5 年累计 < 500 行(Flag 通常长期存活),表大小 < 10 MB。`/check` 端点高频读(每 API 请求一次),需 (flag_key, environment) 复合索引覆盖。无需分区。

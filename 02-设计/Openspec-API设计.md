@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/openspec/{id}/transit` | `business:openspec:edit` | 状态机推进 (00→01→02 单向终态),违反抛 601 |
+| POST | `/business/openspec/ai/generate/{id}` | `business:openspec:edit` | AI 生成规范 (调用 §6 `openspec-gen-flow`,按 `spec_type` 生成 OpenAPI 3.1 / AsyncAPI 3.0 / AI Function / GraphQL 骨架,含 AgriKB x-agrikb-ref) |
+| POST | `/business/openspec/{id}/validate` | `business:openspec:edit` | 校验规范合法性 (按 `spec_type` 调用对应 validator,返回违规清单 JSON) |
+| GET  | `/business/openspec/{id}/render?format=yaml` | `business:openspec:export` | 导出渲染后规范文件 (支持 yaml/json) |

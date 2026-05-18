@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/dora/{id}/transit` | `business:dora:edit` | 状态机推进 (00→01→02 单向终态),违反抛 601 |
+| POST | `/business/dora/refresh` | `business:dora:edit` | 快照刷新 (按 `metric_type` × `period_type` 聚合 tb_release / tb_pipeline 数据,自动创建新行 status=00) |
+| POST | `/business/dora/ai/suggest/{id}` | `business:dora:edit` | AI DORA 改进建议 (调用 §6 `dora-suggest-flow`,生成 Elite/High/Medium/Low 评估 + 农情专项建议) |
+| GET  | `/business/dora/trend?metric=deploy_freq&periodType=month` | `business:dora:query` | 取趋势曲线 + 热力图 + lead-time 拆解 JSON (`trend_chart_json`/`heatmap_json`/`leadtime_breakdown`) |

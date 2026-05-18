@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/apidesign/{id}/transit` | `business:apidesign:edit` | 状态机推进 (00→01→{00,02} 含反向边 / `02→{03}`),违反抛 601 |
+| POST | `/business/apidesign/ai/generate/{id}` | `business:apidesign:edit` | AI 接口设计生成 (调用 §6 `detail-design-flow`,本期 mock 返回 OpenAPI YAML + Mock 响应) |
+| POST | `/business/apidesign/{id}/mock/toggle` | `business:apidesign:edit` | 开关 Mock 服务 (置 `mock_enabled='Y'/'N'`,接受 `mock_response` JSON) |
+| GET  | `/business/apidesign/{id}/openapi.yaml` | `business:apidesign:export` | 导出 OpenAPI 3.0 YAML 文件 |

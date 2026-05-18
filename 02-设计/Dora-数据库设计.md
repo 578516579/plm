@@ -22,11 +22,39 @@
 详见 SQL 文件 `PRIMARY KEY` / `UNIQUE KEY` / `KEY` 定义。
 
 ## 4. 关系图 (ER)
-<待人工填写>:简单 mermaid ER 图,标注 FK 关联
+
+```mermaid
+erDiagram
+    sys_user ||--o{ tb_dora_metric : "author"
+    sys_dict_data ||--o{ tb_dora_metric : "type/period/status"
+    tb_project ||--o{ tb_dora_metric : "optional (NULL=全局)"
+    tb_dora_metric {
+        bigint dora_id PK
+        varchar dora_no UK "DORA-YYYY-NNNN"
+        bigint project_id FK "可空=全局"
+        varchar metric_name
+        varchar metric_type "deploy_freq/lead_time/mttr/change_fail_rate"
+        decimal metric_value
+        varchar metric_unit
+        varchar period_type "month/quarter"
+        date snapshot_date
+        longtext trend_chart_json
+        longtext heatmap_json
+        longtext leadtime_breakdown
+        longtext ai_suggestions
+        char ai_generated "Y/N"
+        datetime ai_generated_at
+        varchar status "字典 biz_dora_status 3态"
+        bigint author_user_id FK
+        datetime create_time
+        char del_flag "0/2"
+    }
+```
 
 ## 5. 数据迁移
 dev 环境:`mysql plm < sql/business-dora-rollback.sql && mysql plm < sql/business-dora.sql`。
 生产部署:留 v1.0 GA 前补。
 
 ## 6. 容量预估
-<待人工填写>
+
+**分级**: 大规模(效能/DORA 类)。按 5 个项目 × 4 指标 × 12 月度快照 + 4 季度快照 = 320 行/年/项目,5 项目共 1600 行/年,加全局快照 1700 行/年,5 年累计 8500 行。`trend_chart_json` / `heatmap_json` / `leadtime_breakdown` LONGTEXT 各 3-10KB,加 `ai_suggestions` 20KB,单行总 50KB。需 RANGE BY YEAR(snapshot_date) 分区(>2 年归档),(metric_type, snapshot_date) 复合索引覆盖。

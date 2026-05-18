@@ -22,11 +22,38 @@
 详见 SQL 文件 `PRIMARY KEY` / `UNIQUE KEY` / `KEY` 定义。
 
 ## 4. 关系图 (ER)
-<待人工填写>:简单 mermaid ER 图,标注 FK 关联
+
+```mermaid
+erDiagram
+    sys_user ||--o{ tb_testdata : "author"
+    sys_dict_data ||--o{ tb_testdata : "target_table/output_format/status"
+    tb_testdata {
+        bigint testdata_id PK
+        varchar testdata_no UK "TD-YYYY-NNNN"
+        varchar title
+        varchar target_table "字典 biz_testdata_table"
+        varchar target_table_label
+        int generate_count
+        varchar output_format "json/sql/csv"
+        text field_semantics "AI 识别字段语义 JSON"
+        char rule_china_coord "Y/N"
+        char rule_time_continuity "Y/N"
+        char rule_sensor_range "Y/N"
+        char rule_include_outliers "Y/N"
+        longtext generated_content
+        datetime generated_at
+        char ai_generated "Y/N"
+        varchar status "字典 biz_testdata_status 3态"
+        bigint author_user_id FK
+        datetime create_time
+        char del_flag "0/2"
+    }
+```
 
 ## 5. 数据迁移
 dev 环境:`mysql plm < sql/business-testdata-rollback.sql && mysql plm < sql/business-testdata.sql`。
 生产部署:留 v1.0 GA 前补。
 
 ## 6. 容量预估
-<待人工填写>
+
+**分级**: 中规模(质量/数据类)。按 5 个项目 × 20 数据集/项目 × 平均 1000 条/数据集 = 单数据集元数据 100 行/年(数据本身存 LONGTEXT)。5 年累计 < 5000 行元数据。`generated_content` LONGTEXT 单行可达 1-10MB(海量样本数据),需关注 `status='02' 已归档` 后冷数据迁移(>2 年清空 content,保留元数据)。索引覆盖 target_table / status / author_user_id。

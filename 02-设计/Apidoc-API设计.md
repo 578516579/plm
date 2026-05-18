@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/apidoc/{id}/transit` | `business:apidoc:edit` | 状态机推进 (00→01→02 单向终态) |
+| POST | `/business/apidoc/sync-from-code` | `business:apidoc:add` | 从代码同步 (F5.4 调用 §6 `api-doc-flow` 扫描 GitLab 仓库 Controller 注解,自动 upsert apidoc,置 `auto_extracted='Y'` + 写 `source_class`/`source_method` + `last_synced_at`) |
+| GET  | `/business/apidoc/{id}/versions` | `business:apidoc:query` | 取该接口所有历史版本 (按 (project_id, http_method, path) 分组) |
+| GET  | `/business/apidoc/search?q=&projectId=` | `business:apidoc:query` | 全文检索 (title / description / path / openapi_spec) |

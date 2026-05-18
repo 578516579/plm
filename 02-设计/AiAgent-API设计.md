@@ -31,4 +31,11 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/ai-agent/{id}/transit` | `business:ai-agent:edit` | 状态机推进 (00↔01 / 02↔{00,01}),错误态可重启或停用 |
+| POST | `/business/ai-agent/{id}/invoke` | `business:ai-agent:edit` | 调用 Agent (转发到 `dify_workflow_id`,接受 `input` JSON 参数,自动 `total_calls++` + 移动平均 `success_rate`,回写 `last_invoked_at`) |
+| POST | `/business/ai-agent/register` | `business:ai-agent:add` | 注册新 Agent (与 `POST /` 区别:同步绑定到 Dify 工作流 ID 并校验工作流存在) |
+| POST | `/business/ai-agent/{id}/unregister` | `business:ai-agent:remove` | 注销 Agent (解绑 Dify + 置 status=01 已停止,保留历史调用记录) |
+| GET  | `/business/ai-agent/{id}/metrics` | `business:ai-agent:query` | 取 Agent 实时调用指标 (today_calls / success_rate / 错误堆栈最近 N 条) |

@@ -23,7 +23,36 @@ ManualOps 模块 v1.0 — 字段 + 状态机 + API + 字典 + 菜单全部就绪
 - 菜单/字典:rollback SQL 自动清理
 
 ## 4. 监控
-<待人工填写>:监控点 / 告警阈值 / 日志关键字
+
+### 4.1 监控点 (3 维)
+
+| 维度 | 指标 | 数据源 | 健康阈值 |
+|---|---|---|---|
+| **业务** | `tb_manual_ops` 日新增行数 | MySQL count(create_time>=今日) | 小模块 0-30 / 日 |
+| **业务** | 运维手册导出失败数 | 应用日志 + Prometheus | ≤ 3 / 日 |
+| **业务** | 全文检索 0 结果率 | 检索日志聚合 | ≤ 30% |
+| **接口** | `/business/manual-ops/*` 错误率 | Spring Actuator + Prometheus | 错误率 ≤ 1% |
+| **接口** | `/business/manual-ops/list` P95 响应时间 | APM | < 1000 ms |
+| **接口** | `/business/manual-ops/search` 全文检索 P95 | APM | < 2000 ms |
+| **资源** | tb_manual_ops 表 size 增长率 | MySQL information_schema | 月增 < 10% |
+
+### 4.2 告警阈值
+
+| 等级 | 触发条件 | 通知渠道 | 处理 SLA |
+|---|---|---|---|
+| P0 | 接口 5xx 持续 > 5 分钟 | PagerDuty + 飞书 | 30 分钟响应 |
+| P1 | 列表查询 P95 > 3s 连续 10 分钟 | 飞书 | 2 小时响应 |
+| P1 | 运维手册导出失败数 > 5 / 小时 | 飞书 | 2 小时响应 |
+| P2 | 表行数月增 > 50% (异常增长) | 邮件 | 工作日响应 |
+
+### 4.3 日志关键字
+
+后端 Logback 输出, ELK / Loki 索引:
+- `ERROR.*ManualOpsService` — Service 层异常
+- `WARN.*ManualOpsController.*RejectedException` — 业务规则拒绝
+- `INFO.*ManualOps.*state-transit` — 状态机推进审计 (draft→reviewing→approved→published→archived)
+- `ERROR.*ManualOps.*export` — 手册导出失败 (含 PDF / HTML 错误)
+- `WARN.*ManualOps.*deadlock` — MySQL 死锁
 
 ## 5. Changelog
 追加到 [Changelog.md](Changelog.md) - ManualOps 模块 v1.0 上线 (2026-05-17)

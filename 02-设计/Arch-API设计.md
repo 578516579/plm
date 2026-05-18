@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/arch/{id}/transit` | `business:arch:edit` | 状态机推进 (00→01→{00,02} 含反向边 / `02→{03}`),违反抛 601 |
+| POST | `/business/arch/ai/generate/{id}` | `business:arch:edit` | AI 架构设计生成 (调用 §6 `arch-design-flow`,本期 mock 生成 C4 Mermaid + NFR 映射模板) |
+| GET  | `/business/arch/{id}/c4-diagram` | `business:arch:query` | 取 C4 容器图 Mermaid 文本(用于前端 mermaid.js 渲染) |
+| GET  | `/business/arch/export-template` | `business:arch:export` | 导出 Excel 架构模板 |

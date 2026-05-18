@@ -31,4 +31,11 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/autotest/{id}/transit` | `business:autotest:edit` | 状态机推进 (00→01↔02 含反向边 02→01 重激活),违反抛 601 |
+| POST | `/business/autotest/ai/generate/{id}` | `business:autotest:edit` | AI 生成测试脚本 (调用 §6 `auto-test-flow`,按 `test_suite_type` + `framework` 生成 `script_content`) |
+| POST | `/business/autotest/{id}/run` | `business:autotest:edit` | 立即执行套件 (异步,完成后回写 `total_cases`/`passed_cases`/`failed_cases`/`pass_rate`/`execution_duration_sec`/`last_executed_at`) |
+| POST | `/business/autotest/{id}/abort` | `business:autotest:edit` | 中止正在运行的套件 |
+| POST | `/business/autotest/{id}/ai/root-cause` | `business:autotest:edit` | AI 根因分析 (基于最近一次执行的失败用例,回写 `last_root_cause_analysis` Markdown) |

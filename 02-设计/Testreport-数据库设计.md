@@ -22,11 +22,44 @@
 详见 SQL 文件 `PRIMARY KEY` / `UNIQUE KEY` / `KEY` 定义。
 
 ## 4. 关系图 (ER)
-<待人工填写>:简单 mermaid ER 图,标注 FK 关联
+
+```mermaid
+erDiagram
+    sys_user ||--o{ tb_testreport : "reviewer"
+    sys_dict_data ||--o{ tb_testreport : "risk_level/status"
+    tb_project ||--o{ tb_testreport : "belongs_to"
+    tb_sprint ||--o{ tb_testreport : "optional"
+    tb_testplan ||--o{ tb_testreport : "based_on"
+    tb_testreport {
+        bigint testreport_id PK
+        varchar testreport_no UK "TR-YYYY-NNNN"
+        bigint project_id FK
+        bigint sprint_id FK
+        bigint testplan_id FK
+        varchar title
+        int total_cases
+        int passed_cases
+        int failed_cases
+        decimal coverage_rate
+        text defect_summary "JSON"
+        int p0_defects
+        int p1_defects
+        int p2_defects
+        varchar risk_level "green/amber/red"
+        text risk_evaluation
+        text recommendations
+        char ai_generated "Y/N"
+        varchar status "字典 biz_testreport_status 3态"
+        datetime generated_at
+        bigint reviewer_user_id FK
+        char del_flag "0/2"
+    }
+```
 
 ## 5. 数据迁移
 dev 环境:`mysql plm < sql/business-testreport-rollback.sql && mysql plm < sql/business-testreport.sql`。
 生产部署:留 v1.0 GA 前补。
 
 ## 6. 容量预估
-<待人工填写>
+
+**分级**: 中规模(质量类)。按 5 个项目 × 26 迭代/年 × 1 测试报告/迭代 = 130 行/年估算,5 年累计 < 1000 行。`defect_summary` JSON 1-5KB,`risk_evaluation` / `recommendations` 各 TEXT ~1-2KB。索引覆盖 testplan_id / status / risk_level。无需分区。

@@ -14,9 +14,9 @@
 - 状态机覆盖: 见 [PRD-MAPPING.md §3](../PRD-MAPPING.md) `submission` 行,合法 + 非法转换全覆盖
 
 ## 2. 测试用例库
-- [Submission-functional.md](测试用例库/Submission-functional.md) <待人工填写>
-- [Submission-api.md](测试用例库/Submission-api.md) <待人工填写>
-- [Submission-e2e.md](测试用例库/Submission-e2e.md) <待人工填写>
+- [Submission-functional.md](测试用例库/Submission-functional.md) — 功能用例 (用户视角:做什么 + 预期),覆盖 CRUD 主流程 + 状态机推进 + 必填校验
+- [Submission-api.md](测试用例库/Submission-api.md) — 接口契约用例 (HTTP code + JSON 字段),覆盖 6 标准 CRUD + 状态机/AI 等特殊端点 + 错误码 601/602/604/702
+- [Submission-e2e.md](测试用例库/Submission-e2e.md) — Playwright 端到端,覆盖菜单访问 + 列表分页 + 新增编辑表单 + 角色权限 + 关键状态机
 
 ## 3. 通过标准
 - mvn test 单测全绿
@@ -27,4 +27,11 @@
 fixtures 见 [plm-frontend/e2e/helpers/fixtures.ts](../plm-frontend/e2e/helpers/fixtures.ts) 或 fixtures-submission.ts。
 
 ## 5. 风险
-<待人工填写>
+
+| 等级 | 风险 | 缓解 |
+|---|---|---|
+| P0 | 测试数据与代码 drift (fixture 字段过时,执行报 604 字段白名单错误) | fixtures 与字典字段 CI 同步校验 + PR 触发 fixtures schema 校验 |
+| P0 | 测试数据脏数据 (上次执行残留导致用例不可重入) | fixture 每次执行前 cleanup hook + 数据库事务回滚 + 隔离 namespace |
+| P1 | 状态机非法转换覆盖不全导致漏测 | Service 单测全矩阵 (合法+非法) + 测试用例库与 PRD §3 状态机一一映射 |
+| P1 | 用例与代码 drift (字段重命名后用例未同步) | CI 集成 + PR 触发用例 schema 校验 + PRD-MAPPING.md 强制更新 |
+| P2 | 高频列表 (用例数 N≥500) 加载慢 | 分页 + 关键列索引 + EXPLAIN review |

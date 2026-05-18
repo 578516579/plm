@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/inception/{id}/transit` | `business:inception:edit` | 状态机推进 (00→01→{02,04} `02→{03,04}` `04→00`),违反抛 601 |
+| POST | `/business/inception/ai/generate/{id}` | `business:inception:edit` | AI 立项建议书生成 (调用 §6 `project-inception-flow`,生成 `ai_proposal_content` + `ai_risks` + `ai_generated_at`) |
+| POST | `/business/inception/{id}/convert-to-project` | `business:inception:edit` | 审批通过 (status=03) 后"转项目":调用 `IProjectService.insertProject(...)`,自动填 projectId 回链 |
+| GET  | `/business/inception/export-template` | `business:inception:export` | 导出 Excel 立项模板 |

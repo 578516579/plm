@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/feature-flag/{id}/toggle` | `business:feature-flag:edit` | 切换 Flag 开关 (置 `status='00'↔'01'`,无审批快速生效) |
+| GET  | `/business/feature-flag/check?flagKey=&environment=&userId=` | (无需权限,公共端点 / 应用 token 鉴权) | 实时判定 (canary 用 `abs(hashCode(userId)) % 100 < rolloutPercentage`),供应用方调用 |
+| PUT  | `/business/feature-flag/{id}/rollout` | `business:feature-flag:edit` | 调整灰度百分比 (校验 strategy-percentage 一致性: canary 必须 1-99,all_on 必须 100,all_off 必须 0,违反抛 604) |
+| GET  | `/business/feature-flag/{id}/audit-log` | `business:feature-flag:query` | 取 Flag 变更审计日志 (灰度推进时间线) |

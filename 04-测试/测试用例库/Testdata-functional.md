@@ -13,20 +13,25 @@
 
 | 用例 ID | 标题 | 前置 | 步骤 | 预期 | 优先级 | 状态 |
 |---|---|---|---|---|---|---|
-| TC-Testdata-F001 | 创建基础流程 | 已登录 admin | 1.进入Testdata菜单 2.点新增 3.填必填项 4.保存 | 列表显示,编号自动生成 | P0 | <待人工补> |
-| TC-Testdata-F002 | 必填字段校验 | 已登录 | 不填必填项创建 | 返 602 | P0 | <待人工补> |
-| TC-Testdata-F003 | 字段白名单校验 | 已登录 | 传非字典值 | 返 604 | P1 | <待人工补> |
-| TC-Testdata-F004 | 状态机合法转换 | 已有数据 | 按 §3 状态机推进 | 200 | P0 | <待人工补> |
-| TC-Testdata-F005 | 状态机非法转换 | 已有数据 | 违反 §3 | 返 601 | P0 | <待人工补> |
-| TC-Testdata-F006 | 终态保护 | 已到终态 | 尝试再推 | 返 601 | P1 | <待人工补> |
+| TC-Testdata-F001 | 创建基础流程 | 已登录 admin | 1.进入Testdata菜单 2.点新增 3.填必填项 4.保存 | 列表显示,编号自动生成 | P0 | 待执行 |
+| TC-Testdata-F002 | 必填字段校验 | 已登录 | 不填必填项创建 | 返 602 | P0 | 待执行 |
+| TC-Testdata-F003 | 字段白名单校验 | 已登录 | 传非字典值 | 返 604 | P1 | 待执行 |
+| TC-Testdata-F004 | 状态机合法转换 | 已有数据 | 按 §3 状态机推进 | 200 | P0 | 待执行 |
+| TC-Testdata-F005 | 状态机非法转换 | 已有数据 | 违反 §3 | 返 601 | P0 | 待执行 |
+| TC-Testdata-F006 | 终态保护 | 已到终态 | 尝试再推 | 返 601 | P1 | 待执行 |
 
 ## 通过率统计
 
-<待人工填写>:运行测试后更新
+首轮跑后回填。预期 P0 ≥ 95% / P1 ≥ 90% / P2 ≥ 80%。
+- 总用例数: 6
+- 通过: 0
+- 失败: 0
+- 阻塞: 0
+- 未执行: 6
 
 ## 自动化对应
 
 | 自动化层 | 覆盖用例 | 文件 |
 |---|---|---|
-| Service 单测 | <待补> | `plm-testdata/src/test/.../TestdataServiceImplTest.java` (如有) |
-| E2E (Playwright) | <待补> | `plm-frontend/e2e/testdata.spec.ts` |
+| Service 单测 | TC-Testdata-F002 (校验), F004/F005 (状态机) | `plm-testdata/src/test/.../TestdataServiceImplTest.java` (如有) |
+| E2E (Playwright) | TC-Testdata-F001 (主流程), F004 (状态机推进) | `plm-frontend/e2e/testdata.spec.ts` |

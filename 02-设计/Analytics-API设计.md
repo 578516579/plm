@@ -31,4 +31,10 @@
 见 [PRD-MAPPING.md §6 AI 能力清单](../PRD-MAPPING.md)。
 
 ## 5. 特殊端点
-<待人工填写>:如有非 CRUD 端点 (e.g. /execute / /run / /ai/generate)
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/business/analytics/{id}/transit` | `business:analytics:edit` | 状态机推进 (00→01→02 单向终态),违反抛 601 |
+| POST | `/business/analytics/refresh` | `business:analytics:edit` | 快照刷新 (按 `period_type` 计算最新 DORA + PLM 14 项指标,创建新行 status=00) |
+| POST | `/business/analytics/ai/recommend/{id}` | `business:analytics:edit` | AI 改进建议 (调用 §6 `analytics-recommend-flow`,基于 4 维度阈值生成 `ai_recommendations`) |
+| GET  | `/business/analytics/kpi-trend?metric=&periodType=` | `business:analytics:query` | KPI 趋势曲线 (按指标名 + 周期返回 JSON,用于 ECharts 渲染) |
