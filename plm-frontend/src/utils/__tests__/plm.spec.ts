@@ -217,25 +217,23 @@ describe('getNormalPath', () => {
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
-// sprintf — 注意实现中 i 从 1 开始（off-by-one），占位符从 args[1] 读起
+// sprintf — i 从 0 开始（标准实现,已修 RuoYi upstream off-by-one bug)
 // ─────────────────────────────────────────────────────────────────────────────
 describe('sprintf', () => {
-  it('单个 %s：args[0] 是多余占位符，args[1] 为 undefined → 返回空串', () => {
-    // 实现: i 从 1 开始，args[1] === undefined → flag=false → ''
-    expect(sprintf('Hello %s!', 'World')).toBe('')
+  it('单个 %s + 1 个 arg → 正确替换', () => {
+    expect(sprintf('Hello %s!', 'World')).toBe('Hello World!')
   })
 
-  it('传 2 个 args 时第一个 %s 使用 args[1]（第二个参数）', () => {
-    // sprintf('Hello %s!', ignored, 'World') → 'Hello World!'
-    expect(sprintf('Hello %s!', 'ignored', 'World')).toBe('Hello World!')
+  it('多个 %s + 多个 args → 顺序替换', () => {
+    expect(sprintf('%s + %s = %s', 1, 2, 3)).toBe('1 + 2 = 3')
   })
 
   it('无 %s 时原样返回字符串', () => {
     expect(sprintf('no placeholder')).toBe('no placeholder')
   })
 
-  it('args 链完全耗尽时返回空串', () => {
-    // 2 个 %s，只有 args[1]='a'，args[2]=undefined → flag=false → ''
-    expect(sprintf('%s %s', 'skip', 'a')).toBe('')
+  it('占位符数量超过 args 时返回空串 (flag=false 短路)', () => {
+    // 2 个 %s,只有 args[0]='a',args[1]=undefined → flag=false → ''
+    expect(sprintf('%s %s', 'a')).toBe('')
   })
 })
