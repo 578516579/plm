@@ -178,7 +178,9 @@ Roadmap (current = Phase B kicked off 2026-05-17):
   - ✅ `reflect-monthly` skill v0.1 ([.claude/skills/reflect-monthly/](.claude/skills/reflect-monthly/)) — 含 tracking 终结 7 步判定 + MUST/SHOULD 规则健康度审计
   - ✅ `reflect-quarterly` skill v0.1 ([.claude/skills/reflect-quarterly/](.claude/skills/reflect-quarterly/)) — Phase B 3/3 完成; 含 ADR 6 维一致性 + 跨文档 4 维 coherence + 季度规范重构建议
 - 🟡 Phase C — `/proposal` skill v0.1 ([.claude/skills/proposal/](.claude/skills/proposal/)) — 3 Mode 一站式 (lift / apply / status) + 决策树 + 元规则 checklist
-- ⏳ Phase D — metrics-driven rule tuning (auto-suggest MUST↔SHOULD downgrades based on signals)
+- 🟡 Phase D — metrics-driven rule tuning (auto-suggest MUST↔SHOULD downgrades based on signals)
+  - ✅ `signals-collect` skill v0.1 ([.claude/skills/signals-collect/](.claude/skills/signals-collect/)) — 7 类信号自动采集 → supplementary 文件 (Phase D 输入基础设施)
+  - ⏳ v0.2-v0.4: Phase 耗时计算 / hook log 接入 / 判断层自动 suggest 规则升降级
 
 **前门文档**: [99-跨阶段/self-evolution.md](99-跨阶段/self-evolution.md) — canonical overview, 整合 7 个分散 README + 2 元规则 + 4 skill 的一页对照
 

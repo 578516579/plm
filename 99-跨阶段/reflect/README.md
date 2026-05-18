@@ -82,6 +82,7 @@
 | [`/reflect-weekly`](../../.claude/skills/reflect-weekly/SKILL.md) | 周度反思（半自动: 数据采集自动 + 写报告半人工）| ✅ v0.1 (2026-05-17) |
 | [`/reflect-monthly`](../../.claude/skills/reflect-monthly/SKILL.md) | 月度反思 + tracking 7 步终结判定 + MUST/SHOULD 规则健康度审计 | ✅ v0.1 (2026-05-17) |
 | [`/reflect-quarterly`](../../.claude/skills/reflect-quarterly/SKILL.md) | 季度反思 + ADR 6 维审计 + 跨文档 4 维 coherence + 重构建议 | ✅ v0.1 (2026-05-17) |
+| [`/signals-collect`](../../.claude/skills/signals-collect/SKILL.md) | 7 类信号自动采集 → supplementary 文件 (Phase D 输入基础设施) | ✅ v0.1 (2026-05-17) |
 | `/proposal` | 候选 → proposal 一命令全链路 | ⏳ Phase C 待 |
 | `/loop` skill（系统级，已有）| 调度上述命令 | — |
 

@@ -162,6 +162,7 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | [reflect-monthly](../.claude/skills/reflect-monthly/) v0.1 | 月度 + tracking 终结 + 规则健康度 |
 | | [reflect-quarterly](../.claude/skills/reflect-quarterly/) v0.1 | 季度 + ADR 一致性 + 跨文档 coherence + 重构建议 |
 | | [proposal](../.claude/skills/proposal/) v0.1 | 候选升格 / apply / 状态管理 |
+| | [signals-collect](../.claude/skills/signals-collect/) v0.1 | 7 类信号自动采集 → supplementary 文件 (Phase D 输入) |
 | | [ruoyi-bootstrap](~/.claude/skills/ruoyi-bootstrap/) | 业务模块脚手架 (与自进化无直接关系, 但产 dogfood 数据) |
 
 ---
@@ -218,8 +219,11 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 🟡 Phase C (proposal lifecycle) — kicked off 2026-05-17
    ✅ proposal skill v0.1 — 候选升格 / apply / status / bundle 判定一站式
 
-⏳ Phase D (data-driven rule tuning) — 待
-   自动 suggest MUST↔SHOULD 升降级, 基于 signals 30 天数据
+🟡 Phase D (data-driven rule tuning) — kicked off 2026-05-17, 1/4
+   ✅ signals-collect v0.1 (输入基础设施)
+   ⏳ v0.2 Phase 耗时自动计算
+   ⏳ v0.3 hook log 接入 (PostToolUse 日志 → signals)
+   ⏳ v0.4 判断层: 基于 30 天数据 auto-suggest MUST↔SHOULD 升降
 ```
 
 ---
