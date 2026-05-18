@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
     path: '/business/competitive',
     name: 'Competitive',
     component: () => import('./views/index.vue'),
-    meta: { title: '竞品情报', icon: 'chart', stub: true }
+    meta: { title: '竞品情报', icon: 'chart' }
   }
 ]
 

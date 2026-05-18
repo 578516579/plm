@@ -23,13 +23,13 @@
 | 12 | API 文档 ApiDoc | F5.4 | apidoc.html | plm-apidoc | 🟢 PRD-aligned |
 | 13 | 产品手册 ManualProduct | F5.1 | productmanual.html | plm-manual-product | 🟢 PRD-aligned |
 | 14 | 立项 Inception | F1.1 | inception.html | plm-inception | 🟢 PRD-aligned |
-| 15 | UED | F2.3 | ued.html | plm-ued | 🟡 空壳 |
-| 16 | 竞品 Competitive | F1.3 | competitive.html | plm-competitive | 🟡 空壳 |
-| 17 | PRD 文档 | F2.2 | prd.html | plm-prd | 🟡 空壳 |
-| 18 | 架构设计 Arch | F3.1 | archdesign.html | plm-arch | 🟡 空壳 |
-| 19 | 数据库设计 DbDesign | F3.2 | dbdesign.html | plm-dbdesign | 🟡 空壳 |
-| 20 | 接口设计 ApiDesign | F3.3 | apidesign.html | plm-apidesign | 🟡 空壳 |
-| 21 | 测试数据 TestData | F4.3 | testdata.html | plm-testdata | 🟡 空壳 |
+| 15 | UED | F2.3 | ued.html | plm-ued | 🟢 PRD-aligned |
+| 16 | 竞品 Competitive | F1.3 | competitive.html | plm-competitive | 🟢 PRD-aligned |
+| 17 | PRD 文档 | F2.2 | prd.html | plm-prd | 🟢 PRD-aligned |
+| 18 | 架构设计 Arch | F3.1 | archdesign.html | plm-arch | 🟢 PRD-aligned |
+| 19 | 数据库设计 DbDesign | F3.2 | dbdesign.html | plm-dbdesign | 🟢 PRD-aligned |
+| 20 | 接口设计 ApiDesign | F3.3 | apidesign.html | plm-apidesign | 🟢 PRD-aligned |
+| 21 | 测试数据 TestData | F4.3 | testdata.html | plm-testdata | 🟢 PRD-aligned |
 | 22 | 自动化测试 AutoTest | F4.5 | autotest.html | plm-autotest | 🟡 空壳 |
 | 23 | 实施手册 ManualImpl | F5.2 | implmanual.html | plm-manual-impl | 🟡 空壳 |
 | 24 | 运维手册 ManualOps | F5.3 | opsmanual.html | plm-manual-ops | 🟡 空壳 |
@@ -325,3 +325,4 @@
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 初版；初始化 SSoT；按 Proposal 0007 加入 §32 MCP / §33 Integration |
 | 2026-05-18 | Wjl + Claude | §34 AI Agent 编排模块 PRD-aligned；补字段对照表/状态机/错误码/URL/字典 |
+| 2026-05-18 | Wjl + Claude | Group A 7 模块前端升级 🟡→🟢：competitive/prd/ued/arch/dbdesign/apidesign/testdata；新增 types/api/views/router/index |
