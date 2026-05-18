@@ -2,7 +2,6 @@ package cn.com.bosssfot.dv.plm.testreport.service.impl;
 
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,12 +37,11 @@ public class TestReportServiceImpl implements ITestReportService
 
     private static final Set<String> ALLOWED_RISK_LEVEL = Set.of("green", "yellow", "red");
 
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01"));
-        STATUS_TRANSITIONS.put("01", Set.of("00", "02"));
-        STATUS_TRANSITIONS.put("02", Set.of());
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01"),         // 草稿 → 审核中
+        "01", Set.of("00", "02"),   // 审核中 → 草稿(打回) / 已发布
+        "02", Set.of()              // 已发布 (终态)
+    );
 
     @Autowired private TestReportMapper testreportMapper;
     @Autowired private ProjectMapper projectMapper;
@@ -156,11 +154,11 @@ public class TestReportServiceImpl implements ITestReportService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "草稿";
-            case "01": return "审核中";
-            case "02": return "已发布";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "草稿";
+            case "01" -> "审核中";
+            case "02" -> "已发布";
+            default   -> "未知(" + status + ")";
+        };
     }
 }
