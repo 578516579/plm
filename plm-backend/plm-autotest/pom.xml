@@ -24,5 +24,9 @@
             <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-system</artifactId>
         </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-project</artifactId>
+        </dependency>
     </dependencies>
 </project>

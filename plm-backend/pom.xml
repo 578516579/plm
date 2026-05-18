@@ -258,6 +258,18 @@
             <!-- v0.x MCP + Integration (Proposal 0007) -->
             <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-mcp</artifactId><version>${plm.version}</version></dependency>
             <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-integration</artifactId><version>${plm.version}</version></dependency>
+            <!-- AI 能力 -->
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-ai-agent</artifactId><version>${plm.version}</version></dependency>
+            <!-- Group B 9 模块 (PRD-aligned) -->
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-autotest</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-impl</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-ops</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-analytics</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-pipeline</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-dora</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-openspec</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-feature-flag</artifactId><version>${plm.version}</version></dependency>
+            <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-dashboard</artifactId><version>${plm.version}</version></dependency>
 
         </dependencies>
     </dependencyManagement>
