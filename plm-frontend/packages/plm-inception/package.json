@@ -1,0 +1,12 @@
+{
+  "name": "@plm/inception",
+  "version": "0.1.0",
+  "description": "PLM 业务模块 - 项目立项",
+  "main": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./router": "./src/router.ts"
+  }
+}
