@@ -1,7 +1,6 @@
 package cn.com.bosssfot.dv.plm.document.service.impl;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,13 +34,12 @@ public class DocumentServiceImpl implements IDocumentService
     private static final Logger log = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
     /** 4×4 状态机含反向边 */
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01"));         // 草稿 → 待评审
-        STATUS_TRANSITIONS.put("01", Set.of("00", "02"));   // 待评审 → 草稿(反向打回) / 已发布
-        STATUS_TRANSITIONS.put("02", Set.of("01", "03"));   // 已发布 → 待评审(反向重审) / 已归档
-        STATUS_TRANSITIONS.put("03", Set.of());             // 已归档 终态
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01"),         // 草稿 → 待评审
+        "01", Set.of("00", "02"),   // 待评审 → 草稿(反向打回) / 已发布
+        "02", Set.of("01", "03"),   // 已发布 → 待评审(反向重审) / 已归档
+        "03", Set.of()              // 已归档 终态
+    );
 
     /** 合法的 doc_type 集合 */
     private static final Set<String> VALID_DOC_TYPES = Set.of(
@@ -137,12 +135,12 @@ public class DocumentServiceImpl implements IDocumentService
     }
 
     private static String statusLabel(String s) {
-        switch (s) {
-            case "00": return "草稿";
-            case "01": return "待评审";
-            case "02": return "已发布";
-            case "03": return "已归档";
-            default:   return "未知(" + s + ")";
-        }
+        return switch (s) {
+            case "00" -> "草稿";
+            case "01" -> "待评审";
+            case "02" -> "已发布";
+            case "03" -> "已归档";
+            default   -> "未知(" + s + ")";
+        };
     }
 }

@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,13 +47,12 @@ public class SprintServiceImpl implements ISprintService
      * 02已完成     ❌        ❌       —        ❌
      * 03已取消     ❌        ❌       ❌       —
      */
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01", "03"));   // 计划中 → 进行中 / 已取消
-        STATUS_TRANSITIONS.put("01", Set.of("02", "03"));   // 进行中 → 已完成 / 已取消
-        STATUS_TRANSITIONS.put("02", Set.of());             // 已完成（终态）
-        STATUS_TRANSITIONS.put("03", Set.of());             // 已取消（终态）
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01", "03"),   // 计划中 → 进行中 / 已取消
+        "01", Set.of("02", "03"),   // 进行中 → 已完成 / 已取消
+        "02", Set.of(),             // 已完成（终态）
+        "03", Set.of()              // 已取消（终态）
+    );
 
     @Autowired
     private SprintMapper sprintMapper;
@@ -282,13 +280,13 @@ public class SprintServiceImpl implements ISprintService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "计划中";
-            case "01": return "进行中";
-            case "02": return "已完成";
-            case "03": return "已取消";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "计划中";
+            case "01" -> "进行中";
+            case "02" -> "已完成";
+            case "03" -> "已取消";
+            default   -> "未知(" + status + ")";
+        };
     }
 
     private static LocalDate toLocalDate(Date d) {

@@ -2,7 +2,6 @@ package cn.com.bosssfot.dv.plm.task.service.impl;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,15 +55,14 @@ public class TaskServiceImpl implements ITaskService
      * 04已完成    ❌        ❌       ❌         ❌        —         ❌   (终态)
      * 05已取消    ❌        ❌       ❌         ❌        ❌        —    (终态)
      */
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01", "05"));
-        STATUS_TRANSITIONS.put("01", Set.of("00", "02", "05"));
-        STATUS_TRANSITIONS.put("02", Set.of("01", "03", "05"));
-        STATUS_TRANSITIONS.put("03", Set.of("02", "04", "05"));
-        STATUS_TRANSITIONS.put("04", Set.of());
-        STATUS_TRANSITIONS.put("05", Set.of());
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01", "05"),
+        "01", Set.of("00", "02", "05"),
+        "02", Set.of("01", "03", "05"),
+        "03", Set.of("02", "04", "05"),
+        "04", Set.of(),
+        "05", Set.of()
+    );
 
     @Autowired
     private TaskMapper taskMapper;
@@ -223,12 +221,12 @@ public class TaskServiceImpl implements ITaskService
     }
 
     @Override
-    public Map<String, Object> kanban(Long projectId, Long sprintId)
+    public Map<String, Object> kanban(Long projectId, Long sprintId, String priority, Long assigneeUserId)
     {
         if (projectId == null) {
             throw new ServiceException("projectId 不能为空", 602);
         }
-        List<Task> all = taskMapper.selectKanbanTasks(projectId, sprintId);
+        List<Task> all = taskMapper.selectKanbanTasks(projectId, sprintId, priority, assigneeUserId);
 
         // 按状态分组（保持顺序 00-04，05 已取消不显示）
         String[] statuses = {"00", "01", "02", "03", "04"};
@@ -271,14 +269,14 @@ public class TaskServiceImpl implements ITaskService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "待开发";
-            case "01": return "开发中";
-            case "02": return "代码评审";
-            case "03": return "测试中";
-            case "04": return "已完成";
-            case "05": return "已取消";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "待开发";
+            case "01" -> "开发中";
+            case "02" -> "代码评审";
+            case "03" -> "测试中";
+            case "04" -> "已完成";
+            case "05" -> "已取消";
+            default   -> "未知(" + status + ")";
+        };
     }
 }

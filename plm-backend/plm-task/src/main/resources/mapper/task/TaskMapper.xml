@@ -165,7 +165,7 @@
         where requirement_id = #{requirementId} and del_flag = '0'
     </select>
 
-    <!-- 看板视图：项目 + 可选迭代下所有未取消任务（不分页，每列最多 50 条由 service 切片） -->
+    <!-- 看板视图：项目 + 可选迭代 + 可选优先级/负责人 过滤；每列最多 50 条由 service 切片 -->
     <select id="selectKanbanTasks" resultMap="TaskResult">
         <include refid="selectTaskVo"/>
         where del_flag = '0'
@@ -173,6 +173,12 @@
           and project_id = #{projectId}
         <if test="sprintId != null">
           and sprint_id = #{sprintId}
+        </if>
+        <if test="priority != null and priority != ''">
+          and priority = #{priority}
+        </if>
+        <if test="assigneeUserId != null">
+          and assignee_user_id = #{assigneeUserId}
         </if>
         order by priority asc, create_time desc
     </select>

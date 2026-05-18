@@ -2,7 +2,6 @@ package cn.com.bosssfot.dv.plm.testcase.service.impl;
 
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,14 +43,13 @@ public class TestCaseServiceImpl implements ITestCaseService
      * 03 已通过   ❌       ✅ 反向   ❌        —         ❌
      * 04 已失败   ❌       ✅ 反向   ❌        ❌        —
      */
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01"));
-        STATUS_TRANSITIONS.put("01", Set.of("00", "02"));
-        STATUS_TRANSITIONS.put("02", Set.of("01", "03", "04"));
-        STATUS_TRANSITIONS.put("03", Set.of("01"));   // 反向边 重测
-        STATUS_TRANSITIONS.put("04", Set.of("01"));   // 反向边 重测
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01"),
+        "01", Set.of("00", "02"),
+        "02", Set.of("01", "03", "04"),
+        "03", Set.of("01"),   // 反向边 重测
+        "04", Set.of("01")    // 反向边 重测
+    );
 
     @Autowired private TestCaseMapper testcaseMapper;
     @Autowired private ProjectMapper projectMapper;
@@ -170,13 +168,13 @@ public class TestCaseServiceImpl implements ITestCaseService
     }
 
     private static String statusLabel(String s) {
-        switch (s) {
-            case "00": return "草稿";
-            case "01": return "待执行";
-            case "02": return "执行中";
-            case "03": return "已通过";
-            case "04": return "已失败";
-            default:   return "未知(" + s + ")";
-        }
+        return switch (s) {
+            case "00" -> "草稿";
+            case "01" -> "待执行";
+            case "02" -> "执行中";
+            case "03" -> "已通过";
+            case "04" -> "已失败";
+            default   -> "未知(" + s + ")";
+        };
     }
 }

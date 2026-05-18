@@ -1,7 +1,7 @@
 {
   "name": "@plm/apidesign",
-  "version": "0.0.1",
-  "description": "PLM 业务模块 - 接口详细设计 (stub 空壳)",
+  "version": "0.1.0",
+  "description": "PLM 业务模块 - 接口详细设计",
   "main": "src/index.ts",
   "type": "module",
   "private": true,

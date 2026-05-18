@@ -53,11 +53,16 @@ export function myTasks(query: TaskQuery) {
   })
 }
 
-/** 看板视图 */
-export function kanbanTasks(projectId: number | string, sprintId?: number | string) {
+/** 看板视图（支持 priority/assigneeUserId 过滤） */
+export function kanbanTasks(params: {
+  projectId: number | string
+  sprintId?: number | string
+  priority?: string
+  assigneeUserId?: number | string
+}) {
   return request({
     url: '/business/task/kanban',
     method: 'get',
-    params: { projectId, sprintId }
+    params
   })
 }
