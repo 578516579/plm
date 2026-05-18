@@ -118,10 +118,9 @@ declare module 'vuedraggable/dist/vuedraggable.common' {
   export default draggable
 }
 
-// vue-cropper
+// vue-cropper (use any to avoid vue-tsc 2.x loading the library's .ts source file)
 declare module 'vue-cropper' {
-  import { DefineComponent } from 'vue'
-  const VueCropper: DefineComponent
+  const VueCropper: any
   export { VueCropper }
 }
 

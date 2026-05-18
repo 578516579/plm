@@ -7,7 +7,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
-      "@plm/*": ["packages/plm-*/src"]
+      "@plm/*": ["packages/plm-*/src"],
+      "vue-cropper": ["src/types/shims/vue-cropper"]
     },
 
     // 严格性和类型检查相关配置
@@ -38,6 +39,6 @@
     "auto-imports.d.ts",
     "vite.config.ts"
   ],
-  "exclude": ["node_modules", "dist", "src/**/*.js", "packages/**/node_modules"]
+  "exclude": ["node_modules", "dist", "src/**/*.js", "packages/**/node_modules", "node_modules/vue-cropper"]
 }
 
