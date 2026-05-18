@@ -47,7 +47,7 @@
 
 ## 2. 字段对照表（Domain ↔ 原型表单元素 ↔ DB 列）
 
-> 每个 PRD-aligned 模块一节。当前已填 §1-7（最早 7 模块）+ §32-33（MCP/Integration）。其他 PRD-aligned 模块的对照表参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
+> 每个 PRD-aligned 模块一节。当前已填 §1-10（10 模块）+ §32-33（MCP/Integration）。其他 PRD-aligned 模块的对照表参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
 
 ### §1. Project（plm-project）
 
@@ -214,6 +214,91 @@
 | tags | tags | VARCHAR | 原型 "标签" | |
 | createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
 
+### §8. Submission（plm-submission）
+
+**领域**: 提测管理 — 含 AI 质量门禁。**PRD 出处**: F4.4 / 原型 [submit.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/submit.html)
+
+#### 表 `tb_submission`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| submissionId | id | BIGINT | - | 主键 |
+| submissionNo | submission_no | VARCHAR | ADR | 编号 SUB-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.4 | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | F4.4 | FK→tb_sprint.id（可空） |
+| title | title | VARCHAR | 原型 "提测标题" | 必填 |
+| scope | scope | TEXT | 原型 "范围" | 本次提测范围 |
+| environment | environment | VARCHAR | 原型 "环境" | dev/sit/uat/prod |
+| expectedTestDays | expected_test_days | INT | 原型 "期望测试天数" | 1-60 |
+| riskNotes | risk_notes | TEXT | 原型 "风险备注" | |
+| unitTestCoverage | unit_test_coverage | DECIMAL(5,2) | **F4.4 AI 门禁** | 单测覆盖率 %，≥60 为通过 |
+| codeScanPassed | code_scan_passed | CHAR(1) | F4.4 AI 门禁 | Y/N |
+| prdCompleted | prd_completed | CHAR(1) | F4.4 AI 门禁 | Y/N |
+| apiDocUpdated | api_doc_updated | CHAR(1) | F4.4 AI 门禁 | Y/N |
+| qualityGatePassed | quality_gate_passed | CHAR(1) | 派生字段 | 4 项全 Y → Y;否则 N (708 错误码) |
+| status | status | VARCHAR | 字典 `biz_submission_status` | 00=草稿 01=已提交 02=质量门禁中 03=已通过 04=已退回 |
+| rejectReason | reject_reason | VARCHAR | - | 进入 04 必填 → 602 |
+| submitterUserId | submitter_user_id | BIGINT | - | FK→sys_user (默认当前用户) |
+| reviewerUserId | reviewer_user_id | BIGINT | - | FK→sys_user |
+| submittedAt | submitted_at | DATETIME | - | 00→01 时自动填 |
+| approvedAt | approved_at | DATETIME | - | 02→03 时自动填 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §9. Release（plm-release）
+
+**领域**: 发布管理 — 蓝绿 / 金丝雀 / 滚动 三策略 + DORA 4 指标 + AI 评审。**PRD 出处**: F4.7+ / 原型 [release.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/release.html)
+
+#### 表 `tb_release`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| releaseId | id | BIGINT | - | 主键 |
+| releaseNo | release_no | VARCHAR | ADR | 编号 REL-YYYY-NNNN |
+| version | version | VARCHAR | 原型 "版本号" | 如 v1.0.0,必填 |
+| projectId | project_id | BIGINT | - | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | - | FK→tb_sprint.id（可空） |
+| strategy | strategy | VARCHAR | 字典 `biz_release_strategy` | blue_green / canary / rolling |
+| environment | environment | VARCHAR | 原型 "环境" | dev/sit/uat/prod |
+| releaseNotes | release_notes | TEXT | 原型 "发布说明" | 变更内容 |
+| plannedAt | planned_at | DATETIME | 原型 "计划时间" | |
+| releasedAt | released_at | DATETIME | - | 01→02 时自动填 |
+| rollbackAt | rollback_at | DATETIME | - | 进入 03 时自动填 |
+| rollbackReason | rollback_reason | VARCHAR | - | 进入 03 必填 |
+| status | status | VARCHAR | 字典 `biz_release_status` | 00=计划中 01=发布中 02=已发布 03=已回滚 04=已废弃 |
+| aiReviewScore | ai_review_score | DECIMAL(5,2) | 原型 "AI 评分" | 0-100 |
+| aiReviewNotes | ai_review_notes | TEXT | 原型 "AI 评审说明" | AI 自动生成摘要 |
+| deploymentFrequency | deployment_frequency | DECIMAL(10,2) | **DORA 1** | 部署频率 |
+| leadTimeHours | lead_time_hours | DECIMAL(10,2) | **DORA 2** | 前置时间 (小时) |
+| mttrMinutes | mttr_minutes | DECIMAL(10,2) | **DORA 3** | 平均恢复时间 (分钟) |
+| changeFailureRate | change_failure_rate | DECIMAL(5,2) | **DORA 4** | 变更失败率 % |
+| releasedByUserId | released_by_user_id | BIGINT | - | FK→sys_user (实际发布人) |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §10. TestPlan（plm-testplan）
+
+**领域**: 测试方案 — AI 生成策略 / 范围 / 资源 / 风险。**PRD 出处**: F4.1 / 原型 [testplan.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/testplan.html)
+
+#### 表 `tb_testplan`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| testplanId | id | BIGINT | - | 主键 |
+| testplanNo | testplan_no | VARCHAR | ADR | 编号 TP-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.1 | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | F4.1 | FK→tb_sprint.id（可空） |
+| title | title | VARCHAR | 原型 "方案标题" | 必填 |
+| testTypes | test_types | VARCHAR | 原型 "测试类型" | CSV: 功能/性能/安全/兼容性 等 (必填) |
+| testCycleDays | test_cycle_days | INT | 原型 "测试周期" | 默认 10 |
+| scope | scope | TEXT | 原型 "测试范围" | |
+| strategy | strategy | TEXT | 原型 "测试策略" | 入口/出口准则 |
+| toolsRecommended | tools_recommended | TEXT | 原型 "工具推荐" | AI 建议 |
+| resourcesPlan | resources_plan | TEXT | 原型 "资源计划" | 人力/环境/数据 |
+| riskAssessment | risk_assessment | TEXT | 原型 "风险评估" | 风险点+缓解 |
+| aiGenerated | ai_generated | CHAR(1) | 原型 "AI 生成" | Y/N |
+| status | status | VARCHAR | 字典 `biz_testplan_status` | 00=草稿 01=已确认 02=执行中 03=已完成 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
 ### §32. MCP Server（plm-mcp）
 
 **领域**: 把 PLM 自己的业务能力（项目/需求/任务/用例/文档/数据）通过 MCP 协议暴露给外部 LLM Agent（Claude Code、Cursor、Copilot 等）。
@@ -371,6 +456,38 @@
 ```
 非法转换 → `ServiceException(701)`;reviewerUserId 缺失 → `ServiceException(707)`;doc_type 不在 12 种枚举内 → 604。落地: [DocumentServiceImpl:37](plm-backend/plm-document/src/main/java/cn/com/bosssfot/dv/plm/document/service/impl/DocumentServiceImpl.java)。
 
+### §8 Submission 状态机（tb_submission.status, 5×5 含反向边）
+
+```
+00草稿     → 01已提交                          [自动填 submittedAt]
+01已提交   → 02质量门禁中 / 04已退回(快速拒)
+02质量门禁中 → 03已通过(qualityGatePassed=Y) / 04已退回   [03 自动填 approvedAt]
+03已通过 (终态)
+04已退回   → 00草稿(反向打回重做)             [必填 rejectReason]
+```
+非法转换 → `ServiceException(701)`;rejectReason 缺失 → 602;qualityGatePassed!=Y 进入 03 → 708;单测覆盖率 < 60% 自动 qualityGatePassed=N。落地: [SubmissionServiceImpl:46](plm-backend/plm-submission/src/main/java/cn/com/bosssfot/dv/plm/submission/service/impl/SubmissionServiceImpl.java)。
+
+### §9 Release 状态机（tb_release.status, 5 态）
+
+```
+00计划中 → 01发布中 / 04已废弃
+01发布中 → 02已发布 / 03已回滚                 [02 自动填 releasedAt]
+02已发布 → 03已回滚 / 04已废弃
+03已回滚 → 04已废弃                            [进入 03 自动填 rollbackAt + 必填 rollbackReason]
+04已废弃 (终态)
+```
+非法转换 → `ServiceException(701)`;rollbackReason 缺失 → 602;strategy ∉ {blue_green, canary, rolling} → 604。落地: [ReleaseServiceImpl:43](plm-backend/plm-release/src/main/java/cn/com/bosssfot/dv/plm/release/service/impl/ReleaseServiceImpl.java)。
+
+### §10 TestPlan 状态机（tb_testplan.status, 4 态含反向边）
+
+```
+00草稿   → 01已确认
+01已确认 → 00草稿(回退) / 02执行中
+02执行中 → 03已完成
+03已完成 (终态)
+```
+非法转换 → `ServiceException(701)`;testCycleDays 默认 10;aiGenerated 默认 N。落地: [TestPlanServiceImpl:37](plm-backend/plm-testplan/src/main/java/cn/com/bosssfot/dv/plm/testplan/service/impl/TestPlanServiceImpl.java)。
+
 ### §32 MCP Server 状态机（tb_mcp_server.status）
 
 ```
@@ -513,3 +630,4 @@
 | 2026-05-17 | Wjl + Claude | 初版；初始化 SSoT；按 Proposal 0007 加入 §32 MCP / §33 Integration |
 | 2026-05-17 | Wjl + Claude | §2 补全 §1-4 Project/Requirement/Sprint/Task 字段对照表；§3 补全 4 模块状态机；配合 Vue 前端补缺(managerUserId / projectType filter / kanban priority+assignee filter+卡片负责人 / requirement 指派人搜索)与 ServiceImpl 现代化(Map.of + enhanced switch) |
 | 2026-05-17 | Wjl + Claude | 第二批: §2 补 §5 Defect / §6 TestCase / §7 Document 字段对照表;§3 补 3 模块状态机;Vue 解锁(Defect 报告人+指派人搜索 / TestCase 需求ID 搜索 / Document 关联类型+ID+作者+审核人 4 项搜索) + 后端 Document Mapper 加 reviewerUserId 过滤;3 个 ServiceImpl 现代化同样模式 |
+| 2026-05-18 | Wjl + Claude | 第三批: §2 补 §8 Submission / §9 Release / §10 TestPlan 字段对照表(含 AI 门禁 4 项 / DORA 4 指标);§3 补 3 模块状态机(含 04→00 反向+回滚必填);3 个 Vue 由空壳 stub(11 行)重写为完整 CRUD ~280 行均;3 个 TS types 由 5 字段扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式 |
