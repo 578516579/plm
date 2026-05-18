@@ -51,7 +51,8 @@ instances/
 | **TestCase**（测试用例管理）| ✅ Phase 01-03 完成 / ⏳ Phase 04 | L1 | `internal-tool` | `solo` | `early` (v0.3) | 2026-05-16 | [P01](testcase/Phase01-立项-Gate-2026-05-16.md) · [P02](testcase/Phase02-设计-Gate-2026-05-16.md) · [P03](testcase/Phase03-开发-Gate-2026-05-16.md) | Wjl |
 | **Document**（文档管理 合并 5 stub）| ✅ Phase 01-03 完成 / ⏳ Phase 04 | L1 | `internal-tool` | `solo` | `early` (v0.4) | 2026-05-16 | [P01](document/Phase01-立项-Gate-2026-05-16.md) · [P02](document/Phase02-设计-Gate-2026-05-16.md) · [P03](document/Phase03-开发-Gate-2026-05-16.md) | Wjl |
 | **Project / Req / Sprint / Task** P04+P05+P06 cycle1 | ✅ Phase 04 + ✅ Phase 05 上线 + ✅ **Phase 06 cycle 1 day 7 closure** (72 case E2E 全过) | L1 | `internal-tool` | `solo` | `early` | 2026-05-22 | [P04](project/Phase04-测试-Gate-2026-05-16.md) · [P05](project/Phase05-上线-Gate-2026-05-16.md) · [P06-c1-d7](project/Phase06-运营-Gate-cycle1-day7-2026-05-22.md) | Wjl |
-| **23 stub 业务模块** | 🟡 空壳骨架已建（pom + package.json + README + 占位 view）；剩余 23 个待启动（document 已激活替代 5 stub）；v0.4 排期 6 个（剩余）/ v0.5 排期 6 个 / deferred 7 个；可用 [生成器](../../../plm-backend/scripts/new-business-module.sh)一键脚手架 | — | — | — | — | 2026-05-16 | 见 [Stubs-Roadmap.md](../../../03-开发/Stubs-Roadmap.md) | — |
+| **Group B 批量**（autotest / manual-impl / manual-ops / analytics / pipeline / dora / openspec / feature-flag / dashboard，9 模块）| ✅ Phase 03 完成（批量 L3）/ ⏳ Phase 04 测试 | L3 (批量) | `internal-tool` | `solo` | `early` (v0.5) | 2026-05-18 | [P03 批量](group-b-batch/Phase03-开发-Gate-2026-05-18.md) | Wjl |
+| **23 stub 业务模块** | 🟡 空壳骨架已建（pom + package.json + README + 占位 view）；本轮 9 个已升 PRD-aligned 走 Group B 批量 Gate；剩余 14 个待启动（document 已激活替代 5 stub）；可用 [生成器](../../../plm-backend/scripts/new-business-module.sh)一键脚手架 | — | — | — | — | 2026-05-16 | 见 [Stubs-Roadmap.md](../../../03-开发/Stubs-Roadmap.md) | — |
 
 > 列说明（4 维参数化）：
 > - **分级** L1/L2/L3 — 见 [../README §维度 1](../README.md)
