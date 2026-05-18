@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-PLM (项目全生命周期管理 / Project Lifecycle Management) — a Spring Boot 4 + Vue 3 application bootstrapped from RuoYi (若依) v3.9.2. A P0 rename has already converted the upstream `com.ruoyi.*` scaffold into a properly-namespaced project (see commit `2679a61`). **No PLM business modules have been built yet** — the codebase is the renamed scaffold plus standard admin modules (user/role/menu/dict/etc.).
+PLM (项目全生命周期管理 / Project Lifecycle Management) — a Spring Boot 4 + Vue 3 application bootstrapped from RuoYi (若依) v3.9.2. A P0 rename has already converted the upstream `com.ruoyi.*` scaffold into a properly-namespaced project (see commit `2679a61`). **All 31 PRD business modules are fully implemented** (backend + frontend) — see PRD-MAPPING.md for module inventory.
 
 - **Java package root**: `cn.com.bosssfot.dv.plm`
-- **Module prefix**: `plm-` (the 6 Maven modules: `plm-admin / plm-common / plm-framework / plm-generator / plm-quartz / plm-system`)
+- **Module prefix**: `plm-` (framework: `plm-admin / plm-common / plm-framework / plm-generator / plm-quartz / plm-system`; business: 31 PRD modules + 2 v0.x extensions)
 - **Maven artifact**: `cn.com.bosssfot.dv.plm:plm:3.9.2`
 - **Schema name**: `plm` (not the upstream `ry-vue`)
 - **Display name in UI / banner / app config prefix**: `PLM` / `plm:`
@@ -134,9 +134,10 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 4. 详细硬规则见 [.claude/rules.md §M](.claude/rules.md)
 
 **实现进度速览** (详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
-- 🟢 PRD-aligned 13 个: project / requirement / sprint / task / defect / testcase / document / submission / release / testplan / testreport / apidoc / manual-product
-- 🟡 空壳 16 个: competitive / prd / ued / arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora
-- 🔴 缺模块 1 个: inception
+- 🟢 PRD-aligned **31 个** (全部完成): project / requirement / sprint / task / defect / testcase / document / submission / release / testplan / testreport / apidoc / manual-product / inception / competitive / prd / ued / arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora
+- 🆕 v0.x 扩展 2 个: mcp / integration (Proposal 0007)
+- 🟡 空壳 0 个
+- 🔴 缺模块 0 个
 
 ## Rules & playbooks
 
