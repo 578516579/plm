@@ -146,25 +146,30 @@
 - `01-立项/README.md` / `02-设计/README.md` / `04-测试/README.md` / `05-上线/README.md` / `06-运营/README.md` / `99-跨阶段/README.md`
 - 03-开发/README.md 既有,不动
 
-### PRD 实质化分层 (2026-05-17 末次更新)
+### PRD 实质化分层 (2026-05-17 终局)
 
 | 层级 | 行数范围 | 数量 | 模块 |
 |---|---|---|---|
-| **完整实质** | 150-185 | **9** | Project (既有) + Inception/Requirement (commit bd63cd8/f20b4a5) + Defect/Sprint/Task (commit 17187e3) + Competitive/Submission/TestCase (commit 3326a54) |
-| 半实质 (v1.1) | 110-130 | **22** | 其余模块,Agent 批量提质 (commit ae40ae1) |
-| 骨架 (v1.0) | 50 | **0** 🎉 | — |
+| **完整实质 v1.2** | 150-188 | **🎉 31** | 全部 31 个 PRD-aligned 业务模块 |
+| 半实质 v1.1 | — | **0** | — |
+| 骨架 v1.0 | — | **0** | — |
 
-**31/31 模块 PRD 全部至少半实质级,9 个核心模块达完整实质级**。
+**31/31 模块 PRD 全部完整实质级**(2026-05-17 当天达成)。
 
-**9 个完整实质 PRD 的 6 大功能域覆盖**:
-- 立项域 (3/3): **Inception** / **Project** / **Competitive**
-- 设计域 (1/3): **Requirement** (PRD/Ued 留半实质)
-- 研发域 (2/7): **Sprint** / **Task** (Arch/DbDesign/ApiDesign/AiAgent/Openspec 留半实质)
-- 质量域 (3/7): **Defect** / **Submission** / **TestCase** (TestPlan/TestData/AutoTest/TestReport 留半实质)
-- 文档域 (0/5): 全留半实质
-- 效能/DevOps (0/6): 全留半实质
+**完整实质 PRD 分组**:
+- **9 个手工/范本级** (170+ 行,主进程或 Agent 用范本精产):
+  - 立项 3: Project (既有 v0.1.0) / Inception / Competitive
+  - 设计 1: Requirement (含 ADR-A)
+  - 研发 2: Sprint / Task
+  - 质量 3: Defect (含 ADR-D) / Submission (含 708) / TestCase (含 ADR-B)
+- **22 个 Agent 批量级** (164-188 行,2026-05-17 末批由 Agent 用 9 范本批量产):
+  - 设计 2: Prd / Ued
+  - 研发 5: Arch / Dbdesign / Apidesign / AiAgent / Openspec
+  - 质量 4: Testplan / Testdata / Autotest / Testreport
+  - 文档 5: ManualProduct / ManualImpl / ManualOps / Apidoc / Document
+  - 效能+DevOps 6: Analytics / Dashboard / Pipeline / FeatureFlag / Dora / Release
 
-半实质级**头部/字段/状态机/AI/验收/关联文档**已结构填充,**业务深度段落(痛点/目标/场景/OOS)留 `<待人工填写>` 占位**(因 Agent 难产业务深度内容)。
+所有 31 份 PRD 均含 8 节标准结构:文档信息 / 背景与目标(痛点 + 北极星 + OOS) / 用户与场景 / 字段定义(引 SSoT) / 状态机 / AI 能力 / 验收标准 / 关联文档。**无 `<待人工填写>` 占位残留**。
 
 ### 本日骨架累计
 

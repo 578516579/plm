@@ -154,10 +154,8 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 
 **文档完整性现状** ([审计 2026-05-17](99-跨阶段/audits/2026-05-17-process-docs-completeness-audit.md)):
 - ✅ **31/31 模块 5/5 文档骨架完整** (2026-05-17 当日 222 份骨架 + 6 阶段 README)
-- ✅ **31/31 模块 PRD 全部至少半实质级**
-- ✅ **9 个核心模块 PRD 达完整实质级** (Project / Inception / Requirement / Defect / Sprint / Task / Competitive / Submission / TestCase)
-- 六大功能域覆盖:立项 3/3 / 设计 1/3 / 研发 2/7 / 质量 3/7 / 文档 0/5 / DevOps 0/6
-- 剩 22 个半实质模块按实际开发时升完整实质
+- ✅ **31/31 模块 PRD 全部完整实质级** 🎉 (9 范本级 + 22 Agent 批量级)
+- 所有 PRD 均含 8 节标准结构 (痛点/北极星/场景/字段/状态机/AI/验收/关联),无 `<待人工填写>` 残留
 
 详细规则:[.claude/rules.md §O](.claude/rules.md) | [03-开发/开发规范.md §6.0](03-开发/开发规范.md)
 
