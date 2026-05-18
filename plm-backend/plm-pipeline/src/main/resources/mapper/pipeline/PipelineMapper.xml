@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.pipeline.mapper.PipelineMapper">
+
+    <resultMap type="Pipeline" id="PipelineResult">
+        <result property="pipelineId"       column="pipeline_id"        />
+        <result property="pipelineNo"       column="pipeline_no"        />
+        <result property="projectId"        column="project_id"         />
+        <result property="pipelineName"     column="pipeline_name"      />
+        <result property="repository"       column="repository"         />
+        <result property="branch"           column="branch"             />
+        <result property="triggerType"      column="trigger_type"       />
+        <result property="stages"           column="stages"             />
+        <result property="lastRunStatus"    column="last_run_status"    />
+        <result property="lastRunAt"        column="last_run_at"        />
+        <result property="lastRunDuration"  column="last_run_duration"  />
+        <result property="successCount"     column="success_count"      />
+        <result property="failedCount"      column="failed_count"       />
+        <result property="successRate"      column="success_rate"       />
+        <result property="status"           column="status"             />
+        <result property="authorUserId"     column="author_user_id"     />
+        <result property="createBy"         column="create_by"          />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateBy"         column="update_by"          />
+        <result property="updateTime"       column="update_time"        />
+        <result property="remark"           column="remark"             />
+        <result property="delFlag"          column="del_flag"           />
+    </resultMap>
+
+    <sql id="selectPipelineVo">
+        select pipeline_id, pipeline_no, project_id, pipeline_name, repository, branch,
+               trigger_type, stages, last_run_status, last_run_at, last_run_duration,
+               success_count, failed_count, success_rate, status, author_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_pipeline
+    </sql>
+
+    <select id="selectPipelineList" parameterType="Pipeline" resultMap="PipelineResult">
+        <include refid="selectPipelineVo"/>
+        <where>
+            del_flag = '0'
+            <if test="pipelineNo != null and pipelineNo != ''">and pipeline_no like concat('%', #{pipelineNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="pipelineName != null and pipelineName != ''">and pipeline_name like concat('%', #{pipelineName}, '%')</if>
+            <if test="repository != null and repository != ''">and repository = #{repository}</if>
+            <if test="branch != null and branch != ''">and branch = #{branch}</if>
+            <if test="triggerType != null and triggerType != ''">and trigger_type = #{triggerType}</if>
+            <if test="lastRunStatus != null and lastRunStatus != ''">and last_run_status = #{lastRunStatus}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="authorUserId != null">and author_user_id = #{authorUserId}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectPipelineById" parameterType="Long" resultMap="PipelineResult">
+        <include refid="selectPipelineVo"/>
+        where pipeline_id = #{pipelineId} and del_flag = '0'
+    </select>
+
+    <insert id="insertPipeline" parameterType="Pipeline" useGeneratedKeys="true" keyProperty="pipelineId">
+        insert into tb_pipeline
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pipelineNo != null">pipeline_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="pipelineName != null">pipeline_name,</if>
+            <if test="repository != null">repository,</if>
+            <if test="branch != null">branch,</if>
+            <if test="triggerType != null">trigger_type,</if>
+            <if test="stages != null">stages,</if>
+            <if test="lastRunStatus != null">last_run_status,</if>
+            <if test="lastRunAt != null">last_run_at,</if>
+            <if test="lastRunDuration != null">last_run_duration,</if>
+            <if test="successCount != null">success_count,</if>
+            <if test="failedCount != null">failed_count,</if>
+            <if test="successRate != null">success_rate,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            del_flag,
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="pipelineNo != null">#{pipelineNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="pipelineName != null">#{pipelineName},</if>
+            <if test="repository != null">#{repository},</if>
+            <if test="branch != null">#{branch},</if>
+            <if test="triggerType != null">#{triggerType},</if>
+            <if test="stages != null">#{stages},</if>
+            <if test="lastRunStatus != null">#{lastRunStatus},</if>
+            <if test="lastRunAt != null">#{lastRunAt},</if>
+            <if test="lastRunDuration != null">#{lastRunDuration},</if>
+            <if test="successCount != null">#{successCount},</if>
+            <if test="failedCount != null">#{failedCount},</if>
+            <if test="successRate != null">#{successRate},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            '0',
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updatePipeline" parameterType="Pipeline">
+        update tb_pipeline
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pipelineNo != null">pipeline_no = #{pipelineNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="pipelineName != null">pipeline_name = #{pipelineName},</if>
+            <if test="repository != null">repository = #{repository},</if>
+            <if test="branch != null">branch = #{branch},</if>
+            <if test="triggerType != null">trigger_type = #{triggerType},</if>
+            <if test="stages != null">stages = #{stages},</if>
+            <if test="lastRunStatus != null">last_run_status = #{lastRunStatus},</if>
+            <if test="lastRunAt != null">last_run_at = #{lastRunAt},</if>
+            <if test="lastRunDuration != null">last_run_duration = #{lastRunDuration},</if>
+            <if test="successCount != null">success_count = #{successCount},</if>
+            <if test="failedCount != null">failed_count = #{failedCount},</if>
+            <if test="successRate != null">success_rate = #{successRate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where pipeline_id = #{pipelineId}
+    </update>
+
+    <update id="deletePipelineByIds" parameterType="Long">
+        update tb_pipeline set del_flag = '2' where pipeline_id in
+        <foreach item="pipelineId" collection="array" open="(" separator="," close=")">
+            #{pipelineId}
+        </foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(pipeline_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_pipeline
+        where pipeline_no like concat(#{prefix}, '%')
+    </select>
+
+</mapper>

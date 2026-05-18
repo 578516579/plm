@@ -30,16 +30,16 @@
 | 19 | 数据库设计 DbDesign | F3.2 | dbdesign.html | plm-dbdesign | 🟢 PRD-aligned |
 | 20 | 接口设计 ApiDesign | F3.3 | apidesign.html | plm-apidesign | 🟢 PRD-aligned |
 | 21 | 测试数据 TestData | F4.3 | testdata.html | plm-testdata | 🟢 PRD-aligned |
-| 22 | 自动化测试 AutoTest | F4.5 | autotest.html | plm-autotest | 🟡 空壳 |
-| 23 | 实施手册 ManualImpl | F5.2 | implmanual.html | plm-manual-impl | 🟡 空壳 |
-| 24 | 运维手册 ManualOps | F5.3 | opsmanual.html | plm-manual-ops | 🟡 空壳 |
-| 25 | 效能分析 Analytics | - | analytics.html | plm-analytics | 🟡 空壳 |
-| 26 | 工作台 Dashboard | - | dashboard.html | plm-dashboard | 🟡 空壳 |
+| 22 | 自动化测试 AutoTest | F4.5 | autotest.html | plm-autotest | 🟢 PRD-aligned |
+| 23 | 实施手册 ManualImpl | F5.2 | implmanual.html | plm-manual-impl | 🟢 PRD-aligned |
+| 24 | 运维手册 ManualOps | F5.3 | opsmanual.html | plm-manual-ops | 🟢 PRD-aligned |
+| 25 | 效能分析 Analytics | - | analytics.html | plm-analytics | 🟢 PRD-aligned |
+| 26 | 工作台 Dashboard | - | dashboard.html | plm-dashboard | 🟢 PRD-aligned |
 | 27 | AI Agent | §2.3/§3.1 | aiagents.html | plm-ai-agent | 🟢 PRD-aligned |
-| 28 | OpenSpec | - | aispec.html | plm-openspec | 🟡 空壳 |
-| 29 | Pipeline | - | pipeline.html | plm-pipeline | 🟡 空壳 |
-| 30 | Feature Flag | - | featureflag.html | plm-feature-flag | 🟡 空壳 |
-| 31 | DORA | - | devops.html | plm-dora | 🟡 空壳 |
+| 28 | OpenSpec | - | aispec.html | plm-openspec | 🟢 PRD-aligned |
+| 29 | Pipeline | - | pipeline.html | plm-pipeline | 🟢 PRD-aligned |
+| 30 | Feature Flag | - | featureflag.html | plm-feature-flag | 🟢 PRD-aligned |
+| 31 | DORA | - | devops.html | plm-dora | 🟢 PRD-aligned |
 | **32** | **MCP Server** | **§2.5/§3.4/§4.1** | **settings.html#MCP集成 (Tab3)** | **plm-mcp** | **🆕 v0.x（Proposal 0007）** |
 | **33** | **集成对接 Integration** | **§3.1/§3.5 Phase2** | **settings.html#MCP集成 (Tab3)** | **plm-integration** | **🆕 v0.x（Proposal 0007）** |
 
@@ -326,3 +326,4 @@
 | 2026-05-17 | Wjl + Claude | 初版；初始化 SSoT；按 Proposal 0007 加入 §32 MCP / §33 Integration |
 | 2026-05-18 | Wjl + Claude | §34 AI Agent 编排模块 PRD-aligned；补字段对照表/状态机/错误码/URL/字典 |
 | 2026-05-18 | Wjl + Claude | Group A 7 模块前端升级 🟡→🟢：competitive/prd/ued/arch/dbdesign/apidesign/testdata；新增 types/api/views/router/index |
+| 2026-05-18 | Wjl + Claude | Group B 9 模块全栈 🟡→🟢：autotest/manual-impl/manual-ops/analytics/pipeline/dora/openspec/feature-flag/dashboard；后端 54 Java 文件 + 9 SQL + 前端 types/api/views/router/index |

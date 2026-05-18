@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
     path: '/business/analytics',
     name: 'Analytics',
     component: () => import('./views/index.vue'),
-    meta: { title: '效能分析', icon: 'data-line', stub: true }
+    meta: { title: '效能分析', icon: 'data-line' }
   }
 ]
 

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.autotest.mapper.AutotestMapper">
+
+    <resultMap type="Autotest" id="AutotestResult">
+        <result property="autotestId"        column="autotest_id"         />
+        <result property="autotestNo"        column="autotest_no"         />
+        <result property="projectId"         column="project_id"          />
+        <result property="suiteName"         column="suite_name"          />
+        <result property="description"       column="description"         />
+        <result property="framework"         column="framework"           />
+        <result property="targetModule"      column="target_module"       />
+        <result property="scriptContent"     column="script_content"      />
+        <result property="aiGenerated"       column="ai_generated"        />
+        <result property="lastRunAt"         column="last_run_at"         />
+        <result property="lastRunPassRate"   column="last_run_pass_rate"  />
+        <result property="lastRunDuration"   column="last_run_duration"   />
+        <result property="failedCaseCount"   column="failed_case_count"   />
+        <result property="status"            column="status"              />
+        <result property="authorUserId"      column="author_user_id"      />
+        <result property="createBy"          column="create_by"           />
+        <result property="createTime"        column="create_time"         />
+        <result property="updateBy"          column="update_by"           />
+        <result property="updateTime"        column="update_time"         />
+        <result property="remark"            column="remark"              />
+        <result property="delFlag"           column="del_flag"            />
+    </resultMap>
+
+    <sql id="selectAutotestVo">
+        select autotest_id, autotest_no, project_id, suite_name, description, framework,
+               target_module, script_content, ai_generated, last_run_at, last_run_pass_rate,
+               last_run_duration, failed_case_count, status, author_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_autotest
+    </sql>
+
+    <select id="selectAutotestList" parameterType="Autotest" resultMap="AutotestResult">
+        <include refid="selectAutotestVo"/>
+        <where>
+            del_flag = '0'
+            <if test="autotestNo != null and autotestNo != ''">and autotest_no like concat('%', #{autotestNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="suiteName != null and suiteName != ''">and suite_name like concat('%', #{suiteName}, '%')</if>
+            <if test="framework != null and framework != ''">and framework = #{framework}</if>
+            <if test="targetModule != null and targetModule != ''">and target_module like concat('%', #{targetModule}, '%')</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectAutotestById" parameterType="Long" resultMap="AutotestResult">
+        <include refid="selectAutotestVo"/>
+        where autotest_id = #{autotestId} and del_flag = '0'
+    </select>
+
+    <insert id="insertAutotest" parameterType="Autotest" useGeneratedKeys="true" keyProperty="autotestId">
+        insert into tb_autotest
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="autotestNo != null">autotest_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="suiteName != null">suite_name,</if>
+            <if test="description != null">description,</if>
+            <if test="framework != null">framework,</if>
+            <if test="targetModule != null">target_module,</if>
+            <if test="scriptContent != null">script_content,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="lastRunAt != null">last_run_at,</if>
+            <if test="lastRunPassRate != null">last_run_pass_rate,</if>
+            <if test="lastRunDuration != null">last_run_duration,</if>
+            <if test="failedCaseCount != null">failed_case_count,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            del_flag,
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="autotestNo != null">#{autotestNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="suiteName != null">#{suiteName},</if>
+            <if test="description != null">#{description},</if>
+            <if test="framework != null">#{framework},</if>
+            <if test="targetModule != null">#{targetModule},</if>
+            <if test="scriptContent != null">#{scriptContent},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="lastRunAt != null">#{lastRunAt},</if>
+            <if test="lastRunPassRate != null">#{lastRunPassRate},</if>
+            <if test="lastRunDuration != null">#{lastRunDuration},</if>
+            <if test="failedCaseCount != null">#{failedCaseCount},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            '0',
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateAutotest" parameterType="Autotest">
+        update tb_autotest
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="autotestNo != null">autotest_no = #{autotestNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="suiteName != null">suite_name = #{suiteName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="framework != null">framework = #{framework},</if>
+            <if test="targetModule != null">target_module = #{targetModule},</if>
+            <if test="scriptContent != null">script_content = #{scriptContent},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="lastRunAt != null">last_run_at = #{lastRunAt},</if>
+            <if test="lastRunPassRate != null">last_run_pass_rate = #{lastRunPassRate},</if>
+            <if test="lastRunDuration != null">last_run_duration = #{lastRunDuration},</if>
+            <if test="failedCaseCount != null">failed_case_count = #{failedCaseCount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where autotest_id = #{autotestId}
+    </update>
+
+    <update id="deleteAutotestByIds" parameterType="Long">
+        update tb_autotest set del_flag = '2' where autotest_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(autotest_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_autotest
+        where autotest_no like concat(#{prefix}, '%')
+    </select>
+</mapper>

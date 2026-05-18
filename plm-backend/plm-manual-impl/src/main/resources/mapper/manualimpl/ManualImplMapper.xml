@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.manualimpl.mapper.ManualImplMapper">
+
+    <resultMap type="ManualImpl" id="ManualImplResult">
+        <result property="manualImplId"     column="manual_impl_id"     />
+        <result property="manualImplNo"     column="manual_impl_no"     />
+        <result property="projectId"        column="project_id"         />
+        <result property="title"            column="title"              />
+        <result property="deploymentMode"   column="deployment_mode"    />
+        <result property="os"               column="os"                 />
+        <result property="database"         column="database"           />
+        <result property="envVars"          column="env_vars"           />
+        <result property="content"          column="content"            />
+        <result property="aiGenerated"      column="ai_generated"       />
+        <result property="aiGeneratedAt"    column="ai_generated_at"    />
+        <result property="status"           column="status"             />
+        <result property="authorUserId"     column="author_user_id"     />
+        <result property="reviewerUserId"   column="reviewer_user_id"   />
+        <result property="createBy"         column="create_by"          />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateBy"         column="update_by"          />
+        <result property="updateTime"       column="update_time"        />
+        <result property="remark"           column="remark"             />
+        <result property="delFlag"          column="del_flag"           />
+    </resultMap>
+
+    <sql id="selectManualImplVo">
+        select manual_impl_id, manual_impl_no, project_id, title, deployment_mode, os, `database`,
+               env_vars, content, ai_generated, ai_generated_at, status, author_user_id, reviewer_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_manual_impl
+    </sql>
+
+    <select id="selectManualImplList" parameterType="ManualImpl" resultMap="ManualImplResult">
+        <include refid="selectManualImplVo"/>
+        <where>
+            del_flag = '0'
+            <if test="manualImplNo != null and manualImplNo != ''">and manual_impl_no like concat('%', #{manualImplNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
+            <if test="deploymentMode != null and deploymentMode != ''">and deployment_mode = #{deploymentMode}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectManualImplById" parameterType="Long" resultMap="ManualImplResult">
+        <include refid="selectManualImplVo"/>
+        where manual_impl_id = #{manualImplId} and del_flag = '0'
+    </select>
+
+    <insert id="insertManualImpl" parameterType="ManualImpl" useGeneratedKeys="true" keyProperty="manualImplId">
+        insert into tb_manual_impl
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="manualImplNo != null">manual_impl_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="title != null">title,</if>
+            <if test="deploymentMode != null">deployment_mode,</if>
+            <if test="os != null">os,</if>
+            <if test="database != null">`database`,</if>
+            <if test="envVars != null">env_vars,</if>
+            <if test="content != null">content,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="aiGeneratedAt != null">ai_generated_at,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="manualImplNo != null">#{manualImplNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="deploymentMode != null">#{deploymentMode},</if>
+            <if test="os != null">#{os},</if>
+            <if test="database != null">#{database},</if>
+            <if test="envVars != null">#{envVars},</if>
+            <if test="content != null">#{content},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateManualImpl" parameterType="ManualImpl">
+        update tb_manual_impl
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="manualImplNo != null">manual_impl_no = #{manualImplNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="deploymentMode != null">deployment_mode = #{deploymentMode},</if>
+            <if test="os != null">os = #{os},</if>
+            <if test="database != null">`database` = #{database},</if>
+            <if test="envVars != null">env_vars = #{envVars},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where manual_impl_id = #{manualImplId}
+    </update>
+
+    <update id="deleteManualImplByIds" parameterType="Long">
+        update tb_manual_impl set del_flag = '2' where manual_impl_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(manual_impl_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_manual_impl
+        where manual_impl_no like concat(#{prefix}, '%')
+    </select>
+
+</mapper>

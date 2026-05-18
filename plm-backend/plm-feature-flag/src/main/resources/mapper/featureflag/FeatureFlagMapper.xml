@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.featureflag.mapper.FeatureFlagMapper">
+
+    <resultMap type="FeatureFlag" id="FeatureFlagResult">
+        <result property="flagId"             column="flag_id"              />
+        <result property="flagKey"            column="flag_key"             />
+        <result property="flagName"           column="flag_name"            />
+        <result property="description"        column="description"          />
+        <result property="environment"        column="environment"          />
+        <result property="rolloutStrategy"    column="rollout_strategy"     />
+        <result property="rolloutPercentage"  column="rollout_percentage"   />
+        <result property="userWhitelist"      column="user_whitelist"       />
+        <result property="enabled"            column="enabled"              />
+        <result property="projectId"          column="project_id"           />
+        <result property="authorUserId"       column="author_user_id"       />
+        <result property="createBy"           column="create_by"            />
+        <result property="createTime"         column="create_time"          />
+        <result property="updateBy"           column="update_by"            />
+        <result property="updateTime"         column="update_time"          />
+        <result property="remark"             column="remark"               />
+        <result property="delFlag"            column="del_flag"             />
+    </resultMap>
+
+    <sql id="selectFeatureFlagVo">
+        select flag_id, flag_key, flag_name, description, environment,
+               rollout_strategy, rollout_percentage, user_whitelist, enabled, project_id,
+               author_user_id, create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_feature_flag
+    </sql>
+
+    <select id="selectFeatureFlagList" parameterType="FeatureFlag" resultMap="FeatureFlagResult">
+        <include refid="selectFeatureFlagVo"/>
+        <where>
+            del_flag = '0'
+            <if test="flagKey != null and flagKey != ''">and flag_key like concat('%', #{flagKey}, '%')</if>
+            <if test="flagName != null and flagName != ''">and flag_name like concat('%', #{flagName}, '%')</if>
+            <if test="environment != null and environment != ''">and environment = #{environment}</if>
+            <if test="rolloutStrategy != null and rolloutStrategy != ''">and rollout_strategy = #{rolloutStrategy}</if>
+            <if test="enabled != null and enabled != ''">and enabled = #{enabled}</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectFeatureFlagById" parameterType="Long" resultMap="FeatureFlagResult">
+        <include refid="selectFeatureFlagVo"/>
+        where flag_id = #{flagId} and del_flag = '0'
+    </select>
+
+    <insert id="insertFeatureFlag" parameterType="FeatureFlag" useGeneratedKeys="true" keyProperty="flagId">
+        insert into tb_feature_flag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="flagKey != null">flag_key,</if>
+            <if test="flagName != null">flag_name,</if>
+            <if test="description != null">description,</if>
+            <if test="environment != null">environment,</if>
+            <if test="rolloutStrategy != null">rollout_strategy,</if>
+            <if test="rolloutPercentage != null">rollout_percentage,</if>
+            <if test="userWhitelist != null">user_whitelist,</if>
+            <if test="enabled != null">enabled,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            del_flag,
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="flagKey != null">#{flagKey},</if>
+            <if test="flagName != null">#{flagName},</if>
+            <if test="description != null">#{description},</if>
+            <if test="environment != null">#{environment},</if>
+            <if test="rolloutStrategy != null">#{rolloutStrategy},</if>
+            <if test="rolloutPercentage != null">#{rolloutPercentage},</if>
+            <if test="userWhitelist != null">#{userWhitelist},</if>
+            <if test="enabled != null">#{enabled},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            '0',
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateFeatureFlag" parameterType="FeatureFlag">
+        update tb_feature_flag
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="flagKey != null">flag_key = #{flagKey},</if>
+            <if test="flagName != null">flag_name = #{flagName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="environment != null">environment = #{environment},</if>
+            <if test="rolloutStrategy != null">rollout_strategy = #{rolloutStrategy},</if>
+            <if test="rolloutPercentage != null">rollout_percentage = #{rolloutPercentage},</if>
+            <if test="userWhitelist != null">user_whitelist = #{userWhitelist},</if>
+            <if test="enabled != null">enabled = #{enabled},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="authorUserId != null">author_user_id = #{authorUserId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where flag_id = #{flagId}
+    </update>
+
+    <update id="deleteFeatureFlagByIds" parameterType="Long">
+        update tb_feature_flag set del_flag = '2' where flag_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+</mapper>

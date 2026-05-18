@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.dashboard.mapper.DashboardMapper">
+
+    <resultMap type="Dashboard" id="DashboardResult">
+        <result property="dashboardId"  column="dashboard_id"  />
+        <result property="dashboardNo"  column="dashboard_no"  />
+        <result property="projectId"    column="project_id"    />
+        <result property="widgetName"   column="widget_name"   />
+        <result property="widgetType"   column="widget_type"   />
+        <result property="dataSource"   column="data_source"   />
+        <result property="config"       column="config"        />
+        <result property="sortOrder"    column="sort_order"    />
+        <result property="visible"      column="visible"       />
+        <result property="userId"       column="user_id"       />
+        <result property="status"       column="status"        />
+        <result property="createBy"     column="create_by"     />
+        <result property="createTime"   column="create_time"   />
+        <result property="updateBy"     column="update_by"     />
+        <result property="updateTime"   column="update_time"   />
+        <result property="remark"       column="remark"        />
+        <result property="delFlag"      column="del_flag"      />
+    </resultMap>
+
+    <sql id="selectDashboardVo">
+        select dashboard_id, dashboard_no, project_id, widget_name, widget_type,
+               data_source, config, sort_order, visible, user_id, status,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_dashboard
+    </sql>
+
+    <select id="selectDashboardList" parameterType="Dashboard" resultMap="DashboardResult">
+        <include refid="selectDashboardVo"/>
+        <where>
+            del_flag = '0'
+            <if test="dashboardNo != null and dashboardNo != ''">and dashboard_no like concat('%', #{dashboardNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="widgetName != null and widgetName != ''">and widget_name like concat('%', #{widgetName}, '%')</if>
+            <if test="widgetType != null and widgetType != ''">and widget_type = #{widgetType}</if>
+            <if test="visible != null and visible != ''">and visible = #{visible}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by sort_order asc, create_time desc
+    </select>
+
+    <select id="selectDashboardById" parameterType="Long" resultMap="DashboardResult">
+        <include refid="selectDashboardVo"/>
+        where dashboard_id = #{dashboardId} and del_flag = '0'
+    </select>
+
+    <insert id="insertDashboard" parameterType="Dashboard" useGeneratedKeys="true" keyProperty="dashboardId">
+        insert into tb_dashboard
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="dashboardNo != null">dashboard_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="widgetName != null">widget_name,</if>
+            <if test="widgetType != null">widget_type,</if>
+            <if test="dataSource != null">data_source,</if>
+            <if test="config != null">config,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="visible != null">visible,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            del_flag,
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="dashboardNo != null">#{dashboardNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="widgetName != null">#{widgetName},</if>
+            <if test="widgetType != null">#{widgetType},</if>
+            <if test="dataSource != null">#{dataSource},</if>
+            <if test="config != null">#{config},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="visible != null">#{visible},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            '0',
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateDashboard" parameterType="Dashboard">
+        update tb_dashboard
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="dashboardNo != null">dashboard_no = #{dashboardNo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="widgetName != null">widget_name = #{widgetName},</if>
+            <if test="widgetType != null">widget_type = #{widgetType},</if>
+            <if test="dataSource != null">data_source = #{dataSource},</if>
+            <if test="config != null">config = #{config},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="visible != null">visible = #{visible},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where dashboard_id = #{dashboardId}
+    </update>
+
+    <update id="deleteDashboardByIds" parameterType="Long">
+        update tb_dashboard set del_flag = '2' where dashboard_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(dashboard_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_dashboard
+        where dashboard_no like concat(#{prefix}, '%')
+    </select>
+</mapper>

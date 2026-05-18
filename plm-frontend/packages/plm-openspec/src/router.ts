@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
     path: '/business/openspec',
     name: 'Openspec',
     component: () => import('./views/index.vue'),
-    meta: { title: 'AI OpenSpec', icon: 'magic-stick', stub: true }
+    meta: { title: 'AI OpenSpec', icon: 'magic-stick' }
   }
 ]
 
