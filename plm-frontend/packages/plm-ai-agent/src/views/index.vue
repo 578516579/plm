@@ -290,7 +290,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import { listAiAgent, getAiAgent, addAiAgent, updateAiAgent, delAiAgent, changeAgentStatus } from '../api'
 import type { AiAgentForm, AiAgentQuery } from '../types'
 
@@ -331,11 +330,11 @@ const rules = {
 }
 
 // 汇总指标（基于当前列表）
-const totalCallsToday = computed(() => list.value.reduce((s, a) => s + (a.callsToday ?? 0), 0))
-const runningCount = computed(() => list.value.filter(a => a.status === '0').length)
+const totalCallsToday = computed(() => list.value.reduce((s: number, a: any) => s + (a.callsToday ?? 0), 0))
+const runningCount = computed(() => list.value.filter((a: any) => a.status === '0').length)
 const avgSuccessRate = computed(() => {
   if (!list.value.length) return 0
-  const avg = list.value.reduce((s, a) => s + Number(a.successRate ?? 100), 0) / list.value.length
+  const avg = list.value.reduce((s: number, a: any) => s + Number(a.successRate ?? 100), 0) / list.value.length
   return Math.round(avg)
 })
 

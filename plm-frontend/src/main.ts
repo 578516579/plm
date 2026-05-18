@@ -1,4 +1,3 @@
-import { createApp } from 'vue'
 
 import Cookies from 'js-cookie'
 

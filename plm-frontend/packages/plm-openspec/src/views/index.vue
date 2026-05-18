@@ -112,7 +112,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { download } from '@/utils/request'
@@ -140,7 +139,7 @@ const rules = { specName: [{ required: true, message: '规范名称不能为空'
 
 function getList() {
   loading.value = true
-  listOpenspec(queryParams).then(res => {
+  listOpenspec(queryParams).then((res: any) => {
     dataList.value = (res.rows || []).map((r: any) => ({ ...r, _aiLoading: false }))
     total.value = res.total
   }).finally(() => { loading.value = false })
@@ -158,7 +157,7 @@ function handleAdd() {
 }
 
 function handleEdit(row: any) {
-  getOpenspec(row.openspecId).then(res => {
+  getOpenspec(row.openspecId).then((res: any) => {
     Object.assign(form, res.data)
     dialogTitle.value = '编辑AI规范'
     dialogVisible.value = true

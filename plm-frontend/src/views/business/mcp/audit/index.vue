@@ -37,7 +37,6 @@
 </template>
 
 <script setup name="McpAudit" lang="ts">
-import { ref, reactive, onMounted } from 'vue'
 import { useDict } from '@/utils/dict'
 import { listAudits, exportAudit, type McpToolAudit } from '@/api/business/mcp/audit'
 

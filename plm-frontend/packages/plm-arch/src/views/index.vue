@@ -198,7 +198,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, getCurrentInstance } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listArch, getArch, addArch, updateArch, delArch, aiGenerateArch } from '../api'
 import type { ArchForm, ArchQuery } from '../types'
@@ -229,7 +228,7 @@ const rules = { title: [{ required: true, message: '架构标题不能为空', t
 
 function getList() {
   loading.value = true
-  listArch(queryParams).then(res => {
+  listArch(queryParams).then((res: any) => {
     dataList.value = res.rows; total.value = res.total
   }).finally(() => { loading.value = false })
 }
@@ -240,16 +239,16 @@ function handleSelectionChange(selection: any[]) {
 }
 function handleAdd() { form.value = { title: '' }; dialogTitle.value = '新增架构设计'; dialogVisible.value = true }
 function handleEdit(row: any) {
-  getArch(row.archId).then(res => { form.value = res.data; dialogTitle.value = '编辑架构设计'; dialogVisible.value = true })
+  getArch(row.archId).then((res: any) => { form.value = res.data; dialogTitle.value = '编辑架构设计'; dialogVisible.value = true })
 }
 function handleDetail(row: any) {
-  getArch(row.archId).then(res => { detail.value = res.data; detailVisible.value = true })
+  getArch(row.archId).then((res: any) => { detail.value = res.data; detailVisible.value = true })
 }
 function handleAiGenerate() {
   aiLoading.value = true
   aiGenerateArch(detail.value.archId).then(() => {
     ElMessage.success('AI 生成完成')
-    getArch(detail.value.archId).then(r => { detail.value = r.data }); getList()
+    getArch(detail.value.archId).then((r: any) => { detail.value = r.data }); getList()
   }).catch(() => ElMessage.error('AI 生成失败')).finally(() => { aiLoading.value = false })
 }
 function handleDelete(row?: any) {

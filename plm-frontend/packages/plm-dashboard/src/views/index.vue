@@ -118,7 +118,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { download } from '@/utils/request'
@@ -146,7 +145,7 @@ const rules = { widgetName: [{ required: true, message: '组件名称不能为�
 
 function getList() {
   loading.value = true
-  listDashboard(queryParams).then(res => {
+  listDashboard(queryParams).then((res: any) => {
     dataList.value = res.rows || []
     total.value = res.total
   }).finally(() => { loading.value = false })
@@ -164,7 +163,7 @@ function handleAdd() {
 }
 
 function handleEdit(row: any) {
-  getDashboard(row.dashboardId).then(res => {
+  getDashboard(row.dashboardId).then((res: any) => {
     Object.assign(form, res.data)
     dialogTitle.value = '编辑看板组件'
     dialogVisible.value = true

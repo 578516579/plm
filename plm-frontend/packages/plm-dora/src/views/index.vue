@@ -121,7 +121,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { download } from '@/utils/request'
@@ -149,7 +148,7 @@ const rules = { period: [{ required: true, message: '周期不能为空', trigge
 
 function getList() {
   loading.value = true
-  listDora(queryParams).then(res => {
+  listDora(queryParams).then((res: any) => {
     dataList.value = (res.rows || []).map((r: any) => ({ ...r, _aiLoading: false }))
     total.value = res.total
   }).finally(() => { loading.value = false })
@@ -167,7 +166,7 @@ function handleAdd() {
 }
 
 function handleEdit(row: any) {
-  getDora(row.doraId).then(res => {
+  getDora(row.doraId).then((res: any) => {
     Object.assign(form, res.data)
     dialogTitle.value = '编辑DORA效能记录'
     dialogVisible.value = true

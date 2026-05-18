@@ -267,7 +267,7 @@ function handleDelete(row?: TestCaseForm) {
 }
 
 function handleExecute(row?: TestCaseForm) {
-  const target = row || list.value.find(x => x.testcaseId === ids.value[0])
+  const target = row || list.value.find((x: any) => x.testcaseId === ids.value[0])
   if (!target) return
   // 业务规则: 必须先推到"执行中"才能 execute
   if (target.status !== '02') {

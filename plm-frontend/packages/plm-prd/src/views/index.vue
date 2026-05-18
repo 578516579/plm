@@ -167,7 +167,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, getCurrentInstance } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listPrd, getPrd, addPrd, updatePrd, delPrd, aiGeneratePrd } from '../api'
 import type { PrdForm, PrdQuery } from '../types'
@@ -197,7 +196,7 @@ const rules = { title: [{ required: true, message: '功能名称不能为空', t
 
 function getList() {
   loading.value = true
-  listPrd(queryParams).then(res => {
+  listPrd(queryParams).then((res: any) => {
     dataList.value = res.rows; total.value = res.total
   }).finally(() => { loading.value = false })
 }
@@ -208,16 +207,16 @@ function handleSelectionChange(selection: any[]) {
 }
 function handleAdd() { form.value = { title: '' }; dialogTitle.value = '新增 PRD 文档'; dialogVisible.value = true }
 function handleEdit(row: any) {
-  getPrd(row.prdId).then(res => { form.value = res.data; dialogTitle.value = '编辑 PRD 文档'; dialogVisible.value = true })
+  getPrd(row.prdId).then((res: any) => { form.value = res.data; dialogTitle.value = '编辑 PRD 文档'; dialogVisible.value = true })
 }
 function handleDetail(row: any) {
-  getPrd(row.prdId).then(res => { detail.value = res.data; detailVisible.value = true })
+  getPrd(row.prdId).then((res: any) => { detail.value = res.data; detailVisible.value = true })
 }
 function handleAiGenerate() {
   aiLoading.value = true
   aiGeneratePrd(detail.value.prdId).then(() => {
     ElMessage.success('AI 生成完成')
-    getPrd(detail.value.prdId).then(r => { detail.value = r.data }); getList()
+    getPrd(detail.value.prdId).then((r: any) => { detail.value = r.data }); getList()
   }).catch(() => ElMessage.error('AI 生成失败')).finally(() => { aiLoading.value = false })
 }
 function handleDelete(row?: any) {

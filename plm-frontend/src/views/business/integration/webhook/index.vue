@@ -51,7 +51,6 @@
 </template>
 
 <script setup name="IntegrationWebhook" lang="ts">
-import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { listEvents, retryEvent, exportEvents, type WebhookEvent } from '@/api/business/integration/webhook'

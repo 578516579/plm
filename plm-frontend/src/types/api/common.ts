@@ -20,6 +20,9 @@ export interface TableDataInfo<T = any> {
   rows: T[]
 }
 
+/** 分页查询参数类型 (PageDomain 的别名，供业务模块 XxxQuery extends PageQuery 使用) */
+export type PageQuery = PageDomain
+
 /** 分页参数类型 */
 export interface PageDomain {
   /** 当前记录起始索引 */

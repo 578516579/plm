@@ -122,7 +122,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { download } from '@/utils/request'
@@ -151,7 +150,7 @@ const rules = { pipelineName: [{ required: true, message: '流水线名称不能
 
 function getList() {
   loading.value = true
-  listPipeline(queryParams).then(res => {
+  listPipeline(queryParams).then((res: any) => {
     dataList.value = res.rows || []
     total.value = res.total
   }).finally(() => { loading.value = false })
@@ -169,7 +168,7 @@ function handleAdd() {
 }
 
 function handleEdit(row: any) {
-  getPipeline(row.pipelineId).then(res => {
+  getPipeline(row.pipelineId).then((res: any) => {
     Object.assign(form, res.data)
     dialogTitle.value = '编辑流水线'
     dialogVisible.value = true

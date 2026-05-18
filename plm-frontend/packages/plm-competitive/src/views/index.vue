@@ -177,7 +177,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, getCurrentInstance } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listCompetitive, getCompetitive, addCompetitive, updateCompetitive, delCompetitive, aiAnalyzeCompetitive } from '../api'
 import type { CompetitiveForm, CompetitiveQuery } from '../types'
@@ -207,7 +206,7 @@ const rules = { competitorName: [{ required: true, message: '竞品名称不能�
 
 function getList() {
   loading.value = true
-  listCompetitive(queryParams).then(res => {
+  listCompetitive(queryParams).then((res: any) => {
     dataList.value = res.rows
     total.value = res.total
   }).finally(() => { loading.value = false })
@@ -224,18 +223,18 @@ function handleAdd() {
   dialogTitle.value = '新增竞品情报'; dialogVisible.value = true
 }
 function handleEdit(row: any) {
-  getCompetitive(row.competitiveId).then(res => {
+  getCompetitive(row.competitiveId).then((res: any) => {
     form.value = res.data; dialogTitle.value = '编辑竞品情报'; dialogVisible.value = true
   })
 }
 function handleDetail(row: any) {
-  getCompetitive(row.competitiveId).then(res => { detail.value = res.data; detailVisible.value = true })
+  getCompetitive(row.competitiveId).then((res: any) => { detail.value = res.data; detailVisible.value = true })
 }
 function handleAiAnalyze() {
   aiLoading.value = true
   aiAnalyzeCompetitive(detail.value.competitiveId).then(() => {
     ElMessage.success('AI 分析完成')
-    getCompetitive(detail.value.competitiveId).then(r => { detail.value = r.data })
+    getCompetitive(detail.value.competitiveId).then((r: any) => { detail.value = r.data })
     getList()
   }).catch(() => ElMessage.error('AI 分析失败')).finally(() => { aiLoading.value = false })
 }

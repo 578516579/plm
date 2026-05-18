@@ -130,7 +130,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { download } from '@/utils/request'
@@ -161,7 +160,7 @@ const rules = {
 
 function getList() {
   loading.value = true
-  listAnalytics(queryParams).then(res => {
+  listAnalytics(queryParams).then((res: any) => {
     dataList.value = (res.rows || []).map((r: any) => ({ ...r, _aiLoading: false }))
     total.value = res.total
   }).finally(() => { loading.value = false })
@@ -179,7 +178,7 @@ function handleAdd() {
 }
 
 function handleEdit(row: any) {
-  getAnalytics(row.analyticsId).then(res => {
+  getAnalytics(row.analyticsId).then((res: any) => {
     Object.assign(form, res.data)
     dialogTitle.value = '编辑效能分析'
     dialogVisible.value = true

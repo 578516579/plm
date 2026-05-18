@@ -174,7 +174,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, getCurrentInstance } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listApidesign, getApidesign, addApidesign, updateApidesign, delApidesign, aiGenerateApidesign } from '../api'
 import type { ApidesignForm, ApidesignQuery } from '../types'
@@ -213,7 +212,7 @@ function methodTagType(method: string) {
 
 function getList() {
   loading.value = true
-  listApidesign(queryParams).then(res => {
+  listApidesign(queryParams).then((res: any) => {
     dataList.value = res.rows; total.value = res.total
   }).finally(() => { loading.value = false })
 }
@@ -224,16 +223,16 @@ function handleSelectionChange(selection: any[]) {
 }
 function handleAdd() { form.value = { title: '', mockEnabled: 'N' }; dialogTitle.value = '新增接口设计'; dialogVisible.value = true }
 function handleEdit(row: any) {
-  getApidesign(row.apidesignId).then(res => { form.value = res.data; dialogTitle.value = '编辑接口设计'; dialogVisible.value = true })
+  getApidesign(row.apidesignId).then((res: any) => { form.value = res.data; dialogTitle.value = '编辑接口设计'; dialogVisible.value = true })
 }
 function handleDetail(row: any) {
-  getApidesign(row.apidesignId).then(res => { detail.value = res.data; detailVisible.value = true })
+  getApidesign(row.apidesignId).then((res: any) => { detail.value = res.data; detailVisible.value = true })
 }
 function handleAiGenerate() {
   aiLoading.value = true
   aiGenerateApidesign(detail.value.apidesignId).then(() => {
     ElMessage.success('AI 生成完成')
-    getApidesign(detail.value.apidesignId).then(r => { detail.value = r.data }); getList()
+    getApidesign(detail.value.apidesignId).then((r: any) => { detail.value = r.data }); getList()
   }).catch(() => ElMessage.error('AI 生成失败')).finally(() => { aiLoading.value = false })
 }
 function handleDelete(row?: any) {

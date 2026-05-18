@@ -89,7 +89,6 @@
 </template>
 
 <script setup name="IntegrationConnector" lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import {

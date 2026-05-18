@@ -153,7 +153,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, getCurrentInstance } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listUed, getUed, addUed, updateUed, delUed, aiReviewUed } from '../api'
 import type { UedForm, UedQuery } from '../types'
@@ -183,7 +182,7 @@ const rules = { title: [{ required: true, message: '设计稿名称不能为空'
 
 function getList() {
   loading.value = true
-  listUed(queryParams).then(res => {
+  listUed(queryParams).then((res: any) => {
     dataList.value = res.rows; total.value = res.total
   }).finally(() => { loading.value = false })
 }
@@ -194,16 +193,16 @@ function handleSelectionChange(selection: any[]) {
 }
 function handleAdd() { form.value = { title: '' }; dialogTitle.value = '新增 UED 设计'; dialogVisible.value = true }
 function handleEdit(row: any) {
-  getUed(row.uedId).then(res => { form.value = res.data; dialogTitle.value = '编辑 UED 设计'; dialogVisible.value = true })
+  getUed(row.uedId).then((res: any) => { form.value = res.data; dialogTitle.value = '编辑 UED 设计'; dialogVisible.value = true })
 }
 function handleDetail(row: any) {
-  getUed(row.uedId).then(res => { detail.value = res.data; detailVisible.value = true })
+  getUed(row.uedId).then((res: any) => { detail.value = res.data; detailVisible.value = true })
 }
 function handleAiReview() {
   aiLoading.value = true
   aiReviewUed(detail.value.uedId).then(() => {
     ElMessage.success('AI 走查完成')
-    getUed(detail.value.uedId).then(r => { detail.value = r.data }); getList()
+    getUed(detail.value.uedId).then((r: any) => { detail.value = r.data }); getList()
   }).catch(() => ElMessage.error('AI 走查失败')).finally(() => { aiLoading.value = false })
 }
 function handleDelete(row?: any) {

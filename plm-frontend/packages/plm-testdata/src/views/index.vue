@@ -171,7 +171,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, getCurrentInstance } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listTestdata, getTestdata, addTestdata, updateTestdata, delTestdata, aiGenerateTestdata } from '../api'
 import type { TestdataForm, TestdataQuery } from '../types'
@@ -206,7 +205,7 @@ const rules = {
 
 function getList() {
   loading.value = true
-  listTestdata(queryParams).then(res => {
+  listTestdata(queryParams).then((res: any) => {
     dataList.value = res.rows; total.value = res.total
   }).finally(() => { loading.value = false })
 }
@@ -220,16 +219,16 @@ function handleAdd() {
   dialogTitle.value = '新增测试数据任务'; dialogVisible.value = true
 }
 function handleEdit(row: any) {
-  getTestdata(row.testdataId).then(res => { form.value = res.data; dialogTitle.value = '编辑测试数据任务'; dialogVisible.value = true })
+  getTestdata(row.testdataId).then((res: any) => { form.value = res.data; dialogTitle.value = '编辑测试数据任务'; dialogVisible.value = true })
 }
 function handleDetail(row: any) {
-  getTestdata(row.testdataId).then(res => { detail.value = res.data; detailVisible.value = true })
+  getTestdata(row.testdataId).then((res: any) => { detail.value = res.data; detailVisible.value = true })
 }
 function handleAiGenerate() {
   aiLoading.value = true
   aiGenerateTestdata(detail.value.testdataId).then(() => {
     ElMessage.success('AI 生成完成')
-    getTestdata(detail.value.testdataId).then(r => { detail.value = r.data }); getList()
+    getTestdata(detail.value.testdataId).then((r: any) => { detail.value = r.data }); getList()
   }).catch(() => ElMessage.error('AI 生成失败')).finally(() => { aiLoading.value = false })
 }
 function handleDelete(row?: any) {

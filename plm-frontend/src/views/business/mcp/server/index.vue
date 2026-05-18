@@ -100,7 +100,6 @@
 </template>
 
 <script setup name="McpServer" lang="ts">
-import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { listServers, getServer, addServer, updateServer, delServer, exportServer, type McpServer } from '@/api/business/mcp/server'

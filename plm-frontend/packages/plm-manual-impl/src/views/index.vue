@@ -128,7 +128,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { download } from '@/utils/request'
@@ -157,7 +156,7 @@ const rules = { title: [{ required: true, message: '标题不能为空', trigger
 
 function getList() {
   loading.value = true
-  listManualImpl(queryParams).then(res => {
+  listManualImpl(queryParams).then((res: any) => {
     dataList.value = (res.rows || []).map((r: any) => ({ ...r, _aiLoading: false }))
     total.value = res.total
   }).finally(() => { loading.value = false })
@@ -175,7 +174,7 @@ function handleAdd() {
 }
 
 function handleEdit(row: any) {
-  getManualImpl(row.manualImplId).then(res => {
+  getManualImpl(row.manualImplId).then((res: any) => {
     Object.assign(form, res.data)
     dialogTitle.value = '编辑实施手册'
     dialogVisible.value = true

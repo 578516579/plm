@@ -135,7 +135,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { download } from '@/utils/request'
@@ -167,7 +166,7 @@ const rules = {
 
 function getList() {
   loading.value = true
-  listFeatureFlag(queryParams).then(res => {
+  listFeatureFlag(queryParams).then((res: any) => {
     dataList.value = res.rows || []
     total.value = res.total
   }).finally(() => { loading.value = false })
@@ -185,7 +184,7 @@ function handleAdd() {
 }
 
 function handleEdit(row: any) {
-  getFeatureFlag(row.flagId).then(res => {
+  getFeatureFlag(row.flagId).then((res: any) => {
     Object.assign(form, res.data)
     dialogTitle.value = '编辑 Feature Flag'
     dialogVisible.value = true

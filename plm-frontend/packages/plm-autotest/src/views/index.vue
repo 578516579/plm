@@ -114,7 +114,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useDict } from '@/utils/dict'
 import { download } from '@/utils/request'
@@ -144,7 +143,7 @@ const rules = { suiteName: [{ required: true, message: '套件名称不能为空
 
 function getList() {
   loading.value = true
-  listAutotest(queryParams).then(res => {
+  listAutotest(queryParams).then((res: any) => {
     dataList.value = (res.rows || []).map((r: any) => ({ ...r, _aiLoading: false }))
     total.value = res.total
   }).finally(() => { loading.value = false })
@@ -163,7 +162,7 @@ function handleAdd() {
 }
 
 function handleEdit(row: any) {
-  getAutotest(row.autotestId).then(res => {
+  getAutotest(row.autotestId).then((res: any) => {
     Object.assign(form, res.data)
     dialogTitle.value = '编辑自动化测试套件'
     dialogVisible.value = true
