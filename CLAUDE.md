@@ -153,10 +153,12 @@ Tool-enforced:
 - [.editorconfig](.editorconfig) — auto-applied indent/charset/EOL by editors
 - [.githooks/commit-msg](.githooks/commit-msg) — Conventional Commits validation. **First-time setup per clone**: `git config core.hooksPath .githooks`
 - [.claude/settings.json](.claude/settings.json) — Claude Code hooks (Stop / PreToolUse / UserPromptSubmit) for runtime reminders. Design + troubleshooting in [.claude/hooks-design.md](.claude/hooks-design.md).
-- [.claude/agents/](.claude/agents/) — PLM 自定义 subagent (via Agent tool). 当前 3 个:
+- [.claude/agents/](.claude/agents/) — PLM 自定义 subagent (via Agent tool). 当前 4 个 (**6 Phase 全覆盖**):
   - [`product-manager`](.claude/agents/product-manager.md) v0.1 — Phase 01 立项主持 (PRD / 需求拆解 / 优先级 / 原型对齐 / 路线图)
   - [`tech-lead`](.claude/agents/tech-lead.md) v0.1 — Phase 02 设计主持 (ADR 主写 / 数据库设计 / API 设计 / 状态机 / 错误码)
   - [`tester`](.claude/agents/tester.md) v0.1 — Phase 04 测试主持 (测试计划 / 用例库 / E2E 矩阵 / 6 维质量门禁 / 缺陷生命周期)
+  - [`ops`](.claude/agents/ops.md) v0.1 — Phase 05/06 上线运营主持 (Gate / Runbook / 灰度 / 监控 / 回滚 / cycle / 退役)
+  - Phase 03 开发由预定义 subagent 处理: `backend-coder` / `frontend-coder` / `db-modeler` / `e2e-validator` / `test-engineer` / ...
 
 ## Self-evolution loop
 
