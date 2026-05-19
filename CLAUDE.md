@@ -67,14 +67,16 @@ All sensitive yml values are wrapped in `${VAR:default}` placeholders. The defau
 
 Spring Boot does not auto-read `.env` files. Inject via IDE run config, shell `export`, docker-compose `env_file:`, or K8s Secret. The `.env` file itself is gitignored (see root `.gitignore`).
 
-The 4 gotchas, one-liner:
+The 6 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](memory/project-quirks.md)):
 
-| # | Symptom | Fix |
-|---|---|---|
-| 1 | `mvn compile` fails: source 17 unsupported | `export JAVA_HOME=<JDK 17 path>` |
-| 2 | SQL import fails: `Data too long for 'dept_name'` | `mysql --default-character-set=utf8mb4 ...` |
-| 3 | Backend hangs: `LettuceConnection: Command timed out` | `export REDIS_HOST=127.0.0.1` (not `localhost`) |
-| 4 | `Failed to resolve import @/utils/ruoyi` on certain frontend pages | `vite/plugins/auto-import.ts` was missed during rename — re-run sed there |
+| # | Symptom | Fix | 复发 |
+|---|---|---|---|
+| 1 | `mvn compile` fails: source 17 unsupported | `export JAVA_HOME=<JDK 17 path>` | 4+ |
+| 2 | SQL import fails: `Data too long for 'dept_name'` | `mysql --default-character-set=utf8mb4 ...` | 2 |
+| 3 | Backend hangs: `LettuceConnection: Command timed out` | `export REDIS_HOST=127.0.0.1` (not `localhost`) | 3+ |
+| 4 | `Failed to resolve import @/utils/ruoyi` on certain frontend pages | `vite/plugins/auto-import.ts` was missed during rename — re-run sed there | 1 |
+| 5 | `mvn install` fails: `Unable to rename '.../plm-admin.jar' to '.../plm-admin.jar.original'` | Backend 在跑锁住 jar — 先 `taskkill //PID <pid> //F` 再 build。从 V2 quirks (Q-BUILD-02) promote, 复发 9+ | 9+ |
+| 6 | Backend 抛 ServiceException 字符串但 grep 当前代码无此字符串 | Stale JVM 进程加载旧字节码(切 branch 后没重启)— 对比 `ls -la <jar>` mtime vs `wmic process get CreationDate` startTime,kill + rebuild | 1 |
 
 ## Architecture (where things live)
 

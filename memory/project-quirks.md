@@ -257,11 +257,13 @@
 
 复发次数 ≥ 3 的 quirk 应该 promote 到 CLAUDE.md 强提示,避免每次 Claude 启动都要重新发现。
 
-当前 promote 候选:
-- Q-ENV-01 (Redis localhost) — **已在 CLAUDE.md gotcha #3**
-- Q-ENV-02 (MySQL charset) — **已在 CLAUDE.md gotcha #2**
-- Q-ENV-03 (JAVA_HOME) — **已在 CLAUDE.md gotcha #1**
-- Q-BUILD-02 (jar 锁) — 9 次复发,**建议 promote 到 CLAUDE.md**
+当前 promote 状态:
+- Q-ENV-01 (Redis localhost) — ✅ CLAUDE.md gotcha #3
+- Q-ENV-02 (MySQL charset) — ✅ CLAUDE.md gotcha #2
+- Q-ENV-03 (JAVA_HOME) — ✅ CLAUDE.md gotcha #1
+- Q-BUILD-01 (vite glob) — ✅ frontend gotcha #4 (auto-import)
+- Q-BUILD-02 (jar 锁) — ✅ CLAUDE.md gotcha #5 (V2 promote, 2026-05-19)
+- Q-JVM-01 (stale 字节码) — ✅ CLAUDE.md gotcha #6 (V2 promote, 2026-05-19)
 
 ---
 
