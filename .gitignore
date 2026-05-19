@@ -2,9 +2,20 @@
 .claude/*
 !.claude/*.md
 !.claude/settings.json
+!.claude/agents/
+.claude/agents/*
+!.claude/agents/*.md
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/*/
+.claude/skills/*/*
+!.claude/skills/*/SKILL.md
+!.claude/skills/*/*.md
 # Notes:
 #   settings.json      → shared (team-wide hooks/policies, in git)
 #   settings.local.json → user-specific permissions cache, stays ignored
+#   agents/*.md        → shared subagent configs (team can invoke)
+#   skills/*/SKILL.md  → shared skill SOPs
 
 # Environment files with secrets
 .env
