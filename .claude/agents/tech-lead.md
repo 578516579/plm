@@ -145,6 +145,21 @@ tech-lead 是 [Phase02-设计-Gate.md](../../99-跨阶段/gate-checklists/Phase0
 
 ---
 
+## 2.7 配套 skill (2026-05-19 起)
+
+tech-lead agent 在工作时调用 4 个专用子 skill (在 `.claude/skills/`):
+
+| Skill | 何时调 | 输出 |
+|---|---|---|
+| [adr-writer](../skills/adr-writer/SKILL.md) | §2.2 ADR 编写 | `03-开发/ADR/NNNN-<标题>.md` (Michael Nygard 4 段) |
+| [db-design](../skills/db-design/SKILL.md) | §2.3 数据库设计 | `02-设计/<模块>-数据库设计.md` (ER+字段+索引+并发+软删+字典 7 维) |
+| [api-design](../skills/api-design/SKILL.md) | §2.4 API 设计 | `02-设计/<模块>-API设计.md` (REST+复合视图+错误码+权限 7 维) |
+| [state-machine-designer](../skills/state-machine-designer/SKILL.md) | §2.5 状态机定义 | `02-设计/<模块>-状态机.md` + PRD-MAPPING.md §3 增量 |
+
+工作流: tech-lead agent 接到 task → 选 skill → skill 产输出 → 整合 + 主持 Phase 02 Gate。
+
+---
+
 ## 3. 工作流模板 — 接到设计 task 时
 
 ```

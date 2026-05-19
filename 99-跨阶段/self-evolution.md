@@ -172,6 +172,10 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | [test-case-designer](../.claude/skills/test-case-designer/) v0.1 | tester agent 子工具: TC-NNN Given-When-Then × 6 类 (CRUD/状态机/FK/编码/权限/异常) |
 | | [quality-gate-audit](../.claude/skills/quality-gate-audit/) v0.1 | tester agent 子工具: 6 维质量门禁 (单测/E2E/flake/性能/安全/回归) |
 | | [defect-triage](../.claude/skills/defect-triage/) v0.1 | tester agent 子工具: 缺陷 6 步走 + plm-defect 5×5 状态机协作 |
+| | [adr-writer](../.claude/skills/adr-writer/) v0.1 | tech-lead agent 子工具: ADR Michael Nygard 格式 (Context/Decision/Consequences/Alternatives) |
+| | [db-design](../.claude/skills/db-design/) v0.1 | tech-lead agent 子工具: ER+字段+索引+并发+软删+字典 7 维 |
+| | [api-design](../.claude/skills/api-design/) v0.1 | tech-lead agent 子工具: REST+复合视图+错误码+权限+分页 7 维 |
+| | [state-machine-designer](../.claude/skills/state-machine-designer/) v0.1 | tech-lead agent 子工具: M×M 矩阵+反向边+进入态必填+601/705 错误码 |
 | **Subagents (角色)** | [product-manager](../.claude/agents/product-manager.md) v0.1 | PLM 产品经理视角: PRD 编写 / 需求拆解 / 优先级 / 原型对齐 / 路线图 / Phase 01 主持 (不写代码) |
 | | [tech-lead](../.claude/agents/tech-lead.md) v0.1 | PLM 技术决策: ADR 主写 / 数据库设计 / API 设计 / 状态机 / 错误码 / Phase 02 主持 (不写代码) |
 | | [tester](../.claude/agents/tester.md) v0.1 | PLM 测试主持: Phase 04 Gate / 测试计划 / 用例库 / E2E 矩阵 / 6 维质量门禁 / 缺陷生命周期 (不写测试代码) |
