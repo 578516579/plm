@@ -153,6 +153,7 @@ Tool-enforced:
 - [.editorconfig](.editorconfig) — auto-applied indent/charset/EOL by editors
 - [.githooks/commit-msg](.githooks/commit-msg) — Conventional Commits validation. **First-time setup per clone**: `git config core.hooksPath .githooks`
 - [.claude/settings.json](.claude/settings.json) — Claude Code hooks (Stop / PreToolUse / UserPromptSubmit) for runtime reminders. Design + troubleshooting in [.claude/hooks-design.md](.claude/hooks-design.md).
+- [.claude/agents/](.claude/agents/) — PLM 自定义 subagent (via Agent tool). 当前: [`product-manager`](.claude/agents/product-manager.md) v0.1 (PRD / 需求拆解 / 优先级 / 原型对齐 / 路线图 / Phase 01 立项主持)。
 
 ## Self-evolution loop
 
