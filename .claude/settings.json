@@ -46,6 +46,19 @@
           }
         ]
       }
+    ],
+
+    "PostToolUse": [
+      {
+        "_comment": "Phase D v0.3 (proposal 0202): tool-use 日志, 供 signals-collect Type 5 Claude 行为分析. 日志 .claude/logs/tools/YYYY-MM-DD.log gitignored. PostToolUse 输入是 stdin JSON (Claude Code 协议), 用 sed 抽取 tool_name + 80 字符截断 excerpt; 不写完整 input/response (避免敏感数据).",
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "LOG_DIR=.claude/logs/tools; mkdir -p \"$LOG_DIR\"; LOG_FILE=\"$LOG_DIR/$(date +%Y-%m-%d).log\"; TS=$(date +%Y-%m-%dT%H:%M:%S); JSON=$(cat); TOOL=$(echo \"$JSON\" | sed -n 's/.*\"tool_name\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p' | head -1); case \"$TOOL\" in Bash) EXCERPT=$(echo \"$JSON\" | sed -n 's/.*\"command\"[[:space:]]*:[[:space:]]*\"\\(.\\{0,80\\}\\).*/\\1/p' | head -1 | tr '\\n' ' ' | tr '\\t' ' ') ;; Edit|Write|Read|NotebookEdit) EXCERPT=$(echo \"$JSON\" | sed -n 's/.*\"file_path\"[[:space:]]*:[[:space:]]*\"\\([^\"]\\{0,80\\}\\).*/\\1/p' | head -1) ;; Agent) EXCERPT=\"subagent=$(echo \"$JSON\" | sed -n 's/.*\"subagent_type\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p' | head -1)\" ;; Skill) EXCERPT=\"skill=$(echo \"$JSON\" | sed -n 's/.*\"skill\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p' | head -1)\" ;; Grep) EXCERPT=$(echo \"$JSON\" | sed -n 's/.*\"pattern\"[[:space:]]*:[[:space:]]*\"\\(.\\{0,80\\}\\).*/\\1/p' | head -1 | tr '\\n' ' ') ;; *) EXCERPT=\"\" ;; esac; printf '%s\\t%s\\t%s\\n' \"$TS\" \"${TOOL:-?}\" \"$EXCERPT\" >> \"$LOG_FILE\" 2>/dev/null; exit 0"
+          }
+        ]
+      }
     ]
   }
 }

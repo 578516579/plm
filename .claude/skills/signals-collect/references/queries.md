@@ -139,16 +139,57 @@ git log --since="$WINDOW_START" --until="$WINDOW_END 23:59" --grep="^fix" --pret
 
 ---
 
-## Type 5: Claude 行为
+## Type 5: Claude 行为 (v0.3 hook log 接入, per proposal 0202)
+
+PostToolUse hook 在每次 tool call 后写一行到 `.claude/logs/tools/YYYY-MM-DD.log`:
+- TSV 格式: `timestamp\ttool_name\texcerpt(≤80 char)`
+- 日志 gitignored (本地), 月底 reflect-monthly 读后可归档
 
 ```bash
-# 5.1 claude_block / override
-# 当前无 hook log; 月底 reflect-monthly 人工填
-CLAUDE_BLOCK="N/A (待 Phase D v0.3 hook log 接入)"
-CLAUDE_OVERRIDE="N/A (同上)"
+LOG_DIR=".claude/logs/tools"
+WS="$WINDOW_START"      # 时间窗起
+WE="$WINDOW_END"        # 时间窗止
+
+# 5.1 总 tool 调用
+TOOL_TOTAL=$(find "$LOG_DIR" -name "*.log" -newermt "$WS" ! -newermt "$WE +1 day" 2>/dev/null \
+    | xargs cat 2>/dev/null | wc -l)
+
+# 5.2 tool 类型分布 (top 5)
+TOOLS_BY_TYPE=$(find "$LOG_DIR" -name "*.log" -newermt "$WS" 2>/dev/null \
+    | xargs cat 2>/dev/null | awk -F'\t' '{print $2}' | sort | uniq -c | sort -rn | head -5)
+
+# 5.3 --no-verify Bash 调用 (Real "override" 信号)
+CLAUDE_NO_VERIFY=$(find "$LOG_DIR" -name "*.log" -newermt "$WS" 2>/dev/null \
+    | xargs cat 2>/dev/null | awk -F'\t' '$2=="Bash" {print $3}' | grep -c "no-verify")
+
+# 5.4 Edit/Write canonical 规范文件 (per PreToolUse hint 仍编辑 = override)
+CLAUDE_EDIT_CANONICAL=$(find "$LOG_DIR" -name "*.log" -newermt "$WS" 2>/dev/null \
+    | xargs cat 2>/dev/null | awk -F'\t' '$2=="Edit" || $2=="Write" {print $3}' \
+    | grep -cE "rules\.md|开发规范\.md|Phase[0-9]{2}-.*-Gate\.md|proposals/0000-template\.md|settings\.json")
+
+# 5.5 Subagent 使用分布
+AGENT_USAGE=$(find "$LOG_DIR" -name "*.log" -newermt "$WS" 2>/dev/null \
+    | xargs cat 2>/dev/null | awk -F'\t' '$2=="Agent" {print $3}' | sort | uniq -c | sort -rn)
+
+# 5.6 Skill 调用分布
+SKILL_USAGE=$(find "$LOG_DIR" -name "*.log" -newermt "$WS" 2>/dev/null \
+    | xargs cat 2>/dev/null | awk -F'\t' '$2=="Skill" {print $3}' | sort | uniq -c | sort -rn)
 ```
 
-Phase D v0.3 计划: PostToolUse hook 输出 log 到 `.claude/logs/`,本 skill grep 统计。
+**期望阈值**:
+- `CLAUDE_NO_VERIFY == 0` → ✅ (per rules.md §L.2 silent merge 反模式)
+- `CLAUDE_EDIT_CANONICAL` 配 proposal 文件数 ≈ 等量 → ✅ (符合 proposal-first 流程)
+- `AGENT_USAGE` 含 4 自建 + 主流预定义 → ✅ (subagent 利用率正常)
+- `SKILL_USAGE` 含 reflect/proposal/signals-collect → ✅ (自进化 skill 被实际触发)
+
+**日志生命周期**:
+- 按日分文件, 不滚动
+- 月底 reflect-monthly 读后, 可手动归档 `mkdir -p .claude/logs/archive/YYYY-MM && mv .claude/logs/tools/YYYY-MM-*.log .claude/logs/archive/YYYY-MM/`
+- 季度初可考虑删除超过 90 天的归档
+
+**注意**:
+- 日志可能缺失 (e.g. 历史 session / hook 部署前 / hook 失败) — 当 TOOL_TOTAL == 0 时, 标 "N/A (日志未捕)" 而非 0
+- 跨日期边界: `find -newermt "$WS"` 含起始日 00:00, 不含 `$WE+1 day` 当日 00:00, 所以正好覆盖 [WS, WE] 闭区间
 
 ---
 

@@ -2,6 +2,8 @@
 .claude/*
 !.claude/*.md
 !.claude/settings.json
+# Phase D v0.3 起 .claude/logs/ 是本地 tool-use 日志, 不入 git (signals-collect 月底读后归档)
+.claude/logs/
 # Phase B skills 是仓库共享 playbook 资产, 显式 unignore (proposal 0040/0041 + reflect-weekly skill 起)
 !.claude/skills/
 .claude/skills/*

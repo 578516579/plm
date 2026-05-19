@@ -1,6 +1,6 @@
 ---
 name: signals-collect
-description: Auto-collect 7 categories of self-evolution signals (commit / Gate / Phase / bug / Claude / risk / OKR) and write to a supplementary signals file. v0.2 adds Phase 耗时 auto-compute via scripts/phase-duration.sh. Use when the user asks for "采集信号 / collect signals / signals 数据更新 / 月度信号汇总 / signal supplementary / 跑一遍信号采集 / Phase 耗时". Outputs to 99-跨阶段/signals/YYYY-MM-supplementary.md (does NOT overwrite main file per signals/README.md convention). Phase D groundwork - provides data input for future auto rule health analysis.
+description: Auto-collect 7 categories of self-evolution signals (commit / Gate / Phase / bug / Claude / risk / OKR) and write to a supplementary signals file. v0.2 adds Phase 耗时 auto-compute via scripts/phase-duration.sh. v0.3 adds Type 5 Claude behavior via .claude/logs/tools/ PostToolUse hook log (per proposal 0202). Use when the user asks for "采集信号 / collect signals / signals 数据更新 / 月度信号汇总 / signal supplementary / 跑一遍信号采集 / Phase 耗时 / tool 日志 / claude 行为". Outputs to 99-跨阶段/signals/YYYY-MM-supplementary.md (does NOT overwrite main file per signals/README.md convention). Phase D groundwork - provides data input for future auto rule health analysis.
 ---
 
 # signals-collect
@@ -16,7 +16,11 @@ Phase D 终态 = "metrics-driven rule tuning"。**核心瓶颈是数据**:
   - 计算 entry / exit / within / gap
   - 跨模块汇总 (平均/中位/异常)
   - 与 4D 期望对照 (per proposal 0007/0010/0011/0012)
-- Phase D v0.3+ 会加 **判断层** (基于数据建议规则升降级)。
+- **v0.3** (2026-05-19, per [proposal 0202](../../../99-跨阶段/proposals/0202-posttooluse-log-for-signals.md)): 加 **Type 5 Claude 行为** via PostToolUse hook log
+  - PostToolUse hook 写 `.claude/logs/tools/YYYY-MM-DD.log` (TSV: timestamp/tool/excerpt)
+  - Type 5 grep 统计: tool 类型分布 / no-verify 次数 / canonical 文件编辑 / subagent 利用率 / skill 利用率
+  - 日志 gitignored, 不污染仓库
+- Phase D v0.4 会加 **判断层** (基于 30 天数据 auto-suggest MUST↔SHOULD 升降级)。
 
 ---
 
@@ -166,7 +170,7 @@ solo 模式 + 月底时机 → 用户答 "合入" → 触发 reflect-monthly 走
 |---|---|---|
 | **v0.1** (2026-05-17) | 7 类采集 → supplementary 文件 | ✅ |
 | **v0.2** (2026-05-19) | Phase 耗时计算 (scripts/phase-duration.sh) | ✅ |
-| v0.3 | 加 Claude block/override 信号 (从 hook log 或 session 摘要) | Phase D 中 |
+| **v0.3** (2026-05-19) | Type 5 Claude 行为 via PostToolUse log (per proposal 0202) | ✅ |
 | v0.4 | **判断层**: 基于 30 天数据自动 suggest MUST↔SHOULD 升降 | Phase D 完整 |
 | v0.5 | 跨项目移植 (signals schema 通用化) | Q3+ |
 
@@ -185,3 +189,4 @@ solo 模式 + 月底时机 → 用户答 "合入" → 触发 reflect-monthly 走
 |---|---|---|
 | v0.1 | 2026-05-17 | 首版; Phase D groundwork; 7 类采集 + 衍生指标; 不覆盖主文件; 月底合入路径 |
 | v0.2 | 2026-05-19 | Phase 耗时 auto-compute (scripts/phase-duration.sh); 4 段输出 (§3.1 时间表 / §3.2 汇总 / §3.3 异常 / §3.4 4D 期望对照); 性能优化 (cache + awk 单次扫描) |
+| v0.3 | 2026-05-19 | Type 5 Claude 行为升级: PostToolUse hook 写 .claude/logs/tools/YYYY-MM-DD.log → grep 统计 6 字段 (tool 分布/no-verify/canonical edit/agent/skill 利用率); per proposal 0202 |

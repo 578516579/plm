@@ -159,11 +159,12 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | `.claude/settings.json` PreToolUse Bash | 高危命令警示 + git commit 编码 hint |
 | | `.claude/settings.json` PreToolUse Edit\|Write | gate instances 已签字 + canonical 规范文件 warning (0201) |
 | | `.claude/settings.json` UserPromptSubmit | 业务关键字 + 自进化 skill 触发 hint (0201) |
+| | `.claude/settings.json` PostToolUse | tool 调用日志 → `.claude/logs/tools/YYYY-MM-DD.log` (0202, Phase D v0.3) |
 | **Skills** | [reflect-weekly](../.claude/skills/reflect-weekly/) v0.1 | 周度反思半自动 |
 | | [reflect-monthly](../.claude/skills/reflect-monthly/) v0.1 | 月度 + tracking 终结 + 规则健康度 |
 | | [reflect-quarterly](../.claude/skills/reflect-quarterly/) v0.1 | 季度 + ADR 一致性 + 跨文档 coherence + 重构建议 |
 | | [proposal](../.claude/skills/proposal/) v0.1 | 候选升格 / apply / 状态管理 |
-| | [signals-collect](../.claude/skills/signals-collect/) v0.2 | 7 类信号自动采集 + **Phase 耗时 auto-compute** (scripts/phase-duration.sh, 2026-05-19) → supplementary 文件 (Phase D 输入) |
+| | [signals-collect](../.claude/skills/signals-collect/) v0.3 | 7 类信号自动采集 + **Phase 耗时 auto-compute** (scripts/phase-duration.sh) + **Type 5 Claude 行为 PostToolUse log** (per proposal 0202, 2026-05-19) → supplementary 文件 (Phase D 输入) |
 | | [pm-brainstorm](../.claude/skills/pm-brainstorm/) v0.1 | PM agent 子工具: 问题空间 + 5 Whys + 假设 + 发散 ≥ 5 + 收敛量化 |
 | | [pm-prd-writer](../.claude/skills/pm-prd-writer/) v0.1 | PM agent 子工具: 结构化 PRD 7 步, 强绑 PRD-MAPPING.md SSoT |
 | | [pm-prototyping](../.claude/skills/pm-prototyping/) v0.1 | PM agent 子工具: HTML wireframe + PLM 视觉规范 (.bg/.bam/.bgr/.bd) |
@@ -257,10 +258,10 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 🟡 Phase C (proposal lifecycle) — kicked off 2026-05-17
    ✅ proposal skill v0.1 — 候选升格 / apply / status / bundle 判定一站式
 
-🟡 Phase D (data-driven rule tuning) — kicked off 2026-05-17, 2/4
+🟡 Phase D (data-driven rule tuning) — kicked off 2026-05-17, 3/4
    ✅ signals-collect v0.1 (输入基础设施)
    ✅ signals-collect v0.2 (Phase 耗时 auto-compute, 2026-05-19)
-   ⏳ v0.3 hook log 接入 (PostToolUse 日志 → signals)
+   ✅ signals-collect v0.3 (PostToolUse hook log → Type 5 Claude 行为, per proposal 0202, 2026-05-19)
    ⏳ v0.4 判断层: 基于 30 天数据 auto-suggest MUST↔SHOULD 升降
 ```
 
