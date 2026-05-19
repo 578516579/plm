@@ -156,6 +156,21 @@ Phase 06 §K 4 个选项:
 
 ---
 
+## 2.7 配套 skill (2026-05-19 起)
+
+ops agent 在工作时调用 4 个专用子 skill (在 `.claude/skills/`):
+
+| Skill | 何时调 | 输出 |
+|---|---|---|
+| [runbook-writer](../skills/runbook-writer/SKILL.md) | §2.3 Runbook 维护 | `05-上线/Runbook.md` 增量 (回滚命令具体到行) |
+| [deploy-checklist](../skills/deploy-checklist/SKILL.md) | §2.1 Phase 05 §B.1 | `05-上线/Pre-Deploy-Checklist-<release>.md` (5 段) |
+| [rollback-planner](../skills/rollback-planner/SKILL.md) | §2.6 上线后 + 退役 | `05-上线/Rollback-Plan-<release>.md` (代码/DB/前端三层) |
+| [cycle-tracker](../skills/cycle-tracker/SKILL.md) | §2.2 Phase 06 cycle 两段式 | Phase 06 cycle instance 启动+终态段 |
+
+工作流: ops agent 接到 task → 选 skill → skill 产输出 → 整合 + 主持 Phase 05/06 Gate。
+
+---
+
 ## 3. 工作流模板 — 接到上线/运营 task 时
 
 ```

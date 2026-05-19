@@ -176,6 +176,10 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | [db-design](../.claude/skills/db-design/) v0.1 | tech-lead agent 子工具: ER+字段+索引+并发+软删+字典 7 维 |
 | | [api-design](../.claude/skills/api-design/) v0.1 | tech-lead agent 子工具: REST+复合视图+错误码+权限+分页 7 维 |
 | | [state-machine-designer](../.claude/skills/state-machine-designer/) v0.1 | tech-lead agent 子工具: M×M 矩阵+反向边+进入态必填+601/705 错误码 |
+| | [runbook-writer](../.claude/skills/runbook-writer/) v0.1 | ops agent 子工具: 部署 SOP + 回滚命令具体到行 (ssh/mysql/rsync) |
+| | [deploy-checklist](../.claude/skills/deploy-checklist/) v0.1 | ops agent 子工具: Phase 05 §B.1 5 段 (代码/DB/凭据/监控/沟通) + maturity 差异化 |
+| | [rollback-planner](../.claude/skills/rollback-planner/) v0.1 | ops agent 子工具: 三层回滚 (代码/DB/前端) + 灰度阶段触发阈值 |
+| | [cycle-tracker](../.claude/skills/cycle-tracker/) v0.1 | ops agent 子工具: Phase 06 两段式 (day 0 启动 + day N 终态) + substrate-only 监控 + §K 4 选 1 决议 |
 | **Subagents (角色)** | [product-manager](../.claude/agents/product-manager.md) v0.1 | PLM 产品经理视角: PRD 编写 / 需求拆解 / 优先级 / 原型对齐 / 路线图 / Phase 01 主持 (不写代码) |
 | | [tech-lead](../.claude/agents/tech-lead.md) v0.1 | PLM 技术决策: ADR 主写 / 数据库设计 / API 设计 / 状态机 / 错误码 / Phase 02 主持 (不写代码) |
 | | [tester](../.claude/agents/tester.md) v0.1 | PLM 测试主持: Phase 04 Gate / 测试计划 / 用例库 / E2E 矩阵 / 6 维质量门禁 / 缺陷生命周期 (不写测试代码) |
