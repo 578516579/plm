@@ -164,6 +164,10 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | [reflect-quarterly](../.claude/skills/reflect-quarterly/) v0.1 | 季度 + ADR 一致性 + 跨文档 coherence + 重构建议 |
 | | [proposal](../.claude/skills/proposal/) v0.1 | 候选升格 / apply / 状态管理 |
 | | [signals-collect](../.claude/skills/signals-collect/) v0.1 | 7 类信号自动采集 → supplementary 文件 (Phase D 输入) |
+| | [pm-brainstorm](../.claude/skills/pm-brainstorm/) v0.1 | PM agent 子工具: 问题空间 + 5 Whys + 假设 + 发散 ≥ 5 + 收敛量化 |
+| | [pm-prd-writer](../.claude/skills/pm-prd-writer/) v0.1 | PM agent 子工具: 结构化 PRD 7 步, 强绑 PRD-MAPPING.md SSoT |
+| | [pm-prototyping](../.claude/skills/pm-prototyping/) v0.1 | PM agent 子工具: HTML wireframe + PLM 视觉规范 (.bg/.bam/.bgr/.bd) |
+| | [pm-priority-matrix](../.claude/skills/pm-priority-matrix/) v0.1 | PM agent 子工具: RICE / WSJF / MoSCoW 三方法择一量化排序 |
 | **Subagents (角色)** | [product-manager](../.claude/agents/product-manager.md) v0.1 | PLM 产品经理视角: PRD 编写 / 需求拆解 / 优先级 / 原型对齐 / 路线图 / Phase 01 主持 (不写代码) |
 | | [tech-lead](../.claude/agents/tech-lead.md) v0.1 | PLM 技术决策: ADR 主写 / 数据库设计 / API 设计 / 状态机 / 错误码 / Phase 02 主持 (不写代码) |
 | | [tester](../.claude/agents/tester.md) v0.1 | PLM 测试主持: Phase 04 Gate / 测试计划 / 用例库 / E2E 矩阵 / 6 维质量门禁 / 缺陷生命周期 (不写测试代码) |

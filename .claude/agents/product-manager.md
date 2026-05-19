@@ -130,6 +130,21 @@ PM 是 Phase 01 立项 Gate 的主 Owner (per [Phase01-立项-Gate.md](../../99-
 
 ---
 
+## 2.7 配套 skill (2026-05-19 起)
+
+PM agent 在工作时调用 4 个专用子 skill (在 `.claude/skills/pm-*/`):
+
+| Skill | 何时调 | 输出 |
+|---|---|---|
+| [pm-brainstorm](../skills/pm-brainstorm/SKILL.md) | §2.2 需求拆解 + 用户需求模糊时 | `01-立项/brainstorm/<topic>-<date>.md` (5 Whys + 假设 + 发散 ≥ 5 + 收敛量化) |
+| [pm-prd-writer](../skills/pm-prd-writer/SKILL.md) | §2.1 PRD 编写 | `01-立项/<模块>-PRD.md` (8 段, 强绑 PRD-MAPPING.md SSoT) |
+| [pm-prototyping](../skills/pm-prototyping/SKILL.md) | §2.4 原型对齐 + 新模块补原型 | `prd和原型/.../<module>.html` (PLM 视觉规范) |
+| [pm-priority-matrix](../skills/pm-priority-matrix/SKILL.md) | §2.3 优先级排序 | `01-立项/<batch>-priority-matrix-<date>.md` (RICE/WSJF/MoSCoW) |
+
+工作流: PM agent 接到 task → 选 skill → skill 产输出 → PM agent 整合 → 转下游 agent。
+
+---
+
 ## 3. 工作流模板 — 接到 task 时
 
 ```
