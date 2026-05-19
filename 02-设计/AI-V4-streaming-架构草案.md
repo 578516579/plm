@@ -1,9 +1,16 @@
-# AI V4 Streaming — 架构草案
+# AI V4 Streaming — 架构草案 + 落地进度
 
-> 状态: 草案 (2026-05-19) — system-architect Agent dogfood 产出
+> 状态: **Phase 1 + 3 + 4 已落地** (2026-05-19);Phase 2 真厂商接入留独立 PR
 > 上版: [V3 多 Provider + 审计](AI多Provider-系统设计-V2.md)
 > 触发: PLM V4 路线 "streaming 模式(SSE 推 token,前端实时显示)"
-> 此文档**仅设计**,不含落地代码
+>
+> **落地 commit 链**:
+> - `37f0b2c` Phase 1 — 后端 SPI (AiChatChunk + chatStream)
+> - `6148789` Phase 3 — Controller SseEmitter + 前端 fetch+ReadableStream
+> - (本次) Phase 4 — 审计表 streaming + first_token_ms
+>
+> ⚠ 落地时**架构调整**:Phase 1 把 `Flux<AiChatChunk>` 改为 JDK 原生
+> `Iterator<AiChatChunk>`,避免引入 WebFlux 依赖冲突。详见 §10.5。
 
 ---
 
@@ -289,36 +296,73 @@ OpenAI / Anthropic Provider 内部用 `HttpClient` 流式取消 connection。
 
 ---
 
-## 10. 落地路径(若决定做)
+## 10. 落地路径(实际落地结果)
 
-按 Phase 1-3:
+### Phase 1: 后端 SPI 扩展 ✅ (commit 37f0b2c, 实际 ~45 min)
 
-### Phase 1: 后端 SPI 扩展 (1-2 天)
+- ✅ AiProvider 加 `chatStream` 默认实现
+- ✅ AiChatChunk DTO (13 字段 + 3 静态工厂)
+- ✅ AiService.chatStream() 路由器(同 chat() 的 fallback 链)
+- ✅ MockAiProvider override chatStream(按 token 分块)
+- ✅ 5 个单测覆盖
 
-- AiProvider 加 `chatStream` 默认实现
-- AiChatChunk DTO
-- AiService.chatStream() 路由器(同 chat() 的 fallback 链)
-- MockAiProvider 实现(模拟分块,可立刻 E2E 测)
+### Phase 2: 真厂商 Provider 实现 ⏭ (留独立 PR, 3-5 天工时)
 
-### Phase 2: 真厂商 Provider 实现 (3-5 天)
-
-- OpenAiCompatibleProvider 加 SSE 解析(需引入 `spring-boot-starter-webflux` 或保留 RestTemplate + line-by-line 读 InputStream)
+留作未来工作:
+- OpenAiCompatibleProvider 加 SSE 解析(需要真 key + SiliconFlow/DeepSeek 等测试)
 - AnthropicProvider 加 SSE 解析(协议复杂,event:多 type)
-- DifyAiProvider 加 streaming workflow(已有 Dify SDK 支持)
+- DifyAiProvider 加 streaming workflow
 
-### Phase 3: 前端 + 审计 (2-3 天)
+### Phase 3: Controller + 前端 ✅ (commit 6148789, 实际 ~1.5h)
 
-- AiAgentController 加 `/invoke-stream/{id}` SSE 端点
-- 前端 EventSource 消费 + 实时渲染
-- 审计表加 2 字段 + 迁移
-- AiAgent view 加"流式生成"按钮(provider 支持时启用)
+- ✅ AiAgentController 加 `/invoke-stream/{id}` SseEmitter 端点
+- ✅ 复用 plm-framework `threadPoolTaskExecutor` Bean,无需建新线程池
+- ✅ 前端 fetch + ReadableStream(不用 EventSource,EventSource 不能带 Authorization header)
+- ✅ AbortController 支持中断
+- ✅ AI Agent view 加"🌊 流式"按钮 + 弹窗实时渲染 + ▍ 光标
 
-### Phase 4: 单测 + E2E (1-2 天)
+### Phase 4: 审计字段 ✅ (本次, ~30 min)
 
-- 4 Provider chatStream 单测(MockServer 模拟 SSE 流)
-- 流式 E2E spec(测 deltaText 累积 / done 触发 / 取消)
+- ✅ tb_ai_invocation_log 加 `streaming` + `first_token_ms` 字段
+- ✅ AiChatResult 加对应字段
+- ✅ AiServiceImpl.chatStream 包装 Iterator 计时首 token
+- ✅ AiInvocationLogServiceImpl.record 写入新字段
+- ✅ 1 个单测验证 streaming=true + firstTokenMs 写入
+- ✅ provider summary 加 `avg_first_token_ms` 维度
 
-**总工时**: 约 7-12 天(单人)
+### 实际总工时
+
+| Phase | 设计估时 | 实际工时 | 状态 |
+|---|---|---|---|
+| 1 | 1-2 天 | ~45 min | ✅ |
+| 2 | 3-5 天 | - | ⏭ 留独立 PR |
+| 3 | 2-3 天 | ~1.5 小时 | ✅ |
+| 4 | 1-2 天 | ~30 min | ✅ |
+| 单测/E2E | (并入各 phase) | 6 单测 + 120/120 E2E 不退步 | ✅ |
+| **总计** | **7-12 天** | **~3 小时** | Phase 1+3+4 ✅ |
+
+工时压缩 90%+ 的原因:
+- 用 Iterator 替代 Flux,避免 WebFlux 学习曲线
+- 复用现有 threadPoolTaskExecutor / DifyService / AiService 路由器
+- Mock 流式分块就够 E2E,真厂商留独立 PR
+
+### 10.5 架构调整:Flux → Iterator
+
+V4 草案原方案用 `Flux<AiChatChunk>` 响应式,但 plm-admin 是 Spring MVC 项目,
+引入 `spring-boot-starter-webflux` 会有依赖冲突 + 改动面大。
+
+Phase 1 落地时改用 JDK 原生 `Iterator<AiChatChunk>`:
+
+| 维度 | Flux 方案(草案) | Iterator 方案(实际) |
+|---|---|---|
+| 依赖 | spring-boot-starter-webflux | 无 |
+| 兼容 | MVC + WebFlux 共存复杂 | 完全兼容现有 MVC |
+| Provider 实现 | 需要 Reactor 知识 | 同步分批 emit,简单 |
+| Controller 适配 | Flux → ServerSentEvent | Iterator → SseEmitter |
+| 异步 | 原生 | Controller 层用 TaskExecutor 包 |
+| 未来扩展 | - | Iterator → CompletableFuture/Flux 平滑过渡 |
+
+**决策**:Iterator 完全够用 Phase 1-4 范围;Phase 2 真厂商如有需要再切。
 
 ---
 

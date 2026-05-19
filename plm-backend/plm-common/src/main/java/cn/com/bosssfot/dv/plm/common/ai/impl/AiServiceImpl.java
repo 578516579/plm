@@ -88,7 +88,12 @@ public class AiServiceImpl implements AiService {
         log.debug("[AiService] stream route → {} (want={})", p.name(), want);
         Iterator<AiChatChunk> upstream = p.chatStream(request);
 
-        // 包装迭代器:done chunk 时触发审计
+        // 包装迭代器 — V4 Phase 4:
+        // 1. 记录第一个 delta chunk 到达时间 → firstTokenMs (流式 UX 核心指标)
+        // 2. done chunk 时把 firstTokenMs + streaming=true 写进 fake result 入审计
+        final long streamStart = System.currentTimeMillis();
+        final long[] firstTokenMs = { -1L };   // -1 = 还没收到第一个 token
+
         return new Iterator<AiChatChunk>() {
             @Override
             public boolean hasNext() { return upstream.hasNext(); }
@@ -96,10 +101,18 @@ public class AiServiceImpl implements AiService {
             @Override
             public AiChatChunk next() {
                 AiChatChunk chunk = upstream.next();
+
+                // 记录第一个非 done chunk 的到达时间
+                if (firstTokenMs[0] < 0 && !chunk.isDone() && chunk.getDeltaText() != null
+                        && !chunk.getDeltaText().isEmpty()) {
+                    firstTokenMs[0] = System.currentTimeMillis() - streamStart;
+                }
+
                 if (chunk.isDone() && recorder != null) {
                     try {
-                        // 把 chunk 转为 AiChatResult 形式入审计
                         AiChatResult fakeResult = chunkToResult(chunk);
+                        fakeResult.setStreaming(true);                        // V4 Phase 4
+                        fakeResult.setFirstTokenMs(firstTokenMs[0] < 0 ? 0 : firstTokenMs[0]);  // V4 Phase 4
                         recorder.record(request, fakeResult);
                     } catch (Exception e) {
                         log.warn("[AiService] stream 审计记录失败(已吞掉): {}", e.toString());

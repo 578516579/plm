@@ -29,6 +29,10 @@ public class AiChatResult implements Serializable {
     private long totalTokens;
     /** 端到端耗时(毫秒) */
     private long elapsedMs;
+    /** 流式首 token 延迟(毫秒);非流式时为 0 — V4 Phase 4 加 */
+    private long firstTokenMs;
+    /** 是否走流式 — V4 Phase 4 加;false=阻塞 chat,true=streaming */
+    private boolean streaming;
     /** provider 回传的请求 id,用于审计 */
     private String requestId;
     /** 失败原因,success=true 时为 null */
@@ -70,6 +74,10 @@ public class AiChatResult implements Serializable {
     public void setTotalTokens(long v) { this.totalTokens = v; }
     public long getElapsedMs() { return elapsedMs; }
     public void setElapsedMs(long v) { this.elapsedMs = v; }
+    public long getFirstTokenMs() { return firstTokenMs; }
+    public void setFirstTokenMs(long v) { this.firstTokenMs = v; }
+    public boolean isStreaming() { return streaming; }
+    public void setStreaming(boolean v) { this.streaming = v; }
     public String getRequestId() { return requestId; }
     public void setRequestId(String v) { this.requestId = v; }
     public String getError() { return error; }

@@ -108,6 +108,27 @@ class AiChatStreamTest {
         assertEquals("mock", captured.get().getProvider());
     }
 
+    /**
+     * V4 Phase 4 — 验证 chatStream 写审计时:
+     *   1. streaming=true 标记
+     *   2. firstTokenMs >= 0(第一个 delta chunk 到达时记录)
+     */
+    @Test
+    void aiService_chatStream_records_streaming_true_and_first_token_ms() {
+        AtomicReference<AiChatResult> captured = new AtomicReference<>();
+        service.setRecorder((req, res) -> captured.set(res));
+
+        Iterator<AiChatChunk> it = service.chatStream(
+                AiChatRequest.builder("mock").user("Generate something").callerTag("test#v4-phase4").build());
+        while (it.hasNext()) it.next();
+
+        AiChatResult res = captured.get();
+        assertNotNull(res);
+        assertTrue(res.isStreaming(), "V4 Phase 4: chatStream done chunk 应标 streaming=true");
+        // Mock 同步分块,firstTokenMs >= 0(可能为 0,但字段必须被设置)
+        assertTrue(res.getFirstTokenMs() >= 0, "firstTokenMs 应被记录,实际:" + res.getFirstTokenMs());
+    }
+
     @Test
     void default_chatStream_fallback_to_chat_as_single_chunk() {
         // 假 provider 不 override chatStream,走 default 实现

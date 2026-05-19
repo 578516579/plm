@@ -20,11 +20,13 @@ public class AiInvocationLog extends BaseEntity {
     @Excel(name = "Provider") private String provider;
     @Excel(name = "模型") private String model;
     @Excel(name = "成功") private Integer success;     // 0/1
+    @Excel(name = "流式") private Integer streaming;   // 0 阻塞 / 1 流式 (V4 Phase 4)
     private String finishReason;
     @Excel(name = "输入token") private Long promptTokens;
     @Excel(name = "输出token") private Long completionTokens;
     @Excel(name = "总token") private Long totalTokens;
     @Excel(name = "耗时ms") private Long elapsedMs;
+    @Excel(name = "首token延迟ms") private Long firstTokenMs;   // V4 Phase 4
     private String requestId;
     private String errorMsg;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -40,6 +42,8 @@ public class AiInvocationLog extends BaseEntity {
     public void setModel(String v) { this.model = v; }
     public Integer getSuccess() { return success; }
     public void setSuccess(Integer v) { this.success = v; }
+    public Integer getStreaming() { return streaming; }
+    public void setStreaming(Integer v) { this.streaming = v; }
     public String getFinishReason() { return finishReason; }
     public void setFinishReason(String v) { this.finishReason = v; }
     public Long getPromptTokens() { return promptTokens; }
@@ -50,6 +54,8 @@ public class AiInvocationLog extends BaseEntity {
     public void setTotalTokens(Long v) { this.totalTokens = v; }
     public Long getElapsedMs() { return elapsedMs; }
     public void setElapsedMs(Long v) { this.elapsedMs = v; }
+    public Long getFirstTokenMs() { return firstTokenMs; }
+    public void setFirstTokenMs(Long v) { this.firstTokenMs = v; }
     public String getRequestId() { return requestId; }
     public void setRequestId(String v) { this.requestId = v; }
     public String getErrorMsg() { return errorMsg; }

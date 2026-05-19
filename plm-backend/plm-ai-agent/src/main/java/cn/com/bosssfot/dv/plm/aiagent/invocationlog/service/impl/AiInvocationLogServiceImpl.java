@@ -44,6 +44,9 @@ public class AiInvocationLogServiceImpl implements IAiInvocationLogService, AiIn
             row.setProvider(orDefault(result.getProvider(), orDefault(request.getProvider(), "mock")));
             row.setModel(result.getModel() == null ? request.getModel() : result.getModel());
             row.setSuccess(result.isSuccess() ? 1 : 0);
+            // V4 Phase 4: streaming + firstTokenMs
+            row.setStreaming(result.isStreaming() ? 1 : 0);
+            row.setFirstTokenMs(result.getFirstTokenMs() > 0 ? result.getFirstTokenMs() : null);
             row.setFinishReason(result.getFinishReason());
             row.setPromptTokens(result.getPromptTokens());
             row.setCompletionTokens(result.getCompletionTokens());

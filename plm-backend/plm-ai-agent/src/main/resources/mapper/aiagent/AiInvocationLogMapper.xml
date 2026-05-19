@@ -7,31 +7,33 @@
         <result property="provider"         column="provider"          />
         <result property="model"            column="model"             />
         <result property="success"          column="success"           />
+        <result property="streaming"        column="streaming"         />
         <result property="finishReason"     column="finish_reason"     />
         <result property="promptTokens"     column="prompt_tokens"     />
         <result property="completionTokens" column="completion_tokens" />
         <result property="totalTokens"      column="total_tokens"      />
         <result property="elapsedMs"        column="elapsed_ms"        />
+        <result property="firstTokenMs"     column="first_token_ms"    />
         <result property="requestId"        column="request_id"        />
         <result property="errorMsg"         column="error_msg"         />
         <result property="invokedAt"        column="invoked_at"        />
     </resultMap>
 
     <sql id="vo">
-        select log_id, caller_tag, provider, model, success, finish_reason,
-               prompt_tokens, completion_tokens, total_tokens, elapsed_ms,
+        select log_id, caller_tag, provider, model, success, streaming, finish_reason,
+               prompt_tokens, completion_tokens, total_tokens, elapsed_ms, first_token_ms,
                request_id, error_msg, invoked_at
         from tb_ai_invocation_log
     </sql>
 
     <insert id="insertAiInvocationLog" parameterType="cn.com.bosssfot.dv.plm.aiagent.invocationlog.domain.AiInvocationLog" useGeneratedKeys="true" keyProperty="logId">
         insert into tb_ai_invocation_log
-        (caller_tag, provider, model, success, finish_reason,
-         prompt_tokens, completion_tokens, total_tokens, elapsed_ms,
+        (caller_tag, provider, model, success, streaming, finish_reason,
+         prompt_tokens, completion_tokens, total_tokens, elapsed_ms, first_token_ms,
          request_id, error_msg, invoked_at)
         values
-        (#{callerTag}, #{provider}, #{model}, #{success}, #{finishReason},
-         #{promptTokens}, #{completionTokens}, #{totalTokens}, #{elapsedMs},
+        (#{callerTag}, #{provider}, #{model}, #{success}, #{streaming}, #{finishReason},
+         #{promptTokens}, #{completionTokens}, #{totalTokens}, #{elapsedMs}, #{firstTokenMs},
          #{requestId}, #{errorMsg}, #{invokedAt})
     </insert>
 
@@ -57,10 +59,12 @@
 
     <select id="selectProviderSummary" resultType="java.util.HashMap">
         select provider,
-               count(*)               as total,
-               sum(success)           as success_count,
-               sum(total_tokens)      as total_tokens,
-               round(avg(elapsed_ms)) as avg_elapsed_ms,
+               count(*)                   as total,
+               sum(success)               as success_count,
+               sum(streaming)             as streaming_count,
+               sum(total_tokens)          as total_tokens,
+               round(avg(elapsed_ms))     as avg_elapsed_ms,
+               round(avg(case when streaming = 1 and first_token_ms is not null then first_token_ms end)) as avg_first_token_ms,
                round(sum(success) * 100 / count(*), 2) as success_rate
         from tb_ai_invocation_log
         group by provider
