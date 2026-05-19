@@ -164,7 +164,7 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | [reflect-monthly](../.claude/skills/reflect-monthly/) v0.1 | 月度 + tracking 终结 + 规则健康度 |
 | | [reflect-quarterly](../.claude/skills/reflect-quarterly/) v0.1 | 季度 + ADR 一致性 + 跨文档 coherence + 重构建议 |
 | | [proposal](../.claude/skills/proposal/) v0.1 | 候选升格 / apply / 状态管理 |
-| | [signals-collect](../.claude/skills/signals-collect/) v0.3 | 7 类信号自动采集 + **Phase 耗时 auto-compute** (scripts/phase-duration.sh) + **Type 5 Claude 行为 PostToolUse log** (per proposal 0202, 2026-05-19) → supplementary 文件 (Phase D 输入) |
+| | [signals-collect](../.claude/skills/signals-collect/) v0.4 skeleton | 7 类信号自动采集 + **Phase 耗时 auto-compute** (scripts/phase-duration.sh) + **Type 5 Claude 行为 PostToolUse log** (per proposal 0202) + **规则健康度判断 skeleton** (scripts/rule-health.sh, 待 30d 数据激活) (Phase D 4/4) |
 | | [pm-brainstorm](../.claude/skills/pm-brainstorm/) v0.1 | PM agent 子工具: 问题空间 + 5 Whys + 假设 + 发散 ≥ 5 + 收敛量化 |
 | | [pm-prd-writer](../.claude/skills/pm-prd-writer/) v0.1 | PM agent 子工具: 结构化 PRD 7 步, 强绑 PRD-MAPPING.md SSoT |
 | | [pm-prototyping](../.claude/skills/pm-prototyping/) v0.1 | PM agent 子工具: HTML wireframe + PLM 视觉规范 (.bg/.bam/.bgr/.bd) |
@@ -258,11 +258,12 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 🟡 Phase C (proposal lifecycle) — kicked off 2026-05-17
    ✅ proposal skill v0.1 — 候选升格 / apply / status / bundle 判定一站式
 
-🟡 Phase D (data-driven rule tuning) — kicked off 2026-05-17, 3/4
+✅ Phase D (data-driven rule tuning) — kicked off 2026-05-17, 4/4 skeleton 完成
    ✅ signals-collect v0.1 (输入基础设施)
    ✅ signals-collect v0.2 (Phase 耗时 auto-compute, 2026-05-19)
    ✅ signals-collect v0.3 (PostToolUse hook log → Type 5 Claude 行为, per proposal 0202, 2026-05-19)
-   ⏳ v0.4 判断层: 基于 30 天数据 auto-suggest MUST↔SHOULD 升降
+   ✅ signals-collect v0.4 skeleton (scripts/rule-health.sh 判断层框架, 2026-05-19;
+                                       数据未成熟前 "建议忽略"; 激活 ≥ 2026-06-19)
 ```
 
 ---

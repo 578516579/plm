@@ -171,8 +171,9 @@ solo 模式 + 月底时机 → 用户答 "合入" → 触发 reflect-monthly 走
 | **v0.1** (2026-05-17) | 7 类采集 → supplementary 文件 | ✅ |
 | **v0.2** (2026-05-19) | Phase 耗时计算 (scripts/phase-duration.sh) | ✅ |
 | **v0.3** (2026-05-19) | Type 5 Claude 行为 via PostToolUse log (per proposal 0202) | ✅ |
-| v0.4 | **判断层**: 基于 30 天数据自动 suggest MUST↔SHOULD 升降 | Phase D 完整 |
-| v0.5 | 跨项目移植 (signals schema 通用化) | Q3+ |
+| **v0.4 skeleton** (2026-05-19) | **判断层 skeleton**: scripts/rule-health.sh — 5 条 hardcoded 规则的 30d 违反 + override + P0/P1 → 升降级建议 (数据未成熟前自动标 "建议忽略") | ✅ skeleton; 激活 ≥ 2026-06-19 (30d data) |
+| v0.5 | 自动解析 rules.md / 开发规范.md MUST/SHOULD (≥ 30 规则) | 数据成熟后 |
+| v0.6 | 跨项目移植 (规则清单按项目类型差异化) | Q3+ |
 
 ---
 
@@ -180,6 +181,7 @@ solo 模式 + 月底时机 → 用户答 "合入" → 触发 reflect-monthly 走
 
 - [references/queries.md](references/queries.md) — 7 类信号的精确 Bash 命令 + 模板
 - [scripts/phase-duration.sh](scripts/phase-duration.sh) — Phase 耗时 auto-compute (v0.2)
+- [scripts/rule-health.sh](scripts/rule-health.sh) — 规则健康度判断 skeleton (v0.4, awaits 30d data)
 
 ---
 
@@ -190,3 +192,4 @@ solo 模式 + 月底时机 → 用户答 "合入" → 触发 reflect-monthly 走
 | v0.1 | 2026-05-17 | 首版; Phase D groundwork; 7 类采集 + 衍生指标; 不覆盖主文件; 月底合入路径 |
 | v0.2 | 2026-05-19 | Phase 耗时 auto-compute (scripts/phase-duration.sh); 4 段输出 (§3.1 时间表 / §3.2 汇总 / §3.3 异常 / §3.4 4D 期望对照); 性能优化 (cache + awk 单次扫描) |
 | v0.3 | 2026-05-19 | Type 5 Claude 行为升级: PostToolUse hook 写 .claude/logs/tools/YYYY-MM-DD.log → grep 统计 6 字段 (tool 分布/no-verify/canonical edit/agent/skill 利用率); per proposal 0202 |
+| v0.4 skeleton | 2026-05-19 | 判断层 skeleton (scripts/rule-health.sh); 5 hardcoded 规则 (commit/no-verify/编码/Gate/proposal-first); 算法: 降级 = 30d 违反 ≥ 3 + override > 50% + 无 P0/P1; 升级 = 30d 违反 ≤ 1 + 有 P0/P1; **数据未成熟前自动标 "建议忽略"** (PLM 激活 ≥ 2026-06-19); Phase D 完成 4/4 |

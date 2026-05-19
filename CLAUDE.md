@@ -184,11 +184,12 @@ Roadmap (current = Phase B kicked off 2026-05-17):
   - ✅ `reflect-monthly` skill v0.1 ([.claude/skills/reflect-monthly/](.claude/skills/reflect-monthly/)) — 含 tracking 终结 7 步判定 + MUST/SHOULD 规则健康度审计
   - ✅ `reflect-quarterly` skill v0.1 ([.claude/skills/reflect-quarterly/](.claude/skills/reflect-quarterly/)) — Phase B 3/3 完成; 含 ADR 6 维一致性 + 跨文档 4 维 coherence + 季度规范重构建议
 - 🟡 Phase C — `/proposal` skill v0.1 ([.claude/skills/proposal/](.claude/skills/proposal/)) — 3 Mode 一站式 (lift / apply / status) + 决策树 + 元规则 checklist
-- 🟡 Phase D — metrics-driven rule tuning (auto-suggest MUST↔SHOULD downgrades based on signals) — 3/4
+- ✅ Phase D — metrics-driven rule tuning (auto-suggest MUST↔SHOULD downgrades based on signals) — 4/4 skeleton 完成
   - ✅ `signals-collect` skill v0.1 ([.claude/skills/signals-collect/](.claude/skills/signals-collect/)) — 7 类信号自动采集 → supplementary 文件 (Phase D 输入基础设施)
   - ✅ `signals-collect` skill v0.2 (2026-05-19) — Phase 耗时 auto-compute ([scripts/phase-duration.sh](.claude/skills/signals-collect/scripts/phase-duration.sh)); 输出 §3.1 时间表 + §3.2 汇总 + §3.3 异常 + §3.4 4D 期望对照
   - ✅ `signals-collect` skill v0.3 (2026-05-19) — PostToolUse hook 写 `.claude/logs/tools/YYYY-MM-DD.log` → Type 5 Claude 行为 grep 统计 (per [proposal 0202](99-跨阶段/proposals/0202-posttooluse-log-for-signals.md))
-  - ⏳ v0.4: 判断层 (基于 30 天数据 auto-suggest MUST↔SHOULD 升降级)
+  - ✅ `signals-collect` skill v0.4 skeleton (2026-05-19) — 判断层 ([scripts/rule-health.sh](.claude/skills/signals-collect/scripts/rule-health.sh)) 5 hardcoded 规则的 30d 违反 + override + P0/P1 → 升降级建议; **数据未成熟前自动 "建议忽略"** (PLM 激活 ≥ 2026-06-19)
+  - 后续 v0.5+: 自动解析 rules.md MUST/SHOULD (≥ 30 规则), 跨项目移植
 
 **前门文档**: [99-跨阶段/self-evolution.md](99-跨阶段/self-evolution.md) — canonical overview, 整合 7 个分散 README + 2 元规则 + 4 skill 的一页对照
 
