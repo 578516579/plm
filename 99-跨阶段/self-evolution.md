@@ -157,7 +157,8 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | `.githooks/pre-commit` | 跑 check-encoding.sh --staged (硬阻断, 0200 + BL-009) |
 | | `.claude/settings.json` Stop hook | 会话末提示沉淀 |
 | | `.claude/settings.json` PreToolUse Bash | 高危命令警示 + git commit 编码 hint |
-| | `.claude/settings.json` UserPromptSubmit | 接收用户指令时提示 |
+| | `.claude/settings.json` PreToolUse Edit\|Write | gate instances 已签字 + canonical 规范文件 warning (0201) |
+| | `.claude/settings.json` UserPromptSubmit | 业务关键字 + 自进化 skill 触发 hint (0201) |
 | **Skills** | [reflect-weekly](../.claude/skills/reflect-weekly/) v0.1 | 周度反思半自动 |
 | | [reflect-monthly](../.claude/skills/reflect-monthly/) v0.1 | 月度 + tracking 终结 + 规则健康度 |
 | | [reflect-quarterly](../.claude/skills/reflect-quarterly/) v0.1 | 季度 + ADR 一致性 + 跨文档 coherence + 重构建议 |
