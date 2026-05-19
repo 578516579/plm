@@ -19,6 +19,7 @@
 | BL-2026-007 | [proposal 0101](../99-跨阶段/proposals/0101-mr-url-host-whitelist.md) §10 派生 | 实现 `cn.com.bosssfot.dv.plm.common.utils.UrlValidator` (含 checkHost + CSV 多值版本 + Guava InternetDomainName); Task / ManualProduct ServiceImpl add+edit 调用 | P1 | TBD | TBD | per 0041 grep 后确认 2 个字段; 含 unit test |
 | BL-2026-008 | [proposal 0101](../99-跨阶段/proposals/0101-mr-url-host-whitelist.md) §10 派生 | 配 application-dev/staging/prod.yml 的 `plm.url.allowed-hosts.task` + `.manualProduct` 白名单 | P1 | TBD | TBD | 与运维同步具体白名单后做 |
 | BL-2026-010 | [signals-collect dogfood 2026-05-19](../99-跨阶段/signals/2026-05-supplementary.md#dogfood-发现--skill-v01-bug) | 修 signals-collect skill v0.1 → v0.2: (1) queries.md 中 `--until="$WE 23:59"` 改预拼变量;(2) 多 chain awk + `|| true` 防 exit middle 跳过 | P2 | TBD | TBD | dogfood 首次即捕,影响信号采集准确性 |
+| BL-2026-011 | [signals-collect v0.3 dogfood 2026-05-19](../99-跨阶段/signals/2026-05-supplementary.md#5-claude-行为-v03-posttooluse-log) | PostToolUse hook excerpt 80 字符在 Windows 长路径下不够 (worktree 前缀就 ~70 字符已耗光); 选项: A) 增到 200 字符 / B) 仅记 basename / C) 双字段 (basename + 截断 fullpath) | P2 | TBD | TBD | Phase D v0.4 已用 sed 解析 stdin JSON; v0.5 需细化 excerpt 提取逻辑 |
 | ~~BL-2026-009~~ | ~~[proposal 0200](../99-跨阶段/proposals/0200-encoding-pretooluse-hook.md) §10 派生~~ | ~~改造 `plm-backend/scripts/check-encoding.sh` 加 `--staged` 模式~~ | ~~P2~~ | ~~W21~~ | ~~Wjl+Claude~~ | ✅ 已完成 2026-05-17，移至 §已完成 |
 
 ## 已完成（归档）

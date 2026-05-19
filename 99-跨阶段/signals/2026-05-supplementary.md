@@ -150,14 +150,50 @@ runtime ≈ 2:18 (MSYS bash + 7 模块 × 6 Phase = 42 date diff 调用)。
 
 ---
 
-## 5. Claude 行为
+## 5. Claude 行为 (v0.3 PostToolUse log)
 
-| 字段 | 值 |
+✅ **v0.3 已实现** (2026-05-19, per [proposal 0202](../proposals/0202-posttooluse-log-for-signals.md)):
+PostToolUse hook 写 `.claude/logs/tools/YYYY-MM-DD.log` (TSV: timestamp/tool/excerpt)。
+gitignored 本地日志, 按日分文件。
+
+### 5.1 本日数据样本 (2026-05-19, 部分会话)
+
+```bash
+# 来源: .claude/logs/tools/2026-05-19.log (62 行)
+```
+
+| 工具 | 调用次数 |
 |---|---|
-| claude_block_count | N/A (待 Phase D v0.3 PostToolUse hook 接入) |
-| claude_override_count | N/A (同上) |
+| Bash | 15 |
+| Edit | 10 |
+| TodoWrite | 6 |
+| Write | 4 |
+| Read | 3 |
+| Grep | 3 |
+| mcp__ccd_session__mark_chapter | 3 |
+| 空 / 未捕 | 18 (早期 stdin JSON 解析 fix 前) |
 
-⚠️ v0.3 计划: PostToolUse hook 输出到 `.claude/logs/`,signals-collect grep 统计。
+### 5.2 自进化关键信号
+
+| 字段 | 当日实际 | 期望阈值 | 评估 |
+|---|---|---|---|
+| `--no-verify` Bash 调用 | **0** | 0 (per rules.md §L.2) | ✅ |
+| Edit canonical 规范文件 (rules.md/开发规范.md/Phase Gate/0000-template/settings.json) | 不可统计 (见 5.3 说明) | ≈ proposal 文件数 | ⚠️ |
+| Agent (subagent_type) 调用 | 0 | 视任务而定 | — 本会话 foreground |
+| Skill (Skill tool) 调用 | 0 | 视任务而定 | — 本会话 foreground |
+
+### 5.3 v0.3 已知限制 / v0.4 候选
+
+**80 字符 excerpt 在 Windows 长路径下不够**:
+- 所有 Edit/Write paths 都被截到 `D:\\【12-trae】\\06-项目全生命周期管理\\plm\\.claude\\worktrees\\inte` — 文件名部分丢失
+- 影响: 无法判断 canonical 规范文件被改 (5.4 字段不可统计)
+- v0.5 候选 fix:
+  - 选项 A: 增 excerpt 到 200 字符
+  - 选项 B: 仅记录 basename (e.g. `settings.json` 而非 fullpath)
+  - 选项 C: 双字段 (basename + 截断 fullpath)
+- 已入 [Sprint backlog](../../03-开发/Sprint%20backlog.md) BL-2026-011
+
+---
 
 ---
 
@@ -201,6 +237,48 @@ runtime ≈ 2:18 (MSYS bash + 7 模块 × 6 Phase = 42 date diff 调用)。
 
 ---
 
+## 8. Rule Health Audit (v0.4 skeleton)
+
+✅ **v0.4 skeleton 已实现** (2026-05-19): [scripts/rule-health.sh](../../.claude/skills/signals-collect/scripts/rule-health.sh) — 30d 违反 + override + P0/P1 → 升降级建议。
+
+### 8.1 数据成熟度检查 (2026-05-19)
+
+- signals 文件覆盖最近 30d: 4 份 ✅ (期望 ≥ 4)
+- PostToolUse log 覆盖最近 30d: 1 份 ❌ (期望 ≥ 7)
+- ⚠️ **数据未成熟 — 建议忽略本次输出** (skeleton 验证 OK, 真激活 ≥ 2026-06-19)
+
+### 8.2 5 规则现状表 (skeleton 输出)
+
+| 规则 ID | 位置 | 现级别 | 描述 | 30d 违反 | override | P0/P1 | 建议 |
+|---|---|---|---|---|---|---|---|
+| RULE-001 | .claude/rules.md §B.2 | MUST | Conventional Commits 格式 | 0 | 0 | 0 | ✅ 保持 (违反低, 规则有效) |
+| RULE-002 | .claude/rules.md §L.2 | MUST=禁 | --no-verify 绕过 hook | 0 | 0 | 0 | ✅ 保持 (违反低, 规则有效) |
+| RULE-003 | .claude/rules.md §D | MUST | 文件编码 UTF-8 BOM 拒收 | 1 | 0 | 0 | ✅ 保持 (违反低, 规则有效) |
+| RULE-004 | .claude/rules.md §G | MUST | Phase 切换前签 Gate Checklist | 23 | 0 | 0 | ⚠️ 复盘 (启发式误报, v0.5 细化检测) |
+| RULE-005 | .claude/rules.md §L | MUST | spec 改前先写 proposal | 0 | 0 | 0 | ✅ 保持 (违反低, 规则有效) |
+
+### 8.3 算法说明
+
+```
+downgrade MUST → SHOULD:
+  30d 违反 ≥ 3
+  AND override 比 > 50%
+  AND 无相关 P0/P1 bug
+
+upgrade SHOULD → MUST:
+  30d 违反 ≤ 1
+  AND 有相关 P0/P1 bug
+```
+
+建议是**输入到 reflect-monthly**, 由人决策是否走 proposal 升降级。
+
+### 8.4 v0.5+ 路线
+
+- v0.5: 自动解析 `.claude/rules.md` / `开发规范.md` MUST/SHOULD 段 (≥ 30 规则; v0.4 仅 5 hardcoded)
+- v0.6: 跨项目移植 (规则清单按项目类型差异化加载)
+
+---
+
 ## 自进化机制规模 (元元)
 
 | 制品 | 行数 / 数量 |
@@ -209,9 +287,11 @@ runtime ≈ 2:18 (MSYS bash + 7 模块 × 6 Phase = 42 date diff 调用)。
 | `03-开发/开发规范.md` | 444 行 |
 | `99-跨阶段/模块工作流.md` | 172 行 |
 | 累计规范行数 | **909 行** (季度增长率待 Q3 末算) |
-| `.claude/skills/` 目录数 | **5** (reflect-weekly/monthly/quarterly + proposal + signals-collect) |
-| `99-跨阶段/proposals/` 文件 | 23 |
+| `.claude/skills/` 目录数 | **22** (5 自进化 + 16 agent 子工具 + 1 ruoyi-bootstrap; 含 signals-collect 含 2 sub-scripts) |
+| `.claude/agents/` 目录数 | **4** (product-manager / tech-lead / tester / ops) |
+| `99-跨阶段/proposals/` 文件 | **25** (含 0202 PostToolUse log) |
 | `99-跨阶段/reflect/` 文件 | 7 (5 reflect + README + template) |
+| `.claude/settings.json` hook 数 | **6** (Stop / PreToolUse Bash / PreToolUse Edit\|Write / UserPromptSubmit / PostToolUse / + 2 git hooks) |
 
 ---
 
@@ -264,6 +344,7 @@ git log --since="$WS" --until="$WE_END" ...
 |---|---|---|
 | 2026-05-19 | signals-collect skill v0.1 dogfood + Wjl | 首次产 supplementary 文件 + 捕 v0.1 2 处 bug |
 | 2026-05-19 (晚) | signals-collect skill v0.2 dogfood | §3 Phase 耗时段从手估升级为 auto-compute (scripts/phase-duration.sh); 实测 Phase 01-05 全 ≤ 1d, P06 4.5d gap; 发现 3 模块缺 P06 cycle1 kickoff Gate |
+| 2026-05-19 (晚 2) | signals-collect skill v0.3 + v0.4 skeleton dogfood | §5 Claude 行为 段从 N/A 升级为 v0.3 PostToolUse log 数据 (62 行采样); §8 新增 v0.4 Rule Health Audit skeleton (5 规则现状); §自进化机制规模 含 22 skills / 4 agents / 25 proposals / 6 hooks 最新统计; BL-2026-011 新建 (80字符 excerpt 在 Windows 长路径下不够); Phase D 闭环验证完成 |
 
 ---
 
