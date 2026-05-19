@@ -99,11 +99,38 @@
           <div class="agent-actions">
             <el-button link type="primary" @click="loadAgent(a)">编辑</el-button>
             <el-button link type="success" @click="invokeNow(a)">▶ 调用</el-button>
+            <el-button link type="warning" @click="invokeStreamNow(a)">🌊 流式</el-button>
             <el-button link type="danger" @click="handleDelete(a)">删除</el-button>
           </div>
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- V4 Phase 3: 流式输出弹窗 -->
+    <el-dialog v-model="streamVisible" :title="`🌊 流式调用: ${streamAgent?.agentName || ''}`" width="640px"
+               :before-close="onStreamDialogClose">
+      <div v-if="streamAgent" class="stream-meta">
+        <el-tag size="small" :type="providerTag(streamAgent.provider)" effect="plain">
+          {{ providerLabel(streamAgent.provider) }}
+        </el-tag>
+        <span v-if="streamAgent.modelName" class="model-chip">{{ streamAgent.modelName }}</span>
+        <el-tag v-if="streamStatus" size="small"
+                :type="streamStatus === 'done' ? 'success' : streamStatus === 'error' ? 'danger' : 'info'"
+                effect="dark" style="margin-left: 8px">
+          {{ streamStatus === 'streaming' ? '⏳ 接收中' : streamStatus === 'done' ? '✓ 完成' : '✗ 错误' }}
+        </el-tag>
+        <span v-if="streamElapsedMs" class="elapsed">{{ streamElapsedMs }}ms</span>
+        <span v-if="streamChunkCount" class="chunk-cnt">{{ streamChunkCount }} chunks</span>
+      </div>
+      <div class="stream-output" :class="{ streaming: streamStatus === 'streaming' }">
+        <span>{{ streamText }}</span>
+        <span v-if="streamStatus === 'streaming'" class="cursor">▍</span>
+      </div>
+      <template #footer>
+        <el-button v-if="streamStatus === 'streaming'" type="danger" @click="cancelStream">⛔ 中断</el-button>
+        <el-button @click="closeStreamDialog">{{ streamStatus === 'streaming' ? '关闭' : '完成' }}</el-button>
+      </template>
+    </el-dialog>
 
     <!-- 协作流程图 -->
     <el-card shadow="never" class="flow-card">
@@ -237,6 +264,15 @@ const rules = {
 const list = ref<AiAgent[]>([])
 const flowSteps = ['📋 需求分析', '📝 PRD 生成', '🔍 代码审查', '🧪 测试生成', '🚀 发布评审', '🛠️ 运维巡检']
 
+// V4 Phase 3: 流式调用状态
+const streamVisible = ref(false)
+const streamAgent = ref<AiAgent | null>(null)
+const streamText = ref('')
+const streamStatus = ref<'streaming' | 'done' | 'error' | ''>('')
+const streamElapsedMs = ref(0)
+const streamChunkCount = ref(0)
+let currentEventSource: EventSource | null = null   // 保留兼容,未使用
+
 const totalCalls = computed(() => list.value.reduce((s, x) => s + (x.totalCalls || 0), 0))
 const runningCount = computed(() => list.value.filter(x => x.status === '00').length)
 const avgSuccessRate = computed(() => {
@@ -342,6 +378,135 @@ async function invokeNow(a: AiAgent) {
   } catch (e: any) { ElMessage.error(e?.msg || '调用失败') }
 }
 
+// V4 Phase 3: 流式调用用 AbortController 替代 EventSource (能带 Authorization header)
+let currentAbortController: AbortController | null = null
+
+/**
+ * V4 Phase 3: 流式调用 — fetch + ReadableStream 读 SSE
+ *
+ * 为什么不用 EventSource:EventSource 不能自定义 header,RuoYi JWT 只从
+ * Authorization header 读,不读 cookie。fetch + getReader 标准做法,可以带 Authorization。
+ */
+async function invokeStreamNow(a: AiAgent) {
+  if (!a.agentId) return
+  if (a.status !== '00') {
+    ElMessage.warning('Agent 当前状态不可调用 (需运行中)')
+    return
+  }
+  // 重置状态
+  streamAgent.value = a
+  streamText.value = ''
+  streamStatus.value = 'streaming'
+  streamElapsedMs.value = 0
+  streamChunkCount.value = 0
+  streamVisible.value = true
+
+  const startMs = Date.now()
+  const token = getCookieToken()   // 从 cookie 读 Admin-Token,前端登录后写的
+  if (!token) {
+    streamStatus.value = 'error'
+    ElMessage.error('未登录,请重新登录')
+    return
+  }
+
+  const url = `/dev-api/business/ai-agent/invoke-stream/${a.agentId}`
+  currentAbortController = new AbortController()
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
+      signal: currentAbortController.signal
+    })
+    if (!resp.ok || !resp.body) {
+      throw new Error(`HTTP ${resp.status}`)
+    }
+
+    const reader = resp.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+
+      // SSE 协议:event 之间用 \n\n 分隔,event 内 event:/data: 行
+      const events = buffer.split('\n\n')
+      buffer = events.pop() || ''   // 最后可能是不完整 event
+      for (const evt of events) {
+        if (!evt.trim()) continue
+        const lines = evt.split('\n')
+        let eventName = 'message'
+        let dataStr = ''
+        for (const line of lines) {
+          if (line.startsWith('event:')) eventName = line.substring(6).trim()
+          else if (line.startsWith('data:')) dataStr += line.substring(5).trim()
+        }
+        if (!dataStr) continue
+        try {
+          const chunk = JSON.parse(dataStr)
+          if (eventName === 'delta') {
+            streamText.value = chunk.accumulatedText || (streamText.value + (chunk.deltaText || ''))
+            streamChunkCount.value++
+          } else if (eventName === 'done') {
+            streamText.value = chunk.accumulatedText || streamText.value
+            streamChunkCount.value++
+            streamStatus.value = 'done'
+            streamElapsedMs.value = Date.now() - startMs
+          } else if (eventName === 'error') {
+            streamStatus.value = 'error'
+            streamElapsedMs.value = Date.now() - startMs
+            streamText.value += `\n[error] ${chunk.error || 'unknown'}`
+          }
+        } catch { /* ignore parse */ }
+      }
+    }
+  } catch (e: any) {
+    if (e.name !== 'AbortError') {
+      streamStatus.value = 'error'
+      streamElapsedMs.value = Date.now() - startMs
+      ElMessage.error('流式调用失败: ' + (e?.message || e))
+    }
+  } finally {
+    currentAbortController = null
+    if (streamStatus.value === 'streaming') {
+      streamStatus.value = 'done'
+      streamElapsedMs.value = Date.now() - startMs
+    }
+  }
+}
+
+function getCookieToken(): string {
+  const match = document.cookie.match(/Admin-Token=([^;]+)/)
+  return match ? decodeURIComponent(match[1]) : ''
+}
+
+function cancelStream() {
+  if (currentAbortController) {
+    currentAbortController.abort()
+    currentAbortController = null
+  }
+  if (currentEventSource) {
+    currentEventSource.close()
+    currentEventSource = null
+  }
+  if (streamStatus.value === 'streaming') {
+    streamStatus.value = 'done'
+  }
+  ElMessage.info('已中断')
+}
+
+function closeStreamDialog() {
+  cancelStream()
+  streamVisible.value = false
+}
+
+function onStreamDialogClose(done: () => void) {
+  cancelStream()
+  done()
+}
+
 async function handleDelete(a: AiAgent) {
   if (!a.agentId) return
   await ElMessageBox.confirm(`删除 Agent "${a.agentName}"?`, '提示', { type: 'warning' })
@@ -396,4 +561,34 @@ onMounted(async () => { await Promise.all([getList(), loadHealth()]) })
 .flow-step { display: flex; gap: 6px; align-items: center; }
 .flow-box { background: rgba(255,255,255,.12); border-radius: 7px; padding: 7px 12px; font-size: 12.5px; }
 .flow-arrow { color: rgba(255,255,255,.5); font-size: 16px; }
+
+/* V4 Phase 3: 流式输出样式 */
+.stream-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb; }
+.elapsed { color: #6b7280; font-size: 12px; margin-left: 8px; }
+.chunk-cnt { color: #6b7280; font-size: 12px; }
+.stream-output {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  background: #1f2937;
+  color: #f3f4f6;
+  padding: 14px 16px;
+  border-radius: 6px;
+  min-height: 160px;
+  max-height: 360px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.stream-output.streaming { border-left: 3px solid #f59e0b; }
+.cursor {
+  display: inline-block;
+  margin-left: 1px;
+  color: #f59e0b;
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
 </style>

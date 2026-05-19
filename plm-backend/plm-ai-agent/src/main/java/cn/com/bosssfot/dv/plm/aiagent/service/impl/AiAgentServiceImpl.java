@@ -108,38 +108,7 @@ public class AiAgentServiceImpl implements IAiAgentService {
             throw new ServiceException("Agent 当前状态不可调用 (需运行中)", 601);
 
         // === 1. 构造统一 AiChatRequest,按 agent.provider 路由 ===
-        String provider = StringUtils.isBlank(t.getProvider()) ? "mock" : t.getProvider().toLowerCase();
-
-        // provider=dify 时,model 字段语义为 workflow_id (优先 dify_workflow_id);
-        // 其他 provider 时,model 字段直接是模型名 (gpt-4o-mini / deepseek-chat / claude-sonnet-4-5)
-        String modelOrWorkflow;
-        if ("dify".equals(provider)) {
-            modelOrWorkflow = StringUtils.isNotBlank(t.getDifyWorkflowId())
-                    ? t.getDifyWorkflowId() : t.getModelName();
-        } else {
-            modelOrWorkflow = t.getModelName();
-        }
-
-        // 系统指令优先用 prompt_template,否则用 description
-        String systemPrompt = StringUtils.isNotBlank(t.getPromptTemplate())
-                ? t.getPromptTemplate()
-                : (StringUtils.isBlank(t.getDescription()) ? "你是 PLM 系统中的 AI Agent" : t.getDescription());
-
-        // 简单的"用户问题":让 Agent 自检/巡检,真实接入由各业务模块拼装
-        String userMsg = String.format("请执行 [%s] 类型 Agent '%s' 的任务", t.getAgentType(), t.getAgentName());
-
-        AiChatRequest req = AiChatRequest.builder(provider)
-                .model(modelOrWorkflow)
-                .system(systemPrompt)
-                .user(userMsg)
-                .temperature(0.5)
-                .maxTokens(2000)
-                .callerTag("ai-agent#" + t.getAgentNo())
-                // 给 dify 多传一份元信息作为 inputs 兜底
-                .difyInput("agent_no", t.getAgentNo())
-                .difyInput("agent_type", t.getAgentType())
-                .difyInput("description", t.getDescription() == null ? "" : t.getDescription())
-                .build();
+        AiChatRequest req = buildChatRequestForAgent(t);
 
         AiChatResult result = aiService.chat(req);
 
@@ -173,5 +142,48 @@ public class AiAgentServiceImpl implements IAiAgentService {
         String prefix = "AGT-" + year + "-";
         Integer maxSeq = aiAgentMapper.selectMaxSeqOfYear(prefix);
         return String.format("%s%04d", prefix, (maxSeq == null ? 0 : maxSeq) + 1);
+    }
+
+    @Override
+    public AiChatRequest buildChatRequest(Long agentId) {
+        AiAgent t = aiAgentMapper.selectAiAgentById(agentId);
+        if (t == null) throw new ServiceException("AI Agent 不存在", 404);
+        if (!"00".equals(t.getStatus()))
+            throw new ServiceException("Agent 当前状态不可调用 (需运行中)", 601);
+        return buildChatRequestForAgent(t);
+    }
+
+    /** invoke() / buildChatRequest() 共用的 request 拼装逻辑(V4 Phase 3 抽出) */
+    private AiChatRequest buildChatRequestForAgent(AiAgent t) {
+        String provider = StringUtils.isBlank(t.getProvider()) ? "mock" : t.getProvider().toLowerCase();
+
+        // provider=dify 时,model 字段语义为 workflow_id (优先 dify_workflow_id)
+        String modelOrWorkflow;
+        if ("dify".equals(provider)) {
+            modelOrWorkflow = StringUtils.isNotBlank(t.getDifyWorkflowId())
+                    ? t.getDifyWorkflowId() : t.getModelName();
+        } else {
+            modelOrWorkflow = t.getModelName();
+        }
+
+        // 系统指令优先用 prompt_template,否则用 description
+        String systemPrompt = StringUtils.isNotBlank(t.getPromptTemplate())
+                ? t.getPromptTemplate()
+                : (StringUtils.isBlank(t.getDescription()) ? "你是 PLM 系统中的 AI Agent" : t.getDescription());
+
+        // 简单的"用户问题":让 Agent 自检/巡检,真实接入由各业务模块拼装
+        String userMsg = String.format("请执行 [%s] 类型 Agent '%s' 的任务", t.getAgentType(), t.getAgentName());
+
+        return AiChatRequest.builder(provider)
+                .model(modelOrWorkflow)
+                .system(systemPrompt)
+                .user(userMsg)
+                .temperature(0.5)
+                .maxTokens(2000)
+                .callerTag("ai-agent#" + t.getAgentNo())
+                .difyInput("agent_no", t.getAgentNo())
+                .difyInput("agent_type", t.getAgentType())
+                .difyInput("description", t.getDescription() == null ? "" : t.getDescription())
+                .build();
     }
 }
