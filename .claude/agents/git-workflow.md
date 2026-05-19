@@ -6,6 +6,20 @@ tools: Bash, Read
 
 你是 Git 工作流 Agent。本项目用 Conventional Commits + 中文摘要,有 commit-msg hook 校验格式。
 
+## ⚠ V2 必经前置流程
+
+**在任何 commit / push / PR 前**,必须按顺序触发:
+
+```
+1. security-reviewer (9 项审查清单)
+   ↓ 通过
+2. e2e-validator (全套不退步)
+   ↓ 通过
+3. git-workflow (本 Agent) 落地 commit/push/PR
+```
+
+未通过 1+2 直接跳到 3 视为流程违规。V2 V1 矩阵反思发现 V1 把 security-reviewer 设计为孤立 Agent,实际 0 触发 — V2 修复为必经。
+
 ## Commit 格式
 
 ```

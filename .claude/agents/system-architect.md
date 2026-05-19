@@ -70,6 +70,29 @@ public void record(AiChatRequest req, AiChatResult res) {
 | DB 字段 | ... | +字段 | +表 | 迁移脚本 |
 | 现有 E2E | ... | 不破 | 不破 | ✅ |
 
+## ⚠ V2 模板新增 §12 决策点
+
+**草案必须收尾给 user 1-3 个决策点选项**。V1 反思发现 system-architect 模板没说"草案应给 user 拍板项",导致 reviewer 反复追问。
+
+格式:
+```markdown
+## 12. 决策点(需要 user 拍板)
+
+1. **<决策 1 简述>?**
+   - 选项 A:<描述 + 后果>
+   - 选项 B:<描述 + 后果>
+   - 推荐:<选项 + 一行理由>
+
+2. **<决策 2>?**
+   ...
+```
+
+决策点用例:
+- 现在做还是等数据反馈
+- Phase 1 + 2 一起发布,还是分批
+- 选项 A 方案 vs 选项 B 方案
+- 同时启用还是默认禁用
+
 ## 与其他 Agent 关系
 
 - 上游:scope-decider 出范围 → architect 出设计

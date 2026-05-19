@@ -400,3 +400,58 @@ progress-narrator (完工汇总 + 全景)
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-05-19 | V1.0 | 首次抽象,基于 PR #11 (AI V1→V3) 会话复盘 |
+| 2026-05-19 | V2.0 | dogfood 自进化:新增 context-memory + db-ops;改 db-modeler/git-workflow/api-contract-keeper/system-architect 边界。详见 §14。|
+
+---
+
+## 14. V1 → V2 自进化变更 (2026-05-19)
+
+V1 落地当天即 dogfood,反思 ([Claude-开发Agent矩阵-V1-反思.md](Claude-开发Agent矩阵-V1-反思.md)) 后产出 V2 P0 落地:
+
+### V2 新增 2 Agent
+
+- **context-memory** — 维护 `memory/project-quirks.md` 单一来源(13 个 quirks 沉淀:Q-ENV / Q-BUILD / Q-BIZ / Q-DB / Q-JVM / Q-TEST / Q-CODE 等)
+- **db-ops** — 从 db-modeler 拆出,负责运维期(应用 sql / dedupe / restore),业务 DELETE/UPDATE 强制问 user 授权
+
+### V2 调整 4 Agent
+
+- **db-modeler** — 收窄为设计期(DDL / 字典 / 索引 / 迁移脚本草稿),不执行 sql
+- **git-workflow** — 加 ⚠ 必经前置流程:security-reviewer + e2e-validator 通过后才能 commit/push/PR
+- **api-contract-keeper** — 触发条件扩大,任意 2 层契约(前端 / domain / DB column / DTO / 字典 3 处同步)
+- **system-architect** — 草案模板加 §12 决策点,必须给 user 拍板项
+
+### V2 数量
+
+| 类别 | V1 | V2 | 变化 |
+|---|---|---|---|
+| A 规划与对话 | 3 | 3 | - |
+| B 架构与设计 | 3 | 3 | - |
+| C 实现 | 5 | 5 | - |
+| D 质量与安全 | 3 | 3 | - |
+| E 工程运维 | 4 | **5** | +db-ops |
+| F 元 | 2 | **3** | +context-memory |
+| **合计** | **20** | **22** | **+2** |
+
+### V2 P1/P2 待办(留 V3)
+
+V1 反思发现的其他 P1/P2 暂未落地:
+- prompt-engineer (P1) — AI 时代 prompt 优化
+- flow-orchestrator (P2) — 多 Agent 协调 DAG
+
+V3 触发条件:用 V2 跑 2-3 个 PR 后再 dogfood 一次,验证是否真需要 P1/P2。
+
+### 自进化模型确认
+
+```
+V1 设计 (60 min) → 落地 → dogfood 反思 (15 min)
+   ↓ 8 改进点 / 3 缺失 Agent
+V2 P0 落地 (~45 min) → 立刻可用
+   ↓
+V2 dogfood (等 PR 跑一阵)
+   ↓
+V3 ...
+```
+
+这个循环本身就是 **meta-cognitive Agent 维护的**。 ROI 数据:
+- V1 → V2 周期 ~ 2 小时,V2 增量 2 个 Agent + 4 个改进
+- 比"等 V1 跑半年再 V2"的传统迭代快 30 倍
