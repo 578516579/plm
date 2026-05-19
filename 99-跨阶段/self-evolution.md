@@ -181,11 +181,19 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | [deploy-checklist](../.claude/skills/deploy-checklist/) v0.1 | ops agent 子工具: Phase 05 §B.1 5 段 (代码/DB/凭据/监控/沟通) + maturity 差异化 |
 | | [rollback-planner](../.claude/skills/rollback-planner/) v0.1 | ops agent 子工具: 三层回滚 (代码/DB/前端) + 灰度阶段触发阈值 |
 | | [cycle-tracker](../.claude/skills/cycle-tracker/) v0.1 | ops agent 子工具: Phase 06 两段式 (day 0 启动 + day N 终态) + substrate-only 监控 + §K 4 选 1 决议 |
-| **Subagents (角色)** | [product-manager](../.claude/agents/product-manager.md) v0.1 | PLM 产品经理视角: PRD 编写 / 需求拆解 / 优先级 / 原型对齐 / 路线图 / Phase 01 主持 (不写代码) |
-| | [tech-lead](../.claude/agents/tech-lead.md) v0.1 | PLM 技术决策: ADR 主写 / 数据库设计 / API 设计 / 状态机 / 错误码 / Phase 02 主持 (不写代码) |
-| | [tester](../.claude/agents/tester.md) v0.1 | PLM 测试主持: Phase 04 Gate / 测试计划 / 用例库 / E2E 矩阵 / 6 维质量门禁 / 缺陷生命周期 (不写测试代码) |
-| | [ops](../.claude/agents/ops.md) v0.1 | PLM 上线+运营主持: Phase 05/06 Gate / Runbook / 灰度 / 监控 / 回滚 / cycle / 退役 (不写代码) |
-| | [ruoyi-bootstrap](~/.claude/skills/ruoyi-bootstrap/) | 业务模块脚手架 (与自进化无直接关系, 但产 dogfood 数据) |
+| **Subagents (角色 12 个)** | [product-manager](../.claude/agents/product-manager.md) v0.1 | Phase 01 PRD/需求/优先级 (不写代码) |
+| | [tech-lead](../.claude/agents/tech-lead.md) v0.1 | Phase 02 ADR/DB/API/状态机/错误码 (不写代码) |
+| | [tester](../.claude/agents/tester.md) v0.1 | Phase 04 测试计划/用例/6 维门禁/缺陷 (不写测试代码) |
+| | [ops](../.claude/agents/ops.md) v0.1 | Phase 05/06 Gate/Runbook/cycle/退役 (不写代码) |
+| | [security-reviewer](../.claude/agents/security-reviewer.md) v0.1 | Phase 03/04/05 SQL注入/XSS/凭据/鉴权 4 类安全审 (Batch 1, 2026-05-19) |
+| | [data-engineer](../.claude/agents/data-engineer.md) v0.1 | Phase 02 跨模块建模/ETL/BI/数据质量 (Batch 1) |
+| | [release-captain](../.claude/agents/release-captain.md) v0.1 | Phase 05 §D-§F 灰度/canary/窗口/沟通 (从 ops 拆出, Batch 2) |
+| | [incident-commander](../.claude/agents/incident-commander.md) v0.1 | Phase 06 cycle 中 P0/P1 应急 (4 步 triage/comms/runbook/postmortem) (Batch 2) |
+| | [knowledge-curator](../.claude/agents/knowledge-curator.md) v0.1 | 元元层: PRD-MAPPING/ADR/三件套/SSoT 一致性 (Batch 3) |
+| | [self-evolution-orchestrator](../.claude/agents/self-evolution-orchestrator.md) v0.1 | 元元层: 周/月编排 + proposal lifecycle + 元规则审 (Batch 3) |
+| | [ux-designer](../.claude/agents/ux-designer.md) v0.1 | Phase 02 UX 流程/IA/微文案/a11y (补 pm-prototyping, Batch 4) |
+| | [customer-support](../.claude/agents/customer-support.md) v0.1 | Phase 06 cycle 用户接触: FAQ/排错/培训/反馈 triage (Batch 4) |
+| | [ruoyi-bootstrap](~/.claude/skills/ruoyi-bootstrap/) | 业务模块脚手架 (与自进化无直接关系) |
 
 ---
 

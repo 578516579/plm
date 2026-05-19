@@ -153,12 +153,26 @@ Tool-enforced:
 - [.editorconfig](.editorconfig) — auto-applied indent/charset/EOL by editors
 - [.githooks/commit-msg](.githooks/commit-msg) — Conventional Commits validation. **First-time setup per clone**: `git config core.hooksPath .githooks`
 - [.claude/settings.json](.claude/settings.json) — Claude Code hooks (Stop / PreToolUse / UserPromptSubmit) for runtime reminders. Design + troubleshooting in [.claude/hooks-design.md](.claude/hooks-design.md).
-- [.claude/agents/](.claude/agents/) — PLM 自定义 subagent (via Agent tool). 当前 4 个 (**6 Phase 全覆盖**):
-  - [`product-manager`](.claude/agents/product-manager.md) v0.1 — Phase 01 立项主持 (PRD / 需求拆解 / 优先级 / 原型对齐 / 路线图)
-  - [`tech-lead`](.claude/agents/tech-lead.md) v0.1 — Phase 02 设计主持 (ADR 主写 / 数据库设计 / API 设计 / 状态机 / 错误码)
-  - [`tester`](.claude/agents/tester.md) v0.1 — Phase 04 测试主持 (测试计划 / 用例库 / E2E 矩阵 / 6 维质量门禁 / 缺陷生命周期)
-  - [`ops`](.claude/agents/ops.md) v0.1 — Phase 05/06 上线运营主持 (Gate / Runbook / 灰度 / 监控 / 回滚 / cycle / 退役)
+- [.claude/agents/](.claude/agents/) — PLM 自定义 subagent (via Agent tool). 当前 **12 个** (6 Phase + 横切关注 + 元元层):
+  - **Phase 主持 (4)**:
+    - [`product-manager`](.claude/agents/product-manager.md) v0.1 — Phase 01 立项 (PRD/需求/优先级)
+    - [`tech-lead`](.claude/agents/tech-lead.md) v0.1 — Phase 02 设计 (ADR/DB/API/状态机)
+    - [`tester`](.claude/agents/tester.md) v0.1 — Phase 04 测试 (计划/用例/6 维门禁/缺陷)
+    - [`ops`](.claude/agents/ops.md) v0.1 — Phase 05/06 上线运营 (Gate/Runbook/cycle/退役)
+  - **横切关注 + 业务 (2, Batch 1 2026-05-19)**:
+    - [`security-reviewer`](.claude/agents/security-reviewer.md) v0.1 — 安全审 (SQL注入/XSS/凭据/鉴权)
+    - [`data-engineer`](.claude/agents/data-engineer.md) v0.1 — 跨模块数据建模/ETL/BI/质量
+  - **运营专项 (2, Batch 2 — 从 ops 拆出)**:
+    - [`release-captain`](.claude/agents/release-captain.md) v0.1 — Phase 05 §D-§F 灰度/canary/窗口
+    - [`incident-commander`](.claude/agents/incident-commander.md) v0.1 — Phase 06 P0 应急 (triage/comms/runbook/postmortem)
+  - **元元层 (2, Batch 3)**:
+    - [`knowledge-curator`](.claude/agents/knowledge-curator.md) v0.1 — PRD-MAPPING/ADR/三件套/SSoT 一致性
+    - [`self-evolution-orchestrator`](.claude/agents/self-evolution-orchestrator.md) v0.1 — 周/月编排 + proposal lifecycle + 元规则审
+  - **产品+用户 (2, Batch 4)**:
+    - [`ux-designer`](.claude/agents/ux-designer.md) v0.1 — UX 流程/IA/微文案/a11y
+    - [`customer-support`](.claude/agents/customer-support.md) v0.1 — FAQ/排错/培训/反馈 triage
   - Phase 03 开发由预定义 subagent 处理: `backend-coder` / `frontend-coder` / `db-modeler` / `e2e-validator` / `test-engineer` / ...
+  - **配套子 skill**: 每自定义 agent 配 4 个 sub-skill = **12 × 4 = 48** sub-skill (在 [.claude/skills/](.claude/skills/))
 
 ## Self-evolution loop
 
