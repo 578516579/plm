@@ -11,6 +11,11 @@
 !.claude/skills/*/references/
 .claude/skills/*/references/*
 !.claude/skills/*/references/*.md
+# Phase D v0.2 起 skill scripts/ 也共享 (signals-collect scripts/phase-duration.sh)
+!.claude/skills/*/scripts/
+.claude/skills/*/scripts/*
+!.claude/skills/*/scripts/*.sh
+!.claude/skills/*/scripts/*.md
 # 自定义 subagent 是仓库共享角色定义 (product-manager v0.1 起, 2026-05-19)
 !.claude/agents/
 .claude/agents/*
@@ -20,7 +25,7 @@
 #   settings.local.json → user-specific permissions cache, stays ignored
 #   .claude/skills/*/SKILL.md + references/*.md → shared playbook
 #   .claude/agents/*.md → shared subagent role definitions (Agent tool target)
-#   .claude/skills/*/scripts/ / other → opt-in via additional rules if needed
+#   .claude/skills/*/scripts/*.sh + *.md → shared (signals-collect phase-duration.sh 起)
 
 # Environment files with secrets
 .env

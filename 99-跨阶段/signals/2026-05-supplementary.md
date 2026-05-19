@@ -54,22 +54,87 @@
 
 ---
 
-## 3. Phase 耗时
+## 3. Phase 耗时 (v0.2 auto-compute)
 
-⚠️ **v0.1 未实现**, 留 Phase D v0.2 自动计算 (从 Gate instance 日期解析 Phase i+1 - Phase i 间隔)。
+✅ **v0.2 已实现** (2026-05-19): 调 [scripts/phase-duration.sh](../../.claude/skills/signals-collect/scripts/phase-duration.sh) 一站产出。
+runtime ≈ 2:18 (MSYS bash + 7 模块 × 6 Phase = 42 date diff 调用)。
 
-当前手工估 (per W20 reflect):
+### 3.1 各模块 Phase 时间表
 
-| Phase | Project 模块耗时 | 备注 |
-|---|---|---|
-| 01 立项 | ~45 min | solo + AI 协作 |
-| 02 设计 | ~30 min | 同上 |
-| 03 开发 | ~3 h | 模板生成 + 调试 |
-| 04 测试 | ~1 h | E2E 5 case |
-| 05 上线 | ~30 min | dev tag 而已 |
-| 06 运营 cycle 1 | 7 天 (持续) | — |
+| 模块 | Phase | entry | exit | within | gap |
+|---|---|---|---|---|---|
+| defect | P01 | 2026-05-16 | 2026-05-16 | 0d | — |
+| defect | P02 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| defect | P03 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| defect | P04 | — | — | — | — |
+| defect | P05 | — | — | — | — |
+| defect | P06 | — | — | — | — |
+| document | P01 | 2026-05-16 | 2026-05-16 | 0d | — |
+| document | P02 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| document | P03 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| document | P04 | — | — | — | — |
+| document | P05 | — | — | — | — |
+| document | P06 | — | — | — | — |
+| project | P01 | 2026-05-15 | 2026-05-15 | 0d | — |
+| project | P02 | 2026-05-15 | 2026-05-15 | 0d | 0d |
+| project | P03 | 2026-05-15 | 2026-05-15 | 0d | 0d |
+| project | P04 | 2026-05-15 | 2026-05-16 | 1d | 0d |
+| project | P05 | 2026-05-15 | 2026-05-16 | 1d | 0d |
+| project | P06 | 2026-05-15 | 2026-05-22 | 7d | 0d |
+| requirement | P01 | 2026-05-16 | 2026-05-16 | 0d | — |
+| requirement | P02 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| requirement | P03 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| requirement | P04 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| requirement | P05 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| requirement | P06 | 2026-05-22 | 2026-05-22 | 0d | 6d |
+| sprint | P01 | 2026-05-16 | 2026-05-16 | 0d | — |
+| sprint | P02 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| sprint | P03 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| sprint | P04 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| sprint | P05 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| sprint | P06 | 2026-05-22 | 2026-05-22 | 0d | 6d |
+| task | P01 | 2026-05-16 | 2026-05-16 | 0d | — |
+| task | P02 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| task | P03 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| task | P04 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| task | P05 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| task | P06 | 2026-05-22 | 2026-05-22 | 0d | 6d |
+| testcase | P01 | 2026-05-16 | 2026-05-16 | 0d | — |
+| testcase | P02 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| testcase | P03 | 2026-05-16 | 2026-05-16 | 0d | 0d |
+| testcase | P04 | — | — | — | — |
+| testcase | P05 | — | — | — | — |
+| testcase | P06 | — | — | — | — |
 
-bottleneck: Phase 03 开发。
+### 3.2 跨模块汇总
+
+| Phase | 完成模块数 | 平均 within | 中位 within | 平均 gap |
+|---|---|---|---|---|
+| P01 | 7 | 0.0d | 0d | —d |
+| P02 | 7 | 0.0d | 0d | 0.0d |
+| P03 | 7 | 0.0d | 0d | 0.0d |
+| P04 | 4 | 0.2d | 0d | 0.0d |
+| P05 | 4 | 0.2d | 0d | 0.0d |
+| P06 | 4 | 1.8d | 0d | 4.5d |
+
+### 3.3 异常 / 缺失
+
+- ✅ 无异常 (所有 Phase within ≤ 阈值, gap ≤ 7d, P01-03 instance 全)
+
+**Dogfood 观察**: 4 模块 (requirement/sprint/task/testcase 中已到 P06 的 3 个) Phase 06 cycle1 kickoff Gate 文件**缺失** (per proposal 0012 两段式签字)。仅有 day7 closure + cycle2 kickoff (合并为同日)。脚本目前未单独标这种"两段式不完整" — v0.3 候选检查项。
+
+### 3.4 4D 参数化期望对照 (per proposal 0007/0010/0011/0012)
+
+| 维度 | 期望 within | 实际中位 | 状态 |
+|---|---|---|---|
+| solo + early × Phase 01-03 | ≤ 2d | 0d (P01) | ✅ |
+| solo + early × Phase 04-05 | ≤ 5d | 0d (P05) | ✅ |
+| solo + early × Phase 06 cycle | = 7d (per proposal 0012) | 0d (P06) | ⚠️ 见 §3.3 (仅 project 模块达标 7d, 其余 3 模块文件不全) |
+
+**bottleneck (v0.1 估计 vs v0.2 实测)**:
+- v0.1 (W20 reflect 手估): Phase 03 ~3h
+- v0.2 实测: 全 Phase 01-05 within 中位 ≤ 1d, solo + AI 协作 + 模板生成的速度优势已明显
+- 真实 bottleneck 转移到 Phase 06 (运营 cycle), 这是预期 (运营本身需要时间观察)
 
 ---
 
@@ -198,6 +263,7 @@ git log --since="$WS" --until="$WE_END" ...
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-19 | signals-collect skill v0.1 dogfood + Wjl | 首次产 supplementary 文件 + 捕 v0.1 2 处 bug |
+| 2026-05-19 (晚) | signals-collect skill v0.2 dogfood | §3 Phase 耗时段从手估升级为 auto-compute (scripts/phase-duration.sh); 实测 Phase 01-05 全 ≤ 1d, P06 4.5d gap; 发现 3 模块缺 P06 cycle1 kickoff Gate |
 
 ---
 

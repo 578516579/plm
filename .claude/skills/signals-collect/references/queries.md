@@ -75,22 +75,41 @@ GATE_FRICTION=$(grep -l "friction\|未达成\|豁免" 99-跨阶段/gate-checklis
 
 ---
 
-## Type 3: Phase 耗时
+## Type 3: Phase 耗时 (v0.2 自动化)
 
-需要从 instance 文件提取 Phase 启动 / 完成日期。复杂, v0.1 简化为:
+**v0.2 (2026-05-19)**: 调 [scripts/phase-duration.sh](../scripts/phase-duration.sh) 一站出 4 段:
 
 ```bash
-# 列每个模块的 Phase 实例文件 + 提取日期
-for module_dir in 99-跨阶段/gate-checklists/instances/*/; do
-    module=$(basename "$module_dir")
-    echo "Module: $module"
-    ls "$module_dir" | grep -oE "Phase[0-9]{2}.*[0-9]{4}-[0-9]{2}-[0-9]{2}" | sort -u
-done
+# 跑全 7 模块
+bash .claude/skills/signals-collect/scripts/phase-duration.sh
+
+# 或单模块
+bash .claude/skills/signals-collect/scripts/phase-duration.sh project
 ```
 
-人工或 Phase D v0.2 计算 Phase 间隔。
+输出格式 (markdown):
+- **§3.1 各模块 Phase 时间表**: 7 模块 × 6 Phase, 每行 entry / exit / within / gap
+- **§3.2 跨模块汇总**: 平均 within / 中位 within / 平均 gap per Phase
+- **§3.3 异常 / 缺失**: within > 7d (P01-05) / > 14d (P06) / gap > 7d / P01-03 缺
+- **§3.4 4D 期望对照**: solo + early × Phase 01-03 ≤ 2d (per proposal 0007/0010/0011/0012)
 
-**期望趋势**: Phase 平均耗时按 4 维参数化预期 (early < stable < mature)。
+**算法概要**:
+- 解析文件名 `Phase{NN}-<name>-Gate-{YYYY-MM-DD}.md` → (phase, date)
+- Phase 06 含 `day7` / `closure` 关键字 → kind=exit, 否则 entry
+- entry = 该 Phase 最早日期; exit = 最晚日期
+- within = exit - entry; gap = 本 Phase entry - 上 Phase entry
+- 异常阈值: P01-05 within > 7d, P06 within > 14d, gap > 7d, P01-03 缺失
+
+**期望趋势** (per 4D 参数化, proposal 0007/0010/0011/0012):
+- early × solo: P01-03 ≤ 2d, P04-05 ≤ 5d, P06 cycle = 7d
+- stable × small: P01-03 ≤ 7d, P04-05 ≤ 14d, P06 cycle = 30d
+- mature × medium+: 按 OKR 周期 (Q1/Q2/...)
+
+**集成方式** (signals-collect 主 skill):
+```bash
+PHASE_DURATION_SECTION=$(bash .claude/skills/signals-collect/scripts/phase-duration.sh)
+# 在 supplementary 文件 §3 段直接 echo "$PHASE_DURATION_SECTION"
+```
 
 ---
 

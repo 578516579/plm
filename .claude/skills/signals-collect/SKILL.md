@@ -1,6 +1,6 @@
 ---
 name: signals-collect
-description: Auto-collect 7 categories of self-evolution signals (commit / Gate / Phase / bug / Claude / risk / OKR) and write to a supplementary signals file. Use when the user asks for "采集信号 / collect signals / signals 数据更新 / 月度信号汇总 / signal supplementary / 跑一遍信号采集". Outputs to 99-跨阶段/signals/YYYY-MM-supplementary.md (does NOT overwrite main file per signals/README.md convention). Phase D groundwork - provides data input for future auto rule health analysis.
+description: Auto-collect 7 categories of self-evolution signals (commit / Gate / Phase / bug / Claude / risk / OKR) and write to a supplementary signals file. v0.2 adds Phase 耗时 auto-compute via scripts/phase-duration.sh. Use when the user asks for "采集信号 / collect signals / signals 数据更新 / 月度信号汇总 / signal supplementary / 跑一遍信号采集 / Phase 耗时". Outputs to 99-跨阶段/signals/YYYY-MM-supplementary.md (does NOT overwrite main file per signals/README.md convention). Phase D groundwork - provides data input for future auto rule health analysis.
 ---
 
 # signals-collect
@@ -10,7 +10,13 @@ description: Auto-collect 7 categories of self-evolution signals (commit / Gate 
 Phase D 终态 = "metrics-driven rule tuning"。**核心瓶颈是数据**:  
 之前 signals/${MONTH}.md 主文件靠人手填,**修订记录滚动加事件** 而非定量字段。本 skill 把 7 类信号的采集**机械化** — Phase D 自动建议升降级需要稳定的输入流。
 
-本 skill v0.1 是**采集层**。Phase D v0.2+ 会加 **判断层** (基于数据建议规则升降级)。
+- **v0.1** (2026-05-17): 7 类信号采集 → supplementary 文件 (基础)
+- **v0.2** (2026-05-19): 加 **Phase 耗时自动计算** via [scripts/phase-duration.sh](scripts/phase-duration.sh)
+  - 从 Gate instance 文件名解析 Phase + Date
+  - 计算 entry / exit / within / gap
+  - 跨模块汇总 (平均/中位/异常)
+  - 与 4D 期望对照 (per proposal 0007/0010/0011/0012)
+- Phase D v0.3+ 会加 **判断层** (基于数据建议规则升降级)。
 
 ---
 
@@ -77,8 +83,10 @@ GATE_NEW=$(find 99-跨阶段/gate-checklists/instances -name "*${TARGET_MONTH}*.
 GATE_SKIP=$(...)  # heuristic
 EXCEPTION_RATE=$(...)
 
-# Type 3: Phase 耗时
-# (需要从 Gate instance 文件中提取日期, 计算 Phase i+1 - Phase i 间隔)
+# Type 3: Phase 耗时 (v0.2 自动化)
+# 调用 scripts/phase-duration.sh — 从 Gate instance 文件名解析 Phase + Date
+# 输出 §3.1 各模块 Phase 时间表 + §3.2 跨模块汇总 + §3.3 异常 + §3.4 4D 期望对照
+PHASE_DURATION_SECTION=$(bash .claude/skills/signals-collect/scripts/phase-duration.sh)
 
 # Type 4: Bug
 BUG_TOTAL=$COMMIT_FIX  # 简化等同
@@ -156,8 +164,8 @@ solo 模式 + 月底时机 → 用户答 "合入" → 触发 reflect-monthly 走
 
 | 版本 | 内容 | 时机 |
 |---|---|---|
-| **v0.1** (now) | 7 类采集 → supplementary 文件 | ✅ |
-| v0.2 | 加 Phase 耗时计算 (从 Gate instance dates) | Q2 末 |
+| **v0.1** (2026-05-17) | 7 类采集 → supplementary 文件 | ✅ |
+| **v0.2** (2026-05-19) | Phase 耗时计算 (scripts/phase-duration.sh) | ✅ |
 | v0.3 | 加 Claude block/override 信号 (从 hook log 或 session 摘要) | Phase D 中 |
 | v0.4 | **判断层**: 基于 30 天数据自动 suggest MUST↔SHOULD 升降 | Phase D 完整 |
 | v0.5 | 跨项目移植 (signals schema 通用化) | Q3+ |
@@ -167,6 +175,7 @@ solo 模式 + 月底时机 → 用户答 "合入" → 触发 reflect-monthly 走
 ## 参考文件
 
 - [references/queries.md](references/queries.md) — 7 类信号的精确 Bash 命令 + 模板
+- [scripts/phase-duration.sh](scripts/phase-duration.sh) — Phase 耗时 auto-compute (v0.2)
 
 ---
 
@@ -175,3 +184,4 @@ solo 模式 + 月底时机 → 用户答 "合入" → 触发 reflect-monthly 走
 | 版本 | 日期 | 改了什么 |
 |---|---|---|
 | v0.1 | 2026-05-17 | 首版; Phase D groundwork; 7 类采集 + 衍生指标; 不覆盖主文件; 月底合入路径 |
+| v0.2 | 2026-05-19 | Phase 耗时 auto-compute (scripts/phase-duration.sh); 4 段输出 (§3.1 时间表 / §3.2 汇总 / §3.3 异常 / §3.4 4D 期望对照); 性能优化 (cache + awk 单次扫描) |
