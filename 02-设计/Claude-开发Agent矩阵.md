@@ -401,6 +401,7 @@ progress-narrator (完工汇总 + 全景)
 |---|---|---|
 | 2026-05-19 | V1.0 | 首次抽象,基于 PR #11 (AI V1→V3) 会话复盘 |
 | 2026-05-19 | V2.0 | dogfood 自进化:新增 context-memory + db-ops;改 db-modeler/git-workflow/api-contract-keeper/system-architect 边界。详见 §14。|
+| 2026-05-19 | V3.0 | V2 4 次实战 dogfood 后:新增 prompt-engineer + flow-orchestrator;改 security-reviewer 触发条件白名单 / system-architect 模板加 §13 落地校准 / bulk-refactor 触发强化 / meta-cognitive 制度化触发。详见 §15。|
 
 ---
 
@@ -455,3 +456,73 @@ V3 ...
 这个循环本身就是 **meta-cognitive Agent 维护的**。 ROI 数据:
 - V1 → V2 周期 ~ 2 小时,V2 增量 2 个 Agent + 4 个改进
 - 比"等 V1 跑半年再 V2"的传统迭代快 30 倍
+
+---
+
+## 15. V2 → V3 自进化变更 (2026-05-19)
+
+V2 4 次实战 (commit 75f11ba / 37f0b2c / 6148789 / 231b32c) 后 dogfood
+([V2 反思](Claude-开发Agent矩阵-V2-反思.md)) 出 V3。
+
+### V3 新增 2 Agent
+
+- **prompt-engineer** — AI prompt 设计 / 三层结构 / 反同质化 / A/B 测试 SOP
+  - V1 反思 P1 → V3 升 P0(V3 13 模块 prompt 同质化已暴露)
+- **flow-orchestrator** — 多 Agent DAG 协调 / 并行机会识别 / 失败回滚
+  - V2 反思发现 V4 Phase 3+4 实战时并行被低估,工时可省 10-15 min/PR
+
+### V3 调整 4 Agent
+
+- **security-reviewer** — V2 4 次形式触发 0 发现 → V3 改文件类型白名单驱动
+  - 必经:*Properties / yml / .env / Mapper.xml / Controller / Provider / .sql
+  - 跳过:Test / md / view (无 v-html) / api type / agents/*.md
+- **system-architect** — 模板加 §13 "落地校准"
+  - V4 草案 Flux→Iterator 偏离实际,reviewer 困惑
+  - V3 要求落地后回头同步草案 + 对比表说明偏离原因
+- **bulk-refactor** — 触发条件强化
+  - V2 4 次实战只 0 次触发 → V3 grep ≥3 文件同模式时**优先**触发
+- **meta-cognitive** — 制度化触发
+  - 每 PR 闭环前自动跑(15-20 min)
+  - 季度回顾 1 次(30-60 min)
+  - 不触发单 commit / 纯文档 / bugfix only PR
+
+### V3 数量
+
+| 类别 | V2 | V3 | 变化 |
+|---|---|---|---|
+| A 规划与对话 | 3 | 3 | - |
+| B 架构与设计 | 3 | 3 | - |
+| C 实现 | 5 | 5 | - |
+| D 质量与安全 | 3 | 3 | - |
+| E 工程运维 | 5 | 5 | - |
+| F 元 | 3 | **5** | +prompt-engineer + flow-orchestrator |
+| **合计** | **22** | **24** | **+2** |
+
+### V3 自进化模型完善
+
+```
+V1 设计 (60 min) → 落地
+   ↓ V1 dogfood (15 min) - 8 改进点
+V2 P0 落地 (45 min)
+   ↓ 4 次实战 (3 小时)
+   ↓ V2 dogfood (20 min) - 5 observation
+V3 落地 (~60 min, 本次)
+   ↓ 等 N 次实战
+   ↓ V3 dogfood (制度化触发,每 PR 跑)
+V4 / Vn...
+```
+
+### V3 不动(V2 验证过的)
+
+- db-modeler ↔ db-ops 拆分(实战 Phase 4 有效)
+- context-memory(1 次实战即让 CLAUDE.md gotchas 4→6)
+- api-contract-keeper 扩大职责(Phase 4 用上 Mapper XML 同步)
+- git-workflow 必经 e2e-validator(总体值得)
+
+### V3 ROI 实测
+
+| 阶段 | 用时 | 产出 |
+|---|---|---|
+| V2 反思 (commit 0e11315) | 20 min | 5 observation + V3 设计 |
+| V3 落地 (本次) | ~60 min | +2 Agent / 4 边界调整 / 主文档 V3 段 |
+| 累计 V1→V3 | ~5 小时 | 24 Agent + 2 skill + memory/ + 3 反思文档 |

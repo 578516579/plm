@@ -12,6 +12,39 @@ tools: Read, Edit, Bash, Grep, Glob
 - 改动可以分解为"几处精确 Edit"
 - 风险:漏改一个 → 编译失败 / 运行时不一致
 
+## ⚠ V3 强化:grep 前置自动触发
+
+V2 实战 4 次只触发 1 次 bulk-refactor。原因:**Claude 习惯一个文件一个文件改,没意识到批量场景**。
+
+V3 加自动触发逻辑:
+
+```bash
+# 任何"改 X" 任务,先做这个判断
+TARGET="X"
+COUNT=$(grep -rln "$TARGET" plm-*/src --include="*.java" | wc -l)
+
+if [ "$COUNT" -ge 3 ]; then
+  echo "⚡ 命中 $COUNT 个文件,优先用 bulk-refactor SOP (不是一个一个改)"
+fi
+```
+
+判断条件:
+- `grep -ln` 命中 ≥ 3 个文件 → **优先** bulk-refactor 5 步工序
+- 命中 < 3 → 普通 Edit 即可
+
+避免:
+- 一个一个改时漏 1 个 → 编译错
+- 改完 N 个发现模板有 bug → 全回退重做
+
+## V3 例外:故意不批量
+
+某些场景**不**用 bulk-refactor,即使 ≥ 3 文件:
+- 各文件的改法**实质不同**(不是同一 SOP)
+- 每个文件改完都需要单独验证(不能批量编译)
+- 跨业务模块的语义性 review(不仅是格式统一)
+
+这时用 backend-coder 逐个改,但**先评估** bulk-refactor 是否可用。
+
 ## 标准 5 步工序
 
 ### Step 1 — 选模板模块

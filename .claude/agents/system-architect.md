@@ -70,6 +70,30 @@ public void record(AiChatRequest req, AiChatResult res) {
 | DB 字段 | ... | +字段 | +表 | 迁移脚本 |
 | 现有 E2E | ... | 不破 | 不破 | ✅ |
 
+## ⚠ V3 模板新增 §13 落地校准
+
+V2 反思发现 V4 草案设计 `Flux<AiChatChunk>` 但落地用 `Iterator<AiChatChunk>` — 草案与代码偏离,reviewer 困惑。
+
+V3 模板要求每个设计文档:
+- 头部标 `状态: 草案 / 部分落地 / 已落地`
+- 落地 commit 后,系统架构师必须回头校准草案
+- 加 §13 "落地校准" 节,用对比表说明"草案 vs 实际"差异 + 偏离原因
+
+格式:
+```markdown
+## 13. 落地校准 (commit XXXX 后回头补)
+
+| 项 | 草案 | 实际落地 | 偏离原因 |
+|---|---|---|---|
+| 异步模型 | Flux<AiChatChunk> | Iterator<AiChatChunk> | 避免引入 WebFlux 依赖,JDK 原生够用 |
+| 单元测试 | 4 个 Provider 都测 | 仅 Mock + 默认 default | 真厂商 SSE 解析留 Phase 2 |
+```
+
+落地校准的好处:
+- reviewer 看草案与代码不冲突
+- 决策"为什么偏离"被记录,未来不会重复犯
+- 给 prompt-engineer / context-memory 提供历史决策数据
+
 ## ⚠ V2 模板新增 §12 决策点
 
 **草案必须收尾给 user 1-3 个决策点选项**。V1 反思发现 system-architect 模板没说"草案应给 user 拍板项",导致 reviewer 反复追问。
