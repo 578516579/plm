@@ -165,6 +165,7 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | | [proposal](../.claude/skills/proposal/) v0.1 | 候选升格 / apply / 状态管理 |
 | | [signals-collect](../.claude/skills/signals-collect/) v0.1 | 7 类信号自动采集 → supplementary 文件 (Phase D 输入) |
 | **Subagents (角色)** | [product-manager](../.claude/agents/product-manager.md) v0.1 | PLM 产品经理视角: PRD 编写 / 需求拆解 / 优先级 / 原型对齐 / 路线图 / Phase 01 主持 (不写代码) |
+| | [tester](../.claude/agents/tester.md) v0.1 | PLM 测试主持: Phase 04 Gate / 测试计划 / 用例库 / E2E 矩阵 / 6 维质量门禁 / 缺陷生命周期 (不写测试代码) |
 | | [ruoyi-bootstrap](~/.claude/skills/ruoyi-bootstrap/) | 业务模块脚手架 (与自进化无直接关系, 但产 dogfood 数据) |
 
 ---
@@ -174,6 +175,7 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 | 角色 | Stage 1 Signal | Stage 2 Reflect | Stage 3 Propose | Stage 4 Review | Stage 5 Apply | Stage 6 Track | Stage 7 Close |
 |---|---|---|---|---|---|---|---|
 | **PM / Owner** ([product-manager](../.claude/agents/product-manager.md) agent) | 提供业务节奏数据 + Phase 06 用户反馈 | 周/月报必看 | 高优先升格决策 + product-flavor proposal | 流程类 (0001-0099) | 与开发协作 (转 backend/frontend agent) | OKR 对照 + 路线图调整 | 月度 closure 主持 |
+| **Tester** ([tester](../.claude/agents/tester.md) agent) | bug_total / recurring / E2E flake / 覆盖率信号 | 缺陷复发反思 | 测试规范类 (0100+) | 测试类 + 质量门禁 | 测试计划 / 用例库实施 | 缺陷生命周期跟踪 | Phase 04 Gate closure |
 | **Tech Lead** | git log / Gate 数据 | 参与诊断 | 架构类 / 编码类决策 | 编码/架构 (0100+/0300+) | 实施 | 技术信号 | 月度 closure |
 | **Claude** | 自动采集 | 半自动写报告 | 自动产 proposal 文件 | solo 模式 [solo-review] | 自动 apply (diff) | 自动数据更新 | 7 步 checklist 走 |
 | **开发者** | 触发事件 | dogfood reflect 实操者 | 候选提交 | — | 落地代码 | 实操反馈 | — |
@@ -204,6 +206,9 @@ Claude 行为硬约束 [.claude/rules.md §L](../.claude/rules.md):
 │
 ├─ "写 PRD / 梳理需求 / 排优先级 / 对齐原型 / 推路线图 / 立项"
 │  └─ → product-manager subagent (Agent tool 调用)
+│
+├─ "写测试计划 / Phase 04 / 测试用例 / 跑测试套件 / 质量门禁 / 缺陷管理"
+│  └─ → tester subagent (Agent tool 调用)
 │
 ├─ "/scaffold-phase NN <module>" / "新建业务模块"
 │  └─ → ruoyi-bootstrap skill (Phase 7)
