@@ -1,5 +1,6 @@
 package cn.com.bosssfot.dv.plm.common.ai.impl;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import cn.com.bosssfot.dv.plm.common.ai.AiInvocationRecorder;
 import cn.com.bosssfot.dv.plm.common.ai.AiProperties;
 import cn.com.bosssfot.dv.plm.common.ai.AiProvider;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatChunk;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatResult;
 
@@ -68,6 +70,60 @@ public class AiServiceImpl implements AiService {
             catch (Exception e) { log.warn("[AiService] 审计记录失败(已吞掉): {}", e.toString()); }
         }
         return result;
+    }
+
+    @Override
+    public Iterator<AiChatChunk> chatStream(AiChatRequest request) {
+        String want = request.getProvider();
+        AiProvider p = pick(want);
+        if (p == null) {
+            log.warn("[AiService] stream 路由失败,want={}", want);
+            AiChatChunk err = AiChatChunk.error(
+                want == null ? props.getDefaultProvider() : want,
+                "无可用 AI provider — 流式调用"
+            );
+            return List.of(err).iterator();
+        }
+        request.setProvider(p.name());
+        log.debug("[AiService] stream route → {} (want={})", p.name(), want);
+        Iterator<AiChatChunk> upstream = p.chatStream(request);
+
+        // 包装迭代器:done chunk 时触发审计
+        return new Iterator<AiChatChunk>() {
+            @Override
+            public boolean hasNext() { return upstream.hasNext(); }
+
+            @Override
+            public AiChatChunk next() {
+                AiChatChunk chunk = upstream.next();
+                if (chunk.isDone() && recorder != null) {
+                    try {
+                        // 把 chunk 转为 AiChatResult 形式入审计
+                        AiChatResult fakeResult = chunkToResult(chunk);
+                        recorder.record(request, fakeResult);
+                    } catch (Exception e) {
+                        log.warn("[AiService] stream 审计记录失败(已吞掉): {}", e.toString());
+                    }
+                }
+                return chunk;
+            }
+        };
+    }
+
+    private static AiChatResult chunkToResult(AiChatChunk chunk) {
+        AiChatResult r;
+        if (chunk.getError() != null && !chunk.getError().isBlank()) {
+            r = AiChatResult.fail(chunk.getProvider(), chunk.getError());
+        } else {
+            r = AiChatResult.ok(chunk.getProvider(), chunk.getModel(), chunk.getAccumulatedText());
+        }
+        r.setFinishReason(chunk.getFinishReason());
+        r.setPromptTokens(chunk.getPromptTokens());
+        r.setCompletionTokens(chunk.getCompletionTokens());
+        r.setTotalTokens(chunk.getTotalTokens());
+        r.setRequestId(chunk.getRequestId());
+        r.setElapsedMs(chunk.getElapsedMs());
+        return r;
     }
 
     /** 路由优先级:精确匹配 → 默认 → mock 兜底 */

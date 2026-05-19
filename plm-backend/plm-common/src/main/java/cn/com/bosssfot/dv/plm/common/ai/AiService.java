@@ -1,7 +1,9 @@
 package cn.com.bosssfot.dv.plm.common.ai;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatChunk;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatResult;
 
@@ -42,6 +44,16 @@ public interface AiService {
 
     /** 执行一次推理(按 request.provider 路由) */
     AiChatResult chat(AiChatRequest request);
+
+    /**
+     * 流式推理 (V4 Phase 1 新增) — 按 request.provider 路由,返回 chunk 迭代器
+     *
+     * <p>调用方循环 {@code while (it.hasNext())} 逐 chunk 处理,
+     * 最终 chunk 的 {@code done=true} 触发审计写库。</p>
+     *
+     * <p>失败时返回包含 error chunk 的单元素 Iterator,不抛异常。</p>
+     */
+    Iterator<AiChatChunk> chatStream(AiChatRequest request);
 
     /** 获取所有已装配的 provider 名 → 可用状态(用于 health 端点) */
     Map<String, Boolean> providerStatus();

@@ -1,9 +1,13 @@
 package cn.com.bosssfot.dv.plm.common.ai.impl;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.com.bosssfot.dv.plm.common.ai.AiProvider;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatChunk;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatResult;
 
@@ -51,6 +55,41 @@ public class MockAiProvider implements AiProvider {
         r.setElapsedMs(System.currentTimeMillis() - start);
         r.setRequestId("mock-" + UUID.randomUUID());
         return r;
+    }
+
+    /**
+     * 流式版本 (V4 Phase 1):把完整 mock text 按 token 分块 emit + 最终 done chunk
+     *
+     * <p>不引入 Thread.sleep — 同步分块,Iterator next() 即同步返回。
+     * 真实延迟由 Controller 层(Phase 3 SseEmitter)控制推送节奏。</p>
+     */
+    @Override
+    public Iterator<AiChatChunk> chatStream(AiChatRequest req) {
+        long start = System.currentTimeMillis();
+        AiChatResult fullResult = chat(req);
+        String fullText = fullResult.getText();
+
+        // 按空格分 token,每 chunk 1-3 token
+        String[] tokens = fullText.split(" ");
+        List<AiChatChunk> chunks = new ArrayList<>();
+        StringBuilder acc = new StringBuilder();
+
+        for (int i = 0; i < tokens.length; i++) {
+            String tok = tokens[i] + (i < tokens.length - 1 ? " " : "");
+            acc.append(tok);
+            chunks.add(AiChatChunk.delta(tok, acc.toString()));
+        }
+
+        // 末尾加 done chunk(把 fullResult 的元数据带过来)
+        AiChatChunk doneChunk = AiChatChunk.done("mock", fullResult.getModel(),
+                acc.toString(), "stop");
+        doneChunk.setRequestId(fullResult.getRequestId());
+        doneChunk.setElapsedMs(System.currentTimeMillis() - start);
+        chunks.add(doneChunk);
+
+        log.debug("[Ai-mock-stream] callerTag={} emitted {} chunks (含 done)",
+                req.getCallerTag(), chunks.size());
+        return chunks.iterator();
     }
 
     private static String shorten(String s, int max) {
