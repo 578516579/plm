@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>plm</artifactId>
+        <groupId>cn.com.bosssfot.dv.plm</groupId>
+        <version>3.9.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>plm-mcp</artifactId>
+
+    <description>
+        MCP Server 模块 — 把 PLM 业务能力按 MCP 协议（Model Context Protocol）暴露给外部 LLM Agent
+        （Claude Code / Cursor / GitHub Copilot 等），并提供注册管理 + 调用审计。
+        关联 PRD §2.5 / §3.4 / §3.5 / §4.1；Proposal 0007；设计文档 02-设计/MCP-集成-设计.md
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-system</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

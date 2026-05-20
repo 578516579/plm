@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.mcp.mapper.McpServerMapper">
+
+    <resultMap type="McpServer" id="McpServerResult">
+        <result property="id"                       column="id"/>
+        <result property="serverCode"               column="server_code"/>
+        <result property="serverName"               column="server_name"/>
+        <result property="protocol"                 column="protocol"/>
+        <result property="endpoint"                 column="endpoint"/>
+        <result property="authType"                 column="auth_type"/>
+        <result property="oauthClientId"            column="oauth_client_id"/>
+        <result property="oauthClientSecretEnc"     column="oauth_client_secret_enc"/>
+        <result property="toolsJson"                column="tools_json"/>
+        <result property="status"                   column="status"/>
+        <result property="lastHealthAt"             column="last_health_at"/>
+        <result property="description"              column="description"/>
+        <result property="createBy"                 column="create_by"/>
+        <result property="createTime"               column="create_time"/>
+        <result property="updateBy"                 column="update_by"/>
+        <result property="updateTime"               column="update_time"/>
+        <result property="remark"                   column="remark"/>
+        <result property="delFlag"                  column="del_flag"/>
+    </resultMap>
+
+    <sql id="selectVo">
+        select id, server_code, server_name, protocol, endpoint, auth_type,
+               oauth_client_id, oauth_client_secret_enc, tools_json, status,
+               last_health_at, description,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_mcp_server
+    </sql>
+
+    <select id="selectMcpServerList" parameterType="McpServer" resultMap="McpServerResult">
+        <include refid="selectVo"/>
+        <where>
+            del_flag = '0'
+            <if test="serverCode != null and serverCode != ''">
+                and server_code like concat('%', #{serverCode}, '%')
+            </if>
+            <if test="serverName != null and serverName != ''">
+                and server_name like concat('%', #{serverName}, '%')
+            </if>
+            <if test="protocol != null and protocol != ''">
+                and protocol = #{protocol}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectMcpServerById" parameterType="Long" resultMap="McpServerResult">
+        <include refid="selectVo"/>
+        where id = #{id} and del_flag = '0'
+    </select>
+
+    <select id="selectMcpServerByCode" parameterType="String" resultMap="McpServerResult">
+        <include refid="selectVo"/>
+        where server_code = #{serverCode} and del_flag = '0'
+        limit 1
+    </select>
+
+    <insert id="insertMcpServer" parameterType="McpServer" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_mcp_server
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="serverCode != null">server_code,</if>
+            <if test="serverName != null">server_name,</if>
+            <if test="protocol != null">protocol,</if>
+            <if test="endpoint != null">endpoint,</if>
+            <if test="authType != null">auth_type,</if>
+            <if test="oauthClientId != null">oauth_client_id,</if>
+            <if test="oauthClientSecretEnc != null">oauth_client_secret_enc,</if>
+            <if test="toolsJson != null">tools_json,</if>
+            <if test="status != null">status,</if>
+            <if test="lastHealthAt != null">last_health_at,</if>
+            <if test="description != null">description,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="serverCode != null">#{serverCode},</if>
+            <if test="serverName != null">#{serverName},</if>
+            <if test="protocol != null">#{protocol},</if>
+            <if test="endpoint != null">#{endpoint},</if>
+            <if test="authType != null">#{authType},</if>
+            <if test="oauthClientId != null">#{oauthClientId},</if>
+            <if test="oauthClientSecretEnc != null">#{oauthClientSecretEnc},</if>
+            <if test="toolsJson != null">#{toolsJson},</if>
+            <if test="status != null">#{status},</if>
+            <if test="lastHealthAt != null">#{lastHealthAt},</if>
+            <if test="description != null">#{description},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateMcpServer" parameterType="McpServer">
+        update tb_mcp_server
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="serverCode != null">server_code = #{serverCode},</if>
+            <if test="serverName != null">server_name = #{serverName},</if>
+            <if test="protocol != null">protocol = #{protocol},</if>
+            <if test="endpoint != null">endpoint = #{endpoint},</if>
+            <if test="authType != null">auth_type = #{authType},</if>
+            <if test="oauthClientId != null">oauth_client_id = #{oauthClientId},</if>
+            <if test="oauthClientSecretEnc != null">oauth_client_secret_enc = #{oauthClientSecretEnc},</if>
+            <if test="toolsJson != null">tools_json = #{toolsJson},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="lastHealthAt != null">last_health_at = #{lastHealthAt},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deleteMcpServerByIds" parameterType="Long">
+        update tb_mcp_server set del_flag = '2' where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+</mapper>

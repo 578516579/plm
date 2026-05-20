@@ -53,12 +53,14 @@
 - 模板没有的实体（如 `Risk`、`Document`）→ 复制 `assets/business-templates/project/` 改字段，不要从零写。
 - 改完模板后建议把它沉淀回 skill（让以后能复用）。
 
-## F. 提交规范（MUST）
+## F. 提交与分支规范（MUST）
 
 - Commit message **必须** 遵 Conventional Commits（type/scope/subject 三段）。
-- 由 `.githooks/commit-msg` 校验，不许用 `--no-verify` 绕过（用户明确要求时除外）。
+- 由 `.githooks/commit-msg` 校验，**不许** `--no-verify` 绕过（用户明确要求时除外）。
 - 多文件改动按"一件事一个 commit"拆分；不要把"加业务模块 + 改 CI + 修 typo"塞一个 commit。
 - 涉及生成器/工具/skill 改动，commit 关联到产生它的指令（在 body 写"用户在会话中要求 …"）。
+- **分支名必须遵 `<type>/<desc>` 规范**，由 `.githooks/pre-push` 校验；`claude/` 前缀分支为工具自动创建，免校验。
+- **禁止直接推 `main` / `release/*`**（pre-push hook 强制，Claude 帮用户操作时同样禁止）。
 
 ## G. 评审与卡控（MUST — 已升级为硬约束）
 
@@ -277,6 +279,80 @@
 
 每次攻坚一个模块走完 §M.2 的 9 项 DoD + 提交一次 `feat(prd-align): <entity> PRD-aligned per F? + <html>`。
 
+## N. GitHub 工作流（MUST — 涉及 PR / Issue / Release 时）
+
+### N.1 `gh` CLI 使用前提
+
+在执行任何 `gh` 命令前，先检查：
+
+```bash
+gh auth status
+```
+
+若未登录，先提示用户执行 `gh auth login`，**不要**假设已认证。  
+若 `gh` 未安装，输出安装命令：`winget install --id GitHub.cli`（Windows）。
+
+### N.2 PR 创建（MUST）
+
+帮用户创建 PR 时，**必须**：
+1. 确认当前分支不是 `main`/`release/*`
+2. 确认分支已 push 到 remote（`git status` 检查 upstream）
+3. 使用 `gh pr create` 并**带完整 body**（从 `.github/PULL_REQUEST_TEMPLATE.md` 读取框架）
+4. PR title 必须符合 Conventional Commits 格式
+5. 若 PR 关联 Issue，在 body 写 `Closes #<n>`
+
+不要只给用户"你可以运行 gh pr create"，要主动生成完整命令。
+
+### N.3 Issue 创建（MUST）
+
+帮用户创建 Issue 时：
+- Bug → 使用 `bug` label
+- 功能需求 → 使用 `enhancement` label  
+- 必须让用户知道 Issue 编号，便于后续 `gh issue develop <n>`
+
+### N.4 CI 状态检查（SHOULD）
+
+push 或 PR 后，如用户关心 CI 结果：
+
+```bash
+gh run list --limit 5
+gh run watch <run-id>   # 实时等待
+```
+
+失败时用 `gh run view <run-id> --log-failed` 定位原因，不要让用户去浏览器翻。
+
+### N.5 高危 GitHub 操作（MUST 确认）
+
+以下操作**必须**先用 AskUserQuestion 确认：
+- `gh release create` — 会公开发布，影响所有用户
+- `gh repo edit --visibility` — 改仓库可见性
+- `gh api ... -X DELETE` — 删除远端资源
+- 修改分支保护规则（`gh api .../protection`）
+
+### N.6 不可绕过的平台限制（MUST）
+
+- 不要帮用户绕过 GitHub 的分支保护（如用 API 直接推 main）
+- 不要帮用户删除已合并 PR 对应的 commit 历史
+- 不要帮用户修改已发布 Release 的 tag（需要先在对话里确认理由）
+
+---
+
+## O. 并行 Session 协作（MUST）
+
+> **编号让位备注**：本章节原编号 § N（"并行 Session 协作"），与 main 上 commit `75f59b4` 加的 § N（"GitHub 工作流"）撞号。按 [99-跨阶段/协作规范.md §5 编号防撞](../99-跨阶段/协作规范.md) "后到者让位"原则，本节让位为 § O。
+
+多 session（多 Claude / 多人 / 人机混合）同时在本仓库工作时，遵守 [99-跨阶段/协作规范.md](../99-跨阶段/协作规范.md) 全文。Claude 视角额外硬条款：
+
+- **O.1** 启动即报到：第一轮响应前必跑 `git worktree list && git status && git log --oneline -3`，看清自己在哪、相对 main 偏离多少
+- **O.2** 写规范前查 §L.2：要改任何 SSoT 文件（详见 [协作规范.md §2](../99-跨阶段/协作规范.md) 列表）→ 先开 proposal，不直接动；Claude 不允许"自批自审"自己刚写的 proposal 后立刻动 SSoT，必须用户 AskUserQuestion 明确授权
+- **O.3** 任务上台账：开工前先在 [99-跨阶段/在途任务.md](../99-跨阶段/在途任务.md) "进行中"加一行；状态变化原地改
+- **O.4** 同模块串行：任一业务模块同一时刻只允许一个 session 改代码 + SQL（详见 [协作规范.md §4](../99-跨阶段/协作规范.md)）
+- **O.5** 见冲突即停：[协作规范.md §8](../99-跨阶段/协作规范.md) "停下 AskUserQuestion"场景禁止自作主张取舍；**禁止** `git push --force` 覆盖他人工作
+- **O.6** 跨 session 边界：其他 session 的 worktree / 分支视作 §B 不可触碰区扩展（不 cd 进入、不 edit、不 git 操作）
+- **O.7** Push 前显式 refspec：worktree 默认上游可能指向"父分支"（见 ruoyi-bootstrap skill gotchas §6），首次 push 必走 `git push -u origin <branch>:<branch>`，确认 `git rev-parse --abbrev-ref @{u}` 等于 `origin/<本地分支>`
+
+本章节是协作规范的强制摘要，详尽规则与示例在 [协作规范.md](../99-跨阶段/协作规范.md)。
+
 ---
 
 ## N. UED / 前端视觉约束（MUST — 与 §M PRD 驱动联动）
@@ -349,3 +425,5 @@ PR 涉及 UI 改动时，PR 描述中包含 UED规范.md §13 的 8 项自检 Ch
 | [99-跨阶段/模块工作流.md](../99-跨阶段/模块工作流.md) | 人类 + Claude | 软（评审卡控） |
 | [.editorconfig](../.editorconfig) | 编辑器 | 硬（自动应用） |
 | [.githooks/commit-msg](../.githooks/commit-msg) | git | 硬（commit 时拒绝） |
+| [.githooks/pre-push](../.githooks/pre-push) | git | 硬（push 时拒绝非规范分支/保护分支直推） |
+| [.github/workflows/ci.yml](../.github/workflows/ci.yml) | GitHub Actions | 硬（PR 必须 CI Gate 绿） |

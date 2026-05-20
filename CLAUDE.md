@@ -149,6 +149,7 @@ Three layers of project-wide rules — read these before non-trivial work:
 | Claude hard constraints (auto-loaded) | [.claude/rules.md](.claude/rules.md) | Claude — naming, untouchable zones, secret handling, gotchas reminders, commit format, **Gate enforcement (§G)** |
 | Human dev standards | [03-开发/开发规范.md](03-开发/开发规范.md) | Engineers — naming/coding/SQL/PR/test/security rules with examples |
 | Module lifecycle overview | [99-跨阶段/模块工作流.md](99-跨阶段/模块工作流.md) | All roles — Phase 01 → 06 entry/exit conditions, DoD, gate reviews |
+| **🤝 Parallel session collaboration** | [99-跨阶段/协作规范.md](99-跨阶段/协作规范.md) + [99-跨阶段/在途任务.md](99-跨阶段/在途任务.md) | Multi-worktree / multi-session scenarios — **§0-§12** worktree isolation / SSoT resource lock / task ledger / conflict handling; **§13-§18** role matrix / sync cadence (daily/weekly/monthly/quarterly) / escalation L0-L4 / on-boarding & hand-off / rollback playbook / Claude-Claude protocol. **Required reading** when running parallel Claude sessions. |
 | **🚦 Hard Gate (mandatory)** | [99-跨阶段/gate-checklists/](99-跨阶段/gate-checklists/) | All roles — **6 copy-and-fill Checklist templates**; instance files in `instances/<module>/` are the audit trail. Without a signed checklist commit, **the module is NOT allowed to advance to the next phase**. Triage by L1/L2/L3 (see Checklists README). |
 
 Tool-enforced:

@@ -1,0 +1,80 @@
+name: Bug Report / 缺陷报告
+description: 报告一个可复现的 bug
+labels: ["bug", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢提交 Bug 报告！请尽量填写完整，以便快速定位问题。
+
+  - type: input
+    id: module
+    attributes:
+      label: 所属模块 / Module
+      description: 哪个业务模块或系统功能？
+      placeholder: "例如: project / auth / task / 系统管理-用户"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述 / Description
+      description: 清晰描述发生了什么
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to Reproduce
+      description: 如何稳定复现？
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为 / Expected Behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为 / Actual Behavior
+      description: 包括错误码、错误信息、截图
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 严重级别 / Severity
+      options:
+        - P0 — 系统不可用 / 数据丢失
+        - P1 — 核心功能不可用
+        - P2 — 功能降级 / 有 workaround
+        - P3 — 样式/文案/轻微体验问题
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: 环境 / Environment
+      placeholder: "例如: 本地开发 / staging / 浏览器 Chrome 124"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 附加信息 / Additional Context
+      description: 日志片段、相关 commit hash、PRD 章节链接等

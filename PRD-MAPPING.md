@@ -754,4 +754,134 @@ plm-admin (entry)
 
 ---
 
+## 附录 B. MCP / Integration (Proposal 0007 — merged from main)
+
+> 本附录从 main 分支 commit [`0f75294`](https://github.com/578516579/plm/commit/0f75294) 合并而来,涉及 plm-mcp + plm-integration 2 个新模块。这两个模块在主表 §1 矩阵中暂未列入 31 个业务模块的范畴,定位为"基础设施类"模块。后续可由 PRD 维护者决定是否升格进 §1/§2 主表,或保留为附录 B 独立维护。
+
+### §32. MCP Server (plm-mcp)
+
+**领域**: 把 PLM 自己的业务能力(项目/需求/任务/用例/文档/数据)通过 MCP 协议暴露给外部 LLM Agent(Claude Code、Cursor、Copilot 等)。
+**PRD 出处**: §2.5 工具集清单 / §3.4 实现细节 / §4.1 信息架构 / 原型 [settings.html:157-180](prd和原型/AgriPLM-DevOps-原型/agriplm_split/settings.html)
+
+#### 表 `tb_mcp_server` — MCP Server 注册表
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| id | id | BIGINT | - | 主键 |
+| serverCode | server_code | VARCHAR(64) | §2.5 工具集分类 | 唯一编码:plm-core / plm-testcase / ... |
+| serverName | server_name | VARCHAR(128) | §3.4 工具注册 | 展示名 |
+| protocol | protocol | VARCHAR(16) | §3.4 "基于 MCP 协议规范" | `stdio` / `sse` / `http` |
+| endpoint | endpoint | VARCHAR(512) | §3.4 | http 模式下的访问 URL |
+| authType | auth_type | VARCHAR(16) | §3.4 "OAuth 2.0" | `none` / `token` / `oauth2` |
+| oauthClientId | oauth_client_id | VARCHAR(128) | §3.4 "支持企业 SSO 对接" | OAuth 客户端 ID |
+| oauthClientSecretEncrypted | oauth_client_secret_enc | VARCHAR(1024) | §3.4 | AES-256-GCM 密文 |
+| toolsJson | tools_json | TEXT | §2.5 工具集 JSON Schema | 暴露的工具列表(JSON Schema 数组) |
+| status | status | CHAR(1) | 原型 mcpTable 状态列 | 0=启用 1=停用 2=异常 |
+| lastHealthAt | last_health_at | DATETIME | 原型 mcpTable "最后健康检查" | 心跳时间戳 |
+| description | description | VARCHAR(500) | - | 描述 |
+
+#### 表 `tb_mcp_tool_audit` — MCP 工具调用审计
+
+| Java field | 列 | 类型 | 说明 |
+|---|---|---|---|
+| serverId | server_id | BIGINT | FK→tb_mcp_server.id |
+| toolName | tool_name | VARCHAR(128) | 如 `project.list` / `requirement.create` |
+| callerType | caller_type | VARCHAR(16) | `user`/`agent`/`system` |
+| callerId | caller_id | VARCHAR(128) | username / agent token id |
+| paramsJson | params_json | TEXT | 调用参数 |
+| resultStatus | result_status | CHAR(1) | 0=成功 1=失败 2=超时 |
+| resultBrief | result_brief | VARCHAR(2000) | 截断到 2KB 的响应摘要 |
+| latencyMs | latency_ms | INT | 耗时(ms) |
+
+### §33. 集成对接 Integration (plm-integration)
+
+**领域**: 管理与 飞书 / GitLab / 钉钉 / Jira / Figma / 禅道 / ZTF 等外部系统的连接器配置 + Webhook 入站事件。
+**PRD 出处**: §3.1 产品边界 / §3.5 Phase 2 / 原型 [settings.html:138-187](prd和原型/AgriPLM-DevOps-原型/agriplm_split/settings.html) "MCP集成" Tab
+
+#### 表 `tb_integration_connector` — 集成连接器配置
+
+| Java field | 列 | 类型 | 说明 |
+|---|---|---|---|
+| connectorCode | connector_code | VARCHAR(64) | 唯一编码:FEISHU-MAIN / GITLAB-OPS / ... |
+| connectorName | connector_name | VARCHAR(128) | 展示名 |
+| connectorType | connector_type | VARCHAR(32) | 字典 `biz_integration_type`:feishu/gitlab/dingtalk/jira/figma/zentao/ztf |
+| endpoint | endpoint | VARCHAR(512) | 外部系统 base URL (GitLab self-hosted 用) |
+| authType | auth_type | VARCHAR(16) | 字典 `biz_integration_auth`:app_secret/access_token/oauth2/pat |
+| credentialEncrypted | credential_enc | VARCHAR(2048) | AES-256-GCM 加密的 JSON |
+| webhookUrl | webhook_url | VARCHAR(512) | 本系统对外暴露的 webhook 入口 |
+| webhookSecret | webhook_secret | VARCHAR(256) | 验签密钥 |
+| configJson | config_json | TEXT | 类型特定配置 |
+| status | status | CHAR(1) | 字典 `biz_integration_status`:0=启用 1=停用 2=异常 |
+| lastSyncAt | last_sync_at | DATETIME | 原型表格 "最后同步" |
+
+#### 表 `tb_integration_webhook_event` — 入站 Webhook 事件流水
+
+| Java field | 列 | 类型 | 说明 |
+|---|---|---|---|
+| connectorId | connector_id | BIGINT | FK→tb_integration_connector.id |
+| eventType | event_type | VARCHAR(128) | 如 `feishu.im.message.receive_v1` / `gitlab.merge_request` |
+| externalEventId | external_event_id | VARCHAR(128) | 外部 event id(幂等键) |
+| payloadJson | payload_json | LONGTEXT | 原始 payload |
+| signature | signature | VARCHAR(512) | 签名头(验签用) |
+| signatureVerified | signature_verified | CHAR(1) | 0=验签失败 1=通过 |
+| processStatus | process_status | CHAR(1) | 字典 `biz_webhook_status`:0=待处理 1=处理中 2=成功 3=失败 4=已忽略 |
+| processError | process_error | VARCHAR(2000) | 失败原因 |
+| retryCount | retry_count | INT | 重试次数 |
+| sourceIp | source_ip | VARCHAR(64) | 调用方 IP(防滥用) |
+
+### §32 状态机 — MCP Server (`tb_mcp_server.status`)
+
+```
+启用(0) ⇄ 停用(1)
+启用(0) → 异常(2) [心跳失败 N 次]
+异常(2) → 启用(0) [手动恢复或心跳恢复]
+异常(2) → 停用(1)
+```
+
+非法转换 → `ServiceException(701)`。
+
+### §33 状态机 — Integration Connector (`tb_integration_connector.status`)
+
+同 §32:启用(0) ⇄ 停用(1);启用(0) → 异常(2);异常(2) → 启用(0) / 停用(1)。
+
+### §33 状态机 — Webhook Event (`tb_integration_webhook_event.process_status`)
+
+```
+待处理(0) → 处理中(1)
+处理中(1) → 成功(2) / 失败(3) / 已忽略(4)
+失败(3) → 处理中(1) [重试]
+```
+
+非法转换 → `ServiceException(701)`。
+
+### 错误码 801-810 (MCP/Integration 专属)
+
+| 代码 | 名称 | HTTP | 示例 |
+|---|---|---|---|
+| **801** | MCP Server 不存在 | 404 | `MCP Server [server_code] 不存在` |
+| **802** | MCP 工具未注册 | 404 | `工具 [project.list] 在 [plm-core] 中未注册` |
+| **803** | MCP OAuth 失败 | 401 | `OAuth 验证失败 / token 已过期` |
+| **804** | MCP 工具调用失败 | 502 | `MCP Server 返回非预期错误` |
+| **805** | 集成连接器未配置 | 404 | `Connector [FEISHU-MAIN] 未找到` |
+| **806** | 集成 token 过期/无效 | 401 | `tenant_access_token 已失效` |
+| **807** | Webhook 验签失败 | 401 | `飞书 verification_token 不匹配 / GitLab X-Gitlab-Token 失败` |
+| **808** | 外部 API 速率限制 | 429 | `飞书 OpenAPI 触发限流,请稍候` |
+| **809** | 凭据加密 key 未配置 | 500 | `MCP_ENCRYPT_KEY 未设置,拒绝启动` |
+| **810** | 不支持的 connector_type | 400 | `connector_type = xxx 暂不支持,仅支持: feishu/gitlab/...` |
+
+### REST API 路径
+
+| 模块 | 路径 |
+|---|---|
+| MCP Server 管理 | `GET/POST/PUT/DELETE /business/mcp/server[/...]` |
+| MCP 工具审计 | `GET /business/mcp/audit/list` (只读) |
+| MCP 协议端点 | `POST /mcp/tools/list` / `POST /mcp/tools/call` |
+| 集成连接器管理 | `GET/POST/PUT/DELETE /business/integration/connector[/...]` |
+| 集成连通性测试 | `POST /business/integration/connector/{id}/test` |
+| Webhook 事件查询 | `GET /business/integration/webhook/list` (只读) |
+| Webhook 入站 - 飞书 | `POST /integration/webhook/feishu/{connectorId}` |
+| Webhook 入站 - GitLab | `POST /integration/webhook/gitlab/{connectorId}` |
+
+---
+
 *文档结束 | 本文件版本变更通过 git history 追踪 | 任何分歧以本文件为准*

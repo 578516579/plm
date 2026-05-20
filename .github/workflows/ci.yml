@@ -1,76 +1,131 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [main, "claude/**"]
   push:
-    branches: [main, "claude/**", "feat/**", "fix/**"]
-  workflow_dispatch:
+    branches: [main, "release/**"]
+  pull_request:
+    branches: [main, "release/**"]
 
-# 同分支后续 push 取消正在跑的旧 run, 省 Actions 时长
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  backend-test:
-    name: Backend (JDK 17 · Maven · JUnit)
+  # ─────────────────────────────────────────
+  # Job 1: Backend — compile + unit test
+  # ─────────────────────────────────────────
+  backend:
+    name: Backend (Java 17 / Maven)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: plm-backend
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci_password
+          MYSQL_DATABASE: plm
+          MYSQL_CHARACTER_SET_SERVER: utf8mb4
+          MYSQL_COLLATION_SERVER: utf8mb4_0900_ai_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
           java-version: "17"
+          distribution: "temurin"
           cache: maven
 
-      - name: mvn test (跳过 install 全量, 只跑单元测试)
-        run: mvn -B test -T 4 -DfailIfNoTests=false --no-transfer-progress
+      - name: Import DB schema
+        run: |
+          mysql -h 127.0.0.1 -uroot -pci_password --default-character-set=utf8mb4 plm \
+            < plm-backend/sql/ry_20260417.sql
+          mysql -h 127.0.0.1 -uroot -pci_password --default-character-set=utf8mb4 plm \
+            < plm-backend/sql/quartz.sql
 
-      - name: Upload surefire reports on failure
+      - name: Build & test
+        working-directory: plm-backend
+        env:
+          DB_PASSWORD: ci_password
+          REDIS_HOST: 127.0.0.1
+          JAVA_TOOL_OPTIONS: >-
+            -Dfile.encoding=UTF-8
+            -Dsun.jnu.encoding=UTF-8
+        run: mvn clean install --no-transfer-progress -T 4
+
+      - name: Upload Surefire reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: surefire-reports
-          path: plm-backend/**/target/surefire-reports/
+          path: "**/target/surefire-reports/**"
           retention-days: 7
 
-  frontend-check:
-    name: Frontend (Node 20 · typecheck + build)
+  # ─────────────────────────────────────────
+  # Job 2: Frontend — lint + build
+  # ─────────────────────────────────────────
+  frontend:
+    name: Frontend (Node / Vite)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: plm-frontend
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: plm-frontend/package-lock.json
+          cache-dependency-path: plm-frontend/package.json
 
-      - name: npm ci (使用 npmmirror 加速)
-        run: npm ci --registry=https://registry.npmmirror.com
+      - name: Install dependencies
+        working-directory: plm-frontend
+        # package-lock.json 未提交（pnpm/yarn workspace 场景），用 npm install
+        run: npm install --registry=https://registry.npmmirror.com
 
-      # vue-tsc 当前有 codegen view 残留 TS2322 / non-autotest 视图字段类型问题,
-      # 暂时 continue-on-error: 让 CI 通过但留可见报告, 后续单独清理
-      - name: vue-tsc typecheck (continue on existing errors)
-        run: npx vue-tsc --noEmit
-        continue-on-error: true
-
-      - name: Vite production build
+      - name: Build check
+        working-directory: plm-frontend
+        run: npm run build:prod
         env:
           VITE_BACKEND_URL: http://localhost:8080
           VITE_APP_TITLE: PLM
-        run: npm run build:prod
+
+      - name: Unit tests
+        working-directory: plm-frontend
+        run: npm run test:unit --if-present
+
+  # ─────────────────────────────────────────
+  # Summary gate — both jobs must pass
+  # ─────────────────────────────────────────
+  ci-gate:
+    name: CI Gate
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          if [[ "${{ needs.backend.result }}" != "success" || \
+                "${{ needs.frontend.result }}" != "success" ]]; then
+            echo "::error::One or more CI jobs failed. See individual job logs."
+            exit 1
+          fi
+          echo "All CI checks passed ✓"

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# .githooks/pre-push
+# 推送前校验：
+#   1. 分支名符合规范（feature|fix|hotfix|chore|release|docs|refactor/<desc>）
+#   2. 禁止直接向 main / release/* 推送（必须走 PR）
+#
+# 启用方式（与 commit-msg 相同，一次即可）：
+#   git config core.hooksPath .githooks
+
+PROTECTED_PATTERN='^(main|release/.*|master)$'
+BRANCH_PATTERN='^(feature|fix|hotfix|chore|release|docs|refactor|test|perf|ci)/[a-z0-9/_\-]+$'
+
+# 从 stdin 读取推送目标
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # 只校验非删除推送（删除推送 local_sha 为全零）
+  if [[ "$local_sha" == "0000000000000000000000000000000000000000" ]]; then
+    continue
+  fi
+
+  # 提取本地分支名
+  BRANCH="${local_ref#refs/heads/}"
+
+  # 1. 禁止直接推 main / release
+  if echo "$BRANCH" | grep -qE "$PROTECTED_PATTERN"; then
+    cat <<'EOF' >&2
+🚫 禁止直接推送到受保护分支
+
+  受保护分支：main / release/* / master
+  必须通过 Pull Request 合并。
+
+工作流：
+  git switch -c feature/<id>-<short-desc>
+  git push -u origin feature/<id>-<short-desc>
+  gh pr create  # 创建 PR
+
+详细规范见：03-开发/git-github-workflow.md §3
+EOF
+    exit 1
+  fi
+
+  # 2. 校验分支名格式（排除 claude/ 前缀的自动化分支）
+  case "$BRANCH" in
+    claude/*|dependabot/*|renovate/*)
+      # 自动化工具分支，跳过校验
+      continue
+      ;;
+  esac
+
+  if ! echo "$BRANCH" | grep -qE "$BRANCH_PATTERN"; then
+    cat <<'EOF' >&2
+❌ 分支名不符合规范
+
+期望格式：<type>/<desc>
+  type : feature | fix | hotfix | chore | release | docs | refactor | test | perf | ci
+  desc : 小写字母 / 数字 / 短横线 / 斜杠，不要空格
+
+示例：
+  feature/123-add-project-batch-close
+  fix/456-jwt-timezone-issue
+  hotfix/urgent-login-500
+  chore/update-fastjson2-2.0.61
+  release/1.2
+
+如必须绕过校验（不推荐）：git push --no-verify
+详细规范见：03-开发/git-github-workflow.md §2.2
+EOF
+    exit 1
+  fi
+done
+
+exit 0

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>plm</artifactId>
+        <groupId>cn.com.bosssfot.dv.plm</groupId>
+        <version>3.9.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>plm-integration</artifactId>
+
+    <description>
+        外部集成模块 — 管理与飞书 / GitLab / 钉钉 / Jira / Figma / 禅道 / ZTF 等外部系统的
+        连接器配置 (凭据 AES-256-GCM 加密) + Webhook 入站事件 + 出站 API 调用。
+        关联 PRD §3.1 / §3.5 Phase 2；Proposal 0007；设计文档 02-设计/MCP-集成-设计.md
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-system</artifactId>
+        </dependency>
+        <!-- 复用 plm-mcp 的 AesGcmCipher（凭据加密同一把 key） -->
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-mcp</artifactId>
+            <version>${plm.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

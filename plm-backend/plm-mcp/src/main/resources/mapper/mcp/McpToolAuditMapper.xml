@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.mcp.mapper.McpToolAuditMapper">
+
+    <resultMap type="McpToolAudit" id="McpToolAuditResult">
+        <result property="id"            column="id"/>
+        <result property="serverId"      column="server_id"/>
+        <result property="toolName"      column="tool_name"/>
+        <result property="callerType"    column="caller_type"/>
+        <result property="callerId"      column="caller_id"/>
+        <result property="paramsJson"    column="params_json"/>
+        <result property="resultStatus"  column="result_status"/>
+        <result property="resultBrief"   column="result_brief"/>
+        <result property="latencyMs"     column="latency_ms"/>
+        <result property="callTime"      column="call_time"/>
+        <result property="createBy"      column="create_by"/>
+        <result property="createTime"    column="create_time"/>
+        <result property="remark"        column="remark"/>
+    </resultMap>
+
+    <sql id="selectVo">
+        select id, server_id, tool_name, caller_type, caller_id, params_json,
+               result_status, result_brief, latency_ms, call_time,
+               create_by, create_time, remark
+        from tb_mcp_tool_audit
+    </sql>
+
+    <select id="selectMcpToolAuditList" parameterType="McpToolAudit" resultMap="McpToolAuditResult">
+        <include refid="selectVo"/>
+        <where>
+            <if test="serverId != null">and server_id = #{serverId}</if>
+            <if test="toolName != null and toolName != ''">and tool_name = #{toolName}</if>
+            <if test="callerType != null and callerType != ''">and caller_type = #{callerType}</if>
+            <if test="resultStatus != null and resultStatus != ''">and result_status = #{resultStatus}</if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and call_time &gt;= #{params.beginTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and call_time &lt;= #{params.endTime}
+            </if>
+        </where>
+        order by call_time desc
+    </select>
+
+    <select id="selectMcpToolAuditById" parameterType="Long" resultMap="McpToolAuditResult">
+        <include refid="selectVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMcpToolAudit" parameterType="McpToolAudit" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_mcp_tool_audit
+        (server_id, tool_name, caller_type, caller_id, params_json,
+         result_status, result_brief, latency_ms, call_time, create_time)
+        values
+        (#{serverId}, #{toolName}, #{callerType}, #{callerId}, #{paramsJson},
+         #{resultStatus}, #{resultBrief}, #{latencyMs},
+         <choose><when test="callTime != null">#{callTime}</when><otherwise>sysdate()</otherwise></choose>,
+         sysdate())
+    </insert>
+
+</mapper>
