@@ -1,7 +1,6 @@
 package cn.com.bosssfot.dv.plm.testplan.service.impl;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,13 +33,12 @@ public class TestPlanServiceImpl implements ITestPlanService
 {
     private static final Logger log = LoggerFactory.getLogger(TestPlanServiceImpl.class);
 
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01"));
-        STATUS_TRANSITIONS.put("01", Set.of("00", "02"));
-        STATUS_TRANSITIONS.put("02", Set.of("03"));
-        STATUS_TRANSITIONS.put("03", Set.of());
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01"),
+        "01", Set.of("00", "02"),
+        "02", Set.of("03"),
+        "03", Set.of()
+    );
 
     @Autowired private TestPlanMapper testplanMapper;
     @Autowired private ProjectMapper projectMapper;
@@ -142,12 +140,12 @@ public class TestPlanServiceImpl implements ITestPlanService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "草稿";
-            case "01": return "已确认";
-            case "02": return "执行中";
-            case "03": return "已完成";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "草稿";
+            case "01" -> "已确认";
+            case "02" -> "执行中";
+            case "03" -> "已完成";
+            default   -> "未知(" + status + ")";
+        };
     }
 }

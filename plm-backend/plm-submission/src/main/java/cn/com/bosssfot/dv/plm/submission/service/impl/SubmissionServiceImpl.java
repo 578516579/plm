@@ -3,7 +3,6 @@ package cn.com.bosssfot.dv.plm.submission.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,14 +43,13 @@ public class SubmissionServiceImpl implements ISubmissionService
     private static final BigDecimal MIN_UNIT_TEST_COVERAGE = new BigDecimal("60.00");
 
     /** 5×5 状态机转换矩阵 — 含反向边 04→00 */
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01"));            // 草稿 → 已提交
-        STATUS_TRANSITIONS.put("01", Set.of("02", "04"));      // 已提交 → 质量门禁中 / 已退回
-        STATUS_TRANSITIONS.put("02", Set.of("03", "04"));      // 质量门禁中 → 已通过 / 已退回
-        STATUS_TRANSITIONS.put("03", Set.of());                // 已通过 (终态)
-        STATUS_TRANSITIONS.put("04", Set.of("00"));            // 已退回 → 草稿 (反向边)
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01"),         // 草稿 → 已提交
+        "01", Set.of("02", "04"),   // 已提交 → 质量门禁中 / 已退回
+        "02", Set.of("03", "04"),   // 质量门禁中 → 已通过 / 已退回
+        "03", Set.of(),             // 已通过 (终态)
+        "04", Set.of("00")          // 已退回 → 草稿 (反向边)
+    );
 
     @Autowired private SubmissionMapper submissionMapper;
     @Autowired private ProjectMapper projectMapper;
@@ -221,13 +219,13 @@ public class SubmissionServiceImpl implements ISubmissionService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "草稿";
-            case "01": return "已提交";
-            case "02": return "质量门禁中";
-            case "03": return "已通过";
-            case "04": return "已退回";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "草稿";
+            case "01" -> "已提交";
+            case "02" -> "质量门禁中";
+            case "03" -> "已通过";
+            case "04" -> "已退回";
+            default   -> "未知(" + status + ")";
+        };
     }
 }

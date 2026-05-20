@@ -26,6 +26,9 @@
           <el-option v-for="dict in status_options" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
       </el-form-item>
+      <el-form-item label="指派人" prop="assigneeUserId">
+        <el-input v-model="queryParams.assigneeUserId" placeholder="user_id" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>

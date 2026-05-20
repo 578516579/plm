@@ -2,7 +2,6 @@ package cn.com.bosssfot.dv.plm.apidesign.service.impl;
 
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,13 +38,12 @@ public class ApiDesignServiceImpl implements IApiDesignService
     private static final Set<String> ALLOWED_METHOD =
         Set.of("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS");
 
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01"));
-        STATUS_TRANSITIONS.put("01", Set.of("00", "02"));
-        STATUS_TRANSITIONS.put("02", Set.of("03"));
-        STATUS_TRANSITIONS.put("03", Set.of());
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01"),
+        "01", Set.of("00", "02"),   // 评审中 → 草稿(反向打回) / 已确认
+        "02", Set.of("03"),
+        "03", Set.of()
+    );
 
     @Autowired private ApiDesignMapper apidesignMapper;
     @Autowired private ProjectMapper projectMapper;
@@ -202,12 +200,12 @@ public class ApiDesignServiceImpl implements IApiDesignService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "草稿";
-            case "01": return "评审中";
-            case "02": return "已确认";
-            case "03": return "已废弃";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "草稿";
+            case "01" -> "评审中";
+            case "02" -> "已确认";
+            case "03" -> "已废弃";
+            default   -> "未知(" + status + ")";
+        };
     }
 }

@@ -3,7 +3,6 @@ package cn.com.bosssfot.dv.plm.project.service.impl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -30,18 +29,14 @@ public class ProjectServiceImpl implements IProjectService
 {
     private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
-    /**
-     * PRD §3.3 状态机转换矩阵
-     * key = 当前状态, value = 允许转入的目标状态集合
-     */
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("0", Set.of("1", "4"));            // 未启动 → 进行中 / 已取消
-        STATUS_TRANSITIONS.put("1", Set.of("2", "3", "4"));       // 进行中 → 暂停 / 已完成 / 已取消
-        STATUS_TRANSITIONS.put("2", Set.of("1", "4"));            // 暂停 → 进行中 / 已取消
-        STATUS_TRANSITIONS.put("3", Set.of());                    // 已完成 → 终态
-        STATUS_TRANSITIONS.put("4", Set.of());                    // 已取消 → 终态
-    }
+    /** PRD §3.3 状态机：key=当前态, value=允许的目标态集合。终态映射到 Set.of() */
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "0", Set.of("1", "4"),       // 未启动 → 进行中 / 已取消
+        "1", Set.of("2", "3", "4"),  // 进行中 → 暂停 / 已完成 / 已取消
+        "2", Set.of("1", "4"),       // 暂停 → 进行中 / 已取消
+        "3", Set.of(),               // 已完成 → 终态
+        "4", Set.of()                // 已取消 → 终态
+    );
 
     @Autowired
     private ProjectMapper projectMapper;
@@ -145,13 +140,13 @@ public class ProjectServiceImpl implements IProjectService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "0": return "未启动";
-            case "1": return "进行中";
-            case "2": return "暂停";
-            case "3": return "已完成";
-            case "4": return "已取消";
-            default:  return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "0" -> "未启动";
+            case "1" -> "进行中";
+            case "2" -> "暂停";
+            case "3" -> "已完成";
+            case "4" -> "已取消";
+            default  -> "未知(" + status + ")";
+        };
     }
 }

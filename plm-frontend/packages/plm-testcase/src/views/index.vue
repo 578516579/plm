@@ -7,6 +7,9 @@
       <el-form-item label="项目ID" prop="projectId">
         <el-input v-model="queryParams.projectId" clearable @keyup.enter="handleQuery" />
       </el-form-item>
+      <el-form-item label="需求ID" prop="requirementId">
+        <el-input v-model="queryParams.requirementId" placeholder="可空" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
       <el-form-item label="分类" prop="category">
         <el-select v-model="queryParams.category" placeholder="全部" clearable>
           <el-option v-for="d in category_options" :key="d.value" :label="d.label" :value="d.value" />
@@ -193,8 +196,8 @@ const execForm = ref<any>({ testcaseId: null, testcaseNo: '', status: '03', actu
 
 const queryParams = ref<TestCaseQuery>({
   pageNum: 1, pageSize: 10,
-  testcaseNo: undefined, projectId: undefined, category: undefined,
-  priority: undefined, status: undefined, isAutomated: undefined
+  testcaseNo: undefined, projectId: undefined, requirementId: undefined,
+  category: undefined, priority: undefined, status: undefined, isAutomated: undefined
 })
 
 const rules = {

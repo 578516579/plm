@@ -8,10 +8,18 @@
       <el-form-item label="项目名称" prop="projectName">
         <el-input v-model="queryParams.projectName" placeholder="请输入项目名称" clearable @keyup.enter="handleQuery" />
       </el-form-item>
+      <el-form-item label="类型" prop="projectType">
+        <el-select v-model="queryParams.projectType" placeholder="全部" clearable>
+          <el-option v-for="dict in project_type_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable>
           <el-option v-for="dict in status_options" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
+      </el-form-item>
+      <el-form-item label="负责人" prop="managerUserId">
+        <el-input v-model="queryParams.managerUserId" placeholder="用户 ID" clearable @keyup.enter="handleQuery" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
@@ -52,6 +60,7 @@
           <dict-tag :options="status_options" :value="scope.row.status" />
         </template>
       </el-table-column>
+      <el-table-column label="负责人" align="center" prop="managerUserId" width="100" />
       <el-table-column label="起止日期" align="center" width="220">
         <template #default="scope">
           <span>{{ parseTime(scope.row.startDate, '{y}-{m}-{d}') }} ~ {{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
@@ -94,6 +103,11 @@
               <el-select v-model="form.status" placeholder="请选择状态">
                 <el-option v-for="dict in status_options" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="负责人ID" prop="managerUserId">
+              <el-input v-model="form.managerUserId" placeholder="user_id" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -152,7 +166,8 @@ const queryParams = ref<ProjectQuery>({
   projectNo: undefined,
   projectName: undefined,
   projectType: undefined,
-  status: undefined
+  status: undefined,
+  managerUserId: undefined
 })
 
 const rules = {
@@ -170,7 +185,7 @@ function getList() {
 }
 
 function reset() {
-  form.value = { projectNo: undefined, projectName: undefined, projectType: undefined, status: '0', budget: undefined, description: undefined }
+  form.value = { projectNo: undefined, projectName: undefined, projectType: undefined, status: '0', managerUserId: undefined, budget: undefined, description: undefined }
   proxy.resetForm('formRef')
 }
 

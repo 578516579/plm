@@ -2,9 +2,14 @@
 .claude/*
 !.claude/*.md
 !.claude/settings.json
+!.claude/skills/
+!.claude/skills/**
+!.claude/commands/
+!.claude/commands/**
 # Notes:
-#   settings.json      → shared (team-wide hooks/policies, in git)
+#   settings.json       → shared (team-wide hooks/policies, in git)
 #   settings.local.json → user-specific permissions cache, stays ignored
+#   skills/, commands/  → shared (team-wide Claude playbooks/slash-commands, in git)
 
 # Environment files with secrets
 .env

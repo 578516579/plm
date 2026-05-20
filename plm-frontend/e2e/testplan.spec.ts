@@ -1,9 +1,12 @@
-/** TestPlan 模块 E2E — PRD §F4.1 */
+/**
+ * TestPlan 模块 E2E — PRD §F4.1 测试方案
+ * 覆盖: CRUD + TP-YYYY-NNNN 编号 + 中文 HEX 守门员 + FK
+ */
 import { test, expect, APIRequestContext } from '@playwright/test'
 import { loginAsAdmin } from './helpers/auth'
 import { ApiClient } from './helpers/api'
-import { execDelete } from './helpers/db'
-import { RUN_ID, makeProjectData } from './helpers/fixtures'
+import { assertNoMojibake, execDelete } from './helpers/db'
+import { RUN_ID, makeProjectData, ERROR_CODES } from './helpers/fixtures'
 
 let token: string, api: ApiClient, apiRequest: APIRequestContext, projectId: number
 
@@ -16,6 +19,7 @@ test.describe('TestPlan 模块 E2E', () => {
     await api.createProject(makeProjectData(`tp-suite-${RUN_ID}`))
     const pl = await api.listProjects()
     projectId = pl.rows.find((p: any) => p.projectName.includes(`tp-suite-${RUN_ID}`))?.id
+    expect(projectId).toBeDefined()
   })
 
   test.afterAll(async () => {
@@ -26,10 +30,11 @@ test.describe('TestPlan 模块 E2E', () => {
     await apiRequest?.dispose()
   })
 
-  test('TC-TP-F001 创建测试方案 (5 种 test_types)', async () => {
+  test('TC-TP-F001 创建测试方案 + TP-YYYY-NNNN 编号 (5 种 test_types)', async () => {
+    const title = `Sprint 测试方案-${RUN_ID}`
     const r = await api.post('/business/testplan', {
       projectId,
-      title: `Sprint 测试方案-${RUN_ID}`,
+      title,
       testTypes: 'functional,api,automation',
       testCycleDays: 10,
       scope: '需求 REQ-001~005',
@@ -39,5 +44,49 @@ test.describe('TestPlan 模块 E2E', () => {
       authorUserId: 1
     })
     expect(r.code).toBe(200)
+
+    const list = await api.get('/business/testplan/list', { pageSize: 100 })
+    const tp = list.rows.find((x: any) => x.title === title)
+    expect(tp).toBeDefined()
+    expect(tp.testplanNo).toMatch(/^TP-\d{4}-\d{4}$/)
+    expect(tp.status).toBe('00')
+    expect(tp.testCycleDays).toBe(10)
+  })
+
+  test('TC-TP-F002 编码守门员: 中文 title + scope + strategy 无乱码', async () => {
+    const title = `编码守门员方案-${RUN_ID}`
+    await api.post('/business/testplan', {
+      projectId,
+      title,
+      testTypes: 'functional,security',
+      testCycleDays: 5,
+      scope: '需求 REQ-001~003,接口 API-PRJ-* αβγ',
+      strategy: '【策略】核心路径优先,边界条件后行 🚀',
+      riskAssessment: '风险点:依赖第三方 OCR 服务稳定性',
+      authorUserId: 1
+    })
+
+    const list = await api.get('/business/testplan/list', { pageSize: 100 })
+    const tp = list.rows.find((x: any) => x.title === title)
+
+    const titleCheck = assertNoMojibake('tb_testplan', 'title',
+      `testplan_id=${tp.testplanId}`)
+    expect.soft(titleCheck.ok, `title HEX=${titleCheck.hex}`).toBe(true)
+    const scopeCheck = assertNoMojibake('tb_testplan', 'scope',
+      `testplan_id=${tp.testplanId}`)
+    expect.soft(scopeCheck.ok, `scope HEX=${scopeCheck.hex}`).toBe(true)
+    const strategyCheck = assertNoMojibake('tb_testplan', 'strategy',
+      `testplan_id=${tp.testplanId}`)
+    expect.soft(strategyCheck.ok, `strategy HEX=${strategyCheck.hex}`).toBe(true)
+  })
+
+  test('TC-TP-F003 FK projectId 不存在 → 702', async () => {
+    const r = await api.post('/business/testplan', {
+      projectId: 999_999_999,
+      title: `FK 测试-${RUN_ID}`,
+      testTypes: 'functional',
+      authorUserId: 1
+    })
+    expect.soft(r.code, 'FK 不存在应返 702').toBe(ERROR_CODES.FK_NOT_EXISTS)
   })
 })

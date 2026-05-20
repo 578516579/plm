@@ -37,9 +37,11 @@ public interface TaskMapper
     /** 统计需求下未删除的任务数（需求删除前可复用） */
     public int countByRequirementId(Long requirementId);
 
-    /** 查迭代下所有未取消任务（看板视图） */
+    /** 查迭代下所有未取消任务（看板视图），支持优先级/负责人过滤 */
     public List<Task> selectKanbanTasks(@Param("projectId") Long projectId,
-                                        @Param("sprintId") Long sprintId);
+                                        @Param("sprintId") Long sprintId,
+                                        @Param("priority") String priority,
+                                        @Param("assigneeUserId") Long assigneeUserId);
 
     /** 查迭代下所有任务（Sprint 聚合详情用） */
     public List<Task> selectBySprintId(Long sprintId);
