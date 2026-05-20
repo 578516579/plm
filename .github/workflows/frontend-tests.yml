@@ -1,0 +1,48 @@
+name: Frontend Unit Tests
+
+on:
+  pull_request:
+    branches: [main, claude/silly-lederberg-451a23]
+    paths:
+      - 'plm-frontend/**'
+      - '.github/workflows/frontend-tests.yml'
+  push:
+    branches: [main, claude/silly-lederberg-451a23]
+    paths:
+      - 'plm-frontend/**'
+      - '.github/workflows/frontend-tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: plm-frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: plm-frontend
+        run: npm ci --registry=https://registry.npmmirror.com
+
+      - name: Run unit tests
+        working-directory: plm-frontend
+        run: npm run test:unit
+
+      - name: Generate coverage report
+        working-directory: plm-frontend
+        run: npm run test:unit:coverage
+        continue-on-error: true  # 覆盖率工具偶发 OOM,不阻塞主测试
+
+      - name: Upload coverage on success
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: plm-frontend/coverage/
+          retention-days: 7

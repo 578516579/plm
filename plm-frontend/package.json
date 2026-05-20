@@ -9,6 +9,9 @@
     "build:prod": "vite build",
     "build:stage": "vite build --mode staging",
     "preview": "vite preview",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:unit:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
@@ -49,6 +52,8 @@
     "vite": "6.4.1",
     "vite-plugin-compression": "0.5.1",
     "vite-plugin-svg-icons": "2.0.1",
+    "vitest": "3.2.0",
+    "@vitest/coverage-v8": "3.2.0",
     "vue-tsc": "2.1.10"
   },
   "overrides": {
