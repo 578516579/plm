@@ -71,4 +71,12 @@ public class AutoTestController extends BaseController {
     public AjaxResult aiGenerate(@PathVariable("id") Long id) {
         return success(autotestService.aiGenerate(id));
     }
+
+    /** PRD §F4.5 立即执行 — mock 执行 + 失败时 AI 根因分析 */
+    @PreAuthorize("@ss.hasPermi('business:autotest:edit')")
+    @Log(title = "自动化测试-立即执行", businessType = BusinessType.OTHER)
+    @PostMapping("/run/{id}")
+    public AjaxResult runNow(@PathVariable("id") Long id) {
+        return success(autotestService.runAutoTest(id));
+    }
 }

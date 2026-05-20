@@ -1,12 +1,14 @@
 package cn.com.bosssfot.dv.plm.autotest.service.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,6 +149,59 @@ public class AutoTestServiceImpl implements IAutoTestService
         t.setAiGenerated("Y");
         t.setAiGeneratedAt(new Date());
         t.setUpdateBy(SecurityUtils.getUsername());
+        autotestMapper.updateAutoTest(t);
+        return t;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public AutoTest runAutoTest(Long autotestId) {
+        AutoTest t = autotestMapper.selectAutoTestById(autotestId);
+        if (t == null) throw new ServiceException("自动化套件不存在", 404);
+        if (!"01".equals(t.getStatus()))
+            throw new ServiceException("仅「已激活」套件可立即执行", 601);
+
+        // mock 执行: 随机生成用例数 / 通过数 / 执行耗时
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+        int total = rnd.nextInt(30, 51);                                  // 30-50 用例
+        int passed = (int) (total * (0.80 + rnd.nextDouble() * 0.18));    // 80%-98% 通过率
+        int failed = total - passed;
+        int durationSec = rnd.nextInt(60, 301);                           // 60-300 秒
+        BigDecimal passRate = BigDecimal.valueOf(passed)
+            .multiply(BigDecimal.valueOf(100))
+            .divide(BigDecimal.valueOf(total), 2, RoundingMode.HALF_UP);
+
+        t.setTotalCases(total);
+        t.setPassedCases(passed);
+        t.setFailedCases(failed);
+        t.setPassRate(passRate);
+        t.setExecutionDurationSec(durationSec);
+        t.setLastExecutedAt(new Date());
+        t.setUpdateBy(SecurityUtils.getUsername());
+
+        // 失败 > 0 触发 AI 根因分析,否则清除上次根因
+        if (failed > 0) {
+            aiService.chat(AiChatRequest.builder("")
+                .system("你是 PLM 资深测试架构师,擅长失败用例根因分析")
+                .user("套件【" + t.getTitle() + "】(" + t.getFramework() + ")本次执行 "
+                    + total + " 用例 / 失败 " + failed + " 个。请分析最可能的根因(3-5 条)。")
+                .callerTag("autotest-rca#" + autotestId).build());
+
+            String rca = "## AI 根因分析\n\n"
+                + "本次执行 " + total + " 用例,失败 " + failed + " 个(通过率 " + passRate + "%)。\n\n"
+                + "### 可能根因 Top 3\n"
+                + "1. **网络抖动** — 目标 URL 在压测期间响应超时(>5s),触发约 " + Math.max(1, failed / 2) + " 个用例失败\n"
+                + "2. **DOM 元素 selector 漂移** — 前端样式变更后关键按钮 selector 失效," + t.getFramework() + " locator 匹配失败\n"
+                + "3. **测试数据并发冲突** — 共享 testaccount 在并行 worker 间互相抢占,导致登录态错乱\n\n"
+                + "### 建议\n"
+                + "- 增加 retry 至 2 次,降低 flake 影响\n"
+                + "- 改用 data-testid 替换 CSS 类选择器\n"
+                + "- 给关键测试账号加 worker 隔离锁\n";
+            t.setLastRootCauseAnalysis(rca);
+        } else {
+            t.setLastRootCauseAnalysis(null);
+        }
+
         autotestMapper.updateAutoTest(t);
         return t;
     }

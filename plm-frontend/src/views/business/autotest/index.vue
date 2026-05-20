@@ -14,7 +14,7 @@
         <el-button type="success" :loading="aiLoading" :disabled="!current.autotestId" @click="triggerAi">
           <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 生成脚本
         </el-button>
-        <el-button type="primary" :disabled="!current.autotestId" @click="runNow">
+        <el-button type="primary" :loading="runLoading" :disabled="!current.autotestId" @click="runNow">
           <el-icon><VideoPlay /></el-icon>&nbsp;▶ 立即执行
         </el-button>
       </div>
@@ -67,7 +67,7 @@
             <el-table-column label="套件名" prop="title" min-width="160" show-overflow-tooltip />
             <el-table-column label="类型" width="90" align="center">
               <template #default="{ row }">
-                <el-tag size="small" :type="suiteTypeTag(row.suiteType)">{{ suiteTypeLabel(row.suiteType) }}</el-tag>
+                <el-tag size="small" :type="suiteTypeTag(row.testSuiteType)">{{ suiteTypeLabel(row.testSuiteType) }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="框架" prop="framework" width="100" align="center">
@@ -82,9 +82,9 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column label="上次" prop="lastRunResult" width="80" align="center">
+            <el-table-column label="上次" width="80" align="center">
               <template #default="{ row }">
-                <el-tag size="small" :type="resultTag(row.lastRunResult)">{{ resultLabel(row.lastRunResult) }}</el-tag>
+                <el-tag size="small" :type="resultTag(resultOf(row))">{{ resultLabel(resultOf(row)) }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="状态" width="80" align="center">
@@ -118,9 +118,9 @@
               <el-descriptions-item label="套件编号"><code>{{ current.autotestNo }}</code></el-descriptions-item>
               <el-descriptions-item label="框架">{{ frameworkLabel(current.framework) }}</el-descriptions-item>
               <el-descriptions-item label="调度 Cron"><code>{{ current.scheduleCron || '(手动)' }}</code></el-descriptions-item>
-              <el-descriptions-item label="最近执行">{{ current.lastRunAt || '(未执行)' }}</el-descriptions-item>
+              <el-descriptions-item label="最近执行">{{ current.lastExecutedAt || '(未执行)' }}</el-descriptions-item>
               <el-descriptions-item label="结果">
-                <el-tag size="small" :type="resultTag(current.lastRunResult)">{{ resultLabel(current.lastRunResult) }}</el-tag>
+                <el-tag size="small" :type="resultTag(resultOf(current))">{{ resultLabel(resultOf(current)) }}</el-tag>
               </el-descriptions-item>
             </el-descriptions>
 
@@ -135,6 +135,13 @@
                 <el-statistic :value="current.failedCases || 0" title="失败" :value-style="{ color: '#ef4444' }" />
               </el-col>
             </el-row>
+
+            <div v-if="current.lastRootCauseAnalysis" class="rca-block">
+              <el-divider content-position="left">
+                <span style="color:#ef4444">🤖 AI 根因分析</span>
+              </el-divider>
+              <pre class="rca-text">{{ current.lastRootCauseAnalysis }}</pre>
+            </div>
 
             <el-divider content-position="left">📜 脚本片段</el-divider>
             <pre class="script-code">{{ truncatedScript }}</pre>
@@ -156,12 +163,12 @@
         </el-form-item>
         <el-row :gutter="10">
           <el-col :span="12">
-            <el-form-item label="类型" prop="suiteType">
-              <el-select v-model="form.suiteType" style="width: 100%">
-                <el-option label="UI E2E" value="ui_e2e" />
+            <el-form-item label="类型" prop="testSuiteType">
+              <el-select v-model="form.testSuiteType" style="width: 100%">
+                <el-option label="UI" value="ui" />
                 <el-option label="API 接口" value="api" />
-                <el-option label="单元测试" value="unit" />
                 <el-option label="性能压测" value="perf" />
+                <el-option label="回归测试" value="regression" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -169,13 +176,19 @@
             <el-form-item label="框架" prop="framework">
               <el-select v-model="form.framework" style="width: 100%">
                 <el-option label="Playwright" value="playwright" />
-                <el-option label="pytest" value="pytest" />
-                <el-option label="JUnit" value="junit" />
-                <el-option label="Postman/Newman" value="postman" />
+                <el-option label="Selenium" value="selenium" />
+                <el-option label="JMeter" value="jmeter" />
+                <el-option label="Cypress" value="cypress" />
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
+        <el-form-item label="目标 URL" prop="targetUrl">
+          <el-input v-model="form.targetUrl" placeholder="http://localhost" />
+        </el-form-item>
+        <el-form-item label="启用调度" prop="scheduleEnabled">
+          <el-switch v-model="form.scheduleEnabled" active-value="Y" inactive-value="N" />
+        </el-form-item>
         <el-form-item label="调度 Cron" prop="scheduleCron">
           <el-input v-model="form.scheduleCron" placeholder="0 2 * * *  (每日凌晨 2 点)" />
         </el-form-item>
@@ -193,7 +206,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, MagicStick, VideoPlay, DataAnalysis } from '@element-plus/icons-vue'
 import {
-  listAutoTest, addAutoTest, updateAutoTest, delAutoTest, aiGenerateAutoTest, getAutoTest, listProjectsForSelect,
+  listAutoTest, addAutoTest, updateAutoTest, delAutoTest, aiGenerateAutoTest, runAutoTest, getAutoTest, listProjectsForSelect,
   type AutoTest, type AutoTestQuery
 } from '@/api/business/autotest'
 
@@ -201,11 +214,12 @@ const dialogVisible = ref(false)
 const formRef = ref()
 const saving = ref(false)
 const aiLoading = ref(false)
+const runLoading = ref(false)
 const listLoading = ref(false)
 
 const emptyForm = (): AutoTest => ({
-  projectId: 0, title: '', suiteType: 'ui_e2e', framework: 'playwright',
-  scheduleCron: '0 2 * * *', authorUserId: 1
+  projectId: 0, title: '', testSuiteType: 'ui', framework: 'playwright',
+  scheduleCron: '0 2 * * *', targetUrl: '', scheduleEnabled: 'N', authorUserId: 1
 })
 const form = reactive<AutoTest>(emptyForm())
 const current = reactive<AutoTest>({ projectId: 0, title: '' })
@@ -233,19 +247,26 @@ const statusMap: Record<string, { label: string; type: any }> = {
 const statusTagFor = (s?: string) => statusMap[s || '00'] || { label: s || '-', type: 'info' as any }
 
 const suiteTypeLabel = (v?: string) =>
-  ({ ui_e2e: 'UI E2E', api: 'API', unit: '单测', perf: '性能' } as Record<string, string>)[v || ''] || v || '-'
+  ({ ui: 'UI', api: 'API', perf: '性能', regression: '回归' } as Record<string, string>)[v || ''] || v || '-'
 
 const suiteTypeTag = (v?: string): any =>
-  ({ ui_e2e: 'success', api: 'primary', unit: 'info', perf: 'warning' } as Record<string, string>)[v || ''] || 'info'
+  ({ ui: 'success', api: 'primary', perf: 'warning', regression: 'info' } as Record<string, string>)[v || ''] || 'info'
 
 const frameworkLabel = (v?: string) =>
-  ({ playwright: 'Playwright', pytest: 'pytest', junit: 'JUnit', postman: 'Postman' } as Record<string, string>)[v || ''] || v || '-'
+  ({ playwright: 'Playwright', selenium: 'Selenium', jmeter: 'JMeter', cypress: 'Cypress' } as Record<string, string>)[v || ''] || v || '-'
 
 const resultLabel = (v?: string) =>
-  ({ passed: '通过', failed: '失败', skipped: '跳过', never: '未执行' } as Record<string, string>)[v || ''] || v || '-'
+  ({ passed: '通过', failed: '失败', skipped: '跳过', partial: '部分通过', never: '未执行' } as Record<string, string>)[v || ''] || v || '-'
 
 const resultTag = (v?: string): any =>
-  ({ passed: 'success', failed: 'danger', skipped: 'info', never: 'info' } as Record<string, string>)[v || ''] || 'info'
+  ({ passed: 'success', failed: 'danger', skipped: 'info', partial: 'warning', never: 'info' } as Record<string, string>)[v || ''] || 'info'
+
+const resultOf = (row: AutoTest) => {
+  if (!row.lastExecutedAt) return 'never'
+  if ((row.failedCases || 0) > 0) return 'failed'
+  if ((row.passRate || 0) >= 99) return 'passed'
+  return 'partial'
+}
 
 const truncatedScript = computed(() => (current.scriptContent || '(待 AI 生成)').slice(0, 600))
 
@@ -298,8 +319,23 @@ async function triggerAi() {
 
 async function runNow() {
   if (!current.autotestId) return
-  ElMessage.info('立即执行 (模拟): 排队中,实际接入 v0.6 通过 CI 调度')
-  // 实际接入时改为 POST /business/autotest/run/{id}
+  if (current.status !== '01') {
+    ElMessage.warning('仅「已激活」套件可立即执行,请先把套件状态切到 01')
+    return
+  }
+  runLoading.value = true
+  try {
+    const res: any = await runAutoTest(current.autotestId)
+    if (res.code === 200 && res.data) {
+      Object.assign(current, res.data)
+      const rate = Number(res.data.passRate || 0)
+      const failed = Number(res.data.failedCases || 0)
+      if (failed > 0) ElMessage.warning(`执行完成: 通过率 ${rate}%,失败 ${failed} 例,见下方 AI 根因分析`)
+      else ElMessage.success(`执行完成: 全通过,通过率 ${rate}%`)
+      await getList()
+    }
+  } catch (e: any) { ElMessage.error(e?.msg || '执行失败') }
+  finally { runLoading.value = false }
 }
 
 async function handleDelete(row: AutoTest) {
@@ -340,5 +376,12 @@ code { background: #f4f4f5; padding: 2px 6px; border-radius: 3px; font-family: m
   background: #1e1e2e; color: #cdd6f4; padding: 12px 14px; border-radius: 6px;
   font-family: 'Consolas', monospace; font-size: 11.5px; line-height: 1.6;
   overflow-x: auto; white-space: pre-wrap; max-height: 240px; overflow-y: auto;
+}
+.rca-block { margin-top: 8px; }
+.rca-text {
+  background: #fef2f2; color: #7f1d1d; padding: 10px 12px; border-radius: 6px;
+  border-left: 3px solid #ef4444;
+  font-family: 'Consolas', monospace; font-size: 12px; line-height: 1.65;
+  white-space: pre-wrap; max-height: 320px; overflow-y: auto; margin: 0;
 }
 </style>
