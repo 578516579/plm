@@ -34,6 +34,9 @@ export interface PageDomain {
   reasonable?: boolean
 }
 
+/** 分页查询参数 — 业务 Query 接口扩展用 (packages/plm-* 等模块沿用此别名) */
+export type PageQuery = PageDomain
+
 /** Entity基类 */
 export interface BaseEntity {
   /** 搜索值 */
