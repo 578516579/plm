@@ -7,7 +7,13 @@ import { execSync } from 'child_process'
 const MYSQL = process.env.MYSQL_CLI || 'C:/Program Files/MySQL/MySQL Server 8.0/bin/mysql.exe'
 const DB_NAME = process.env.DB_NAME || 'plm'
 const DB_USER = process.env.DB_USER || 'root'
-const DB_PWD = process.env.DB_PASSWORD || 'aa8945163'
+const DB_PWD = process.env.DB_PASSWORD || (() => {
+  throw new Error(
+    '[e2e/helpers/db.ts] 环境变量 DB_PASSWORD 未设置。\n' +
+    '请先在 shell 中:  export DB_PASSWORD=<your-mysql-root-password>\n' +
+    '详见 04-测试/测试用例库/E2E-运行手册.md §3'
+  )
+})()
 
 /**
  * 执行 SQL 返回单值（-Nse 模式,silent + no-header）

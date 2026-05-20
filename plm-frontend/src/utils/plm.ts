@@ -112,9 +112,9 @@ export function selectDictLabels(datas: any, value: any, separator?: string): st
   return actions.join('').substring(0, actions.join('').length - 1)
 }
 
-// 字符串格式化(%s )
+// 字符串格式化(%s ) — i 从 0 开始，args[0] 对应第一个 %s（修复 RuoYi upstream off-by-one bug）
 export function sprintf(str: string, ...args: any[]): string {
-  let flag = true, i = 1
+  let flag = true, i = 0
   str = str.replace(/%s/g, function () {
     const arg = args[i++]
     if (typeof arg === 'undefined') {

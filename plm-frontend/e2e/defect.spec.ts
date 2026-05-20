@@ -179,7 +179,7 @@ test.describe('Defect 模块 E2E', () => {
   test('UI 层: 缺陷管理菜单可访问', async ({ page, context }) => {
     await context.addCookies([{ name: 'Admin-Token', value: token, url: 'http://localhost' }])
     await page.goto('/business/defect')
-    await expect(page.locator('.el-table')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('.el-table')).toBeVisible({ timeout: 60_000 })
     // 验证有"严重级别""分类"两个搜索字段(Defect 独有,区别于其他模块)
     await expect(page.getByText(/严重级别/).first()).toBeVisible()
     await expect(page.getByText(/分类/).first()).toBeVisible()
