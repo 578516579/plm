@@ -217,6 +217,21 @@
 | 诊断 | 把字符串复制到 VS Code / 浏览器看真值;或 `iconv` 转码 |
 | 复发次数 | 持续(只要在 cmd/PowerShell 看 log 就会) |
 
+### Q-CODE-03 — .d.ts ambient vs module 决定 `declare module 'vue'` 行为
+
+| 字段 | 内容 |
+|---|---|
+| 现象 | `vue-tsc --noEmit` 报 130+ 个 `TS2305: Module '"vue"' has no exported member 'ref/reactive/computed/onMounted/createApp/App'` + 派生 74 个 `TS7006: implicit any`,集中在 `src/views/business/*` 和 `src/main.ts` |
+| 根因 | `src/types/global.d.ts` 顶部只有 `import type { DefineComponent } from 'vue'`,**type-only import 不让文件成为 module**(TS 5.6 + moduleResolution=bundler 下)。文件被判为 ambient global script 时,`declare module 'vue' { interface ComponentInternalInstance { proxy: any } }` 不是 augmentation 而是**重新声明 vue 模块**,把 vue 真实的 ref/reactive/createApp 等 named exports 全部覆盖 |
+| 误判方向 1 | 怀疑 `auto-imports.d.ts` 末尾 `declare global { export type { Component, ... } from 'vue' }`。验证:删除后错误数 227 → 232(反增)。非真凶 |
+| 误判方向 2 | 怀疑 `vue.d.mts` 损坏或 vue-tsc 版本不兼容。验证:`@vue/runtime-dom/dist/runtime-dom.d.ts:1427` 有 `export declare const createApp`,链路完整。非真凶 |
+| 调试关键 | 建 `src/test-vue.ts` 写 `import { createApp } from 'vue'`,跑 tsc -p,在 src/ 内报错而根目录同文件不报 → 确诊 program-wide 污染 |
+| 修复 | (1) `global.d.ts` 顶部加 `export {}` 让它成为 module,augmentation 正确;(2) `declare module '*.vue'` 通配 + 没 d.ts 的三方库 shim(js-cookie/nprogress/file-saver/jsencrypt/sortablejs/fuse.js/vue-cropper/splitpanes/vuedraggable)全部移到新建的 `src/types/shims-vue.d.ts`(无顶层 import/export 的 ambient 文件);(3) 在 `src/types/api/common.ts` 加 `export type PageQuery = PageDomain` 别名修 13 个 packages 的 import |
+| 战果 | TS2305 vue named exports 130+ → 0;TS7006 implicit any 74 → 1;227 个模板化错误归零 |
+| 首次发现 | 2026-05-20 commit feat/ai-multi-provider-v1-v3 分支跑 vue-tsc |
+| 复发次数 | 1(已升格为 [.claude/rules.md §P](../.claude/rules.md) MUST 强制规范 + [proposal 0010](../99-跨阶段/proposals/0010-frontend-dts-module-augmentation-rule.md)) |
+| **预防** | 改 `src/types/*.d.ts` 前先 `grep -nE "^(import\|export)" <file>` 看文件类型;改完跑 §P.3 的自验最小测试 |
+
 ---
 
 ## 历史决策 (DECISION)
