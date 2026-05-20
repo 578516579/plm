@@ -242,7 +242,7 @@ const avgPassRate = computed(() => {
 const totalFailed = computed(() => list.value.reduce((s, x) => s + Number(x.failedCases || 0), 0))
 
 const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿', type: 'info' }, '01': { label: '启用', type: 'success' }, '02': { label: '已归档', type: 'warning' }
+  '00': { label: '草稿', type: 'info' }, '01': { label: '已激活', type: 'success' }, '02': { label: '已禁用', type: 'danger' }
 }
 const statusTagFor = (s?: string) => statusMap[s || '00'] || { label: s || '-', type: 'info' as any }
 
