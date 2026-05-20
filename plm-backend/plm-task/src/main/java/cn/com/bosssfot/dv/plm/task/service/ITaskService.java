@@ -27,6 +27,6 @@ public interface ITaskService
     /** "我的任务"：按当前 userId 筛选 */
     public List<Task> selectMyTasks(Task taskFilter);
 
-    /** 看板视图：项目 + 可选迭代下分组按状态的任务 */
-    public Map<String, Object> kanban(Long projectId, Long sprintId);
+    /** 看板视图：项目 + 可选迭代/优先级/负责人 过滤后分组按状态的任务 */
+    public Map<String, Object> kanban(Long projectId, Long sprintId, String priority, Long assigneeUserId);
 }

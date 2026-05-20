@@ -1,7 +1,6 @@
 package cn.com.bosssfot.dv.plm.release.service.impl;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,14 +39,13 @@ public class ReleaseServiceImpl implements IReleaseService
 
     private static final Set<String> ALLOWED_STRATEGY = Set.of("blue_green", "canary", "rolling");
 
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01", "04"));
-        STATUS_TRANSITIONS.put("01", Set.of("02", "03"));
-        STATUS_TRANSITIONS.put("02", Set.of("03", "04"));
-        STATUS_TRANSITIONS.put("03", Set.of("04"));
-        STATUS_TRANSITIONS.put("04", Set.of());
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01", "04"),
+        "01", Set.of("02", "03"),
+        "02", Set.of("03", "04"),
+        "03", Set.of("04"),
+        "04", Set.of()
+    );
 
     @Autowired private ReleaseMapper releaseMapper;
     @Autowired private ProjectMapper projectMapper;
@@ -165,13 +163,13 @@ public class ReleaseServiceImpl implements IReleaseService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "计划中";
-            case "01": return "发布中";
-            case "02": return "已发布";
-            case "03": return "已回滚";
-            case "04": return "已废弃";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "计划中";
+            case "01" -> "发布中";
+            case "02" -> "已发布";
+            case "03" -> "已回滚";
+            case "04" -> "已废弃";
+            default   -> "未知(" + status + ")";
+        };
     }
 }
