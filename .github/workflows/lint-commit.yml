@@ -1,0 +1,41 @@
+name: Commit Message Lint
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        run: |
+          # 与 .githooks/commit-msg 规则保持一致:
+          # type: feat | fix | docs | refactor | test | chore | perf | build | ci | revert | style
+          # scope: 可选，小写字母/数字/短横线/斜杠
+          # 跳过: Merge* | Revert* | fixup! | squash! | amend!
+          BASE_SHA=$(git merge-base origin/${{ github.base_ref }} HEAD)
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          PATTERN='^(feat|fix|docs|refactor|test|chore|perf|build|ci|revert|style)(\([a-z0-9/_\-]+\))?(!)?: .+'
+          FAIL=0
+          for sha in $(git rev-list "$BASE_SHA".."$HEAD_SHA"); do
+            MSG=$(git log -1 --pretty=%s "$sha")
+            # 跳过 merge / revert / fixup / squash / amend 提交
+            case "$MSG" in
+              Merge*|Revert*|"fixup!"*|"squash!"*|"amend!"*)
+                echo "SKIP $sha: $MSG"
+                continue
+                ;;
+            esac
+            if echo "$MSG" | grep -qE "$PATTERN"; then
+              echo "OK   $sha: $MSG"
+            else
+              echo "FAIL $sha: $MSG"
+              FAIL=1
+            fi
+          done
+          exit $FAIL
