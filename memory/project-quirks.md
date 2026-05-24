@@ -279,6 +279,7 @@
 - Q-BUILD-01 (vite glob) — ✅ frontend gotcha #4 (auto-import)
 - Q-BUILD-02 (jar 锁) — ✅ CLAUDE.md gotcha #5 (V2 promote, 2026-05-19)
 - Q-JVM-01 (stale 字节码) — ✅ CLAUDE.md gotcha #6 (V2 promote, 2026-05-19)
+- Q-CODE-03 (.d.ts module 污染 vue) — ✅ [.claude/rules.md §P](../.claude/rules.md) + 开发规范.md §2.4 (强制规范, 2026-05-20)
 
 ---
 
