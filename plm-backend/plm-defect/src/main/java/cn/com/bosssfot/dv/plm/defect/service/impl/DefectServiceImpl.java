@@ -1,7 +1,6 @@
 package cn.com.bosssfot.dv.plm.defect.service.impl;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,14 +45,13 @@ public class DefectServiceImpl implements IDefectService
      * 03 已解决   ❌       ✅ (反向) ❌        —         ✅
      * 04 已关闭   ❌       ❌        ❌        ❌        — (终态)
      */
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01"));                  // 新建 → 已确认
-        STATUS_TRANSITIONS.put("01", Set.of("02", "04"));            // 已确认 → 处理中 / 已关闭
-        STATUS_TRANSITIONS.put("02", Set.of("01", "03"));            // 处理中 → 重新分析 / 已解决
-        STATUS_TRANSITIONS.put("03", Set.of("01", "04"));            // 已解决 → 反向打回 / 已关闭
-        STATUS_TRANSITIONS.put("04", Set.of());                      // 已关闭 (终态)
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01"),         // 新建 → 已确认
+        "01", Set.of("02", "04"),   // 已确认 → 处理中 / 已关闭
+        "02", Set.of("01", "03"),   // 处理中 → 重新分析 / 已解决
+        "03", Set.of("01", "04"),   // 已解决 → 反向打回 / 已关闭
+        "04", Set.of()              // 已关闭 (终态)
+    );
 
     @Autowired private DefectMapper defectMapper;
     @Autowired private ProjectMapper projectMapper;
@@ -167,13 +165,13 @@ public class DefectServiceImpl implements IDefectService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "新建";
-            case "01": return "已确认";
-            case "02": return "处理中";
-            case "03": return "已解决";
-            case "04": return "已关闭";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "新建";
+            case "01" -> "已确认";
+            case "02" -> "处理中";
+            case "03" -> "已解决";
+            case "04" -> "已关闭";
+            default   -> "未知(" + status + ")";
+        };
     }
 }

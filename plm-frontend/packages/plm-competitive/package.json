@@ -1,7 +1,7 @@
 {
   "name": "@plm/competitive",
-  "version": "0.0.1",
-  "description": "PLM 业务模块 - 竞品情报 (stub 空壳)",
+  "version": "0.1.0",
+  "description": "PLM 业务模块 - 竞品情报",
   "main": "src/index.ts",
   "type": "module",
   "private": true,

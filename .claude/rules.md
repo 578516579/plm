@@ -100,15 +100,32 @@
 
 1. 启动后端（带 `-Dfile.encoding=UTF-8` 等 4 个编码标志）+ 前端 `npm run dev`
 2. 在 `plm-frontend/` 跑 `npm run test:e2e:encoding`（乱码守门员 — 6 case 全过）
-3. 跑 `npm run test:e2e` 全套件 41 case,**任何 fail 不允许进 Phase 04**
-4. 把通过证据（最后一行 `41 passed`）写进 Phase 03 Gate 实例的 §I "进入 Phase 04 准出确认" 段
+3. 跑 `npm run test:e2e` 全套件,**任何 fail 不允许进 Phase 04**(当前用例总数见 [E2E-测试矩阵.md](../04-测试/测试用例库/E2E-测试矩阵.md) §1)
+4. 把通过证据（最后一行 `N passed`）写进 Phase 03 Gate 实例的 §I "进入 Phase 04 准出确认" 段
 
-新增业务模块时,需要：
-- 复用 [E2E-测试矩阵.md](../04-测试/测试用例库/E2E-测试矩阵.md) 模式新建 `e2e/<module>.spec.ts`
-- 至少覆盖：CRUD + 状态机合法/非法 + FK 校验 + 编码 HEX 校验
+**工具链(Claude 必用)**:
+
+| 资源 | 用途 |
+|---|---|
+| [`.claude/skills/plm-e2e/SKILL.md`](skills/plm-e2e/SKILL.md) | E2E 流程的 SSoT — Claude 决策树/前置检查/失败排查/Gate 落档 |
+| `/e2e-run [smoke\|encoding\|business\|<模块>]` | 跑测试(自动前置自检) |
+| `/e2e-encoding` | 单跑编码守门员(6 case) |
+| `/e2e-smoke` | 冒烟测试(typo 修复后用) |
+| `/e2e-debug <spec> [-g <case>]` | Playwright Inspector 单步调试 |
+
+**Claude 行为约束**:
+- 用户说"开发完毕 / 提测 / Phase 04 / 自动化测试" → 必须主动建议触发 `plm-e2e` skill，不要被动等用户问
+- 用户跑 `npm run test:e2e*` 命令前，PreToolUse hook 会提醒前置 4 项检查
+- 测试 fail → 不要"再跑一次试试"，按 [E2E-运行手册.md §4](../04-测试/测试用例库/E2E-运行手册.md) 失败排查表归类
+- DB HEX 含 `EFBFBD` → **P0 阻塞**，立即停下，**不允许**绕过 encoding 套件
+
+**新增业务模块时**:
+- 复用 [E2E-测试矩阵.md](../04-测试/测试用例库/E2E-测试矩阵.md) 模式新建 `plm-frontend/e2e/<module>.spec.ts`(以 [`defect.spec.ts`](../plm-frontend/e2e/defect.spec.ts) / [`testcase.spec.ts`](../plm-frontend/e2e/testcase.spec.ts) 为模板)
+- 至少覆盖：CRUD + 状态机合法/非法 + FK 校验 + 编码 HEX 校验 + UI 菜单可达性
 - 添加 npm script `test:e2e:<module>`
+- 把新 case 登记进 [E2E-测试矩阵.md §2](../04-测试/测试用例库/E2E-测试矩阵.md)
 
-详细操作见 [`04-测试/测试用例库/E2E-运行手册.md`](../04-测试/测试用例库/E2E-运行手册.md)。
+详细操作见 [`04-测试/测试用例库/E2E-运行手册.md`](../04-测试/测试用例库/E2E-运行手册.md) 与 [`plm-e2e` skill](skills/plm-e2e/SKILL.md)。
 
 ## H. 文档落位（MUST）
 

@@ -47,7 +47,490 @@
 
 ## 2. 字段对照表（Domain ↔ 原型表单元素 ↔ DB 列）
 
-> 每个 PRD-aligned 模块一节。当前只填了 §32-33 两个新模块；其他已 PRD-aligned 模块的对照表参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
+> 每个 PRD-aligned 模块一节。当前已填 §1-13（13 PRD-aligned）+ §14-§21（**8 个 prd-align 空壳模块**)+ §32-33（MCP/Integration）—— **全 21 个业务模块字段对照表完工**。剩余 9 个纯 stub 模块（autotest/manual-impl/manual-ops/analytics/dashboard/ai-agent/openspec/pipeline/feature-flag/dora）的对照表暂参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
+
+### §1. Project（plm-project）
+
+**领域**: 项目主数据。**PRD 出处**: F1.2 / 原型 [projects.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/projects.html)
+
+#### 表 `tb_project`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| id | id | BIGINT | - | 主键 |
+| projectNo | project_no | VARCHAR | ADR-0001 | 编号 PRJ-YYYY-NNNN，自动生成 |
+| projectName | project_name | VARCHAR | 原型 projects.html 表单 "项目名称" | 必填 |
+| projectType | project_type | VARCHAR | 字典 `biz_project_type` | 类型 |
+| status | status | VARCHAR | 字典 `biz_project_status` | 0=未启动 1=进行中 2=暂停 3=已完成 4=已取消 |
+| managerUserId | manager_user_id | BIGINT | F1.2 负责人 | FK→sys_user.user_id |
+| startDate | start_date | DATE | 原型 "开始日期" | |
+| endDate | end_date | DATE | 原型 "结束日期" | |
+| budget | budget | DECIMAL | 原型 "预算" | |
+| description | description | VARCHAR | - | 详细描述 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §2. Requirement（plm-requirement）
+
+**领域**: 需求条目。**PRD 出处**: F2.1 / 原型 [requirements.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/requirements.html)
+
+#### 表 `tb_requirement`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| requirementId | id | BIGINT | - | 主键 |
+| requirementNo | requirement_no | VARCHAR | ADR-0002 | 编号 REQ-YYYY-NNNN |
+| projectId | project_id | BIGINT | F2.1 所属项目 | FK→tb_project.id（必填） |
+| title | title | VARCHAR | 原型 requirements.html "需求标题" | 必填 |
+| description | description | TEXT | 原型 "详细描述" | Markdown 兼容 |
+| source | source | VARCHAR | 字典 `biz_req_source` | 来源 |
+| priority | priority | VARCHAR | 字典 `biz_req_priority` | |
+| status | status | VARCHAR | 字典 `biz_req_status` | 00=待评审 01=开发中 02=已完成 03=已取消 |
+| assigneeUserId | assignee_user_id | BIGINT | F2.1 指派人 | FK→sys_user.user_id（可空） |
+| reviewNote | review_note | VARCHAR | 状态推进时简要纪要 | |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §3. Sprint（plm-sprint）
+
+**领域**: 迭代/Sprint。**PRD 出处**: F3.4 / 原型 [kanban.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/kanban.html) 迭代部分
+
+#### 表 `tb_sprint`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| sprintId | id | BIGINT | - | 主键 |
+| sprintNo | sprint_no | VARCHAR | ADR-0004 | 编号 SPR-YYYY-NNNN |
+| projectId | project_id | BIGINT | F3.4 | FK→tb_project.id（必填） |
+| name | name | VARCHAR | 原型 sprint modal "迭代名称" | 必填，如 "Sprint 26W21" |
+| goal | goal | VARCHAR | 原型 "目标" | 一句话目标 |
+| status | status | VARCHAR | 字典 `biz_sprint_status` | 00=计划中 01=进行中 02=已完成 03=已取消 |
+| plannedStartDate | planned_start_date | DATE | 原型 "开始日期" | 必填 |
+| plannedEndDate | planned_end_date | DATE | - | 由 plannedStartDate + durationDays 推算 |
+| actualStartDate | actual_start_date | DATE | - | 状态 00→01 时自动填（不由用户输入） |
+| actualEndDate | actual_end_date | DATE | - | 状态 01→02 时自动填 |
+| durationDays | duration_days | INT | 原型 "工期(天)" | 默认 14 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+**业务硬规则 703**: 同一 project_id 下 status='01' (进行中) 的迭代必须唯一。
+
+### §4. Task（plm-task）
+
+**领域**: 任务条目。**PRD 出处**: F3.4 / 原型 [kanban.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/kanban.html) 任务部分
+
+#### 表 `tb_task`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| taskId | id | BIGINT | - | 主键 |
+| taskNo | task_no | VARCHAR | ADR-0003 | 编号 TASK-YYYY-NNNN |
+| projectId | project_id | BIGINT | F3.4 | FK→tb_project.id（必填） |
+| requirementId | requirement_id | BIGINT | F3.4 | FK→tb_requirement.id（可空） |
+| sprintId | sprint_id | BIGINT | F3.4 | FK→tb_sprint.id（可空） |
+| title | title | VARCHAR | 原型 task modal "任务标题" | 必填 |
+| description | description | TEXT | 原型 "详细描述" | |
+| status | status | VARCHAR | 字典 `biz_task_status` | 00=待开发 01=开发中 02=代码评审 03=测试中 04=已完成 05=已取消 |
+| priority | priority | VARCHAR | 字典 `biz_task_priority` | |
+| assigneeUserId | assignee_user_id | BIGINT | 原型 "负责人" | FK→sys_user.user_id |
+| estimatedHours | estimated_hours | DECIMAL | 原型 "预估工时" | |
+| actualHours | actual_hours | DECIMAL | 原型 "实际工时" | 进入"已完成"必填 (601) |
+| mrUrl | mr_url | VARCHAR | 原型 "关联MR" | 格式 http(s)://（604 校验） |
+| mrBranch | mr_branch | VARCHAR | - | 分支名 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §5. Defect（plm-defect）
+
+**领域**: 缺陷条目。**PRD 出处**: F4.6 / 原型 [defects.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/defects.html)
+
+#### 表 `tb_defect`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| defectId | id | BIGINT | - | 主键 |
+| defectNo | defect_no | VARCHAR | ADR-0005 | 编号 DEFECT-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.6 | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | F4.6 | FK→tb_sprint.id（可空） |
+| taskId | task_id | BIGINT | F4.6 | FK→tb_task.id（可空） |
+| title | title | VARCHAR | 原型 defects.html "标题" | 必填 |
+| description | description | TEXT | 原型 "详细描述" | |
+| severity | severity | VARCHAR | 字典 `biz_defect_severity` | 严重级别 |
+| category | category | VARCHAR | 字典 `biz_defect_category` | 分类 |
+| status | status | VARCHAR | 字典 `biz_defect_status` | 00=新建 01=已确认 02=处理中 03=已解决 04=已关闭 |
+| assigneeUserId | assignee_user_id | BIGINT | 原型 "指派人" | FK→sys_user.user_id |
+| reporterUserId | reporter_user_id | BIGINT | 原型 "报告人" | FK→sys_user.user_id (默认当前用户) |
+| reproduceSteps | reproduce_steps | TEXT | 原型 "重现步骤" | |
+| expectedResult | expected_result | TEXT | 原型 "期望结果" | |
+| actualResult | actual_result | TEXT | 原型 "实际结果" | |
+| resolution | resolution | VARCHAR | - | 进入 03(已解决) 必填 → 705 |
+| tags | tags | VARCHAR | - | CSV |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §6. TestCase（plm-testcase）
+
+**领域**: 测试用例。**PRD 出处**: F4.2 / 原型 [testcase.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/testcase.html)
+
+#### 表 `tb_testcase`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| testcaseId | id | BIGINT | - | 主键 |
+| testcaseNo | testcase_no | VARCHAR | ADR-0006 | 编号 TC-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.2 | FK→tb_project.id（必填） |
+| requirementId | requirement_id | BIGINT | F4.2 | FK→tb_requirement.id（可空，关联需求） |
+| title | title | VARCHAR | 原型 testcase.html "标题" | 必填 |
+| description | description | TEXT | - | |
+| category | category | VARCHAR | 字典 `biz_testcase_category` | 分类 |
+| priority | priority | VARCHAR | 字典 `biz_testcase_priority` | |
+| status | status | VARCHAR | 字典 `biz_testcase_status` | 00=草稿 01=待执行 02=执行中 03=已通过 04=已失败 |
+| preconditions | preconditions | TEXT | 原型 "前置条件" | |
+| steps | steps | TEXT | 原型 "测试步骤" | 必填 |
+| expectedResult | expected_result | TEXT | 原型 "期望结果" | 必填 |
+| actualResult | actual_result | TEXT | 原型 "实际结果" | execute 端点回填 |
+| isAutomated | is_automated | CHAR(1) | 原型 "自动化" | Y/N |
+| automationScriptPath | automation_script_path | VARCHAR | - | is_automated='Y' 时必填 → 706 |
+| executionCount | execution_count | INT | - | /execute 自增 |
+| lastExecutedAt | last_executed_at | DATETIME | - | /execute 自动填 |
+| tags | tags | VARCHAR | - | |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §7. Document（plm-document）
+
+**领域**: 单表合并 5 种文档 (PRD/Arch/DbDesign/ApiDesign/Proposal/UED 等) — 用 doc_type 字段区分。**PRD 出处**: F2.2/F3.1/F3.2 / 原型 [prd.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/prd.html) / [archdesign.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/archdesign.html) / [dbdesign.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/dbdesign.html)
+
+#### 表 `tb_document`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| documentId | id | BIGINT | - | 主键 |
+| documentNo | document_no | VARCHAR | ADR-0007 | 编号 DOC-<TYPE>-YYYY-NNNN（按 type 分别累加） |
+| projectId | project_id | BIGINT | - | FK→tb_project.id（必填） |
+| relatedEntityType | related_entity_type | VARCHAR | - | 关联实体类型 (e.g. project / requirement / sprint) |
+| relatedEntityId | related_entity_id | BIGINT | - | 关联实体主键 (与 relatedEntityType 联用) |
+| docType | doc_type | VARCHAR | 字典 `biz_doc_type` | prd/arch/db_design/api_design/proposal/ued/test_plan/test_report/api_doc/manual_product/manual_impl/manual_ops (12 种, 校验 604) |
+| title | title | VARCHAR | 原型各 doc 页 "标题" | 必填 |
+| content | content | TEXT | 原型 "正文" | Markdown |
+| version | version | VARCHAR | 原型 "版本" | e.g. v1.0 |
+| status | status | VARCHAR | 字典 `biz_doc_status` | 00=草稿 01=待评审 02=已发布 03=已归档 |
+| authorUserId | author_user_id | BIGINT | 原型 "作者" | FK→sys_user.user_id |
+| reviewerUserId | reviewer_user_id | BIGINT | 原型 "审核人" | 进入 02(已发布) 必填 → 707 |
+| tags | tags | VARCHAR | 原型 "标签" | |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §8. Submission（plm-submission）
+
+**领域**: 提测管理 — 含 AI 质量门禁。**PRD 出处**: F4.4 / 原型 [submit.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/submit.html)
+
+#### 表 `tb_submission`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| submissionId | id | BIGINT | - | 主键 |
+| submissionNo | submission_no | VARCHAR | ADR | 编号 SUB-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.4 | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | F4.4 | FK→tb_sprint.id（可空） |
+| title | title | VARCHAR | 原型 "提测标题" | 必填 |
+| scope | scope | TEXT | 原型 "范围" | 本次提测范围 |
+| environment | environment | VARCHAR | 原型 "环境" | dev/sit/uat/prod |
+| expectedTestDays | expected_test_days | INT | 原型 "期望测试天数" | 1-60 |
+| riskNotes | risk_notes | TEXT | 原型 "风险备注" | |
+| unitTestCoverage | unit_test_coverage | DECIMAL(5,2) | **F4.4 AI 门禁** | 单测覆盖率 %，≥60 为通过 |
+| codeScanPassed | code_scan_passed | CHAR(1) | F4.4 AI 门禁 | Y/N |
+| prdCompleted | prd_completed | CHAR(1) | F4.4 AI 门禁 | Y/N |
+| apiDocUpdated | api_doc_updated | CHAR(1) | F4.4 AI 门禁 | Y/N |
+| qualityGatePassed | quality_gate_passed | CHAR(1) | 派生字段 | 4 项全 Y → Y;否则 N (708 错误码) |
+| status | status | VARCHAR | 字典 `biz_submission_status` | 00=草稿 01=已提交 02=质量门禁中 03=已通过 04=已退回 |
+| rejectReason | reject_reason | VARCHAR | - | 进入 04 必填 → 602 |
+| submitterUserId | submitter_user_id | BIGINT | - | FK→sys_user (默认当前用户) |
+| reviewerUserId | reviewer_user_id | BIGINT | - | FK→sys_user |
+| submittedAt | submitted_at | DATETIME | - | 00→01 时自动填 |
+| approvedAt | approved_at | DATETIME | - | 02→03 时自动填 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §9. Release（plm-release）
+
+**领域**: 发布管理 — 蓝绿 / 金丝雀 / 滚动 三策略 + DORA 4 指标 + AI 评审。**PRD 出处**: F4.7+ / 原型 [release.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/release.html)
+
+#### 表 `tb_release`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| releaseId | id | BIGINT | - | 主键 |
+| releaseNo | release_no | VARCHAR | ADR | 编号 REL-YYYY-NNNN |
+| version | version | VARCHAR | 原型 "版本号" | 如 v1.0.0,必填 |
+| projectId | project_id | BIGINT | - | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | - | FK→tb_sprint.id（可空） |
+| strategy | strategy | VARCHAR | 字典 `biz_release_strategy` | blue_green / canary / rolling |
+| environment | environment | VARCHAR | 原型 "环境" | dev/sit/uat/prod |
+| releaseNotes | release_notes | TEXT | 原型 "发布说明" | 变更内容 |
+| plannedAt | planned_at | DATETIME | 原型 "计划时间" | |
+| releasedAt | released_at | DATETIME | - | 01→02 时自动填 |
+| rollbackAt | rollback_at | DATETIME | - | 进入 03 时自动填 |
+| rollbackReason | rollback_reason | VARCHAR | - | 进入 03 必填 |
+| status | status | VARCHAR | 字典 `biz_release_status` | 00=计划中 01=发布中 02=已发布 03=已回滚 04=已废弃 |
+| aiReviewScore | ai_review_score | DECIMAL(5,2) | 原型 "AI 评分" | 0-100 |
+| aiReviewNotes | ai_review_notes | TEXT | 原型 "AI 评审说明" | AI 自动生成摘要 |
+| deploymentFrequency | deployment_frequency | DECIMAL(10,2) | **DORA 1** | 部署频率 |
+| leadTimeHours | lead_time_hours | DECIMAL(10,2) | **DORA 2** | 前置时间 (小时) |
+| mttrMinutes | mttr_minutes | DECIMAL(10,2) | **DORA 3** | 平均恢复时间 (分钟) |
+| changeFailureRate | change_failure_rate | DECIMAL(5,2) | **DORA 4** | 变更失败率 % |
+| releasedByUserId | released_by_user_id | BIGINT | - | FK→sys_user (实际发布人) |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §10. TestPlan（plm-testplan）
+
+**领域**: 测试方案 — AI 生成策略 / 范围 / 资源 / 风险。**PRD 出处**: F4.1 / 原型 [testplan.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/testplan.html)
+
+#### 表 `tb_testplan`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| testplanId | id | BIGINT | - | 主键 |
+| testplanNo | testplan_no | VARCHAR | ADR | 编号 TP-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.1 | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | F4.1 | FK→tb_sprint.id（可空） |
+| title | title | VARCHAR | 原型 "方案标题" | 必填 |
+| testTypes | test_types | VARCHAR | 原型 "测试类型" | CSV: 功能/性能/安全/兼容性 等 (必填) |
+| testCycleDays | test_cycle_days | INT | 原型 "测试周期" | 默认 10 |
+| scope | scope | TEXT | 原型 "测试范围" | |
+| strategy | strategy | TEXT | 原型 "测试策略" | 入口/出口准则 |
+| toolsRecommended | tools_recommended | TEXT | 原型 "工具推荐" | AI 建议 |
+| resourcesPlan | resources_plan | TEXT | 原型 "资源计划" | 人力/环境/数据 |
+| riskAssessment | risk_assessment | TEXT | 原型 "风险评估" | 风险点+缓解 |
+| aiGenerated | ai_generated | CHAR(1) | 原型 "AI 生成" | Y/N |
+| status | status | VARCHAR | 字典 `biz_testplan_status` | 00=草稿 01=已确认 02=执行中 03=已完成 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §11. ApiDoc（plm-apidoc）
+
+**领域**: API 文档 — 从代码注释自动提取 + OpenAPI 规范 + 在线调试。**PRD 出处**: F5.4 / 原型 [apidoc.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/apidoc.html)
+
+#### 表 `tb_apidoc`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| apidocId | id | BIGINT | - | 主键 |
+| apidocNo | apidoc_no | VARCHAR | ADR | 编号 API-YYYY-NNNN |
+| projectId | project_id | BIGINT | F5.4 | FK→tb_project.id（必填） |
+| title | title | VARCHAR | 原型 "接口标题" | 必填 |
+| httpMethod | http_method | VARCHAR | 原型 "HTTP方法" | GET / POST / PUT / DELETE / PATCH / HEAD / OPTIONS (校验集合) |
+| path | path | VARCHAR | 原型 "接口路径" | 如 /business/xxx |
+| description | description | TEXT | 原型 "描述" | Markdown |
+| requestSchema | request_schema | TEXT | 原型 "请求 Schema" | JSON Schema |
+| responseSchema | response_schema | TEXT | 原型 "响应 Schema" | JSON Schema |
+| openapiSpec | openapi_spec | TEXT | 原型 "OpenAPI 规范" | OpenAPI 3.0 片段 |
+| sourceClass | source_class | VARCHAR | - | 源 Controller 类全限定名 |
+| sourceMethod | source_method | VARCHAR | - | 源方法名 |
+| version | version | VARCHAR | 原型 "版本" | 如 v1,必填 |
+| status | status | VARCHAR | 字典 `biz_apidoc_status` | 00=草稿 01=已发布 02=已废弃 |
+| lastSyncedAt | last_synced_at | DATETIME | - | autoExtracted='Y' 时自动填 |
+| autoExtracted | auto_extracted | CHAR(1) | - | Y/N |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+**唯一键**: (http_method, path, version) → 重复抛 701。
+
+### §12. ManualProduct（plm-manual-product）
+
+**领域**: 产品手册 — AI 一键生成 + 截图自动描述 + 多格式导出。**PRD 出处**: F5.1 / 原型 [productmanual.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/productmanual.html)
+
+#### 表 `tb_manual_product`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| manualproductId | id | BIGINT | - | 主键 |
+| manualproductNo | manualproduct_no | VARCHAR | ADR | 编号 MP-YYYY-NNNN |
+| projectId | project_id | BIGINT | F5.1 | FK→tb_project.id（必填） |
+| title | title | VARCHAR | 原型 "手册标题" | 必填 |
+| productVersion | product_version | VARCHAR | 原型 "产品版本" | 如 v1.0.0,必填 |
+| includeModules | include_modules | VARCHAR | 原型 "包含模块" | CSV 模块列表 |
+| content | content | LONGTEXT | 原型 "正文" | Markdown,AI 一键生成 |
+| screenshotsUrls | screenshots_urls | TEXT | 原型 "截图 URL 列表" | CSV/换行分隔 |
+| screenshotsCount | screenshots_count | INT | 原型 "截图数" | |
+| outputFormats | output_formats | VARCHAR | 原型 "导出格式" | word / pdf / html / h5 (CSV) |
+| aiGenerated | ai_generated | CHAR(1) | 原型 "AI 生成" | Y/N |
+| generatedAt | generated_at | DATETIME | - | 进入 02(已生成) 时自动填 |
+| status | status | VARCHAR | 字典 `biz_manualproduct_status` | 00=草稿 01=生成中 02=已生成 03=已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §13. TestReport（plm-testreport）
+
+**领域**: 测试报告 — AI 自动生成 + 上线风险评级 (绿/黄/红)。**PRD 出处**: F4.7 / 原型 [testreport.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/testreport.html)
+
+#### 表 `tb_testreport`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| testreportId | id | BIGINT | - | 主键 |
+| testreportNo | testreport_no | VARCHAR | ADR | 编号 TR-YYYY-NNNN |
+| projectId | project_id | BIGINT | F4.7 | FK→tb_project.id（必填） |
+| sprintId | sprint_id | BIGINT | F4.7 | FK→tb_sprint.id（可空） |
+| testplanId | testplan_id | BIGINT | F4.7 | FK→tb_testplan.id（可空） |
+| title | title | VARCHAR | 原型 "报告标题" | 必填 |
+| totalCases | total_cases | INT | 原型 "总用例数" | |
+| passedCases | passed_cases | INT | 原型 "通过用例" | |
+| failedCases | failed_cases | INT | 原型 "失败用例" | |
+| coverageRate | coverage_rate | DECIMAL(5,2) | 原型 "覆盖率%" | 0-100 |
+| defectSummary | defect_summary | TEXT | 原型 "缺陷摘要" | |
+| p0Defects | p0_defects | INT | 原型 "P0 缺陷数" | 严重 |
+| p1Defects | p1_defects | INT | 原型 "P1 缺陷数" | 重要 |
+| p2Defects | p2_defects | INT | 原型 "P2 缺陷数" | 一般 |
+| riskLevel | risk_level | VARCHAR | 字典 `biz_testreport_risk` | green / yellow / red (校验集合) |
+| riskEvaluation | risk_evaluation | TEXT | 原型 "风险评价" | 详细说明 |
+| recommendations | recommendations | TEXT | 原型 "改进建议" | 后续措施 |
+| aiGenerated | ai_generated | CHAR(1) | 原型 "AI 生成" | Y/N |
+| status | status | VARCHAR | 字典 `biz_testreport_status` | 00=草稿 01=审核中 02=已发布 |
+| generatedAt | generated_at | DATETIME | - | AI 生成时自动填 |
+| reviewerUserId | reviewer_user_id | BIGINT | - | FK→sys_user |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §14. Inception（plm-inception）
+
+**领域**: 项目立项 — AI 辅助生成立项建议书 + 风险识别。**PRD 出处**: F1.1 / 原型 [inception.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/inception.html)
+
+#### 表 `tb_inception`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| inceptionId | id | BIGINT | - | 主键 |
+| inceptionNo | inception_no | VARCHAR | ADR | 编号 INC-YYYY-NNNN |
+| projectName | project_name | VARCHAR | 原型 "项目名称" | 必填 |
+| businessLine | business_line | VARCHAR | 字典 `biz_inception_biz_line` | 业务线 |
+| inceptionType | inception_type | VARCHAR | 字典 `biz_inception_type` | 项目类型 |
+| background | background | TEXT | 原型 "背景" | 立项原因 |
+| estimatedDurationMonths | estimated_duration_months | INT | 原型 "工期" | 月 |
+| estimatedTeam | estimated_team | VARCHAR | 原型 "团队规模" | |
+| aiGenerated | ai_generated | CHAR(1) | - | Y/N |
+| aiProposalContent | ai_proposal_content | LONGTEXT | - | AI 生成的立项建议书 |
+| aiRisks | ai_risks | TEXT | - | AI 识别的关键风险 |
+| aiGeneratedAt | ai_generated_at | DATETIME | - | |
+| status | status | VARCHAR | 字典 `biz_inception_status` | 00 草稿 01 已提交 02 审批中 03 已批准 04 已驳回 |
+| rejectReason | reject_reason | TEXT | - | 04 时填,可反向打回 00 |
+| submitterUserId | submitter_user_id | BIGINT | - | |
+| approverUserId | approver_user_id | BIGINT | - | |
+| approvedAt | approved_at | DATETIME | - | |
+| projectId | project_id | BIGINT | - | 批准后关联 tb_project.id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §15. Prd（plm-prd）
+
+**领域**: AI PRD 文档 — 基于 AgriKB 自动生成 7 段完整 PRD。**PRD 出处**: F2.2 / 原型 [prd.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/prd.html)
+
+#### 表 `tb_prd`
+
+| Java field | 列 | 类型 | 说明 |
+|---|---|---|---|
+| prdId / prdNo (PRD-YYYY-NNNN) / projectId / title (功能名) / description | | | 基础 |
+| sceneTemplate (字典 biz_prd_scene) / targetUser (字典 biz_prd_target_user) | | | 场景&用户 |
+| content (TEXT) | | | 7 段正文 (背景/用户故事/功能/非功能/验收/原型/版本) |
+| completenessScore | DECIMAL(5,2) | 0-100 | 完整度 |
+| version / aiGenerated / aiGeneratedAt | | | |
+| status (字典 biz_prd_status) | | | 00 草稿 01 评审中 02 已确认 03 已废弃 (含 01→00 反向打回) |
+| authorUserId / reviewerUserId | BIGINT | | |
+
+### §16. Competitive（plm-competitive）
+
+**领域**: 竞品情报 — AI 爬取官网/App Store + SWOT 分析 + 订阅监控。**PRD 出处**: F1.3 / 原型 [competitive.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/competitive.html)
+
+#### 表 `tb_competitive`
+
+| Java field | 类型 | 说明 |
+|---|---|---|
+| competitiveId / competitiveNo (COMP-YYYY-NNNN) / projectId | | 基础 |
+| competitorName / vendor / website / pricingModel / pricingTier (字典 biz_competitive_tier) | | 基础信息 |
+| featureMatrix | TEXT | 功能矩阵(JSON/CSV) |
+| strengths / weaknesses / opportunities / threats | TEXT | **SWOT 四象限** |
+| aiAnalysisReport / aiGenerated / aiGeneratedAt | | AI 自动综合分析 |
+| monitorEnabled / monitorKeywords / lastMonitoredAt | | **订阅监控** |
+| status (字典 biz_competitive_status) | | 00 草稿 01 已发布 02 已归档 (3 态) |
+| authorUserId | BIGINT | |
+
+### §17. Arch（plm-arch）
+
+**领域**: 系统架构 — AI 根据 PRD 推荐技术架构 + C4 模型容器图 + NFR 映射。**PRD 出处**: F3.1 / 原型 [archdesign.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/archdesign.html)
+
+#### 表 `tb_arch`
+
+| Java field | 类型 | 说明 |
+|---|---|---|
+| archId / archNo (ARCH-YYYY-NNNN) / projectId / prdId / title | | 基础 |
+| archMode (字典 biz_arch_mode) | | 分层/微服务/MFE 等 |
+| primaryStack (字典 biz_arch_stack) | | Spring Boot/Vue/Next 等 |
+| databaseChoice (字典 biz_arch_database) | | MySQL/PostgreSQL/MongoDB 等 |
+| aiOrchestration (字典 biz_arch_ai_engine) | | LangChain/LlamaIndex 等 |
+| deploymentType (字典 biz_arch_deployment) | | Docker/K8s/Serverless |
+| iotProtocol | VARCHAR | MQTT/HTTP/CoAP |
+| designContent / c4DiagramContent (Mermaid C4) / nfrMapping | TEXT | 设计内容 |
+| aiGenerated / aiGeneratedAt / status (4 态含 01→00 反向) | | |
+| authorUserId / reviewerUserId | | |
+
+### §18. DbDesign（plm-dbdesign）
+
+**领域**: 数据库设计 — AI 自动生成 ER 图 + 建表 SQL + 数据字典 + 规范检查。**PRD 出处**: F3.2 / 原型 [dbdesign.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/dbdesign.html)
+
+#### 表 `tb_dbdesign`
+
+| Java field | 类型 | 说明 |
+|---|---|---|
+| dbdesignId / dbdesignNo (DB-YYYY-NNNN) / projectId / archId / title | | 基础 |
+| dbEngine (字典 biz_dbdesign_engine) | | mysql/postgresql/mongo/redis 等 |
+| erDiagramContent | TEXT | Mermaid ER / PlantUML / dbdiagram.io 源码 |
+| dataDictionary | TEXT | 表/字段/含义 Markdown 或 JSON |
+| ddlScript | TEXT | CREATE TABLE ... |
+| normalizationCheck | TEXT | 3NF/BCNF 检查结果 + 命名规约违规 |
+| aiGenerated / aiGeneratedAt / status (字典 biz_dbdesign_status, 4 态含 01→00 反向) | | |
+| authorUserId / reviewerUserId | | |
+
+### §19. ApiDesign（plm-apidesign）
+
+**领域**: LLD 接口详细设计 (**设计期**,区分于 §11 ApiDoc 发布交付期) — AI 生成 OpenAPI 3.0 + Mock 联调。**PRD 出处**: F3.3 / 原型 [apidesign.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/apidesign.html)
+
+#### 表 `tb_apidesign`
+
+| Java field | 类型 | 说明 |
+|---|---|---|
+| apidesignId / apidesignNo (API-D-YYYY-NNNN) / projectId / archId / title | | 基础 |
+| httpMethod / path / description | | RESTful 三件套 |
+| requestSchema / responseSchema / openapiSpec | TEXT | OpenAPI 3.0 Schema |
+| mockEnabled (Y/N) / mockResponse | TEXT | **F3.6 Mock 服务联调** |
+| aiGenerated / aiGeneratedAt / status (字典 biz_apidesign_status, 4 态含 01→00 反向) | | |
+| authorUserId / reviewerUserId | | |
+
+**唯一键**: (project_id, http_method, path) → 重复 701。
+
+### §20. Ued（plm-ued）
+
+**领域**: UED 设计 — Figma MCP 集成 + AI 规范检查 + 双向关联需求。**PRD 出处**: F2.3 / 原型 [ued.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/ued.html)
+
+#### 表 `tb_ued`
+
+| Java field | 类型 | 说明 |
+|---|---|---|
+| uedId / uedNo (UED-YYYY-NNNN) / projectId / requirementId / title | | 基础;关联需求 |
+| figmaUrl / figmaFileKey / versionLabel / previewUrl | | **Figma MCP 集成** |
+| annotationContent | TEXT | 设计稿标注说明 |
+| aiReviewReport / aiReviewScore (DECIMAL 0-100) | | **AI 规范评审** |
+| complianceCheck | VARCHAR | WCAG 2.1 / 中文字体 |
+| usabilityIssues | TEXT | 可用性主要发现 |
+| agriComponentTags | VARCHAR | 农业组件 CSV (大棚卡片/传感器图/作物日历) |
+| aiGenerated / aiGeneratedAt / status (字典 biz_ued_status, 4 态含 01→00 反向) | | |
+| designerUserId / reviewerUserId | | |
+
+### §21. TestData（plm-testdata）
+
+**领域**: 测试数据工厂 — 基于字段语义 + AgriKB 生成农业场景真实感测试数据。**PRD 出处**: F4.3 / 原型 [testdata.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/testdata.html)
+
+#### 表 `tb_testdata`
+
+| Java field | 类型 | 说明 |
+|---|---|---|
+| testdataId / testdataNo (TD-YYYY-NNNN) / projectId / title | | 基础 |
+| targetTable (字典 biz_testdata_table) / generateCount (INT) | | |
+| outputFormat (字典 biz_testdata_format) | | csv/json/sql/excel |
+| fieldSemantics | TEXT | 字段名→业务含义 JSON/YAML |
+| ruleChinaCoord / ruleTimeContinuity / ruleSensorRange / ruleIncludeOutliers | CHAR(1) | **AgriKB 农业规则**：中国坐标 / 时序连续 / 传感器值域 / 5% 异常 |
+| generatedContent | LONGTEXT | 生成结果 CSV/JSON/SQL |
+| generatedAt | DATETIME | 01 已生成 时自动填 |
+| aiGenerated / status (字典 biz_testdata_status, 3 态) | | 00 草稿 01 已生成 02 已归档 |
+| authorUserId | BIGINT | |
 
 ### §32. MCP Server（plm-mcp）
 
@@ -130,6 +613,171 @@
 ---
 
 ## 3. 状态机汇总
+
+### §1 Project 状态机（tb_project.status）
+
+```
+0未启动 → 1进行中 / 4已取消
+1进行中 → 2暂停 / 3已完成 / 4已取消
+2暂停   → 1进行中 / 4已取消
+3已完成 (终态)
+4已取消 (终态)
+```
+非法转换 → `ServiceException(701)`。落地: [ProjectServiceImpl:33](plm-backend/plm-project/src/main/java/cn/com/bosssfot/dv/plm/project/service/impl/ProjectServiceImpl.java)。
+
+### §2 Requirement 状态机（tb_requirement.status, 4×4）
+
+```
+00待评审 → 01开发中 / 03已取消
+01开发中 → 00待评审(打回) / 02已完成 / 03已取消
+02已完成 (终态)
+03已取消 (终态)
+```
+非法转换 → `ServiceException(601)`。落地: [RequirementServiceImpl:44](plm-backend/plm-requirement/src/main/java/cn/com/bosssfot/dv/plm/requirement/service/impl/RequirementServiceImpl.java)。
+
+### §3 Sprint 状态机（tb_sprint.status, 4×4）
+
+```
+00计划中 → 01进行中 / 03已取消    [01→ 自动填 actualStartDate]
+01进行中 → 02已完成 / 03已取消    [02→ 自动填 actualEndDate]
+02已完成 (终态)
+03已取消 (终态)
+```
+非法转换 → `ServiceException(601)`。**业务硬规则 703**: 同一 project 下进行中迭代唯一。落地: [SprintServiceImpl:50](plm-backend/plm-sprint/src/main/java/cn/com/bosssfot/dv/plm/sprint/service/impl/SprintServiceImpl.java)。
+
+### §4 Task 状态机（tb_task.status, 6×6 含反向边）
+
+```
+00待开发  → 01开发中 / 05已取消
+01开发中  → 00待开发(回退) / 02代码评审 / 05已取消
+02代码评审 → 01开发中(打回) / 03测试中 / 05已取消
+03测试中  → 02代码评审(打回) / 04已完成 / 05已取消    [04→ 强制要求 actualHours]
+04已完成 (终态)
+05已取消 (终态)
+```
+非法转换 → `ServiceException(601)`。落地: [TaskServiceImpl:48](plm-backend/plm-task/src/main/java/cn/com/bosssfot/dv/plm/task/service/impl/TaskServiceImpl.java)。
+
+### §5 Defect 状态机（tb_defect.status, 5×5 含反向边）
+
+```
+00新建    → 01已确认
+01已确认  → 02处理中 / 04已关闭(重复/无效直接关)
+02处理中  → 01已确认(重新分析) / 03已解决
+03已解决  → 01已确认(反向打回) / 04已关闭          [进入 03 强制要求 resolution]
+04已关闭 (终态)
+```
+非法转换 → `ServiceException(701)`;resolution 缺失 → `ServiceException(705)`。落地: [DefectServiceImpl:49](plm-backend/plm-defect/src/main/java/cn/com/bosssfot/dv/plm/defect/service/impl/DefectServiceImpl.java)。
+
+### §6 TestCase 状态机（tb_testcase.status, 5×5 含反向边）
+
+```
+00草稿   → 01待执行
+01待执行 → 00草稿(回退) / 02执行中
+02执行中 → 01待执行(撤回) / 03已通过 / 04已失败
+03已通过 → 01待执行(重测)
+04已失败 → 01待执行(重测)
+```
+非法转换 → `ServiceException(701)`;is_automated='Y' 缺 automation_script_path → 706。/execute 端点专属:status 02→03|04 + execution_count+1 + last_executed_at。落地: [TestCaseServiceImpl:47](plm-backend/plm-testcase/src/main/java/cn/com/bosssfot/dv/plm/testcase/service/impl/TestCaseServiceImpl.java)。
+
+### §7 Document 状态机（tb_document.status, 4×4 含反向边）
+
+```
+00草稿   → 01待评审
+01待评审 → 00草稿(反向打回) / 02已发布                [进入 02 强制要求 reviewerUserId]
+02已发布 → 01待评审(反向重审) / 03已归档
+03已归档 (终态)
+```
+非法转换 → `ServiceException(701)`;reviewerUserId 缺失 → `ServiceException(707)`;doc_type 不在 12 种枚举内 → 604。落地: [DocumentServiceImpl:37](plm-backend/plm-document/src/main/java/cn/com/bosssfot/dv/plm/document/service/impl/DocumentServiceImpl.java)。
+
+### §8 Submission 状态机（tb_submission.status, 5×5 含反向边）
+
+```
+00草稿     → 01已提交                          [自动填 submittedAt]
+01已提交   → 02质量门禁中 / 04已退回(快速拒)
+02质量门禁中 → 03已通过(qualityGatePassed=Y) / 04已退回   [03 自动填 approvedAt]
+03已通过 (终态)
+04已退回   → 00草稿(反向打回重做)             [必填 rejectReason]
+```
+非法转换 → `ServiceException(701)`;rejectReason 缺失 → 602;qualityGatePassed!=Y 进入 03 → 708;单测覆盖率 < 60% 自动 qualityGatePassed=N。落地: [SubmissionServiceImpl:46](plm-backend/plm-submission/src/main/java/cn/com/bosssfot/dv/plm/submission/service/impl/SubmissionServiceImpl.java)。
+
+### §9 Release 状态机（tb_release.status, 5 态）
+
+```
+00计划中 → 01发布中 / 04已废弃
+01发布中 → 02已发布 / 03已回滚                 [02 自动填 releasedAt]
+02已发布 → 03已回滚 / 04已废弃
+03已回滚 → 04已废弃                            [进入 03 自动填 rollbackAt + 必填 rollbackReason]
+04已废弃 (终态)
+```
+非法转换 → `ServiceException(701)`;rollbackReason 缺失 → 602;strategy ∉ {blue_green, canary, rolling} → 604。落地: [ReleaseServiceImpl:43](plm-backend/plm-release/src/main/java/cn/com/bosssfot/dv/plm/release/service/impl/ReleaseServiceImpl.java)。
+
+### §10 TestPlan 状态机（tb_testplan.status, 4 态含反向边）
+
+```
+00草稿   → 01已确认
+01已确认 → 00草稿(回退) / 02执行中
+02执行中 → 03已完成
+03已完成 (终态)
+```
+非法转换 → `ServiceException(701)`;testCycleDays 默认 10;aiGenerated 默认 N。落地: [TestPlanServiceImpl:37](plm-backend/plm-testplan/src/main/java/cn/com/bosssfot/dv/plm/testplan/service/impl/TestPlanServiceImpl.java)。
+
+### §11 ApiDoc 状态机（tb_apidoc.status, 3 态）
+
+```
+00草稿   → 01已发布
+01已发布 → 02已废弃
+02已废弃 (终态)
+```
+非法转换 → `ServiceException(701)`;唯一键 (http_method, path, version) 重复 → 701;httpMethod ∉ {GET/POST/PUT/DELETE/PATCH/HEAD/OPTIONS} → 604;autoExtracted='Y' 自动填 lastSyncedAt。落地: [ApiDocServiceImpl:41](plm-backend/plm-apidoc/src/main/java/cn/com/bosssfot/dv/plm/apidoc/service/impl/ApiDocServiceImpl.java)。
+
+### §12 ManualProduct 状态机（tb_manual_product.status, 4 态含反向边）
+
+```
+00草稿   → 01生成中
+01生成中 → 02已生成                                  [02 自动填 generatedAt]
+02已生成 → 00草稿(重新编辑) / 03已发布
+03已发布 (终态)
+```
+非法转换 → `ServiceException(701)`。落地: [ManualProductServiceImpl:38](plm-backend/plm-manual-product/src/main/java/cn/com/bosssfot/dv/plm/manualproduct/service/impl/ManualProductServiceImpl.java)。
+
+### §13 TestReport 状态机（tb_testreport.status, 3 态含反向边）
+
+```
+00草稿   → 01审核中
+01审核中 → 00草稿(打回) / 02已发布
+02已发布 (终态)
+```
+非法转换 → `ServiceException(701)`;riskLevel ∉ {green, yellow, red} → 604;AI 生成时自动填 generatedAt。落地: [TestReportServiceImpl:39](plm-backend/plm-testreport/src/main/java/cn/com/bosssfot/dv/plm/testreport/service/impl/TestReportServiceImpl.java)。
+
+### §14 Inception 状态机（tb_inception.status, 5×5 含反向边）
+
+```
+00草稿   → 01已提交
+01已提交 → 02审批中 / 04已驳回 (重复/无效直接驳)
+02审批中 → 03已批准 / 04已驳回                  [批准时回填 projectId + approvedAt]
+03已批准 (终态)
+04已驳回 → 00草稿 (反向打回重写)                [必填 rejectReason]
+```
+落地: [InceptionServiceImpl:43](plm-backend/plm-inception/src/main/java/cn/com/bosssfot/dv/plm/inception/service/impl/InceptionServiceImpl.java)。
+
+### §15 Prd / §17 Arch / §18 DbDesign / §19 ApiDesign / §20 Ued 共用 4 态 (含 01→00 反向打回)
+
+```
+00草稿 → 01评审中
+01评审中 → 00草稿(反向打回) / 02已确认
+02已确认 → 03已废弃
+03已废弃 (终态)
+```
+落地分别在 [PrdServiceImpl:46](plm-backend/plm-prd/src/main/java/cn/com/bosssfot/dv/plm/prd/service/impl/PrdServiceImpl.java) / [ArchServiceImpl:46](plm-backend/plm-arch/src/main/java/cn/com/bosssfot/dv/plm/arch/service/impl/ArchServiceImpl.java) / [DbDesignServiceImpl:39](plm-backend/plm-dbdesign/src/main/java/cn/com/bosssfot/dv/plm/dbdesign/service/impl/DbDesignServiceImpl.java) / [ApiDesignServiceImpl:41](plm-backend/plm-apidesign/src/main/java/cn/com/bosssfot/dv/plm/apidesign/service/impl/ApiDesignServiceImpl.java) / [UedServiceImpl:38](plm-backend/plm-ued/src/main/java/cn/com/bosssfot/dv/plm/ued/service/impl/UedServiceImpl.java)。
+
+### §16 Competitive / §21 TestData 共用 3 态
+
+```
+00草稿 → 01已发布(已生成)
+01 → 02已归档
+02已归档 (终态)
+```
+落地: [CompetitiveServiceImpl:40](plm-backend/plm-competitive/src/main/java/cn/com/bosssfot/dv/plm/competitive/service/impl/CompetitiveServiceImpl.java) / [TestDataServiceImpl:42](plm-backend/plm-testdata/src/main/java/cn/com/bosssfot/dv/plm/testdata/service/impl/TestDataServiceImpl.java)。
 
 ### §32 MCP Server 状态机（tb_mcp_server.status）
 
@@ -271,3 +919,8 @@
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-17 | Wjl + Claude | 初版；初始化 SSoT；按 Proposal 0007 加入 §32 MCP / §33 Integration |
+| 2026-05-17 | Wjl + Claude | §2 补全 §1-4 Project/Requirement/Sprint/Task 字段对照表；§3 补全 4 模块状态机；配合 Vue 前端补缺(managerUserId / projectType filter / kanban priority+assignee filter+卡片负责人 / requirement 指派人搜索)与 ServiceImpl 现代化(Map.of + enhanced switch) |
+| 2026-05-17 | Wjl + Claude | 第二批: §2 补 §5 Defect / §6 TestCase / §7 Document 字段对照表;§3 补 3 模块状态机;Vue 解锁(Defect 报告人+指派人搜索 / TestCase 需求ID 搜索 / Document 关联类型+ID+作者+审核人 4 项搜索) + 后端 Document Mapper 加 reviewerUserId 过滤;3 个 ServiceImpl 现代化同样模式 |
+| 2026-05-18 | Wjl + Claude | 第三批: §2 补 §8 Submission / §9 Release / §10 TestPlan 字段对照表(含 AI 门禁 4 项 / DORA 4 指标);§3 补 3 模块状态机(含 04→00 反向+回滚必填);3 个 Vue 由空壳 stub(11 行)重写为完整 CRUD ~280 行均;3 个 TS types 由 5 字段扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式 |
+| 2026-05-18 | Wjl + Claude | **第四批: 全部 13 个 PRD-aligned 模块字段对照表/状态机完工!** §2 补 §11 ApiDoc / §12 ManualProduct / §13 TestReport(含 OpenAPI Schema / 截图/导出格式 / 风险评级+缺陷统计);§3 补 3 模块状态机(ApiDoc 3 态+唯一键 / ManualProduct 4 态含 02→00 反向 / TestReport 3 态含 01→00 反向);3 个 Vue 由 stub 重写为完整 CRUD ~300+ 行;3 个 TS types 扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式。**10 个 ServiceImpl 全部完成现代化收尾**。 |
+| 2026-05-18 | Wjl + Claude | **第五批: 21/21 业务模块字段对照表完工!** §2 补 §14-§21 (Inception/Prd/Competitive/Arch/DbDesign/ApiDesign/Ued/TestData) 8 模块;§3 补 4 个状态机摘要(Inception 5 态 + 5 模块共用 4 态含反向 + 2 模块共用 3 态);7 个 Vue 由 21 行 stub 重写为完整 CRUD ~220-280 行,新建 plm-inception 前端 package (6 文件全新);8 个 TS types 由 5 字段扩到完整 domain 映射;8 个 ServiceImpl 现代化同样模式 → **18 个 ServiceImpl 全部完成**。 |

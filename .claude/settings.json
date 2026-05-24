@@ -33,6 +33,15 @@
             "command": "path=\"$CLAUDE_TOOL_INPUT_file_path\"; case \"$path\" in *'gate-checklists/instances/'*) echo '⚠️  EDITING SIGNED GATE CHECKLIST INSTANCE' >&2; echo '   Path: '\"$path\" >&2; echo '   These files are immutable once signed.' >&2; echo '   Add a 「修订记录」 entry instead of overwriting content.' >&2 ;; esac; exit 0"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=\"$CLAUDE_TOOL_INPUT_command\"; case \"$cmd\" in *'test:e2e'*|*'playwright test'*) echo '🧪 E2E test about to run.' >&2; echo '   Pre-flight checklist (see .claude/skills/plm-e2e/SKILL.md):' >&2; echo '   ▸ netstat ports 3306/6379/8081/80 LISTENING' >&2; echo '   ▸ $DB_PASSWORD exported (helpers/db.ts throws if absent)' >&2; echo '   ▸ backend started with -Dfile.encoding=UTF-8 (encoding spec depends on it)' >&2; echo '   On full-suite green, append evidence to gate-checklists/instances/<module>/Phase03-Gate-*.md §I' >&2 ;; esac; exit 0"
+          }
+        ]
       }
     ],
 
@@ -42,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "prompt=\"$CLAUDE_USER_PROMPT\"; case \"$prompt\" in *'新功能'*|*'加功能'*|*'新模块'*|*'新业务'*|*'new feature'*|*'add module'*) echo '💡 detected intent: new business feature' >&2; echo '   Consider triggering the ruoyi-bootstrap skill Phase 7, and create the Gate Checklist instance in 99-跨阶段/gate-checklists/instances/' >&2 ;; *'上线'*|*'发布'*|*'release'*|*'deploy'*) echo '💡 detected intent: release' >&2; echo '   Phase 05 Gate must be filled: 99-跨阶段/gate-checklists/Phase05-上线-Gate.md' >&2 ;; *'回滚'*|*'rollback'*|*'revert'*) echo '💡 detected intent: rollback' >&2; echo '   Check 05-上线/Runbook.md and follow the documented rollback steps' >&2 ;; esac; exit 0"
+            "command": "prompt=\"$CLAUDE_USER_PROMPT\"; case \"$prompt\" in *'新功能'*|*'加功能'*|*'新模块'*|*'新业务'*|*'new feature'*|*'add module'*) echo '💡 detected intent: new business feature' >&2; echo '   Consider triggering the ruoyi-bootstrap skill Phase 7, and create the Gate Checklist instance in 99-跨阶段/gate-checklists/instances/' >&2 ;; *'上线'*|*'发布'*|*'release'*|*'deploy'*) echo '💡 detected intent: release' >&2; echo '   Phase 05 Gate must be filled: 99-跨阶段/gate-checklists/Phase05-上线-Gate.md' >&2 ;; *'回滚'*|*'rollback'*|*'revert'*) echo '💡 detected intent: rollback' >&2; echo '   Check 05-上线/Runbook.md and follow the documented rollback steps' >&2 ;; *'开发完'*|*'开发完毕'*|*'提测'*|*'Phase 03'*|*'phase 04'*|*'Phase 04'*|*'进入测试'*) echo '🧪 detected intent: dev-complete → preparing Phase 04 entry' >&2; echo '   §G.4 MUST: run `npm run test:e2e` full suite. Use the /e2e-run command or .claude/skills/plm-e2e' >&2; echo '   Encoding gate (6 case) is non-negotiable — DB HEX must not contain EFBFBD' >&2 ;; *'乱码'*|*'编码'*|*'EFBFBD'*|*'mojibake'*|*'utf-8'*|*'UTF-8'*) echo '💡 detected intent: encoding investigation' >&2; echo '   Run /e2e-encoding (6 case, ~20s) to confirm mojibake regression status' >&2; echo '   See 03-开发/字符编码规范.md and plm-e2e skill §一票否决项' >&2 ;; *'e2e'*|*'E2E'*|*'playwright'*|*'Playwright'*|*'自动化测试'*) echo '💡 detected intent: E2E test' >&2; echo '   .claude/skills/plm-e2e/SKILL.md is the SOP for this workflow' >&2; echo '   Commands: /e2e-run /e2e-smoke /e2e-encoding /e2e-debug' >&2 ;; esac; exit 0"
           }
         ]
       }

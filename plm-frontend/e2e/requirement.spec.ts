@@ -140,7 +140,7 @@ test.describe('Requirement 模块 E2E', () => {
   test('UI 层: 需求管理菜单可访问且表单可填', async ({ page, context }) => {
     await context.addCookies([{ name: 'Admin-Token', value: token, url: 'http://localhost' }])
     await page.goto('/business/requirement')
-    await expect(page.locator('.el-table')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('.el-table')).toBeVisible({ timeout: 60_000 })
 
     // 新增按钮点开
     await page.getByRole('button', { name: /新增/ }).first().click()

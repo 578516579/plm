@@ -1,0 +1,62 @@
+name: Frontend Unit Tests
+
+on:
+  pull_request:
+    branches: [main, claude/silly-lederberg-451a23]
+    paths:
+      - 'plm-frontend/**'
+      - '.github/workflows/frontend-tests.yml'
+  push:
+    branches: [main, claude/silly-lederberg-451a23]
+    paths:
+      - 'plm-frontend/**'
+      - '.github/workflows/frontend-tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if Vitest is configured
+        id: vitest_check
+        run: |
+          if [ -f plm-frontend/vitest.config.ts ]; then
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::notice::Vitest 未配置 (vitest.config.ts 不存在),跳过前端单元测试。PR #4 (feat/vitest) merge 后会自动启用。"
+          fi
+
+      - name: Setup Node 20
+        if: steps.vitest_check.outputs.configured == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: plm-frontend/package-lock.json
+
+      - name: Install dependencies
+        if: steps.vitest_check.outputs.configured == 'true'
+        working-directory: plm-frontend
+        run: npm ci --registry=https://registry.npmmirror.com
+
+      - name: Run unit tests
+        if: steps.vitest_check.outputs.configured == 'true'
+        working-directory: plm-frontend
+        run: npm run test:unit
+
+      - name: Generate coverage report
+        if: steps.vitest_check.outputs.configured == 'true'
+        working-directory: plm-frontend
+        run: npm run test:unit:coverage
+        continue-on-error: true  # 覆盖率工具偶发 OOM,不阻塞主测试
+
+      - name: Upload coverage on success
+        if: steps.vitest_check.outputs.configured == 'true' && success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: plm-frontend/coverage/
+          retention-days: 7

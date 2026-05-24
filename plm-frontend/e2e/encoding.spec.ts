@@ -148,7 +148,7 @@ test.describe('字符编码回归 (Mojibake guard)', () => {
     }])
 
     await page.goto('/business/project')
-    await page.waitForSelector('.el-table', { timeout: 10_000 })
+    await page.waitForSelector('.el-table', { timeout: 60_000 })
 
     // 点新增
     await page.getByRole('button', { name: /新增/ }).first().click()

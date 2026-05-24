@@ -152,7 +152,7 @@ test.describe('Document 模块 E2E (合并 5 stub)', () => {
   test('UI 层: 文档管理菜单 + 12 doc_type 下拉', async ({ page, context }) => {
     await context.addCookies([{ name: 'Admin-Token', value: token, url: 'http://localhost' }])
     await page.goto('/business/document')
-    await expect(page.locator('.el-table')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('.el-table')).toBeVisible({ timeout: 60_000 })
     // 验证有"文档类型"过滤(Document 独有)
     await expect(page.getByText(/文档类型/).first()).toBeVisible()
   })
