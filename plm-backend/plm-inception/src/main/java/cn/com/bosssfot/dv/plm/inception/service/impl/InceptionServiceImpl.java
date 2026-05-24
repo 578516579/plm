@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -49,6 +51,7 @@ public class InceptionServiceImpl implements IInceptionService
     );
 
     @Autowired private InceptionMapper inceptionMapper;
+    @Autowired private AiService aiService;
 
     @Override
     public List<Inception> selectInceptionList(Inception t) {
@@ -160,6 +163,14 @@ public class InceptionServiceImpl implements IInceptionService
         if (inc == null) {
             throw new ServiceException("立项单不存在", 404);
         }
+        // V3 审计:走一次 AiService 产生 invocation log,业务输出仍用下方 mock(保 E2E)。
+        // 当 plm.ai.default-provider 切到真厂商时,审计表能立刻看到真实 tokens/elapsed,
+        // 业务侧可逐步替换 result.getText() (本期保持 mock 输出兼容现有 E2E 断言)。
+        aiService.chat(AiChatRequest.builder("")
+            .system("你是 PLM 资深立项专家,擅长农业 IoT 项目可行性分析")
+            .user("请生成项目 [" + inc.getProjectName() + "] 的立项建议书,业务线:" + inc.getBusinessLine())
+            .callerTag("inception#" + inceptionId)
+            .build());
         // 本期 mock
         String proposal = "# 立项建议书:" + inc.getProjectName() + "\n\n"
             + "## 1. 背景与诉求\n" + (inc.getBackground() == null ? "(待补充)" : inc.getBackground()) + "\n\n"

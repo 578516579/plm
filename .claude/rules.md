@@ -289,8 +289,8 @@
 ### M.8 16 个空壳模块的攻坚优先级（REFERENCE）
 
 按 [PRD-MAPPING.md §7](../PRD-MAPPING.md) 路线图：
-- **P0（Phase 1 MVP）**：`inception`（🔴 缺模块）/ `prd` / `competitive`
-- **P1（Phase 2）**：`arch` / `dbdesign` / `apidesign` / `ued` / `testdata` / `autotest`
+- **P0（Phase 1 MVP，已完成 🟢）**：`inception` / `prd` / `competitive`
+- **P1（Phase 2，启动）**：~~`ued`（🟢 已完成）~~ / `arch` / `dbdesign` / `apidesign` / `testdata` / `autotest`
 - **P2（Phase 3）**：`manual-impl` / `manual-ops` / `analytics` / `dashboard`
 - **P3（扩展）**：`ai-agent` / `openspec` / `pipeline` / `feature-flag` / `dora`
 
@@ -372,6 +372,65 @@ gh run watch <run-id>   # 实时等待
 
 ---
 
+## N. UED / 前端视觉约束（MUST — 与 §M PRD 驱动联动）
+
+本节是 [02-设计/UED规范.md](../02-设计/UED规范.md) 的 Claude 执行摘要。规范全文以 UED规范.md 为准，本节只列"Claude 必须执行的强制项"。
+
+### N.1 颜色 Token（MUST）
+
+- 前端 CSS / Vue `<style>` **禁止写裸十六进制颜色**（如 `#2d7a4f`），必须用 `var(--gp)` 等变量。
+- 唯一例外：`agriplm.css :root` 中 Token 本身的定义行，以及与 Token 无关的纯黑白透明叠加（`rgba(0,0,0,...)` 等）。
+- 新增颜色变量 → 先在 UED规范.md §1.1 登记，再用；不允许在组件里临时创建匿名颜色。
+
+### N.2 状态徽章颜色（MUST）
+
+任何状态字段（status / level / priority）的展示，**必须**用 UED规范.md §5.2 的标准徽章类（`.b.bg / .bam / .brd / .bbl / .bgr / .bai`），对应颜色与 PRD-MAPPING.md §3 状态机保持一致：
+
+- `草稿` → `.bgr`　`待评审/评审中` → `.bam`　`已确认/已完成` → `.bg`　`失败/拒绝` → `.brd`　`AI生成` → `.bai`
+- 禁止自定义 `background-color` 做状态显示（会绕过 Token 和无障碍对比度规则）。
+
+### N.3 AI 按钮区分（MUST）
+
+- 触发 AI 工作流的按钮 **必须** 用 `.btn-ai`（紫蓝渐变）+ `✨` 前缀。
+- 普通保存 / 确认 / 取消按钮 **禁止** 用 `.btn-ai`，用 `.btn-p` / `.btn-s`。
+- 判断依据：按钮点击后是否调用 AI 接口 → 是则必须 `.btn-ai`，否则禁止。
+
+### N.4 表单 Label（MUST）
+
+- 每个 `<input> / <select> / <textarea>` **必须** 有对应 `<label>`（或 `aria-label`）。
+- 不允许用 `placeholder` 代替 label（`placeholder` 在 focus 后消失，违反无障碍）。
+- 必填字段：label 末尾加 ` *`（文字），不用红色星号。
+
+### N.5 空态 / 加载态 / 错误态（MUST）
+
+写前端组件时，以下三个状态必须同时实现（不允许只写正常数据态）：
+
+| 状态 | 实现方式 |
+|---|---|
+| 空数据 | 居中 icon + 文字（如 `📭 暂无数据`），不留白 |
+| 加载中 | 表格/列表用骨架屏；AI 生成中按钮用 `.dot-anim` |
+| 错误 | 通知 `.notif-item.err` + 保持原有内容（不清空） |
+
+### N.6 间距合规（SHOULD）
+
+新增间距值必须是 4px 的倍数（4 / 8 / 12 / 14 / 16 / 18 / 20 / 24px）。奇数或非 4 倍数间距（如 3/5/7/9/11/13/15px）需有原型精确标注依据。
+
+### N.7 模态框约束（MUST）
+
+- 模态框 **禁止嵌套**（Modal 内不弹 Modal）。
+- 操作按钮行：主操作在左，`取消` 在右，危险操作（删除）用 `.btn-rd.btn-sm` 放在主操作右侧。
+- 模态框必须有关闭按钮（`.mclose`）且支持点击遮罩关闭。
+
+### N.8 UED CR 准入（SHOULD）
+
+PR 涉及 UI 改动时，PR 描述中包含 UED规范.md §13 的 8 项自检 Checklist。Claude 提交包含 UI 变更的 commit 前，主动过一遍该 Checklist。
+
+### N.9 新组件/新 CSS 类（SHOULD）
+
+现有 CSS 类无法覆盖新需求时：先检查 UED规范.md §附录A；没有合适类时，先在 UED规范.md 对应章节注册（先改规范，再写代码），新类命名遵循 `agriplm.css` 缩写风格。
+
+---
+
 ## 索引：相关规则文件
 
 | 文件 | 受众 | 强制层 |
@@ -379,6 +438,7 @@ gh run watch <run-id>   # 实时等待
 | [本文件 .claude/rules.md](rules.md) | Claude 自动加载 | 软（Claude 自觉） |
 | 根 [CLAUDE.md](../CLAUDE.md) | Claude + 人类（开仓库即看） | 软 |
 | [03-开发/开发规范.md](../03-开发/开发规范.md) | 人类开发者 | 软（CR 时检查） |
+| [02-设计/UED规范.md](../02-设计/UED规范.md) | 设计师 + 前端 + Claude | 软（CR 时检查） |
 | [99-跨阶段/模块工作流.md](../99-跨阶段/模块工作流.md) | 人类 + Claude | 软（评审卡控） |
 | [.editorconfig](../.editorconfig) | 编辑器 | 硬（自动应用） |
 | [.githooks/commit-msg](../.githooks/commit-msg) | git | 硬（commit 时拒绝） |

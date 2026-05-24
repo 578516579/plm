@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.aiagent.mapper.AiAgentMapper">
+    <resultMap type="cn.com.bosssfot.dv.plm.aiagent.domain.AiAgent" id="AiAgentResult">
+        <id     property="agentId"         column="agent_id"         />
+        <result property="agentNo"         column="agent_no"         />
+        <result property="agentName"       column="agent_name"       />
+        <result property="agentType"       column="agent_type"       />
+        <result property="description"     column="description"      />
+        <result property="promptTemplate"  column="prompt_template"  />
+        <result property="difyWorkflowId"  column="dify_workflow_id" />
+        <result property="provider"        column="provider"         />
+        <result property="modelName"       column="model_name"       />
+        <result property="configJson"      column="config_json"      />
+        <result property="totalCalls"      column="total_calls"      />
+        <result property="successRate"     column="success_rate"     />
+        <result property="lastInvokedAt"   column="last_invoked_at"  />
+        <result property="status"          column="status"           />
+        <result property="authorUserId"    column="author_user_id"   />
+        <result property="createBy"        column="create_by"        />
+        <result property="createTime"      column="create_time"      />
+        <result property="updateBy"        column="update_by"        />
+        <result property="updateTime"      column="update_time"      />
+        <result property="remark"          column="remark"           />
+        <result property="delFlag"         column="del_flag"         />
+    </resultMap>
+
+    <sql id="selectAiAgentVo">
+        select agent_id, agent_no, agent_name, agent_type, description, prompt_template,
+               dify_workflow_id, provider, model_name, config_json, total_calls, success_rate, last_invoked_at,
+               status, author_user_id, create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_ai_agent
+    </sql>
+
+    <select id="selectAiAgentList" parameterType="cn.com.bosssfot.dv.plm.aiagent.domain.AiAgent" resultMap="AiAgentResult">
+        <include refid="selectAiAgentVo"/>
+        <where>
+            del_flag = '0'
+            <if test="agentNo != null and agentNo != ''">and agent_no like concat('%', #{agentNo}, '%')</if>
+            <if test="agentName != null and agentName != ''">and agent_name like concat('%', #{agentName}, '%')</if>
+            <if test="agentType != null and agentType != ''">and agent_type = #{agentType}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+            <if test="authorUserId != null">and author_user_id = #{authorUserId}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectAiAgentById" parameterType="Long" resultMap="AiAgentResult">
+        <include refid="selectAiAgentVo"/>
+        where agent_id = #{agentId} and del_flag = '0'
+    </select>
+
+    <insert id="insertAiAgent" parameterType="cn.com.bosssfot.dv.plm.aiagent.domain.AiAgent" useGeneratedKeys="true" keyProperty="agentId">
+        insert into tb_ai_agent
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="agentNo != null">agent_no,</if>
+            <if test="agentName != null">agent_name,</if>
+            <if test="agentType != null">agent_type,</if>
+            <if test="description != null">description,</if>
+            <if test="promptTemplate != null">prompt_template,</if>
+            <if test="difyWorkflowId != null">dify_workflow_id,</if>
+            <if test="provider != null">provider,</if>
+            <if test="modelName != null">model_name,</if>
+            <if test="configJson != null">config_json,</if>
+            <if test="totalCalls != null">total_calls,</if>
+            <if test="successRate != null">success_rate,</if>
+            <if test="lastInvokedAt != null">last_invoked_at,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="agentNo != null">#{agentNo},</if>
+            <if test="agentName != null">#{agentName},</if>
+            <if test="agentType != null">#{agentType},</if>
+            <if test="description != null">#{description},</if>
+            <if test="promptTemplate != null">#{promptTemplate},</if>
+            <if test="difyWorkflowId != null">#{difyWorkflowId},</if>
+            <if test="provider != null">#{provider},</if>
+            <if test="modelName != null">#{modelName},</if>
+            <if test="configJson != null">#{configJson},</if>
+            <if test="totalCalls != null">#{totalCalls},</if>
+            <if test="successRate != null">#{successRate},</if>
+            <if test="lastInvokedAt != null">#{lastInvokedAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateAiAgent" parameterType="cn.com.bosssfot.dv.plm.aiagent.domain.AiAgent">
+        update tb_ai_agent
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="agentName != null">agent_name = #{agentName},</if>
+            <if test="agentType != null">agent_type = #{agentType},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="promptTemplate != null">prompt_template = #{promptTemplate},</if>
+            <if test="difyWorkflowId != null">dify_workflow_id = #{difyWorkflowId},</if>
+            <if test="provider != null">provider = #{provider},</if>
+            <if test="modelName != null">model_name = #{modelName},</if>
+            <if test="configJson != null">config_json = #{configJson},</if>
+            <if test="totalCalls != null">total_calls = #{totalCalls},</if>
+            <if test="successRate != null">success_rate = #{successRate},</if>
+            <if test="lastInvokedAt != null">last_invoked_at = #{lastInvokedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where agent_id = #{agentId}
+    </update>
+
+    <update id="deleteAiAgentByIds" parameterType="Long">
+        update tb_ai_agent set del_flag = '2' where agent_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(agent_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_ai_agent where agent_no like concat(#{prefix}, '%')
+    </select>
+</mapper>

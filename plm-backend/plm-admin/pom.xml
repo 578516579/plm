@@ -75,6 +75,10 @@
         </dependency>
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-ued</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-competitive</artifactId>
         </dependency>
         <dependency>
@@ -91,11 +95,11 @@
         </dependency>
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-ued</artifactId>
+            <artifactId>plm-testdata</artifactId>
         </dependency>
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
-            <artifactId>plm-testdata</artifactId>
+            <artifactId>plm-autotest</artifactId>
         </dependency>
         <dependency>
             <groupId>cn.com.bosssfot.dv.plm</groupId>
@@ -124,6 +128,15 @@
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-testreport</artifactId></dependency>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-apidoc</artifactId></dependency>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-product</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-impl</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-manual-ops</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-analytics</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-dashboard</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-ai-agent</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-openspec</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-pipeline</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-feature-flag</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-dora</artifactId></dependency>
 
         <!-- v0.x MCP + Integration (Proposal 0007) -->
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-mcp</artifactId></dependency>

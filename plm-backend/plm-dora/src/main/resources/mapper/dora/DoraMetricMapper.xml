@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.dora.mapper.DoraMetricMapper">
+    <resultMap type="cn.com.bosssfot.dv.plm.dora.domain.DoraMetric" id="DoraResult">
+        <id     property="doraId"             column="dora_id"             />
+        <result property="doraNo"             column="dora_no"             />
+        <result property="projectId"          column="project_id"          />
+        <result property="metricName"         column="metric_name"         />
+        <result property="metricType"         column="metric_type"         />
+        <result property="metricValue"        column="metric_value"        />
+        <result property="metricUnit"         column="metric_unit"         />
+        <result property="periodType"         column="period_type"         />
+        <result property="snapshotDate"       column="snapshot_date"       />
+        <result property="trendChartJson"     column="trend_chart_json"    />
+        <result property="heatmapJson"        column="heatmap_json"        />
+        <result property="leadtimeBreakdown"  column="leadtime_breakdown"  />
+        <result property="aiSuggestions"      column="ai_suggestions"      />
+        <result property="aiGenerated"        column="ai_generated"        />
+        <result property="aiGeneratedAt"      column="ai_generated_at"     />
+        <result property="status"             column="status"              />
+        <result property="authorUserId"       column="author_user_id"      />
+        <result property="createBy"           column="create_by"           />
+        <result property="createTime"         column="create_time"         />
+        <result property="updateBy"           column="update_by"           />
+        <result property="updateTime"         column="update_time"         />
+        <result property="remark"             column="remark"              />
+        <result property="delFlag"            column="del_flag"            />
+    </resultMap>
+
+    <sql id="selectDoraVo">
+        select dora_id, dora_no, project_id, metric_name, metric_type, metric_value, metric_unit,
+               period_type, snapshot_date, trend_chart_json, heatmap_json, leadtime_breakdown,
+               ai_suggestions, ai_generated, ai_generated_at, status, author_user_id,
+               create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_dora_metric
+    </sql>
+
+    <select id="selectDoraList" parameterType="cn.com.bosssfot.dv.plm.dora.domain.DoraMetric" resultMap="DoraResult">
+        <include refid="selectDoraVo"/>
+        <where>
+            del_flag = '0'
+            <if test="doraNo != null and doraNo != ''">and dora_no like concat('%', #{doraNo}, '%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="metricName != null and metricName != ''">and metric_name like concat('%', #{metricName}, '%')</if>
+            <if test="metricType != null and metricType != ''">and metric_type = #{metricType}</if>
+            <if test="periodType != null and periodType != ''">and period_type = #{periodType}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by snapshot_date desc, create_time desc
+    </select>
+
+    <select id="selectDoraById" parameterType="Long" resultMap="DoraResult">
+        <include refid="selectDoraVo"/>
+        where dora_id = #{doraId} and del_flag = '0'
+    </select>
+
+    <insert id="insertDora" parameterType="cn.com.bosssfot.dv.plm.dora.domain.DoraMetric" useGeneratedKeys="true" keyProperty="doraId">
+        insert into tb_dora_metric
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="doraNo != null">dora_no,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="metricName != null">metric_name,</if>
+            <if test="metricType != null">metric_type,</if>
+            <if test="metricValue != null">metric_value,</if>
+            <if test="metricUnit != null">metric_unit,</if>
+            <if test="periodType != null">period_type,</if>
+            <if test="snapshotDate != null">snapshot_date,</if>
+            <if test="trendChartJson != null">trend_chart_json,</if>
+            <if test="heatmapJson != null">heatmap_json,</if>
+            <if test="leadtimeBreakdown != null">leadtime_breakdown,</if>
+            <if test="aiSuggestions != null">ai_suggestions,</if>
+            <if test="aiGenerated != null">ai_generated,</if>
+            <if test="aiGeneratedAt != null">ai_generated_at,</if>
+            <if test="status != null">status,</if>
+            <if test="authorUserId != null">author_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="doraNo != null">#{doraNo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="metricName != null">#{metricName},</if>
+            <if test="metricType != null">#{metricType},</if>
+            <if test="metricValue != null">#{metricValue},</if>
+            <if test="metricUnit != null">#{metricUnit},</if>
+            <if test="periodType != null">#{periodType},</if>
+            <if test="snapshotDate != null">#{snapshotDate},</if>
+            <if test="trendChartJson != null">#{trendChartJson},</if>
+            <if test="heatmapJson != null">#{heatmapJson},</if>
+            <if test="leadtimeBreakdown != null">#{leadtimeBreakdown},</if>
+            <if test="aiSuggestions != null">#{aiSuggestions},</if>
+            <if test="aiGenerated != null">#{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">#{aiGeneratedAt},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authorUserId != null">#{authorUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateDora" parameterType="cn.com.bosssfot.dv.plm.dora.domain.DoraMetric">
+        update tb_dora_metric
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="metricName != null">metric_name = #{metricName},</if>
+            <if test="metricType != null">metric_type = #{metricType},</if>
+            <if test="metricValue != null">metric_value = #{metricValue},</if>
+            <if test="metricUnit != null">metric_unit = #{metricUnit},</if>
+            <if test="periodType != null">period_type = #{periodType},</if>
+            <if test="snapshotDate != null">snapshot_date = #{snapshotDate},</if>
+            <if test="trendChartJson != null">trend_chart_json = #{trendChartJson},</if>
+            <if test="heatmapJson != null">heatmap_json = #{heatmapJson},</if>
+            <if test="leadtimeBreakdown != null">leadtime_breakdown = #{leadtimeBreakdown},</if>
+            <if test="aiSuggestions != null">ai_suggestions = #{aiSuggestions},</if>
+            <if test="aiGenerated != null">ai_generated = #{aiGenerated},</if>
+            <if test="aiGeneratedAt != null">ai_generated_at = #{aiGeneratedAt},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where dora_id = #{doraId}
+    </update>
+
+    <update id="deleteDoraByIds" parameterType="Long">
+        update tb_dora_metric set del_flag = '2' where dora_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
+        select max(cast(substring(dora_no, length(#{prefix}) + 1) as unsigned)) as max_seq
+        from tb_dora_metric where dora_no like concat(#{prefix}, '%')
+    </select>
+</mapper>

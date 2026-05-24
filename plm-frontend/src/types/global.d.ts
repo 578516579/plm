@@ -1,9 +1,9 @@
-/** 模块类型声明 */
-declare module '*.vue' {
-  import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
-  export default component
-}
+// 让本文件被 TS 解析为 module(而不是 ambient global script)。
+// 否则下方 `declare module 'vue' { ... }` 会被当作"重新声明" vue 模块,
+// 而不是 module augmentation,导致 vue 的 ref/reactive/createApp/App 等
+// named exports 在 program 中全部 TS2305 "no exported member"。
+// `declare module '*.vue'` 通配声明 + 三方库 shim 已移至 src/types/shims-vue.d.ts(ambient script)。
+export {}
 
 /** Vite 环境变量类型 */
 interface ImportMetaEnv {
@@ -16,119 +16,7 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
 }
 
-// element-plus
-declare module 'element-plus'
-
-// vue
+// Vue 模块 augmentation — 给 ComponentInternalInstance 加 proxy 字段
 declare module 'vue' {
   interface ComponentInternalInstance { proxy: any }
-}
-
-// nprogress
-declare module 'nprogress' {
-  export interface NProgressOptions {
-    minimum?: number
-    template?: string
-    easing?: string
-    speed?: number
-    trickle?: boolean
-    trickleSpeed?: number
-    showSpinner?: boolean
-    parent?: string
-    barSelector?: string
-  }
-
-  export interface NProgress {
-    start(): NProgress
-    set(n: number): NProgress
-    inc(amount?: number): NProgress
-    done(force?: boolean): NProgress
-    remove(): void
-    configure(options: NProgressOptions): NProgress
-    status: number | null
-  }
-
-  const nprogress: NProgress
-  export default nprogress
-}
-
-// js-cookie
-declare module 'js-cookie' {
-  export default Cookies
-}
-
-// file-saver
-declare module 'file-saver' {
-  export function saveAs(data: Blob | string, filename?: string, options?: any): void
-  export function saveAs(data: Blob | string, filename?: string, disableAutoBOM?: boolean): void
-  export default saveAs
-}
-
-// jsencrypt
-declare module 'jsencrypt/bin/jsencrypt.min' {
-  import JSEncrypt from 'jsencrypt'
-  export default JSEncrypt
-}
-
-// axios
-declare module 'axios'
-
-// vue-quill
-declare module '@vueup/vue-quill'
-
-// sortablejs
-declare module 'sortablejs' {
-  export interface SortableEvent {
-    oldIndex: number;
-    newIndex: number;
-  }
-  
-  export interface SortableOptions {
-    ghostClass?: string;
-    onEnd?: (evt: SortableEvent) => void;
-  }
-  
-  export default class Sortable {
-    static create(el: HTMLElement, options: SortableOptions): Sortable;
-  }
-}
-
-// fuse
-declare module 'fuse.js' {
-  export interface FuseOptions<T> {
-    keys: string[];
-    threshold?: number;
-    includeScore?: boolean;
-    includeMatches?: boolean;
-    minMatchCharLength?: number;
-    shouldSort?: boolean;
-    // 添加其他你需要的选项
-  }
-  
-  export default class Fuse<T> {
-    constructor(list: T[], options?: FuseOptions<T>)
-    search(pattern: string): T[]
-  }
-}
-
-// vuedraggable
-declare module 'vuedraggable/dist/vuedraggable.common' {
-  import { DefineComponent } from 'vue'
-  const draggable: DefineComponent
-  export default draggable
-}
-
-// vue-cropper
-declare module 'vue-cropper' {
-  import { DefineComponent } from 'vue'
-  const VueCropper: DefineComponent
-  export { VueCropper }
-}
-
-// splitpanes
-declare module 'splitpanes' {
-  import { DefineComponent } from 'vue'
-  
-  export const Splitpanes: DefineComponent
-  export const Pane: DefineComponent
 }
