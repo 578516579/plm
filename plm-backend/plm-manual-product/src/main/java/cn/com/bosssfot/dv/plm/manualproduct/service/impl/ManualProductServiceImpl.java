@@ -2,7 +2,6 @@ package cn.com.bosssfot.dv.plm.manualproduct.service.impl;
 
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,13 +35,12 @@ public class ManualProductServiceImpl implements IManualProductService
 {
     private static final Logger log = LoggerFactory.getLogger(ManualProductServiceImpl.class);
 
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01"));
-        STATUS_TRANSITIONS.put("01", Set.of("02"));
-        STATUS_TRANSITIONS.put("02", Set.of("00", "03"));
-        STATUS_TRANSITIONS.put("03", Set.of());
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01"),         // 草稿 → 生成中
+        "01", Set.of("02"),         // 生成中 → 已生成
+        "02", Set.of("00", "03"),   // 已生成 → 草稿(重做) / 已发布
+        "03", Set.of()              // 已发布 (终态)
+    );
 
     @Autowired private ManualProductMapper manualproductMapper;
     @Autowired private ProjectMapper projectMapper;
@@ -152,12 +150,12 @@ public class ManualProductServiceImpl implements IManualProductService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "草稿";
-            case "01": return "生成中";
-            case "02": return "已生成";
-            case "03": return "已发布";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "草稿";
+            case "01" -> "生成中";
+            case "02" -> "已生成";
+            case "03" -> "已发布";
+            default   -> "未知(" + status + ")";
+        };
     }
 }

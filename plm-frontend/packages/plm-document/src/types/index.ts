@@ -25,5 +25,6 @@ export interface DocumentQuery extends PageQuery {
   title?: string
   status?: string
   authorUserId?: number | string
+  reviewerUserId?: number | string
   tags?: string
 }

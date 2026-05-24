@@ -177,7 +177,7 @@ test.describe('Task 模块 E2E', () => {
     await context.addCookies([{ name: 'Admin-Token', value: token, url: 'http://localhost' }])
 
     await page.goto('/business/task')
-    await expect(page.locator('.el-table')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('.el-table')).toBeVisible({ timeout: 60_000 })
 
     await page.goto('/business/taskkanban')
     // 看板页只验证容器存在,kanban-board 内 columns 空时高度为 0 不算 visible

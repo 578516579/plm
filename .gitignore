@@ -6,16 +6,14 @@
 .claude/agents/*
 !.claude/agents/*.md
 !.claude/skills/
-.claude/skills/*
-!.claude/skills/*/
-.claude/skills/*/*
-!.claude/skills/*/SKILL.md
-!.claude/skills/*/*.md
+!.claude/skills/**
+!.claude/commands/
+!.claude/commands/**
 # Notes:
-#   settings.json      → shared (team-wide hooks/policies, in git)
+#   settings.json       → shared (team-wide hooks/policies, in git)
 #   settings.local.json → user-specific permissions cache, stays ignored
-#   agents/*.md        → shared subagent configs (team can invoke)
-#   skills/*/SKILL.md  → shared skill SOPs
+#   agents/*.md         → shared subagent configs (team can invoke)
+#   skills/, commands/  → shared (team-wide Claude playbooks/slash-commands, in git)
 
 # Environment files with secrets
 .env

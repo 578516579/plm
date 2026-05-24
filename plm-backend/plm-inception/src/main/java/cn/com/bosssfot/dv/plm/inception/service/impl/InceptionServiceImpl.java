@@ -2,7 +2,6 @@ package cn.com.bosssfot.dv.plm.inception.service.impl;
 
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,14 +42,13 @@ public class InceptionServiceImpl implements IInceptionService
         Set.of("new_product", "iteration", "refactor", "platform");
 
     /** 5×5 状态机 — 含反向边 04→00 */
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01"));
-        STATUS_TRANSITIONS.put("01", Set.of("02", "04"));
-        STATUS_TRANSITIONS.put("02", Set.of("03", "04"));
-        STATUS_TRANSITIONS.put("03", Set.of());
-        STATUS_TRANSITIONS.put("04", Set.of("00"));
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01"),
+        "01", Set.of("02", "04"),
+        "02", Set.of("03", "04"),
+        "03", Set.of(),
+        "04", Set.of("00")              // 已驳回 → 打回草稿 (反向边)
+    );
 
     @Autowired private InceptionMapper inceptionMapper;
     @Autowired private AiService aiService;
@@ -201,13 +199,13 @@ public class InceptionServiceImpl implements IInceptionService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "草稿";
-            case "01": return "已提交";
-            case "02": return "审批中";
-            case "03": return "已批准";
-            case "04": return "已驳回";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "草稿";
+            case "01" -> "已提交";
+            case "02" -> "审批中";
+            case "03" -> "已批准";
+            case "04" -> "已驳回";
+            default   -> "未知(" + status + ")";
+        };
     }
 }

@@ -1,7 +1,6 @@
 package cn.com.bosssfot.dv.plm.requirement.service.impl;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,13 +41,12 @@ public class RequirementServiceImpl implements IRequirementService
      * 02已完成     ❌        ❌       —        ❌  (终态)
      * 03已取消     ❌        ❌       ❌       —   (终态)
      */
-    private static final Map<String, Set<String>> STATUS_TRANSITIONS = new HashMap<>();
-    static {
-        STATUS_TRANSITIONS.put("00", Set.of("01", "03"));   // 待评审 → 开发中 / 已取消
-        STATUS_TRANSITIONS.put("01", Set.of("00", "02", "03")); // 开发中 → 待评审（打回） / 已完成 / 已取消
-        STATUS_TRANSITIONS.put("02", Set.of());             // 已完成（终态）
-        STATUS_TRANSITIONS.put("03", Set.of());             // 已取消（终态）
-    }
+    private static final Map<String, Set<String>> STATUS_TRANSITIONS = Map.of(
+        "00", Set.of("01", "03"),       // 待评审 → 开发中 / 已取消
+        "01", Set.of("00", "02", "03"), // 开发中 → 待评审（打回） / 已完成 / 已取消
+        "02", Set.of(),                 // 已完成（终态）
+        "03", Set.of()                  // 已取消（终态）
+    );
 
     @Autowired
     private RequirementMapper requirementMapper;
@@ -176,12 +174,12 @@ public class RequirementServiceImpl implements IRequirementService
     }
 
     private static String statusLabel(String status) {
-        switch (status) {
-            case "00": return "待评审";
-            case "01": return "开发中";
-            case "02": return "已完成";
-            case "03": return "已取消";
-            default:   return "未知(" + status + ")";
-        }
+        return switch (status) {
+            case "00" -> "待评审";
+            case "01" -> "开发中";
+            case "02" -> "已完成";
+            case "03" -> "已取消";
+            default   -> "未知(" + status + ")";
+        };
     }
 }
