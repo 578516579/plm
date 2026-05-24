@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 开发规范 / Dev Standards
+    url: https://github.com/578516579/plm/blob/main/03-开发/开发规范.md
+    about: 提交前请阅读开发规范，确保 PR 符合 Conventional Commits 和 Gate Checklist 要求
+  - name: PRD-MAPPING
+    url: https://github.com/578516579/plm/blob/main/PRD-MAPPING.md
+    about: 业务字段/状态/错误码的唯一事实来源
