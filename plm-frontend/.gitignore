@@ -23,5 +23,5 @@ playwright-report/
 *.sln
 *.local
 
-package-lock.json
+# package-lock.json — 已纳入版本控制(CI 用 npm ci 需要 lockfile,见 .github/workflows/frontend-tests.yml)
 yarn.lock
