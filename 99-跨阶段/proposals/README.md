@@ -61,6 +61,7 @@ proposed    完成填写、关联数据，等 review
 | [0006](0006-project-maturity-stage.md) | 引入"项目成熟度"维度（early/stable/mature），4 维参数化 | **merged → tracking** | 2026-05-15 | reflect F-P03-03 | 同上 | 同上 |
 | [0007](0007-mcp-integration-modules-uplift.md) | 把 MCP/Integration 模块从 v0.5+ 提到当前迭代 | **merged → tracking** (User-requested-bypass) | 2026-05-17 | 用户明确请求 + AgriPLM-模块映射 drift | 0f75294 / eabbbe4 | 2026-05-17 → 06-30 |
 | [0008](0008-parallel-session-collaboration.md) | 并行 Session 协作规范 + 把硬性条款沉淀进 .claude/rules.md § O | **merged → tracking** (solo-review) | 2026-05-17 | 用户明确请求 + `git worktree list` 6 工作树并行 | 0fc27a3 + 2d7308d + follow-up | 2026-05-17 → 06-30 |
+| [0009](0009-session-handoff-agent.md) | 加 session-handoff Agent — 跨时间维度交接 + 防重复造轮子(补 0008) | **proposed** | 2026-05-20 | 用户明确请求 + 本会话亲历"差点重复造 0008"失败案例 | 待 merged | 待 merged → 2026-06-17 |
 
 ---
 

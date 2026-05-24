@@ -372,6 +372,70 @@ gh run watch <run-id>   # 实时等待
 
 ---
 
+## P. 前端 TypeScript 类型声明约束（MUST — 防 .d.ts 模块污染)
+
+**血泪背景**:2026-05-20 在 [feat/ai-multi-provider-v1-v3](https://) 分支跑 `npx vue-tsc --noEmit`,227 个错误,其中 130+ 个是 `TS2305: Module '"vue"' has no exported member 'ref/reactive/computed/onMounted/createApp'`,另 74 个是派生 `TS7006: implicit any`。两次错误方向(怀疑 auto-imports.d.ts、怀疑 vue.d.mts 损坏)都不是真凶。真凶是 [src/types/global.d.ts](../plm-frontend/src/types/global.d.ts) 里这段:
+
+```ts
+import type { DefineComponent } from 'vue'         // type-only,不让文件成为 module
+// ...
+declare module 'vue' {                              // 因为文件是 ambient script
+  interface ComponentInternalInstance { proxy: any }   // 这段变成"重新声明 vue 模块"
+}                                                   // 而不是 augmentation,覆盖掉 ref/reactive 等
+```
+
+TS 5.x + `moduleResolution: bundler` 下,**`import type` 不足以让一个 `.d.ts` 文件成为 module**。文件被判为 ambient global script 时,`declare module 'X' { ... }` 是**重新声明**而非 augmentation,会把目标模块的真实 named exports 全部覆盖。
+
+详尽根因诊断与修复路径见 [memory/project-quirks.md Q-CODE-03](../memory/project-quirks.md) + [memory/frontend_ts_vue_augmentation.md](../memory/frontend_ts_vue_augmentation.md)。
+
+### P.1 .d.ts 文件分工(MUST)
+
+PLM 前端 `plm-frontend/src/types/` 下的 `.d.ts` 文件**必须**按下表分工,**禁止**混合:
+
+| 用途 | 文件 | 文件头要求 | 内容只允许 |
+|---|---|---|---|
+| **Module augmentation**(为已有的 module 补字段 / interface 合并) | `global.d.ts` / `components.d.ts` 等 | 顶部必须有 `export {}` 或真实顶层 `import/export`(非 `import type`) | `declare module 'X' { ... }` 给已存在的 module 加 member;`declare global { interface Y { ... } }` 给全局接口加字段 |
+| **Ambient shim**(声明"通配模式" / 没 d.ts 的三方库) | `shims-vue.d.ts` / `shims-*.d.ts` | 顶部**不得**有任何 `import`/`export`(包括 `import type`) | `declare module '*.vue' { ... }`;`declare module 'js-cookie' { ... }`(为没 .d.ts 的库声明类型) |
+
+**判定红线**:看 .d.ts 文件第 1 行——
+- 出现 `import type { X } from 'Y'` **或** `import` **或** `export` → 这是 module,只能放 augmentation
+- 没有任何顶层 import/export → 这是 ambient,只能放"声明一个新模块/通配"
+
+混合违规的典型症状:`Module '"vue"' has no exported member 'ref'`(全 program 同时报)。
+
+### P.2 改动 .d.ts 前必查(MUST)
+
+修改 / 新建 `src/types/*.d.ts` 前必须:
+
+1. `grep -nE "^(import|export)" <file>` 看文件类型(module / ambient)
+2. 如果要加 `declare module 'X' { ... }`:
+   - augment 已有 module(如 `vue`、`pinia`、`element-plus`) → 放进 module 文件
+   - 声明新 module(三方库无 d.ts) → 放进 ambient 文件
+3. 改完后跑 `npx vue-tsc --noEmit 2>&1 | grep -E "TS2305.*Module .'vue'" | wc -l`,**必须 = 0**
+
+### P.3 自验最小测试(MUST — 调 .d.ts 后必跑)
+
+修改任何 `src/types/*.d.ts` 后,临时写一个 `src/__type-check.ts`:
+
+```ts
+import { ref, reactive, computed, onMounted, watch, createApp } from 'vue'
+export const _ = { ref, reactive, computed, onMounted, watch, createApp }
+```
+
+跑 `npx vue-tsc --noEmit -p tsconfig.json 2>&1 | grep "__type-check"`。**必须零输出**,否则说明 vue 模块又被污染。验证完删除该文件。
+
+### P.4 与 unplugin-auto-import 的边界(MUST)
+
+`plm-frontend/auto-imports.d.ts` 是 **generated file**,**禁止**手工编辑。该文件末尾的 `declare global { export type { Component, ... } from 'vue' }` 是 unplugin-auto-import 0.18.x 的默认输出,看起来可疑但不是 vue 报错的根因(2026-05-20 验证:删除后错误数不变)。
+
+如果将来该文件被证实有害,改 [vite/plugins/auto-import.ts](../plm-frontend/vite/plugins/auto-import.ts) 配置控制其生成行为,而不是后修生成产物。
+
+### P.5 开发规范契约同步(MUST)
+
+[03-开发/开发规范.md §2.4](../03-开发/开发规范.md) 明文要求 `types/api/common.ts` 含 `BaseEntity` 与 `PageQuery`。**任何对 `types/api/common.ts` 的删减必须同步更新开发规范.md**;反之,开发规范.md 列出的导出必须在 common.ts 中存在(2026-05-20 发现 13 个 packages 报错就是因为 common.ts 只有 `PageDomain` 没有 `PageQuery`,通过加 `export type PageQuery = PageDomain` 别名修复)。
+
+---
+
 ## N. UED / 前端视觉约束（MUST — 与 §M PRD 驱动联动）
 
 本节是 [02-设计/UED规范.md](../02-设计/UED规范.md) 的 Claude 执行摘要。规范全文以 UED规范.md 为准，本节只列"Claude 必须执行的强制项"。
