@@ -22,7 +22,7 @@
 | 11 | 测试报告 TestReport | F4.7 | testreport.html | plm-testreport | 🟢 PRD-aligned |
 | 12 | API 文档 ApiDoc | F5.4 | apidoc.html | plm-apidoc | 🟢 PRD-aligned |
 | 13 | 产品手册 ManualProduct | F5.1 | productmanual.html | plm-manual-product | 🟢 PRD-aligned |
-| 14 | 立项 Inception | F1.1 | inception.html | plm-inception | 🔴 缺模块 |
+| 14 | 立项 Inception | F1.1 | inception.html | plm-inception | 🟢 PRD-aligned |
 | 15 | UED | F2.3 | ued.html | plm-ued | 🟡 空壳 |
 | 16 | 竞品 Competitive | F1.3 | competitive.html | plm-competitive | 🟡 空壳 |
 | 17 | PRD 文档 | F2.2 | prd.html | plm-prd | 🟡 空壳 |
@@ -921,9 +921,9 @@
 
 ## 7. v0.x 路线图
 
-- ✅ Project / Requirement / Sprint / Task / Defect / TestCase / Document / Submission / Release / TestPlan / TestReport / ApiDoc / ManualProduct
+- ✅ Project / Requirement / Sprint / Task / Defect / TestCase / Document / Submission / Release / TestPlan / TestReport / ApiDoc / ManualProduct / Dashboard / **Inception**
 - 🆕 **MCP / Integration**（本提案 0007）
-- 下一批：Inception / UED / Competitive / PRD / Arch / DbDesign / ApiDesign
+- 下一批：UED / Competitive / PRD / Arch / DbDesign / ApiDesign
 
 ---
 
@@ -953,3 +953,4 @@
 | 2026-05-18 | Wjl + Claude | 第三批: §2 补 §8 Submission / §9 Release / §10 TestPlan 字段对照表(含 AI 门禁 4 项 / DORA 4 指标);§3 补 3 模块状态机(含 04→00 反向+回滚必填);3 个 Vue 由空壳 stub(11 行)重写为完整 CRUD ~280 行均;3 个 TS types 由 5 字段扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式 |
 | 2026-05-18 | Wjl + Claude | **第四批: 全部 13 个 PRD-aligned 模块字段对照表/状态机完工!** §2 补 §11 ApiDoc / §12 ManualProduct / §13 TestReport(含 OpenAPI Schema / 截图/导出格式 / 风险评级+缺陷统计);§3 补 3 模块状态机(ApiDoc 3 态+唯一键 / ManualProduct 4 态含 02→00 反向 / TestReport 3 态含 01→00 反向);3 个 Vue 由 stub 重写为完整 CRUD ~300+ 行;3 个 TS types 扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式。**10 个 ServiceImpl 全部完成现代化收尾**。 |
 | 2026-05-18 | Wjl + Claude | **第五批: 21/21 业务模块字段对照表完工!** §2 补 §14-§21 (Inception/Prd/Competitive/Arch/DbDesign/ApiDesign/Ued/TestData) 8 模块;§3 补 4 个状态机摘要(Inception 5 态 + 5 模块共用 4 态含反向 + 2 模块共用 3 态);7 个 Vue 由 21 行 stub 重写为完整 CRUD ~220-280 行,新建 plm-inception 前端 package (6 文件全新);8 个 TS types 由 5 字段扩到完整 domain 映射;8 个 ServiceImpl 现代化同样模式 → **18 个 ServiceImpl 全部完成**。 |
+| 2026-05-25 | Wjl + Claude | **Inception 模块流程证据补齐** — §1 状态色 🔴 缺模块 → 🟢 PRD-aligned(代码本已存在,本次补流程证据)。具体:(a) 修复前端字典契约 P0 bug 5 处(precision_ag/version_iter/... → 对齐后端 ALLOWED_BIZ_LINE + SQL 字典);(b) 新增 InceptionServiceImplTest.java 单测 28 case 全绿(5 @Nested:GenerateNo×4 / Validation×6 / Defaults×2 / StateMachine×12 / AiGenerate×3 / Delete×1);(c) E2E spec 从 1 case 扩到 11 case(CRUD/状态机正负向/反向边/AI 生成/编号格式/编码 HEX);(d) 创建 Phase 01/02/03 Gate 实例 3 文件(§I Phase 04 准出待本地 E2E 全套件回填);(e) §7 路线图把 Inception 挪入 ✅ 完工列。 |
