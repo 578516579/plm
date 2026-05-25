@@ -1,57 +1,58 @@
 /**
  * businessRoute SSoT 单测
  *
- * 锁定 entity → path 映射 (sys_menu 重分组导致的"按钮 404"修复证据).
+ * 锁定 entity → path 映射 (P0 troubleshoot: menu-path-absolute-business-prefix.sql 落地后,
+ * sys_menu 子菜单 path 改 `/business/<entity>` 绝对路径,映射统一回 `/business/<entity>`).
  * 此 spec 失败 = 映射表与 sys_menu 漂移, 必须按文件头部 SQL 重新校对.
  */
 import { describe, it, expect } from 'vitest'
 import { entityToPath, ENTITY_TO_PATH } from '../businessRoute'
 
-describe('businessRoute SSoT (entity → /<phase>/<entity>)', () => {
+describe('businessRoute SSoT (entity → /business/<entity>)', () => {
   describe('8 阶段映射齐全', () => {
     it('workbench: dashboard', () => {
-      expect(entityToPath('dashboard')).toBe('/workbench/dashboard')
+      expect(entityToPath('dashboard')).toBe('/business/dashboard')
     })
 
     it('phase-plan: project / inception / competitive', () => {
-      expect(entityToPath('project')).toBe('/phase-plan/project')
-      expect(entityToPath('inception')).toBe('/phase-plan/inception')
-      expect(entityToPath('competitive')).toBe('/phase-plan/competitive')
+      expect(entityToPath('project')).toBe('/business/project')
+      expect(entityToPath('inception')).toBe('/business/inception')
+      expect(entityToPath('competitive')).toBe('/business/competitive')
     })
 
     it('phase-design: 7 个 entity', () => {
       ;['requirement', 'prd', 'ued', 'arch', 'dbdesign', 'apidesign', 'document'].forEach(e => {
-        expect(entityToPath(e)).toBe(`/phase-design/${e}`)
+        expect(entityToPath(e)).toBe(`/business/${e}`)
       })
     })
 
     it('phase-dev: task / mytask / sprint', () => {
-      expect(entityToPath('task')).toBe('/phase-dev/task')
-      expect(entityToPath('mytask')).toBe('/phase-dev/mytask')
-      expect(entityToPath('sprint')).toBe('/phase-dev/sprint')
+      expect(entityToPath('task')).toBe('/business/task')
+      expect(entityToPath('mytask')).toBe('/business/mytask')
+      expect(entityToPath('sprint')).toBe('/business/sprint')
     })
 
     it('phase-test: 7 个 entity', () => {
       ;['defect', 'testcase', 'submission', 'autotest', 'testplan', 'testreport', 'testdata'].forEach(e => {
-        expect(entityToPath(e)).toBe(`/phase-test/${e}`)
+        expect(entityToPath(e)).toBe(`/business/${e}`)
       })
     })
 
     it('phase-deploy: 8 个 entity (含中划线 manual-* / feature-flag)', () => {
       ;['release', 'apidoc', 'manual-product', 'manual-impl', 'manual-ops',
         'pipeline', 'feature-flag', 'dora'].forEach(e => {
-        expect(entityToPath(e)).toBe(`/phase-deploy/${e}`)
+        expect(entityToPath(e)).toBe(`/business/${e}`)
       })
     })
 
     it('phase-ai: ai-agent / openspec / ai-invocation-log', () => {
-      expect(entityToPath('ai-agent')).toBe('/phase-ai/ai-agent')
-      expect(entityToPath('openspec')).toBe('/phase-ai/openspec')
-      expect(entityToPath('ai-invocation-log')).toBe('/phase-ai/ai-invocation-log')
+      expect(entityToPath('ai-agent')).toBe('/business/ai-agent')
+      expect(entityToPath('openspec')).toBe('/business/openspec')
+      expect(entityToPath('ai-invocation-log')).toBe('/business/ai-invocation-log')
     })
 
     it('phase-report: analytics', () => {
-      expect(entityToPath('analytics')).toBe('/phase-report/analytics')
+      expect(entityToPath('analytics')).toBe('/business/analytics')
     })
   })
 
@@ -66,9 +67,9 @@ describe('businessRoute SSoT (entity → /<phase>/<entity>)', () => {
       expect(Object.keys(ENTITY_TO_PATH).length).toBe(33)
     })
 
-    it('所有映射 value 都以 / 开头且无尾 /', () => {
+    it('所有映射 value 都以 /business/ 开头', () => {
       Object.values(ENTITY_TO_PATH).forEach(path => {
-        expect(path).toMatch(/^\/[a-z][a-z-]*\/[a-z][a-z-]*$/)
+        expect(path).toMatch(/^\/business\/[a-z][a-z-]*$/)
       })
     })
 

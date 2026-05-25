@@ -173,8 +173,10 @@ test.describe('Task 模块 E2E', () => {
     })
   })
 
-  test('UI 层: 任务管理 + 看板 + 我的任务 三个菜单都可访问', async ({ page, context }) => {
-    await context.addCookies([{ name: 'Admin-Token', value: token, url: 'http://localhost' }])
+  test('UI 层: 任务管理 + 看板 + 我的任务 三个菜单都可访问', async ({ page, context, request }) => {
+    // 用 loginAsAdmin 给 fresh context 注入完整 cookie + 触发 fresh login
+    // 旧 context.addCookies 在 vue-router 动态路由场景下拿不到菜单 → /business/task 404
+    await loginAsAdmin(request, context)
 
     await page.goto('/business/task')
     await expect(page.locator('.el-table')).toBeVisible({ timeout: 60_000 })
@@ -184,8 +186,9 @@ test.describe('Task 模块 E2E', () => {
     await expect(page.locator('.app-container').first()).toBeVisible({ timeout: 10_000 })
     await expect(page.getByPlaceholder(/必填|项目ID/).first()).toBeVisible({ timeout: 5_000 })
 
-    // "我的任务"菜单 parent_id=0 是顶级菜单,实际路径是 /mytask 不是 /business/mytask
-    await page.goto('/mytask')
+    // "我的任务"菜单当前 parent_id=2930 phase-dev, 子菜单 path='/business/mytask' (绝对路径)
+    // 历史: 一度 parent_id=0 走顶级 /mytask, 现已统一到 /business/<entity> 契约
+    await page.goto('/business/mytask')
     await expect(page.locator('.app-container, .el-result').first()).toBeVisible({ timeout: 10_000 })
   })
 })
