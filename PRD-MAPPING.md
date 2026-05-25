@@ -34,7 +34,7 @@
 | 23 | 实施手册 ManualImpl | F5.2 | implmanual.html | plm-manual-impl | 🟡 空壳 |
 | 24 | 运维手册 ManualOps | F5.3 | opsmanual.html | plm-manual-ops | 🟡 空壳 |
 | 25 | 效能分析 Analytics | - | analytics.html | plm-analytics | 🟡 空壳 |
-| 26 | 工作台 Dashboard | - | dashboard.html | plm-dashboard | 🟡 空壳 |
+| 26 | 工作台 Dashboard | §4.2 | dashboard.html | plm-dashboard | 🟢 PRD-aligned |
 | 27 | AI Agent | - | aiagents.html | plm-ai-agent | 🟡 空壳 |
 | 28 | OpenSpec | - | aispec.html | plm-openspec | 🟡 空壳 |
 | 29 | Pipeline | - | pipeline.html | plm-pipeline | 🟡 空壳 |
@@ -47,7 +47,7 @@
 
 ## 2. 字段对照表（Domain ↔ 原型表单元素 ↔ DB 列）
 
-> 每个 PRD-aligned 模块一节。当前已填 §1-13（13 PRD-aligned）+ §14-§21（**8 个 prd-align 空壳模块**)+ §32-33（MCP/Integration）—— **全 21 个业务模块字段对照表完工**。剩余 9 个纯 stub 模块（autotest/manual-impl/manual-ops/analytics/dashboard/ai-agent/openspec/pipeline/feature-flag/dora）的对照表暂参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
+> 每个 PRD-aligned 模块一节。当前已填 §1-13（13 PRD-aligned）+ §14-§21（**8 个 prd-align 空壳模块**)+ §22 Dashboard + §32-33（MCP/Integration）—— **全 23 个业务模块字段对照表完工**。剩余 8 个纯 stub 模块（autotest/manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora）的对照表暂参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
 
 ### §1. Project（plm-project）
 
@@ -531,6 +531,35 @@
 | generatedAt | DATETIME | 01 已生成 时自动填 |
 | aiGenerated / status (字典 biz_testdata_status, 3 态) | | 00 草稿 01 已生成 02 已归档 |
 | authorUserId | BIGINT | |
+
+### §22. Dashboard（plm-dashboard）
+
+**领域**: 工作台 / 首屏聚合页 — 6 类 widget(统计 / 在办项目 / 我的待办 / 生命周期 / 质量快照 / AI 改进)聚合展示 + 用户自定义工作台预设。**PRD 出处**: §4.2 页面1：工作台 / 原型 [dashboard.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/dashboard.html)
+
+#### 表 `tb_dashboard` —— 用户工作台预设（widget 布局）
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| dashboardId | dashboard_id | BIGINT | - | 主键 |
+| dashboardNo | dashboard_no | VARCHAR(32) | DASH-YYYY-NNNN | 自动生成 / 撞号重试 |
+| title | title | VARCHAR(200) | 原型"我的工作台" | 必填 |
+| ownerUserId | owner_user_id | BIGINT | F4.2 所属用户 | FK→sys_user.user_id |
+| layoutJson | layout_json | LONGTEXT | - | widget 布局 JSON |
+| widgetTypes | widget_types | VARCHAR(500) | 字典 `biz_dashboard_widget` | CSV: stats,active_projects,my_todos,quality_snapshot,lifecycle,ai_metrics |
+| refreshInterval | refresh_interval | INT | - | 秒;默认 60 |
+| isDefault | is_default | CHAR(1) | - | Y=默认工作台(同 owner 唯一) |
+| status | status | VARCHAR(2) | 字典 `biz_dashboard_status` | 00=启用 01=停用 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+#### 聚合接口 `/business/dashboard/aggregate`
+
+返回 6 类 widget JSON(本期 mock,下迭代接真实跨模块查询):
+- `stats`: activeProjects / aiDocsGenerated / currentDefects / autoTestCoverage
+- `activeProjects[]`: name / progress / color
+- `myTodos[]`: title / priority(P0/P1/P2) / dueDate
+- `qualitySnapshot`: defectCount / testPassRate / codeCoverage
+- `aiMetrics`: hoursSaved / docsGenerated / recommendations[]
+- `lifecycle`: 17 阶段静态数组(立项→…→运维)
 
 ### §32. MCP Server（plm-mcp）
 

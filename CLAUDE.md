@@ -136,8 +136,8 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 4. 详细硬规则见 [.claude/rules.md §M](.claude/rules.md)
 
 **实现进度速览** (详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
-- 🟢 PRD-aligned 17 个: inception / project / competitive / requirement / prd / **ued** / sprint / task / defect / testcase / document / submission / release / testplan / testreport / apidoc / manual-product
-- 🟡 空壳 13 个: arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora
+- 🟢 PRD-aligned 18 个: inception / project / competitive / requirement / prd / **ued** / sprint / task / defect / testcase / document / submission / release / testplan / testreport / apidoc / manual-product / **dashboard**
+- 🟡 空壳 12 个: arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / ai-agent / openspec / pipeline / feature-flag / dora
 - 🔴 缺模块 0 个
 
 ## Rules & playbooks
