@@ -216,57 +216,13 @@ const quickActions = [
 ]
 
 // === 跳转 ===
-// menu-regroup-by-phase.sql 后, 业务菜单按 8 阶段分组, URL 不再是 /business/<entity>
-// 而是 /<phase>/<entity>. 见 sys_menu parent_id=2900-2970.
-// (sync 自 DB 查询 SELECT m.path, p.path FROM sys_menu m JOIN sys_menu p ON p.menu_id=m.parent_id WHERE m.perms LIKE 'business:%:list')
-const ENTITY_TO_PATH: Record<string, string> = {
-  // workbench (2900)
-  dashboard: '/workbench/dashboard',
-  // phase-plan (2910)
-  project:        '/phase-plan/project',
-  inception:      '/phase-plan/inception',
-  competitive:    '/phase-plan/competitive',
-  // phase-design (2920)
-  requirement:    '/phase-design/requirement',
-  prd:            '/phase-design/prd',
-  ued:            '/phase-design/ued',
-  arch:           '/phase-design/arch',
-  dbdesign:       '/phase-design/dbdesign',
-  apidesign:      '/phase-design/apidesign',
-  document:       '/phase-design/document',
-  // phase-dev (2930)
-  task:           '/phase-dev/task',
-  mytask:         '/phase-dev/mytask',
-  sprint:         '/phase-dev/sprint',
-  // phase-test (2940)
-  defect:         '/phase-test/defect',
-  testcase:       '/phase-test/testcase',
-  submission:     '/phase-test/submission',
-  autotest:       '/phase-test/autotest',
-  testplan:       '/phase-test/testplan',
-  testreport:     '/phase-test/testreport',
-  testdata:       '/phase-test/testdata',
-  // phase-deploy (2950)
-  release:           '/phase-deploy/release',
-  apidoc:            '/phase-deploy/apidoc',
-  'manual-product':  '/phase-deploy/manual-product',
-  'manual-impl':     '/phase-deploy/manual-impl',
-  'manual-ops':      '/phase-deploy/manual-ops',
-  pipeline:          '/phase-deploy/pipeline',
-  'feature-flag':    '/phase-deploy/feature-flag',
-  dora:              '/phase-deploy/dora',
-  // phase-ai (2960)
-  'ai-agent':            '/phase-ai/ai-agent',
-  openspec:              '/phase-ai/openspec',
-  'ai-invocation-log':   '/phase-ai/ai-invocation-log',
-  // phase-report (2970)
-  analytics:      '/phase-report/analytics'
-}
+// menu-regroup-by-phase.sql 后业务菜单按 8 阶段分组, URL 形如 /<phase>/<entity>.
+// 映射表统一在 @/utils/businessRoute.ts (SSoT).
+import { entityToPath, ENTITY_TO_PATH } from '@/utils/businessRoute'
 
 function goto(entity: string) {
-  const path = ENTITY_TO_PATH[entity] || `/business/${entity}`
+  const path = entityToPath(entity)
   router.push(path).catch(err => {
-    // catch 路由没注册的兜底,避免无声 404
     console.warn(`[dashboard] 跳转失败 entity=${entity} path=${path}`, err)
     ElMessage.warning(`「${entity}」模块路由未注册`)
   })
