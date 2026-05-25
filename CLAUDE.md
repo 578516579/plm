@@ -34,6 +34,15 @@ cd plm-backend
 "$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < sql/quartz.sql
 # Verify: 31 tables, sys_user shows admin/若依 and ry/若依 with correct CJK.
 
+# --- Business modules + menu regroup (run in order; idempotent) ---
+for f in sql/business-*.sql; do
+  "$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < "$f"
+done
+"$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < sql/menu-regroup-by-phase.sql   # 8 阶段分组重组
+"$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < sql/menu-fill-missing-8.sql     # 补 8 个 PRD-aligned 缺菜单
+# Verify: 10 可见一级目录 (2400/2500 + 2900-2970), 旧 2000 业务管理 visible=1
+# Rollback: 对应 *-rollback.sql 反向逆操作
+
 # === 2. Backend build (Maven needs JDK 17, NOT system default) ===
 export JAVA_HOME="/c/Program Files/Microsoft/jdk-17.0.18.8-hotspot"   # adjust per machine
 cd plm-backend
