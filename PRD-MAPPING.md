@@ -24,7 +24,7 @@
 | 13 | 产品手册 ManualProduct | F5.1 | productmanual.html | plm-manual-product | 🟢 PRD-aligned |
 | 14 | 立项 Inception | F1.1 | inception.html | plm-inception | 🟢 PRD-aligned |
 | 15 | UED | F2.3 | ued.html | plm-ued | 🟡 空壳 |
-| 16 | 竞品 Competitive | F1.3 | competitive.html | plm-competitive | 🟡 空壳 |
+| 16 | 竞品 Competitive | F1.3 | competitive.html | plm-competitive | 🟢 PRD-aligned |
 | 17 | PRD 文档 | F2.2 | prd.html | plm-prd | 🟡 空壳 |
 | 18 | 架构设计 Arch | F3.1 | archdesign.html | plm-arch | 🟡 空壳 |
 | 19 | 数据库设计 DbDesign | F3.2 | dbdesign.html | plm-dbdesign | 🟡 空壳 |
@@ -639,6 +639,70 @@
 | createTime / processTime | (RuoYi 标准) | | | 不可删除（审计） |
 | sourceIp | source_ip | VARCHAR(64) | - | 调用方 IP（防滥用） |
 
+### §33.1. 禅道(ZenTao)双向同步子映射
+
+**领域**: 禅道与 PLM 的 bug/story/task/case 双向同步。**关联**: [Proposal 0014](99-跨阶段/proposals/0014-zentao-bidirectional-sync.md) / [02-设计/Zentao-集成-设计.md](02-设计/Zentao-集成-设计.md)
+
+#### 表 ALTER（4 个业务表新增 3 列）
+
+| 业务表 | 列 | 类型 | 说明 |
+|---|---|---|---|
+| tb_defect / tb_requirement / tb_task / tb_testcase | `external_source` | VARCHAR(32) DEFAULT NULL | 外部来源(zentao/jira/...)，NULL=未同步 |
+| 同上 | `external_id` | VARCHAR(64) DEFAULT NULL | 外部主键 id，NULL=未同步 |
+| 同上 | `external_url` | VARCHAR(512) DEFAULT NULL | 外部详情 URL，跳转用 |
+| 同上 | 唯一索引 | `(external_source, external_id)` | 任一列 NULL 不参与约束，仅约束已同步行幂等 |
+
+#### 新表 `tb_integration_user_mapping` —— 集成用户映射
+
+| Java field | 列 | 类型 | 说明 |
+|---|---|---|---|
+| id | id | BIGINT | 主键 |
+| connectorId | connector_id | BIGINT | FK→tb_integration_connector.id |
+| externalAccount | external_account | VARCHAR(64) | 外部账号(禅道 account) |
+| userId | user_id | BIGINT | sys_user.user_id，NULL=未映射(容忍) |
+| syncDirection | sync_direction | VARCHAR(16) | inbound / outbound / both |
+| lastUsedAt | last_used_at | DATETIME | 最近一次使用 |
+| createBy/createTime/updateBy/updateTime/remark | (RuoYi 标准 5 字段) | | |
+
+唯一索引 `(connector_id, external_account)`，索引 `(user_id)` 用于反查。
+
+#### 字段映射(详细见 02-设计/Zentao-集成-设计.md §4)
+
+| 禅道资源 | PLM 模块 | PLM 表 | 关键字段(禅道→PLM) |
+|---|---|---|---|
+| bug | plm-defect | tb_defect | title→title, severity(1-4)→biz_defect_severity, pri→priority, status(active/resolved/closed)→status(1/2/3), openedBy→reporter(查 user_map), assignedTo→assignee, product→projectId(productProjectMap) |
+| story | plm-requirement | tb_requirement | title→title, spec→description, pri→priority, stage(wait/developing/released)→status(00/01/02), product→projectId |
+| task | plm-task | tb_task | name→title, desc→description, pri→priority, status(wait/doing/done)→status(0/1/2), execution→sprintId(executionSprintMap), estimate→estimateHours |
+| case | plm-testcase | tb_testcase | title→title, precondition→precondition, steps→steps(JSON), pri→priority, type→caseType, status(normal/blocked)→status(0/1) |
+
+#### 状态机映射
+
+```
+禅道 bug.status   → tb_defect.status:        active=1 resolved=2 closed=3   其他=99
+禅道 story.stage  → tb_requirement.status:   wait/planned=00 developing=01 released/closed=02 其他=99
+禅道 task.status  → tb_task.status:          wait=0 doing=1 done=2 pause=3 cancel=4 closed=5 其他=99
+禅道 case.status  → tb_testcase.status:      normal=0 blocked=1 其他=99
+```
+
+反向(PLM → 禅道)取上表反查,多对一时取禅道侧最具体的值。
+
+#### 冲突合并
+
+`last-write-wins`，基于 `update_time` ↔ `lastEditedDate` 比对(详 [设计文档 §6](02-设计/Zentao-集成-设计.md))；防循环用 `SyncContext.inbound` ThreadLocal + Caffeine 60s 抑制。
+
+#### 错误码
+
+| 码 | 含义 |
+|---|---|
+| 813 | 禅道 token 失败(account/password 错) |
+| 814 | 禅道 endpoint 不可达 |
+| 815 | webhook X-Zentao-Token 不匹配 |
+| 816 | 禅道 product 与 PLM project 未映射(connector.config_json.productProjectMap 缺) |
+| 817 | 禅道 execution 与 PLM sprint 未映射 |
+| 818 | 双向同步循环(SyncContext 检测) |
+| 819 | 冲突合并:外部数据 stale |
+| 820 | 用户映射缺失且 fallback 无效 |
+
 ---
 
 ## 3. 状态机汇总
@@ -954,3 +1018,4 @@
 | 2026-05-18 | Wjl + Claude | **第四批: 全部 13 个 PRD-aligned 模块字段对照表/状态机完工!** §2 补 §11 ApiDoc / §12 ManualProduct / §13 TestReport(含 OpenAPI Schema / 截图/导出格式 / 风险评级+缺陷统计);§3 补 3 模块状态机(ApiDoc 3 态+唯一键 / ManualProduct 4 态含 02→00 反向 / TestReport 3 态含 01→00 反向);3 个 Vue 由 stub 重写为完整 CRUD ~300+ 行;3 个 TS types 扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式。**10 个 ServiceImpl 全部完成现代化收尾**。 |
 | 2026-05-18 | Wjl + Claude | **第五批: 21/21 业务模块字段对照表完工!** §2 补 §14-§21 (Inception/Prd/Competitive/Arch/DbDesign/ApiDesign/Ued/TestData) 8 模块;§3 补 4 个状态机摘要(Inception 5 态 + 5 模块共用 4 态含反向 + 2 模块共用 3 态);7 个 Vue 由 21 行 stub 重写为完整 CRUD ~220-280 行,新建 plm-inception 前端 package (6 文件全新);8 个 TS types 由 5 字段扩到完整 domain 映射;8 个 ServiceImpl 现代化同样模式 → **18 个 ServiceImpl 全部完成**。 |
 | 2026-05-25 | Wjl + Claude | **Inception 模块流程证据补齐** — §1 状态色 🔴 缺模块 → 🟢 PRD-aligned(代码本已存在,本次补流程证据)。具体:(a) 修复前端字典契约 P0 bug 5 处(precision_ag/version_iter/... → 对齐后端 ALLOWED_BIZ_LINE + SQL 字典);(b) 新增 InceptionServiceImplTest.java 单测 28 case 全绿(5 @Nested:GenerateNo×4 / Validation×6 / Defaults×2 / StateMachine×12 / AiGenerate×3 / Delete×1);(c) E2E spec 从 1 case 扩到 11 case(CRUD/状态机正负向/反向边/AI 生成/编号格式/编码 HEX);(d) 创建 Phase 01/02/03 Gate 实例 3 文件(§I Phase 04 准出待本地 E2E 全套件回填);(e) §7 路线图把 Inception 挪入 ✅ 完工列。 |
+| 2026-05-25 | Wjl + Claude | **规划阶段(2910 菜单分组)项目管理能力收尾 — Competitive 模块流程证据补齐** — §1 状态色 🟡 空壳 → 🟢 PRD-aligned(后端代码已存在,本次补 Gate + 单测)。具体:(a) 新增 CompetitiveServiceImplTest.java 单测 28 case 全绿 / BUILD SUCCESS 20.7s(6 @Nested:GenerateNo×4 / Validation×8 / Defaults×3 / StateMachine×9[3 态+终态保护+无反向边+ENUM+702 项目存在性] / AiAnalyze×3 / Delete×1);(b) 创建 Phase 01/02/03 Gate 实例 3 文件,inception 模板对齐(§I Phase 04 准出待本地 E2E 全套件回填);(c) 至此规划阶段 inception + project + competitive 3 模块全部 🟢 + 后端单测齐 + Gate 实例齐;菜单挂载已在既有 menu-fill-missing-8.sql(行 36-41)就绪,跑过 SQL 后 admin 即可看见。 |
