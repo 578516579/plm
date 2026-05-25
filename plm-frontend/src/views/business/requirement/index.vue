@@ -61,9 +61,11 @@
             <span v-else class="muted">未评估</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center">
+        <el-table-column label="操作" width="320" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadReq(row)">编辑</el-button>
+            <el-button link type="warning" @click="openReview(row)">评审</el-button>
+            <el-button link type="info" @click="openDetail(row)">详情</el-button>
             <el-button link type="success" @click="quickAi(row)">AI 评估</el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
@@ -127,6 +129,101 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 评审对话框 (PRD §F2.4 需求评审管理) -->
+    <el-dialog v-model="reviewDialogVisible" title="📝 提交需求评审" width="560px">
+      <el-alert v-if="currentReviewReq" type="info" :closable="false" show-icon class="mb12">
+        正在评审: <strong>{{ currentReviewReq.requirementNo }}</strong> — {{ currentReviewReq.title }}
+      </el-alert>
+      <el-form ref="reviewFormRef" :model="reviewForm" :rules="reviewRules" label-width="100px">
+        <el-form-item label="评审结果" prop="reviewResult" required>
+          <el-radio-group v-model="reviewForm.reviewResult">
+            <el-radio value="00">✅ 通过 (允许推进到「开发中」)</el-radio>
+            <el-radio value="01">❌ 打回 (需求方修改后重新评审)</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="评审意见" prop="reviewComment"
+          :required="reviewForm.reviewResult === '01'">
+          <el-input v-model="reviewForm.reviewComment" type="textarea" :rows="4"
+            :placeholder="reviewForm.reviewResult === '01' ? '打回必须填写打回原因' : '可选,记录评审重点'"
+            maxlength="1000" show-word-limit />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="reviewDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="reviewSubmitting" @click="handleSubmitReview">
+          提交评审
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 详情/关联对话框 — 评审历史 + 关联 PRD/UED/任务 -->
+    <el-dialog v-model="detailDialogVisible" title="🔗 需求详情与关联" width="800px">
+      <el-descriptions v-if="currentDetailReq" :column="2" border size="small" class="mb12">
+        <el-descriptions-item label="编号">{{ currentDetailReq.requirementNo }}</el-descriptions-item>
+        <el-descriptions-item label="标题">{{ currentDetailReq.title }}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag :type="statusTagFor(currentDetailReq.status).type" size="small">
+            {{ statusTagFor(currentDetailReq.status).label }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="优先级">{{ currentDetailReq.priority || '-' }}</el-descriptions-item>
+      </el-descriptions>
+      <el-tabs v-model="detailTab">
+        <el-tab-pane name="reviews" :label="`📝 评审记录 (${reviewsList.length})`">
+          <el-empty v-if="!reviewsList.length" description="暂无评审记录,点击「评审」按钮提交首次评审" :image-size="80" />
+          <el-table v-else :data="reviewsList" stripe size="small">
+            <el-table-column label="评审结果" width="100" align="center">
+              <template #default="{ row }">
+                <el-tag :type="row.reviewResult === '00' ? 'success' : 'danger'" size="small">
+                  {{ row.reviewResult === '00' ? '✅ 通过' : '❌ 打回' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="评审意见" prop="reviewComment" min-width="220" show-overflow-tooltip />
+            <el-table-column label="评审时间" prop="reviewAt" width="160" />
+            <el-table-column label="评审人" prop="createBy" width="100" />
+            <el-table-column label="操作" width="80" align="center">
+              <template #default="{ row }">
+                <el-button link type="danger" size="small" @click="handleDeleteReview(row)">撤回</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane name="prd" :label="`📄 关联 PRD (${prdList.length})`">
+          <el-empty v-if="!prdList.length" description="暂无关联 PRD" :image-size="80" />
+          <el-table v-else :data="prdList" stripe size="small">
+            <el-table-column label="编号" prop="prdNo" width="160" />
+            <el-table-column label="功能名称" prop="title" min-width="200" show-overflow-tooltip />
+            <el-table-column label="状态" prop="status" width="100" align="center">
+              <template #default="{ row }">
+                {{ ({ '00':'草稿','01':'评审中','02':'已确认','03':'已废弃' } as any)[row.status] || row.status }}
+              </template>
+            </el-table-column>
+            <el-table-column label="完整度" prop="completenessScore" width="90" align="center" />
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane name="ued" :label="`🎨 关联 UED (${uedList.length})`">
+          <el-empty v-if="!uedList.length" description="暂无关联 UED" :image-size="80" />
+          <el-table v-else :data="uedList" stripe size="small">
+            <el-table-column label="编号" prop="uedNo" width="160" />
+            <el-table-column label="标题" prop="title" min-width="200" show-overflow-tooltip />
+            <el-table-column label="状态" prop="status" width="100" align="center" />
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane name="tasks" :label="`✅ 关联任务 (${tasksList.length})`">
+          <el-empty v-if="!tasksList.length" description="暂无关联任务" :image-size="80" />
+          <el-table v-else :data="tasksList" stripe size="small">
+            <el-table-column label="编号" prop="taskNo" width="140" />
+            <el-table-column label="标题" prop="title" min-width="200" show-overflow-tooltip />
+            <el-table-column label="状态" prop="status" width="100" align="center" />
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+      <template #footer>
+        <el-button @click="detailDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -137,7 +234,9 @@ import { MagicStick, Plus } from '@element-plus/icons-vue'
 import {
   listRequirement, addRequirement, updateRequirement, delRequirement,
   aiEvaluateRequirement, getRequirement, listProjectsForSelect,
-  type Requirement, type RequirementQuery
+  listRequirementReviews, submitRequirementReview, deleteRequirementReviews,
+  listPrdByRequirementId, listUedByRequirementId, listTasksByRequirementId,
+  type Requirement, type RequirementQuery, type RequirementReview
 } from '@/api/business/requirement'
 
 const activeTab = ref('')
@@ -264,6 +363,100 @@ async function handleDelete(row: Requirement) {
   await delRequirement(row.requirementId); ElMessage.success('删除成功'); await getList()
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// 需求评审 (PRD §F2.4, 2026-05-25 新增)
+// ─────────────────────────────────────────────────────────────────────
+const reviewDialogVisible = ref(false)
+const reviewFormRef = ref()
+const reviewSubmitting = ref(false)
+const currentReviewReq = ref<Requirement | null>(null)
+const reviewForm = reactive<RequirementReview>({ reviewResult: '00', reviewComment: '' })
+const reviewRules = {
+  reviewResult: [{ required: true, message: '请选择评审结果', trigger: 'change' }],
+  reviewComment: [{
+    validator: (_r: any, v: any, cb: any) => {
+      if (reviewForm.reviewResult === '01' && (!v || !v.trim())) cb(new Error('打回评审必须填写意见'))
+      else cb()
+    },
+    trigger: 'blur'
+  }]
+}
+
+function openReview(row: Requirement) {
+  if (!row.requirementId) return
+  currentReviewReq.value = row
+  reviewForm.reviewResult = '00'
+  reviewForm.reviewComment = ''
+  reviewDialogVisible.value = true
+}
+
+async function handleSubmitReview() {
+  if (!currentReviewReq.value?.requirementId) return
+  await reviewFormRef.value.validate()
+  reviewSubmitting.value = true
+  try {
+    await submitRequirementReview(currentReviewReq.value.requirementId, { ...reviewForm })
+    ElMessage.success(reviewForm.reviewResult === '00' ? '✅ 评审通过' : '❌ 已打回')
+    reviewDialogVisible.value = false
+    // 若刚才正在看详情对话框, 刷新评审历史
+    if (detailDialogVisible.value && currentDetailReq.value?.requirementId === currentReviewReq.value.requirementId) {
+      await loadReviewsList(currentReviewReq.value.requirementId)
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.msg || '评审提交失败')
+  } finally { reviewSubmitting.value = false }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// 详情/关联对话框 (评审历史 + PRD/UED/任务)
+// ─────────────────────────────────────────────────────────────────────
+const detailDialogVisible = ref(false)
+const detailTab = ref('reviews')
+const currentDetailReq = ref<Requirement | null>(null)
+const reviewsList = ref<RequirementReview[]>([])
+const prdList = ref<any[]>([])
+const uedList = ref<any[]>([])
+const tasksList = ref<any[]>([])
+
+async function loadReviewsList(reqId: number) {
+  try { const res: any = await listRequirementReviews(reqId); reviewsList.value = res.data || [] }
+  catch { reviewsList.value = [] }
+}
+async function loadPrdList(reqId: number) {
+  try { const res: any = await listPrdByRequirementId(reqId); prdList.value = res.rows || [] }
+  catch { prdList.value = [] }
+}
+async function loadUedList(reqId: number) {
+  try { const res: any = await listUedByRequirementId(reqId); uedList.value = res.rows || [] }
+  catch { uedList.value = [] }
+}
+async function loadTasksList(reqId: number) {
+  try { const res: any = await listTasksByRequirementId(reqId); tasksList.value = res.rows || [] }
+  catch { tasksList.value = [] }
+}
+
+async function openDetail(row: Requirement) {
+  if (!row.requirementId) return
+  currentDetailReq.value = row
+  detailTab.value = 'reviews'
+  reviewsList.value = []; prdList.value = []; uedList.value = []; tasksList.value = []
+  detailDialogVisible.value = true
+  await Promise.all([
+    loadReviewsList(row.requirementId),
+    loadPrdList(row.requirementId),
+    loadUedList(row.requirementId),
+    loadTasksList(row.requirementId)
+  ])
+}
+
+async function handleDeleteReview(row: RequirementReview) {
+  if (!row.reviewId) return
+  await ElMessageBox.confirm('确认撤回这条评审记录?', '提示', { type: 'warning' })
+  await deleteRequirementReviews(row.reviewId)
+  ElMessage.success('已撤回')
+  if (currentDetailReq.value?.requirementId) await loadReviewsList(currentDetailReq.value.requirementId)
+}
+
 onMounted(() => { getList(); loadProjects() })
 </script>
 
@@ -277,4 +470,5 @@ onMounted(() => { getList(); loadProjects() })
 .card-header-flex { display: flex; justify-content: space-between; align-items: center; }
 .status-tabs { background: #fff; padding: 0 16px; border-radius: 8px; margin-bottom: 14px; }
 .muted { color: #9ca3af; font-size: 12px; }
+.mb12 { margin-bottom: 12px; }
 </style>

@@ -31,6 +31,7 @@
                 placeholder="选择项目"
                 style="width: 100%"
                 filterable
+                @change="onProjectChange"
               >
                 <el-option
                   v-for="p in projects"
@@ -39,6 +40,25 @@
                   :value="p.id"
                 />
               </el-select>
+            </el-form-item>
+
+            <el-form-item label="关联需求">
+              <el-select
+                v-model="form.requirementId"
+                placeholder="可选 — 关联的源需求"
+                style="width: 100%"
+                clearable
+                filterable
+                :disabled="!form.projectId"
+              >
+                <el-option
+                  v-for="r in requirements"
+                  :key="r.requirementId"
+                  :label="`${r.requirementNo} - ${r.title}`"
+                  :value="r.requirementId"
+                />
+              </el-select>
+              <div v-if="!form.projectId" class="form-hint">请先选择项目以加载该项目下的需求</div>
             </el-form-item>
 
             <el-form-item label="功能名称" prop="title">
@@ -248,6 +268,7 @@ import {
 } from '@element-plus/icons-vue'
 import {
   listPrd, getPrd, addPrd, updatePrd, delPrd, aiGeneratePrd, listProjectsForSelect,
+  listRequirementsForSelect,
   type Prd, type PrdQuery
 } from '@/api/business/prd'
 
@@ -269,6 +290,7 @@ const emptyForm = (): Prd => ({
 const form = reactive<Prd>(emptyForm())
 const current = reactive<Prd>({ title: '' })
 const projects = ref<any[]>([])
+const requirements = ref<any[]>([])  // 2026-05-25 新增 — 关联需求下拉
 const list = ref<Prd[]>([])
 const total = ref(0)
 const queryParams = reactive<PrdQuery>({ pageNum: 1, pageSize: 10, title: '' })
@@ -355,6 +377,20 @@ async function loadProjects() {
   } catch { /* 项目列表加载失败不阻塞 */ }
 }
 
+// 2026-05-25 新增 — 项目切换时刷新需求下拉
+async function loadRequirements(projectId?: number) {
+  if (!projectId) { requirements.value = []; return }
+  try {
+    const res: any = await listRequirementsForSelect(projectId)
+    requirements.value = res.rows || []
+  } catch { requirements.value = [] }
+}
+
+function onProjectChange(projectId?: number) {
+  form.requirementId = undefined
+  loadRequirements(projectId)
+}
+
 async function handleSubmit(triggerAiAfter: boolean) {
   await formRef.value.validate()
   saving.value = true
@@ -408,6 +444,7 @@ async function loadPrd(row: Prd) {
   if (res.code === 200 && res.data) {
     Object.assign(form, {
       projectId: res.data.projectId,
+      requirementId: res.data.requirementId,    // 2026-05-25 加载关联需求
       title: res.data.title,
       description: res.data.description,
       sceneTemplate: res.data.sceneTemplate,
@@ -416,6 +453,8 @@ async function loadPrd(row: Prd) {
       authorUserId: res.data.authorUserId || 1
     })
     Object.assign(current, res.data)
+    // 同步加载该 PRD 关联项目下的需求清单(便于查看/切换关联需求)
+    if (res.data.projectId) await loadRequirements(res.data.projectId)
     ElMessage.info(`已载入 ${res.data.prdNo}`)
   }
 }
@@ -462,6 +501,7 @@ onMounted(async () => {
 
 <style scoped>
 .prd-page { padding: 20px; }
+.form-hint { font-size: 11px; color: #94a3b8; margin-top: 4px; line-height: 1.4; }
 .page-header {
   display: flex; justify-content: space-between; align-items: flex-end;
   margin-bottom: 20px;

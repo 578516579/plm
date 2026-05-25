@@ -3,9 +3,12 @@
  *
  * 覆盖:
  * - TC-Req-F001: CRUD 全流程
- * - TC-Req-F005: 4×4 状态机 (含反向边 01→00 打回)
+ * - TC-Req-F005: 4×4 状态机 (含反向边 01→00 打回, 00→01 评审前置)
  * - TC-Req-F008: FK 702 — projectId 不存在
  * - TC-Req-F009: 新建非 00 状态 → 601
+ * - TC-Req-F010: 评审前置失败 — 00→01 无通过评审 → 701 (PRD §F2.4 新增 2026-05-25)
+ * - TC-Req-F011: 评审 API CRUD — submit / list / delete (PRD §F2.4 新增 2026-05-25)
+ * - TC-Req-F012: 打回评审 reviewComment 必填 — 604 (PRD §F2.4 新增 2026-05-25)
  */
 import { test, expect, APIRequestContext } from '@playwright/test'
 import { loginAsAdmin } from './helpers/auth'
@@ -64,13 +67,17 @@ test.describe('Requirement 模块 E2E', () => {
     expect(del.code).toBe(200)
   })
 
-  test('TC-Req-F005 状态机合法转换 (含反向边 01→00)', async () => {
+  test('TC-Req-F005 状态机合法转换 (含反向边 01→00, 评审前置)', async () => {
     const data = makeRequirementData(projectId, `state-${RUN_ID}`)
     const create = await api.createRequirement(data)
     expect(create.code).toBe(200)
     const list = await api.listRequirements()
     const r = list.rows.find((x: any) => x.title === data.title)
     const id = r.requirementId
+
+    // PRD §F2.4 评审前置: 00→01 必须先有通过的评审记录
+    const review = await api.submitRequirementReview(id, { reviewResult: '00', reviewComment: '功能定义清晰' })
+    expect(review.code, '评审提交应成功').toBe(200)
 
     // 00 → 01
     let resp = await api.updateRequirement({ requirementId: id, status: '01' })
@@ -85,6 +92,7 @@ test.describe('Requirement 模块 E2E', () => {
     resp = await api.updateRequirement({ requirementId: id, status: '00' })
     expect(resp.code).toBe(ERROR_CODES.STATUS_VIOLATION)
 
+    execDelete('tb_requirement_review', `requirement_id=${id}`)
     execDelete('tb_requirement', `requirement_id=${id}`)
   })
 
@@ -97,8 +105,11 @@ test.describe('Requirement 模块 E2E', () => {
       const id = r.requirementId
 
       // 推到 from 状态 (若 from != 00 需要中间步骤)
+      // PRD §F2.4 评审前置: 推到 01 或更高状态前先提交通过评审
+      if (tc.from === '01' || tc.from === '02') {
+        await api.submitRequirementReview(id, { reviewResult: '00', reviewComment: 'setup' })
+      }
       if (tc.from === '02') {
-        // 推 00 → 01 → 02
         await api.updateRequirement({ requirementId: id, status: '01' })
         await api.updateRequirement({ requirementId: id, status: '02' })
       } else if (tc.from === '03') {
@@ -111,6 +122,7 @@ test.describe('Requirement 模块 E2E', () => {
       const resp = await api.updateRequirement({ requirementId: id, status: tc.to })
       expect.soft(resp.code, `${tc.name} 应被拒绝 (601)`).toBe(ERROR_CODES.STATUS_VIOLATION)
 
+      execDelete('tb_requirement_review', `requirement_id=${id}`)
       execDelete('tb_requirement', `requirement_id=${id}`)
     }
   })
@@ -135,6 +147,78 @@ test.describe('Requirement 模块 E2E', () => {
       status: '01' // 非 00
     })
     expect(resp.code).toBe(ERROR_CODES.STATUS_VIOLATION)
+  })
+
+  // ─────────────────────────────────────────────────────────────────────
+  // PRD §F2.4 需求评审管理 (2026-05-25 新增)
+  // ─────────────────────────────────────────────────────────────────────
+
+  test('TC-Req-F010 评审前置失败:00→01 但无通过评审 → 701', async () => {
+    const data = makeRequirementData(projectId, `noreview-${RUN_ID}`)
+    const create = await api.createRequirement(data)
+    expect(create.code).toBe(200)
+    const list = await api.listRequirements()
+    const r = list.rows.find((x: any) => x.title === data.title)
+    const id = r.requirementId
+
+    // 不提交评审, 直接推 00 → 01 → 应被拒绝 (701)
+    const resp = await api.updateRequirement({ requirementId: id, status: '01' })
+    expect(resp.code, '无评审推 00→01 应被拒绝').toBe(701)
+    expect(resp.msg).toContain('评审')
+
+    execDelete('tb_requirement', `requirement_id=${id}`)
+  })
+
+  test('TC-Req-F011 评审 API CRUD: submit / list / delete', async () => {
+    const data = makeRequirementData(projectId, `reviewcrud-${RUN_ID}`)
+    const create = await api.createRequirement(data)
+    expect(create.code).toBe(200)
+    const list = await api.listRequirements()
+    const r = list.rows.find((x: any) => x.title === data.title)
+    const id = r.requirementId
+
+    // 1. 提交通过评审
+    const pass = await api.submitRequirementReview(id, { reviewResult: '00', reviewComment: '清晰' })
+    expect(pass.code).toBe(200)
+
+    // 2. 提交打回评审
+    const reject = await api.submitRequirementReview(id, { reviewResult: '01', reviewComment: '范围模糊' })
+    expect(reject.code).toBe(200)
+
+    // 3. 列评审历史 — 应有 2 条
+    const histResp = await api.listRequirementReviews(id)
+    expect(histResp.code).toBe(200)
+    expect(histResp.data.length).toBeGreaterThanOrEqual(2)
+    expect(histResp.data.some((x: any) => x.reviewResult === '00')).toBe(true)
+    expect(histResp.data.some((x: any) => x.reviewResult === '01')).toBe(true)
+
+    // 4. 撤回一条评审
+    const firstReviewId = histResp.data[0].reviewId
+    const delResp = await api.deleteRequirementReviews(firstReviewId)
+    expect(delResp.code).toBe(200)
+
+    // 5. 撤回后再查只剩 1 条
+    const after = await api.listRequirementReviews(id)
+    expect(after.data.length).toBeGreaterThanOrEqual(1)
+
+    execDelete('tb_requirement_review', `requirement_id=${id}`)
+    execDelete('tb_requirement', `requirement_id=${id}`)
+  })
+
+  test('TC-Req-F012 打回评审 reviewComment 必填 → 604', async () => {
+    const data = makeRequirementData(projectId, `reject-blank-${RUN_ID}`)
+    const create = await api.createRequirement(data)
+    expect(create.code).toBe(200)
+    const list = await api.listRequirements()
+    const r = list.rows.find((x: any) => x.title === data.title)
+    const id = r.requirementId
+
+    // 打回但不填意见
+    const resp = await api.submitRequirementReview(id, { reviewResult: '01', reviewComment: '' })
+    expect(resp.code).toBe(604)
+    expect(resp.msg).toContain('打回评审')
+
+    execDelete('tb_requirement', `requirement_id=${id}`)
   })
 
   test('UI 层: 需求管理菜单可访问且表单可填', async ({ page, context }) => {

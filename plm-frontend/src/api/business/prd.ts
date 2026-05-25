@@ -7,6 +7,8 @@ export interface Prd {
   prdId?: number
   prdNo?: string
   projectId?: number
+  /** 反向关联需求 ID (FK→tb_requirement.requirement_id, 可空) — 2026-05-25 新增 */
+  requirementId?: number
   title: string
   description?: string
   sceneTemplate?: string
@@ -25,6 +27,7 @@ export interface PrdQuery {
   pageNum?: number
   pageSize?: number
   projectId?: number
+  requirementId?: number   // 2026-05-25 新增 — 按关联需求过滤
   title?: string
   status?: string
 }
@@ -53,3 +56,7 @@ export const aiGeneratePrd = (id: number): Promise<any> =>
 // 复用 project 列表 (用于关联项目下拉)
 export const listProjectsForSelect = (): Promise<any> =>
   request({ url: '/business/project/list', method: 'get', params: { pageSize: 200 } })
+
+// 2026-05-25 新增 — 用于关联需求下拉(按项目过滤,简化关联场景)
+export const listRequirementsForSelect = (projectId?: number): Promise<any> =>
+  request({ url: '/business/requirement/list', method: 'get', params: { projectId, pageSize: 200 } })

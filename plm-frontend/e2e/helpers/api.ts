@@ -79,4 +79,16 @@ export class ApiClient {
     return this.get('/business/task/kanban', params)
   }
   myTasks() { return this.get('/business/task/my') }
+
+  // ==== 需求评审 (PRD §F2.4, 2026-05-25 新增) ====
+  submitRequirementReview(reqId: number, data: any) {
+    return this.post(`/business/requirement/${reqId}/review`, data)
+  }
+  listRequirementReviews(reqId: number) {
+    return this.get(`/business/requirement/${reqId}/reviews`)
+  }
+  deleteRequirementReviews(ids: number | number[]) {
+    const idStr = Array.isArray(ids) ? ids.join(',') : ids
+    return this.delete(`/business/requirement/review/${idStr}`)
+  }
 }

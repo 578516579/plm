@@ -51,3 +51,54 @@ export const aiEvaluateRequirement = (id: number): Promise<any> =>
 
 export const listProjectsForSelect = (): Promise<any> =>
   request({ url: '/business/project/list', method: 'get', params: { pageSize: 200 } })
+
+// ─────────────────────────────────────────────────────────────────────
+// 需求评审管理 — PRD §F2.4 (2026-05-25 新增)
+// 状态机 00→01 前置: 必须存在至少 1 条 review_result=00 通过的评审
+// ─────────────────────────────────────────────────────────────────────
+
+export interface RequirementReview {
+  reviewId?: number
+  requirementId?: number
+  reviewerUserId?: number
+  reviewResult: string  // 00=通过 01=打回
+  reviewComment?: string
+  reviewAt?: string
+  createBy?: string
+  createTime?: string
+  remark?: string
+}
+
+/** 评审历史:列出某需求的全部评审记录(倒序) */
+export const listRequirementReviews = (requirementId: number): Promise<any> =>
+  request({ url: `/business/requirement/${requirementId}/reviews`, method: 'get' })
+
+/** 单条评审详情 */
+export const getRequirementReview = (reviewId: number): Promise<any> =>
+  request({ url: `/business/requirement/review/${reviewId}`, method: 'get' })
+
+/** 提交评审 — 状态机 00→01 的前置 */
+export const submitRequirementReview = (requirementId: number, data: RequirementReview): Promise<any> =>
+  request({ url: `/business/requirement/${requirementId}/review`, method: 'post', data })
+
+/** 撤回评审(逻辑删除) */
+export const deleteRequirementReviews = (reviewIds: number | number[]): Promise<any> => {
+  const idStr = Array.isArray(reviewIds) ? reviewIds.join(',') : reviewIds
+  return request({ url: `/business/requirement/review/${idStr}`, method: 'delete' })
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// 关联资源查询 — 需求→PRD / UED / 任务 的反向追溯 (2026-05-25 新增)
+// ─────────────────────────────────────────────────────────────────────
+
+/** 查关联的 PRD 列表(by requirementId) */
+export const listPrdByRequirementId = (requirementId: number): Promise<any> =>
+  request({ url: '/business/prd/list', method: 'get', params: { requirementId, pageSize: 100 } })
+
+/** 查关联的 UED 列表(by requirementId) */
+export const listUedByRequirementId = (requirementId: number): Promise<any> =>
+  request({ url: '/business/ued/list', method: 'get', params: { requirementId, pageSize: 100 } })
+
+/** 查关联的任务列表(by requirementId) — 复用 task 模块的 list */
+export const listTasksByRequirementId = (requirementId: number): Promise<any> =>
+  request({ url: '/business/task/list', method: 'get', params: { requirementId, pageSize: 100 } })
