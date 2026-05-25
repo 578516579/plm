@@ -1,90 +1,25 @@
-## 背景 / Background
+## Summary
 
-> 解决什么问题？链接对应的 Issue / PRD 章节 / Gate Checklist 实例。
-> What problem does this solve? Link the Issue / PRD section / Gate Checklist instance.
+<!-- 一句话说明这个 PR 做了什么 -->
 
-- Issue: #
-- PRD § (如有 / if applicable):
-- Gate Checklist 实例 (如有 / if applicable): `99-跨阶段/gate-checklists/instances/<module>/`
+## 改动范围
 
----
+- [ ] 后端 (plm-backend/)
+- [ ] 前端 (plm-frontend/)
+- [ ] 文档 (docs/ 或根目录 *.md)
+- [ ] 测试 (e2e/ 或 src/**/*.spec.ts 或 src/test/)
+- [ ] CI/构建 (.github/, .githooks/, pom.xml, package.json 等)
 
-## 改动点 / Changes
+## Test plan
 
-> 列要点，不要罗列每个文件。
+<!-- Reviewer 需要验证什么 -->
 
-- 
+- [ ] 本地跑过相关测试,全过
+- [ ] 不破坏既有功能
+- [ ] (如改业务逻辑) 加了测试覆盖
 
----
+## 关联
 
-## 改动类型 / Type of Change
+<!-- 关联 issue / PR / PRD § / Gate 实例 -->
 
-- [ ] `feat` — 新功能（New feature）
-- [ ] `fix` — Bug 修复（Bug fix）
-- [ ] `refactor` — 重构（Refactoring, no feature/fix）
-- [ ] `docs` — 文档（Documentation only）
-- [ ] `test` — 测试（Adding/fixing tests）
-- [ ] `chore` — 构建/依赖/配置（Build, deps, config）
-- [ ] `perf` — 性能优化（Performance improvement）
-- [ ] `ci` — CI/CD 变更
-
----
-
-## 自测情况 / Self-Test
-
-> 本地跑过的命令 / 截图证据。
-
-- [ ] 后端编译通过：`mvn clean install -DskipTests`
-- [ ] 前端编译通过：`npm run build`
-- [ ] E2E 通过（业务模块必填）：`npm run test:e2e` — **41 passed**
-- [ ] 手动验证关键路径（截图/curl 输出附下方）
-
-<details>
-<summary>验证输出 / Verification output</summary>
-
-```
-# 粘贴命令输出 / Paste command output here
-```
-
-</details>
-
----
-
-## 数据库变更 / DB Changes
-
-- [ ] 无数据库变更
-- [ ] 有 DDL 变更（新增 SQL 文件：`plm-backend/sql/business-<entity>.sql`）
-- [ ] 有数据迁移（已在 PR 描述中说明回滚方式）
-
----
-
-## 安全 / Security
-
-- [ ] 无敏感值硬编码（密码/token/key 全走 `${VAR}` 占位）
-- [ ] 新增 API 端点已加 `@PreAuthorize` 权限注解
-- [ ] 无 SQL 注入风险（用户输入走 `#{param}` 参数化）
-
----
-
-## PRD 追溯 / PRD Traceability（业务模块必填）
-
-- [ ] 字段/状态/错误码 已在 `PRD-MAPPING.md` 登记
-- [ ] 无 PRD 未提及的字段被添加（或已走 Proposal 流程修改 PRD-MAPPING）
-
----
-
-## 关联 / Related
-
-- PR: #
-- ADR (架构决策): `03-开发/ADR/`
-- 测试用例: `04-测试/`
-
----
-
-## 合并清单 / Merge Checklist（Reviewer 确认）
-
-- [ ] CI 全绿
-- [ ] 至少 1 个 Approve（架构级至少 2 个）
-- [ ] 分支名符合规范（`feature|fix|hotfix|chore|release/<desc>`）
-- [ ] Commit message 符合 Conventional Commits
-- [ ] 不允许 `--no-verify` 绕过 hook（无法规避时在 PR 描述中说明原因）
+Generated with [Claude Code](https://claude.com/claude-code) (if applicable)
