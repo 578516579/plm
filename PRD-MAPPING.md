@@ -985,9 +985,9 @@
 
 ## 7. v0.x 路线图
 
-- ✅ Project / Requirement / Sprint / Task / Defect / TestCase / Document / Submission / Release / TestPlan / TestReport / ApiDoc / ManualProduct / Dashboard / **Inception**
+- ✅ Project / Requirement / Sprint / Task / Defect / TestCase / Document / Submission / Release / TestPlan / TestReport / ApiDoc / ManualProduct / Dashboard / **Inception** / **Competitive**
 - 🆕 **MCP / Integration**（本提案 0007）
-- 下一批：UED / Competitive / PRD / Arch / DbDesign / ApiDesign
+- 下一批：UED / PRD / Arch / DbDesign / ApiDesign
 
 ---
 
