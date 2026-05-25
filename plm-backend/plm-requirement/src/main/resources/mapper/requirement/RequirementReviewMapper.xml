@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.requirement.mapper.RequirementReviewMapper">
+
+    <resultMap type="RequirementReview" id="RequirementReviewResult">
+        <result property="reviewId"        column="review_id"         />
+        <result property="requirementId"   column="requirement_id"    />
+        <result property="reviewerUserId"  column="reviewer_user_id"  />
+        <result property="reviewResult"    column="review_result"     />
+        <result property="reviewComment"   column="review_comment"    />
+        <result property="reviewAt"        column="review_at"         />
+        <result property="createBy"        column="create_by"         />
+        <result property="createTime"      column="create_time"       />
+        <result property="updateBy"        column="update_by"         />
+        <result property="updateTime"      column="update_time"       />
+        <result property="remark"          column="remark"            />
+        <result property="delFlag"         column="del_flag"          />
+    </resultMap>
+
+    <sql id="selectRequirementReviewVo">
+        select review_id, requirement_id, reviewer_user_id, review_result, review_comment,
+               review_at, create_by, create_time, update_by, update_time, remark, del_flag
+        from tb_requirement_review
+    </sql>
+
+    <select id="selectRequirementReviewList" parameterType="RequirementReview" resultMap="RequirementReviewResult">
+        <include refid="selectRequirementReviewVo"/>
+        <where>
+            del_flag = '0'
+            <if test="requirementId != null">
+                and requirement_id = #{requirementId}
+            </if>
+            <if test="reviewerUserId != null">
+                and reviewer_user_id = #{reviewerUserId}
+            </if>
+            <if test="reviewResult != null and reviewResult != ''">
+                and review_result = #{reviewResult}
+            </if>
+        </where>
+        order by review_at desc, create_time desc
+    </select>
+
+    <select id="selectRequirementReviewById" parameterType="Long" resultMap="RequirementReviewResult">
+        <include refid="selectRequirementReviewVo"/>
+        where review_id = #{reviewId} and del_flag = '0'
+    </select>
+
+    <select id="selectByRequirementId" parameterType="Long" resultMap="RequirementReviewResult">
+        <include refid="selectRequirementReviewVo"/>
+        where requirement_id = #{requirementId} and del_flag = '0'
+        order by review_at desc, create_time desc
+    </select>
+
+    <select id="countPassedReviewsByRequirementId" parameterType="Long" resultType="int">
+        select count(1) from tb_requirement_review
+        where requirement_id = #{requirementId}
+          and review_result = '00'
+          and del_flag = '0'
+    </select>
+
+    <insert id="insertRequirementReview" parameterType="RequirementReview" useGeneratedKeys="true" keyProperty="reviewId">
+        insert into tb_requirement_review
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="requirementId != null">requirement_id,</if>
+            <if test="reviewerUserId != null">reviewer_user_id,</if>
+            <if test="reviewResult != null">review_result,</if>
+            <if test="reviewComment != null">review_comment,</if>
+            <if test="reviewAt != null">review_at,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="requirementId != null">#{requirementId},</if>
+            <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            <if test="reviewResult != null">#{reviewResult},</if>
+            <if test="reviewComment != null">#{reviewComment},</if>
+            <if test="reviewAt != null">#{reviewAt},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateRequirementReview" parameterType="RequirementReview">
+        update tb_requirement_review
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="reviewComment != null">review_comment = #{reviewComment},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where review_id = #{reviewId}
+    </update>
+
+    <update id="deleteRequirementReviewByIds" parameterType="Long">
+        update tb_requirement_review set del_flag = '2' where review_id in
+        <foreach item="reviewId" collection="array" open="(" separator="," close=")">
+            #{reviewId}
+        </foreach>
+    </update>
+
+</mapper>
