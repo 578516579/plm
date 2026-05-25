@@ -28,7 +28,7 @@
 | 17 | PRD 文档 | F2.2 | prd.html | plm-prd | 🟡 空壳 |
 | 18 | 架构设计 Arch | F3.1 | archdesign.html | plm-arch | 🟡 空壳 |
 | 19 | 数据库设计 DbDesign | F3.2 | dbdesign.html | plm-dbdesign | 🟡 空壳 |
-| 20 | 接口设计 ApiDesign | F3.3 | apidesign.html | plm-apidesign | 🟡 空壳 |
+| 20 | 接口设计 ApiDesign | F3.3 | apidesign.html | plm-apidesign | 🟢 PRD-aligned |
 | 21 | 测试数据 TestData | F4.3 | testdata.html | plm-testdata | 🟡 空壳 |
 | 22 | 自动化测试 AutoTest | F4.5 | autotest.html | plm-autotest | 🟡 空壳 |
 | 23 | 实施手册 ManualImpl | F5.2 | implmanual.html | plm-manual-impl | 🟡 空壳 |
