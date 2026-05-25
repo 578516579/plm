@@ -1,7 +1,7 @@
 {
   "name": "@plm/dashboard",
   "version": "0.0.1",
-  "description": "PLM 业务模块 - 工作台 (stub 空壳)",
+  "description": "PLM 业务模块 - 工作台 / 首屏聚合页 (PRD-aligned)",
   "main": "src/index.ts",
   "type": "module",
   "private": true,
