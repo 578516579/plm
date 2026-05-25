@@ -23,7 +23,7 @@
 | 12 | API 文档 ApiDoc | F5.4 | apidoc.html | plm-apidoc | 🟢 PRD-aligned |
 | 13 | 产品手册 ManualProduct | F5.1 | productmanual.html | plm-manual-product | 🟢 PRD-aligned |
 | 14 | 立项 Inception | F1.1 | inception.html | plm-inception | 🟢 PRD-aligned |
-| 15 | UED | F2.3 | ued.html | plm-ued | 🟡 空壳 |
+| 15 | UED | F2.3 | ued.html | plm-ued | 🟢 PRD-aligned |
 | 16 | 竞品 Competitive | F1.3 | competitive.html | plm-competitive | 🟢 PRD-aligned |
 | 17 | PRD 文档 | F2.2 | prd.html | plm-prd | 🟡 空壳 |
 | 18 | 架构设计 Arch | F3.1 | archdesign.html | plm-arch | 🟡 空壳 |
@@ -985,9 +985,9 @@
 
 ## 7. v0.x 路线图
 
-- ✅ Project / Requirement / Sprint / Task / Defect / TestCase / Document / Submission / Release / TestPlan / TestReport / ApiDoc / ManualProduct / Dashboard / **Inception** / **Competitive**
+- ✅ Project / Requirement / Sprint / Task / Defect / TestCase / Document / Submission / Release / TestPlan / TestReport / ApiDoc / ManualProduct / Dashboard / **Inception** / **Competitive** / **UED**
 - 🆕 **MCP / Integration**（本提案 0007）
-- 下一批：UED / PRD / Arch / DbDesign / ApiDesign
+- 下一批：PRD / Arch / DbDesign / ApiDesign / TestData
 
 ---
 
@@ -1019,3 +1019,4 @@
 | 2026-05-18 | Wjl + Claude | **第五批: 21/21 业务模块字段对照表完工!** §2 补 §14-§21 (Inception/Prd/Competitive/Arch/DbDesign/ApiDesign/Ued/TestData) 8 模块;§3 补 4 个状态机摘要(Inception 5 态 + 5 模块共用 4 态含反向 + 2 模块共用 3 态);7 个 Vue 由 21 行 stub 重写为完整 CRUD ~220-280 行,新建 plm-inception 前端 package (6 文件全新);8 个 TS types 由 5 字段扩到完整 domain 映射;8 个 ServiceImpl 现代化同样模式 → **18 个 ServiceImpl 全部完成**。 |
 | 2026-05-25 | Wjl + Claude | **Inception 模块流程证据补齐** — §1 状态色 🔴 缺模块 → 🟢 PRD-aligned(代码本已存在,本次补流程证据)。具体:(a) 修复前端字典契约 P0 bug 5 处(precision_ag/version_iter/... → 对齐后端 ALLOWED_BIZ_LINE + SQL 字典);(b) 新增 InceptionServiceImplTest.java 单测 28 case 全绿(5 @Nested:GenerateNo×4 / Validation×6 / Defaults×2 / StateMachine×12 / AiGenerate×3 / Delete×1);(c) E2E spec 从 1 case 扩到 11 case(CRUD/状态机正负向/反向边/AI 生成/编号格式/编码 HEX);(d) 创建 Phase 01/02/03 Gate 实例 3 文件(§I Phase 04 准出待本地 E2E 全套件回填);(e) §7 路线图把 Inception 挪入 ✅ 完工列。 |
 | 2026-05-25 | Wjl + Claude | **规划阶段(2910 菜单分组)项目管理能力收尾 — Competitive 模块流程证据补齐** — §1 状态色 🟡 空壳 → 🟢 PRD-aligned(后端代码已存在,本次补 Gate + 单测)。具体:(a) 新增 CompetitiveServiceImplTest.java 单测 28 case 全绿 / BUILD SUCCESS 20.7s(6 @Nested:GenerateNo×4 / Validation×8 / Defaults×3 / StateMachine×9[3 态+终态保护+无反向边+ENUM+702 项目存在性] / AiAnalyze×3 / Delete×1);(b) 创建 Phase 01/02/03 Gate 实例 3 文件,inception 模板对齐(§I Phase 04 准出待本地 E2E 全套件回填);(c) 至此规划阶段 inception + project + competitive 3 模块全部 🟢 + 后端单测齐 + Gate 实例齐;菜单挂载已在既有 menu-fill-missing-8.sql(行 36-41)就绪,跑过 SQL 后 admin 即可看见。 |
+| 2026-05-25 | Wjl + Claude | **需求与设计阶段(2920 菜单分组)— UED 模块 🟡→🟢 PRD-aligned 流程证据补齐** — §1 第 26 行状态色 🟡 空壳 → 🟢 PRD-aligned(后端 5 件套 + 前端视图 + e2e 1 case + SQL + §20 字段表 + §15 共用 4 态状态机 本已存在,本次补 Gate + 单测 + 状态色,与 Inception/Competitive 同模板)。具体:(a) 新增 UedServiceImplTest.java 单测 28 case 全绿(6 @Nested:GenerateNo×4 / Validation×7[title null+空白+projectId+designerUserId+702+新建非00 拒 601+显式 00 接受] / Defaults×2[aiGenerated=N+status=00] / StateMachine×11[**4 态含反向边**:00→01 / 01→02 / **01→00 反向打回**(UED 特色)/ 02→03 / 03 终态保护 / **02→01 反向边非法** / 跳级 ×2 / status 不变不校验 / 404 / 702] / AiReview×3[报告+合规+可用性+score=85+审计联动] / Delete×1) - 实测 mvn -pl plm-ued test → Tests run: 28, Failures: 0, Errors: 0, Skipped: 0;(b) 创建 Phase 01/02/03 Gate 实例 3 文件,inception/competitive 同模板对齐(§I Phase 04 准出待本地 E2E 全套件回填,ued.spec.ts 仅 1 case 建议 Phase 04 扩到 5+);(c) 字典契约三方一致已确认:前端 statusMap{00/01/02/03} ↔ 后端 STATUS_TRANSITIONS Map ↔ SQL biz_ued_status 4 项 ↔ §15 共用 4 态状态机;(d) **菜单挂载特别说明**:SQL 旧 schema 挂 2000 业务管理,跑过 menu-regroup-by-phase.sql 后 UPDATE 父挂 2920 需求与设计 order=3(F2.3 所属阶段);(e) §7 路线图把 UED 挪入 ✅ 完工列;**至此需求与设计阶段 UED 首发,下一批 PRD / Arch / DbDesign / ApiDesign / TestData**。 |
