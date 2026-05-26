@@ -13,9 +13,14 @@
 
 # 收集本次 staged 文件(增/改/复制/改名)
 STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+# 仅新增(Added)的文件 — lint 1 只盯"新建模块的 business-*.sql", 不骚扰对存量文件的修改
+ADDED=$(git diff --cached --name-only --diff-filter=A)
 
-# ---------- lint 1: business-*.sql 模板完整性 ----------
-SQL_FILES=$(echo "$STAGED" | grep -E '^plm-backend/sql/business-[^/]+\.sql$' || true)
+# ---------- lint 1: 新建 business-*.sql 模板完整性 ----------
+# 仅检查"本次新建"的 business-<entity>.sql:38 个存量文件里 25 个把菜单集中在
+# menu-regroup-by-phase.sql / menu-fill-missing-8.sql(2026-05-25 audit), 故对存量文件
+# 的修改不强制 sys_menu;只在"建新模块表却忘挂菜单"(如 81bc1ba 类)时拦截。
+SQL_FILES=$(echo "$ADDED" | grep -E '^plm-backend/sql/business-[^/]+\.sql$' || true)
 
 if [ -n "$SQL_FILES" ]; then
   FAIL_LIST=""

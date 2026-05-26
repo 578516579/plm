@@ -76,7 +76,7 @@ All sensitive yml values are wrapped in `${VAR:default}` placeholders. The defau
 
 Spring Boot does not auto-read `.env` files. Inject via IDE run config, shell `export`, docker-compose `env_file:`, or K8s Secret. The `.env` file itself is gitignored (see root `.gitignore`).
 
-The 6 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](memory/project-quirks.md)):
+The 8 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](memory/project-quirks.md)):
 
 | # | Symptom | Fix | 复发 |
 |---|---|---|---|
@@ -86,6 +86,8 @@ The 6 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](m
 | 4 | `Failed to resolve import @/utils/ruoyi` on certain frontend pages | `vite/plugins/auto-import.ts` was missed during rename — re-run sed there | 1 |
 | 5 | `mvn install` fails: `Unable to rename '.../plm-admin.jar' to '.../plm-admin.jar.original'` | Backend 在跑锁住 jar — 先 `taskkill //PID <pid> //F` 再 build。从 V2 quirks (Q-BUILD-02) promote, 复发 9+ | 9+ |
 | 6 | Backend 抛 ServiceException 字符串但 grep 当前代码无此字符串 | Stale JVM 进程加载旧字节码(切 branch 后没重启)— 对比 `ls -la <jar>` mtime vs `wmic process get CreationDate` startTime,kill + rebuild | 1 |
+| 7 | `business-*.sql` 漏写 `sys_menu` INSERT → 前端无菜单入口、功能不可达 | `.githooks/pre-commit` lint 1 自动拦截(缺 `INSERT INTO sys_menu`);仅扩字典/子表的脚本顶部加 `-- @no-menu: <原因>` 豁免。Q-DB-04,首例 81bc1ba | 1+ |
+| 8 | `sys_menu` path 列改动后,前端 `/business/<entity>` 按钮 404 大面积复发 | `.githooks/pre-commit` lint 2 自动 grep `plm-frontend/src/views/**` 给清单;跳转必须经 `src/utils/businessRoute.ts` SSoT,**禁止硬编码 `router.push('/business/...)`**。Q-BIZ-04,首例 5c4e70d+7b14807 | 2+ |
 
 ## Architecture (where things live)
 
@@ -164,6 +166,8 @@ Three layers of project-wide rules — read these before non-trivial work:
 Tool-enforced:
 - [.editorconfig](.editorconfig) — auto-applied indent/charset/EOL by editors
 - [.githooks/commit-msg](.githooks/commit-msg) — Conventional Commits validation. **First-time setup per clone**: `git config core.hooksPath .githooks`
+- [.githooks/pre-commit](.githooks/pre-commit) — `business-*.sql` 模板 lint(必含 `sys_menu` INSERT,否则加 `-- @no-menu` 豁免)+ `sys_menu` path 改动→前端硬编码 `/business/` grep。proposal 0016 落地。绕过:`git commit --no-verify`(计入 signals)。
+- [.githooks/pre-push](.githooks/pre-push) — 分支名 `<type>/<desc>` 校验 + 禁止直推 `main`/`release/*`。
 - [.claude/settings.json](.claude/settings.json) — Claude Code hooks (Stop / PreToolUse / UserPromptSubmit) for runtime reminders. Design + troubleshooting in [.claude/hooks-design.md](.claude/hooks-design.md).
 
 ## Self-evolution loop
