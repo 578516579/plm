@@ -136,6 +136,8 @@ The P0 rename deliberately left these alone — **do NOT mass-rewrite them witho
 
 **`plm-module-uplift`** — 固化「业务模块 🟡 空壳 → 🟢 PRD-aligned」SOP(proposal 0015;2026-05-25 单日 6 模块同流程显形)。装在 `~/.claude/skills/plm-module-uplift/`,模板从真实 🟢 模块(apidesign / ued)抽取。触发词:「把 X 模块从 🟡 改成 🟢」「🟡→🟢 落地」「uplift module」或直接说 🟡 模块名(manual-impl / manual-ops / analytics / ai-agent / openspec / pipeline / feature-flag / dora)。**只搭骨架,业务逻辑仍要人写**。与 ruoyi-bootstrap 区分:后者脚手架→正名(P0 一次性),本 skill 空壳→PRD-aligned(N 次复用)。
 
+**`integration-connector`** — 固化「接入第三方系统做数据同步(集成连接器)」SOP(proposal 0019;飞书/GitLab/禅道第 3 次同范式)。装在 `~/.claude/skills/integration-connector/`,模板从真实禅道集成(commit 9d37d03)抽取:ConnectorAdapter + WebhookController + Inbound/OutboundSyncService(防回环三道防线,见 [Q-INTEG-01](memory/project-quirks.md))+ 业务 Event 钩子 + 设计文档模板。触发词:「接入 XX 第三方系统做同步」「双向同步 <系统名>」「integrate <system>」。与 plm-module-uplift **正交**(那个造业务模块,本 skill 接外部系统)。
+
 ## 🎯 PRD/原型驱动开发 — 单一事实来源 (SSoT)
 
 本仓库是 **AgriPLM·AI** 的实现 (PRD V1.0 in `prd和原型/AgriAI-PLM-完整PRD文档.md`, 31 个原型 HTML in `prd和原型/AgriPLM-DevOps-原型/agriplm_split/*.html`)。
