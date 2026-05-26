@@ -317,7 +317,7 @@
 
 | ID | 现象 | 转向 |
 |---|---|---|
-| P-FLOW-2026-05-25 | 未提交工作量过大(17 modified + 30+ untracked,Zentao 集成 + 评审 + dbdesign/arch 测试同时在途),回滚困难 | proposal 0015 候选:制定"在途任务上限"或"分支拆分阈值"规范 |
+| P-FLOW-2026-05-25 | 未提交工作量过大(17 modified + 30+ untracked,Zentao 集成 + 评审 + dbdesign/arch 测试同时在途),回滚困难 | W22 主线反思 A5(settings.json dirty>15 Stop hook nudge,待授权)+ Zentao 反思模式3 / proposal 0021;候选独立 proposal:"在途任务上限 / 分支拆分阈值"。(原误标 0015,实为 skill 提案,与 WIP 无关) |
 
 ---
 
@@ -326,4 +326,5 @@
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-05-19 | V1.0 | 首次沉淀,从 V1 反思 (commit 545ff2f) 提取 10+ quirks |
-| 2026-05-25 | V1.1 | +Q-DB-04 (sys_menu INSERT 漏写, 81bc1ba) / +Q-BIZ-04 (硬编码 /business/ URL 漂移, 5c4e70d+7b14807) / +P-FLOW-2026-05-25 (在途量过大转 proposal 0015 候选) |
+| 2026-05-25 | V1.1 | +Q-DB-04 (sys_menu INSERT 漏写, 81bc1ba) / +Q-BIZ-04 (硬编码 /business/ URL 漂移, 5c4e70d+7b14807) / +P-FLOW-2026-05-25 (在途量过大) |
+| 2026-05-27 | V1.2 | 修正 P-FLOW 转向(0015 误标→实为 W22 A5/0021;0015 是 skill 提案) |
