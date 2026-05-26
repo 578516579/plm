@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# .githooks/pre-commit
+# 自进化 proposal 0016 (W22 reflect A3+A4) 落地。
+#
+# lint 1: business-*.sql 必须含 INSERT INTO sys_menu,否则要求顶部 -- @no-menu 豁免注释
+#         (防 Q-DB-04: 漏 sys_menu 致前端无入口, 首例 81bc1ba)
+# lint 2: sql/menu-*.sql 或 sql/business-*.sql 的 path 列改动 → grep 前端硬编码 /business/ 路由
+#         (防 Q-BIZ-04: sys_menu path 改动后前端 404 大面积复发, 首例 5c4e70d+7b14807)
+#
+# 失败行为:exit 1 阻塞 commit;允许 `git commit --no-verify` 绕过(将计入 signals 月度 bypass)。
+# 启用方式(首次 clone):git config core.hooksPath .githooks
+# Windows 兼容:Git for Windows 自带 bash;本脚本仅用 POSIX sh 子集 + [[:space:]] 字符类,无 \s/\b GNU 扩展。
+
+# 收集本次 staged 文件(增/改/复制/改名)
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# ---------- lint 1: business-*.sql 模板完整性 ----------
+SQL_FILES=$(echo "$STAGED" | grep -E '^plm-backend/sql/business-[^/]+\.sql$' || true)
+
+if [ -n "$SQL_FILES" ]; then
+  FAIL_LIST=""
+  for f in $SQL_FILES; do
+    # 跳过 rollback 脚本(命名约定 -rollback.sql)
+    case "$f" in *-rollback.sql) continue ;; esac
+
+    # 跳过显式豁免(顶部 50 行内出现 -- @no-menu 注释)
+    if head -n 50 "$f" 2>/dev/null | grep -qE '^--[[:space:]]*@no-menu'; then
+      continue
+    fi
+
+    # 必含 sys_menu INSERT(任一即可)
+    if ! grep -qE 'INSERT[[:space:]]+INTO[[:space:]]+sys_menu' "$f"; then
+      FAIL_LIST="${FAIL_LIST}  - $f\n"
+    fi
+  done
+
+  if [ -n "$FAIL_LIST" ]; then
+    printf "\n[lint 1] business-*.sql 缺 sys_menu INSERT:\n" >&2
+    printf '%b' "$FAIL_LIST" >&2
+    cat <<'EOF' >&2
+
+修复方式(任选一):
+  a) 补 INSERT INTO sys_menu / sys_role_menu(同 business-requirement.sql 范式)
+  b) 若仅扩字典/子表/回滚, 在 SQL 顶部 50 行内加注释:
+       -- @no-menu: 本 SQL 仅扩 <字典/子表/...>, 不挂菜单
+  c) 明知故犯绕过:git commit --no-verify(将计入 signals 月度 bypass)
+
+参考:99-跨阶段/proposals/0016 / memory/project-quirks.md Q-DB-04
+EOF
+    exit 1
+  fi
+fi
+
+# ---------- lint 2: sys_menu URL 改动 → 前端硬编码 grep ----------
+MENU_CHANGED=$(echo "$STAGED" | grep -E '^plm-backend/sql/(menu-|business-).*\.sql$' || true)
+
+if [ -n "$MENU_CHANGED" ]; then
+  # 仅当 diff 涉及 path 列(粗判:新增行含 path 关键字)
+  if git diff --cached -- $MENU_CHANGED 2>/dev/null | grep -qE "^\+.*['\"]?path['\"]?"; then
+    # grep 前端硬编码导航 — 限定 views, 排除 api 层/mocks, 并排除 axios API 调用
+    # (后端 REST 端点如 url:'/business/task/list' 不受 sys_menu.path 影响, 排除以免误报)
+    HITS=$(grep -rnE "['\"]/business/[a-z][a-z0-9-]*" \
+             plm-frontend/src/views 2>/dev/null \
+             | grep -v -E '/(api|__mocks__)/' \
+             | grep -vE "(url:[[:space:]]*|request\()['\"]/business/" || true)
+    if [ -n "$HITS" ]; then
+      printf "\n[lint 2] 检测到 sys_menu path 改动, 以下前端硬编码可能受影响:\n" >&2
+      echo "$HITS" >&2
+      cat <<'EOF' >&2
+
+请确认是否需要同步更新(或确认无影响):
+  - 跳转应统一走 src/utils/businessRoute.ts SSoT, 禁止硬编码 router.push('/business/...)
+  - 确认后把上述清单粘进 commit body 再重新 commit
+  - 绕过:git commit --no-verify
+
+参考:99-跨阶段/proposals/0016 / memory/project-quirks.md Q-BIZ-04
+EOF
+      exit 1
+    fi
+  fi
+fi
+
+exit 0
