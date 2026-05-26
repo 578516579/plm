@@ -125,6 +125,17 @@
 | 复发次数 | 1(已统一对齐) |
 | **预防** | api-contract-keeper Agent 改前后端任一字段时,grep 另一侧 |
 
+### Q-BIZ-04 — 前端硬编码 `/business/<entity>` 跳转,菜单 regroup 后大面积 404
+
+| 字段 | 内容 |
+|---|---|
+| 现象 | menu-regroup-by-phase.sql 把菜单父级分组改了,前端 push(`/business/xxx`)大量 404 |
+| 根因 | entity → URL 没有 SSoT,各 view/router 各自硬编码,菜单 schema 一动就漂移 |
+| 修复 | 抽 `src/utils/businessRoute.ts`,所有跳转走 `businessRoutePath(entity)`,SSoT 化 |
+| 首次发现 | commit 5c4e70d / 7b14807(menu regroup 后修 hardcoded 路径) |
+| 复发次数 | 1 |
+| **预防** | 新增模块跳转一律走 `businessRoute.ts`;CI grep `'/business/'` 字面量出现即 fail |
+
 ---
 
 ## 数据库层 (DB)
@@ -158,6 +169,17 @@
 | 修复 | 重跑该 entity 的 `business-*.sql`(`--force` 跳过字典 dup) |
 | 复发次数 | 1 |
 | **预防** | 切 branch 后第一件事:`mvn install + 重跑相关 sql + 重启 backend` |
+
+### Q-DB-04 — business-*.sql 漏写 sys_menu INSERT 致前端无入口
+
+| 字段 | 内容 |
+|---|---|
+| 现象 | 新模块表建成 + Controller 通,但前端侧边栏无菜单入口,功能不可达 |
+| 根因 | business-*.sql 模板未强制要求同时 INSERT sys_menu(目录 + CRUD 按钮),容易漏 |
+| 修复 | 对照已存在模块补 INSERT sys_menu(parent_id 跟 menu-regroup-by-phase 分组对齐)|
+| 首次发现 | commit 81bc1ba(补 business-ued.sql 漏写的 sys_menu INSERT) |
+| 复发次数 | 1 |
+| **预防** | business-*.sql 模板 checklist:CREATE TABLE + dict_type/data + **sys_menu(M/C/D 三件套)** 缺一不可 |
 
 ---
 
@@ -291,8 +313,17 @@
 
 ---
 
+## 流程候选(转 proposal,不入主 quirks 表)
+
+| ID | 现象 | 转向 |
+|---|---|---|
+| P-FLOW-2026-05-25 | 未提交工作量过大(17 modified + 30+ untracked,Zentao 集成 + 评审 + dbdesign/arch 测试同时在途),回滚困难 | proposal 0015 候选:制定"在途任务上限"或"分支拆分阈值"规范 |
+
+---
+
 ## 变更记录
 
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-05-19 | V1.0 | 首次沉淀,从 V1 反思 (commit 545ff2f) 提取 10+ quirks |
+| 2026-05-25 | V1.1 | +Q-DB-04 (sys_menu INSERT 漏写, 81bc1ba) / +Q-BIZ-04 (硬编码 /business/ URL 漂移, 5c4e70d+7b14807) / +P-FLOW-2026-05-25 (在途量过大转 proposal 0015 候选) |
