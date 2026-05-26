@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0016 |
 | 标题 | business-*.sql 模板 lint + sys_menu URL 改动→前端硬编码 grep |
-| 状态 | draft |
+| 状态 | **merged → tracking** (solo-review) |
 | 类型 | 工具链(号段 0200-0299) |
 | 提出人 | Claude(/reflect-weekly meta-cognitive) |
 | 提出日期 | 2026-05-25 |
@@ -194,16 +194,19 @@ exit 0
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| | 通过 / 有条件通过 / 不通过 | | |
+| Wjl | 通过(solo-review)| 2026-05-27 | 实施期接受两处偏离草案的精炼(见 §10)|
 
 ---
 
 ## 10. 实施后跟踪(merged 后填)
 
 ### 实际 PR / commit
-- PR: __
-- 合入 commit: __
-- 实际 merged 日期:YYYY-MM-DD
+- 合入 commit: **c2e8b99**(`chore(hook): pre-commit business-sql menu lint + CLAUDE gotcha 7/8`)
+- 实际 merged 日期:2026-05-27
+- **实施期两处精炼(偏离 §3 草案,已验证)**:
+  1. **lint 1 只盯 `--diff-filter=A` 新增文件**:Step 1 audit 实测 38 个存量 business-*.sql 中 25 个把菜单集中在 `menu-regroup-by-phase.sql`/`menu-fill-missing-8.sql`(而非草案预估的 ~5),对存量修改强制 sys_menu 会 25 误报;改为"只在新建模块的 business-*.sql 上拦截",存量无需回填 @no-menu。
+  2. **lint 2 排除 axios `url:`/`request(` 调用**:草案 grep 会误报 `request({url:'/business/task/list'})` 这类后端 REST 端点(不受 sys_menu.path 影响);已加排除。
+- **CLAUDE.md gotcha**:草案 §3 Diff 2 加 1 行 #7,实施时拆为 #7(漏菜单/lint1)+ #8(path404/lint2)两行,与两条 lint 1:1 对应。
 
 ### Tracking 数据
 
@@ -225,3 +228,4 @@ exit 0
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-25 | Claude(/reflect-weekly) | V1.0 — 初稿,从 reflect/2026-W22 行动 A3+A4 派生 |
+| 2026-05-27 | Claude / Wjl | merged(commit c2e8b99);记录 lint1 改 --diff-filter=A、lint2 排除 axios url、gotcha 拆 #7/#8 三处精炼 |
