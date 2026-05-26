@@ -130,9 +130,11 @@ The P0 rename deliberately left these alone — **do NOT mass-rewrite them witho
 - `README.md`, `LICENSE`, `doc/若依环境使用手册.docx` → upstream framework docs, retained for future upgrades.
 - Code-generator Velocity templates in [plm-generator/src/main/resources/vm/](plm-backend/plm-generator/src/main/resources/vm/) → content already updated by the rename; structure preserved so the in-app generator at `/tool/gen` still works.
 
-## Available skill: `ruoyi-bootstrap`
+## Available skills
 
-A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the entire RuoYi-scaffold-to-named-project flow (the very flow that built this repo's commits `4e9777d → 2679a61 → e2e37c3`). It also ships a `Project` CRUD module template that can be dropped in via Phase 7. Trigger it on future fresh-RuoYi imports by saying "用若依新建项目", "把若依改名", or similar.
+**`ruoyi-bootstrap`** — A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the entire RuoYi-scaffold-to-named-project flow (the very flow that built this repo's commits `4e9777d → 2679a61 → e2e37c3`). It also ships a `Project` CRUD module template that can be dropped in via Phase 7. Trigger it on future fresh-RuoYi imports by saying "用若依新建项目", "把若依改名", or similar.
+
+**`plm-module-uplift`** — 固化「业务模块 🟡 空壳 → 🟢 PRD-aligned」SOP(proposal 0015;2026-05-25 单日 6 模块同流程显形)。装在 `~/.claude/skills/plm-module-uplift/`,模板从真实 🟢 模块(apidesign / ued)抽取。触发词:「把 X 模块从 🟡 改成 🟢」「🟡→🟢 落地」「uplift module」或直接说 🟡 模块名(manual-impl / manual-ops / analytics / ai-agent / openspec / pipeline / feature-flag / dora)。**只搭骨架,业务逻辑仍要人写**。与 ruoyi-bootstrap 区分:后者脚手架→正名(P0 一次性),本 skill 空壳→PRD-aligned(N 次复用)。
 
 ## 🎯 PRD/原型驱动开发 — 单一事实来源 (SSoT)
 
