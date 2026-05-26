@@ -108,7 +108,7 @@
 | B3 | **P0** | proposal 模板 §10"实际 PR/commit"加**强制校验语义**:状态置 `merged` 时,merged commit hash 字段**不允许为空/待填**;无 commit 只能停在 `accepted`/`implementing`。沉淀到 README 生命周期图:**merged = 存在 merged commit 的 git 事实,不是决议** | **→ proposal 0021-proposal-merged-requires-commit.md**(0001-0099 流程段);改 `0000-template.md` + `README.md` 生命周期定义 | 未来 proposal 不再出现 merged/tracking 但 commit 待填;tracking 期不空转 |
 | B4 | **P1** | **集成连接器 SOP 固化为 skill**:`~/.claude/skills/integration-connector/`,脚手架含 ConnectorAdapter(ping/验签/token 缓存)+ WebhookController(@Anonymous+验签+落 event)+ Inbound/OutboundSyncService(SyncContext 防循环 + last-write-wins 模板)+ 4 业务 Event 钩子 + 测试骨架 + 专用设计文档模板(C4+字段映射+状态机+错误码+时序图)。触发语:"接入 XX 第三方系统做同步" | **→ proposal 0019-integration-connector-skill.md**(与主线 0015 plm-module-uplift skill 并列,**不合并**:0015 是业务模块 SOP,0019 是集成 SOP,正交) | 下一个 connector(Jira)从 ~1 week → ~2 day;跨会话第 4 个 connector 走 skill 路径 |
 | B5 | **P1** | **双向同步通用防护清单沉淀为 gotcha/quirks**:把"防回环三道防线(ThreadLocal inbound 标志 / N 秒防抖 / last-write-wins + FOR UPDATE)+ 幂等键(external_source+external_id 唯一索引,NULL 不参与约束)+ webhook 幂等(externalEventId 带时间戳)"写成"集成类通用反模式防护"段 | **→ proposal 0020-bidirectional-sync-loop-guard-gotcha.md** + 改 `memory/project-quirks.md` 加 Q-INTEG-01 段;并扩 `.claude/rules.md §L.1` gotcha 触发条件:加"主动设计出的通用正确范式"语义 | 下一个双向集成不再从零想防回环;§L.1 能收"正确范式"不只收"坑" |
-| B6 | **P1** | **补派生 ADR**:为"引入进程内领域事件总线(ApplicationEvent + @TransactionalEventListener AFTER_COMMIT,否决 Kafka)"写 `ADR-0002`;为"集成层回写旁路业务 Service(裸 JDBC,因外部状态机≠PLM 状态机)"写 `ADR-0003`。**顺手修 ADR 目录两个 0001-* 撞号** | Edit/新建 `03-开发/ADR/0002-*.md` + `0003-*.md`;重命名撞号文件 | ADR 不再停在 0001;架构类 proposal(0014)有对应 ADR 落点 |
+| B6 | **P1** | **补派生 ADR**:为"引入进程内领域事件总线(ApplicationEvent + @TransactionalEventListener AFTER_COMMIT,否决 Kafka)"写 `ADR-0008`;为"集成层回写旁路业务 Service(裸 JDBC,因外部状态机≠PLM 状态机)"写 `ADR-0009`。**顺手修 ADR 目录两个 0001-* 撞号** | Edit/新建 `03-开发/ADR/0002-*.md` + `0003-*.md`;重命名撞号文件 | ADR 不再停在 0001;架构类 proposal(0014)有对应 ADR 落点 |
 | B7 | **P1** | meta-cognitive V3 触发表 + signals 加**"跨会话同类工作类型累计"信号**:按工作类型(集成 / 业务模块 / 基础设施)分桶计数,某桶累计 ≥3 → nudge"该抽 skill 了"。补主线 A2"单会话高频"的盲点(集成是跨会话低频高单价) | **→ Edit `.claude/agents/meta-cognitive.md`** V3 段(不走 proposal)+ `signals/README.md` 加"工作类型分桶"维度 | 下一个(第 4 个)connector 在动手前就被提示"已 3 个同类,先 skill 化" |
 | B8 | P2 | 扩 proposal 0016 的 business-*.sql lint:除"必须含 sys_menu INSERT"外,加"**INSERT 的 component 路径 + perms 必须有对应前端 view 文件 / 后端 @PreAuthorize 端点**",拦 O8 类"发空菜单" | 并入 **proposal 0016**(主线已立) scope | business-*.sql 不再发指向虚空的菜单;O8 类未来 4 周 0 复发 |
 | B9 | P2 | "proposal→ADR 派生"加弱触发器:架构类 proposal 置 merged 时,Stop hook/checklist 提示"是否需派生 ADR?";补 §L.1 与 README §文档关系的衔接 hook | 并入 **proposal 0021** scope 或 Edit `.claude/settings.json` Stop hook | 架构类 proposal merged 后不再漏 ADR(模式 4 根因 5 的衔接补上) |
@@ -119,7 +119,7 @@
 B1 (雪球落盘 + 回填 commit) ──┬──→ B2 (补 4 测试 / 或诚实改 [ ])
                             └──→ B3 (proposal merged 须绑 commit) ──→ B9 (proposal→ADR 弱触发)
                                                                        ↑
-B6 (补 ADR-0002 事件总线 / ADR-0003 旁路 Service) ─────────────────────┘
+B6 (补 ADR-0008 事件总线 / ADR-0009 旁路 Service) ─────────────────────┘
 
 B4 (集成 connector skill 0019) ──┐
                                 ├──→ 下一个 connector(Jira)验证 SOP 收敛
@@ -183,4 +183,4 @@ B8 (sql lint 扩 component 存在性) ── 并入主线 0016,独立推进
 
 - **(并入主线 0016,非新提案)**:business-*.sql lint 扩"菜单 component 路径 + perms 须有对应前端 view / 后端端点"的存在性校验,拦 O8 类"发指向虚空的菜单"。证据:O8(sql 发了 user-mapping 菜单 + 6 权限,但前端页 / Controller 均不存在,设计文档自承不做 UI)。
 
-- **(补做,非提案,走 §L.1 既有 ADR 流程)**:补 `ADR-0002`(引入进程内领域事件总线,否决 Kafka)+ `ADR-0003`(集成层回写旁路业务 Service 的理由),并修 `03-开发/ADR/` 两个 `0001-*` 撞号文件。证据:F4 + F5 + O2(0014 全文无 ADR、引入事件机制 + 旁路分层均为不可逆架构选型,触发 `.claude/rules.md §L.1` 与 ADR/README §何时新增)。
+- **(补做,非提案,走 §L.1 既有 ADR 流程)**:补 `ADR-0008`(引入进程内领域事件总线,否决 Kafka)+ `ADR-0009`(集成层回写旁路业务 Service 的理由),并修 `03-开发/ADR/` 两个 `0001-*` 撞号文件。证据:F4 + F5 + O2(0014 全文无 ADR、引入事件机制 + 旁路分层均为不可逆架构选型,触发 `.claude/rules.md §L.1` 与 ADR/README §何时新增)。

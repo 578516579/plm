@@ -90,7 +90,7 @@
 | R1 与 0015/ruoyi-bootstrap 触发混淆 | description 触发词严格区分:0015=造业务模块、ruoyi-bootstrap=脚手架正名、本 skill=接外部系统。三者 SKILL.md 末尾 cross-link |
 | R2 不同第三方系统差异大,模板套不上(消息平台 vs 项管系统同步方向不同)| Phase 0 显式问"系统类型 + 同步方向";单向系统跳过 Phase 5 的 Outbound |
 | R3 模板含 7 中第 5 的双向同步范式漂移 | bidirectional-sync.md reference 引用 proposal 0020 的防护清单作为唯一来源,模板漂移时改一处 |
-| R4 模板里 Inbound 用裸 JDBC 旁路业务 Service(reflect F5 破窗)被无脑复制 | 模板里把"旁路 Service"做成**显式注释 + 指向 ADR-0003**(见 reflect B6),并提示"能走业务 Service 就走" |
+| R4 模板里 Inbound 用裸 JDBC 旁路业务 Service(reflect F5 破窗)被无脑复制 | 模板里把"旁路 Service"做成**显式注释 + 指向 ADR-0009**(见 reflect B6),并提示"能走业务 Service 就走" |
 
 ---
 

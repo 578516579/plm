@@ -86,7 +86,7 @@
 ## 6. 备选方案(Alternatives Considered)
 
 - **A 写进禅道专用设计文档**:已经在那(部分),但"专用"=下个集成看不到。**不够**。
-- **B 只写 ADR**:ADR 记"为什么这么设计",但"防回环清单"是操作性 checklist,更适合 gotcha/quirks。**互补,不替代**(ADR-0002 事件总线另立,见 reflect B6)。
+- **B 只写 ADR**:ADR 记"为什么这么设计",但"防回环清单"是操作性 checklist,更适合 gotcha/quirks。**互补,不替代**(ADR-0008 事件总线另立,见 reflect B6)。
 - **C 并入 0019 skill 不单独立 proposal**:可行,但"扩 §L.1 收正确范式"是独立的元规则改进,值得单独评审。**故拆出**。
 
 ---
