@@ -96,7 +96,7 @@ INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_cla
 -- ----------------------------
 INSERT INTO sys_menu (menu_id, menu_name,    parent_id, order_num, path,      component,                       menu_type, visible, status, perms,                              icon,        create_by, create_time, remark) VALUES
 (2400, 'MCP 集成',     0,    10, 'mcp',           NULL,                              'M', '0', '0', '',                                 'connection',  'admin', SYSDATE(), 'MCP 一级目录'),
-(2410, 'MCP Server',   2400, 1,  'server',        'business/mcp/server/index',       'C', '0', '0', 'business:mcp:server:list',        'cloud',       'admin', SYSDATE(), 'MCP Server 列表'),
+(2410, 'MCP Server',   2400, 1,  'mcpserver',     'business/mcp/server/index',       'C', '0', '0', 'business:mcp:server:list',        'cloud',       'admin', SYSDATE(), 'MCP Server 列表'),
 (2411, 'Server查询',   2410, 1,  '#',             '',                                'F', '0', '0', 'business:mcp:server:query',       '#',           'admin', SYSDATE(), ''),
 (2412, 'Server新增',   2410, 2,  '#',             '',                                'F', '0', '0', 'business:mcp:server:add',         '#',           'admin', SYSDATE(), ''),
 (2413, 'Server修改',   2410, 3,  '#',             '',                                'F', '0', '0', 'business:mcp:server:edit',        '#',           'admin', SYSDATE(), ''),
