@@ -1,16 +1,11 @@
 -- =============================================================================
--- 回滚 menu-regroup-remaining-7.sql — 把 7 模块菜单还原到 seed 状态 (parent_id=2000)
+-- 回滚 menu-regroup-remaining-7.sql — 删除本脚本创建的 7 模块菜单 + 授权
 -- =============================================================================
--- 还原到 menu-seed-prd-aligned-modules.sql 的 order_num (52/53/61/72/81/82/83)
+-- 范围: 2280-2305 (manual-impl/manual-ops/analytics) + 2330-2365 (openspec/pipeline/feature-flag/dora)
+-- 不动 2320-2325 (ai-agent,由 menu-fill-missing-8 管理)
 -- =============================================================================
-UPDATE sys_menu SET parent_id=2000, order_num=52 WHERE menu_id=2280;   -- manual-impl
-UPDATE sys_menu SET parent_id=2000, order_num=53 WHERE menu_id=2290;   -- manual-ops
-UPDATE sys_menu SET parent_id=2000, order_num=61 WHERE menu_id=2300;   -- analytics
-UPDATE sys_menu SET parent_id=2000, order_num=72 WHERE menu_id=2330;   -- openspec
-UPDATE sys_menu SET parent_id=2000, order_num=81 WHERE menu_id=2340;   -- pipeline
-UPDATE sys_menu SET parent_id=2000, order_num=82 WHERE menu_id=2350;   -- feature-flag
-UPDATE sys_menu SET parent_id=2000, order_num=83 WHERE menu_id=2360;   -- dora
+DELETE FROM sys_role_menu WHERE menu_id BETWEEN 2280 AND 2305 OR menu_id BETWEEN 2330 AND 2365;
+DELETE FROM sys_menu      WHERE menu_id BETWEEN 2280 AND 2305 OR menu_id BETWEEN 2330 AND 2365;
 
-SELECT '回滚完成,7 模块已还原到 parent_id=2000' AS result,
-       COUNT(*) AS cnt FROM sys_menu
-WHERE menu_id IN (2280,2290,2300,2330,2340,2350,2360) AND parent_id=2000;
+SELECT '回滚完成,7 模块菜单已删除' AS result,
+       (SELECT COUNT(*) FROM sys_menu WHERE menu_id BETWEEN 2280 AND 2305 OR menu_id BETWEEN 2330 AND 2365) AS remaining;
