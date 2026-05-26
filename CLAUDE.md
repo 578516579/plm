@@ -149,9 +149,10 @@ The P0 rename deliberately left these alone — **do NOT mass-rewrite them witho
 4. 详细硬规则见 [.claude/rules.md §M](.claude/rules.md)
 
 **实现进度速览** (详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
-- 🟢 PRD-aligned 18 个: inception / project / competitive / requirement / prd / **ued** / sprint / task / defect / testcase / document / submission / release / testplan / testreport / apidoc / manual-product / **dashboard**
-- 🟡 空壳 12 个: arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / ai-agent / openspec / pipeline / feature-flag / dora
+- 🟢 PRD-aligned **31 个(全部业务模块)**: 规划 inception/project/competitive/dashboard · 需求设计 requirement/prd/ued/arch/dbdesign/apidesign · 研发 sprint/task/document · 测试 testplan/testcase/testdata/submission/autotest/defect/testreport · 交付运维 apidoc/manual-product/manual-impl/manual-ops/pipeline/release/feature-flag/dora · 分析 analytics · AI openspec/ai-agent
+- 🟡 空壳 **0 个**（2026-05-27 末批 8 模块 manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora 全部 🟢，单测 200 case 全绿）
 - 🔴 缺模块 0 个
+- 🆕 v0.x: MCP / Integration（Proposal 0007，真实接入中）
 
 ## Rules & playbooks
 
