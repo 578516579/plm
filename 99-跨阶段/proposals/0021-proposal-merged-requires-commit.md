@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0021 |
 | 标题 | proposal `merged` 必须绑定真实 commit;无 commit 只能停 `accepted`/`implementing` |
-| 状态 | **draft** |
+| 状态 | **merged → tracking** (solo-review) |
 | 类型 | 流程(号段 0001-0099) |
 | 提出人 | Claude(meta-cognitive / reflect 2026-W22-zentao-integration)+ Wjl |
 | 提出日期 | 2026-05-27 |
@@ -118,8 +118,9 @@ proposal 生命周期把 `merged` 当作**决议状态字**(用户拍板"要做"
 ## 10. 实施后跟踪(merged 后填)
 
 ### 实际 PR / commit
-- 合入 commit:**待填(本提案自身即首个"merged 必须有此字段"的实践对象)**
-- 实际 merged 日期:待
+- 合入 commit:**ea5cd37**(`docs(proposals): 实现 0021 — proposal merged 须绑真实 commit`)
+- 实际 merged 日期:2026-05-27
+- 自指验证:本提案是第一个按自身规则填真实 commit hash 的 proposal;0015(5e9a17f)/0016(c2e8b99)/0019(5ee6676)同批回填,0022 因实现被拦截**故意停在 accepted**(正是本规则要的效果)
 
 ### 最终判定
 - [ ] done(4 周内 0 复发)

@@ -157,8 +157,13 @@
 
 ### 实际 PR / commit
 
-- PR: 待开
-- 合入 commit: 待填(应在同一系列 commit 中,标签 `feat(integration): 禅道双向同步 — adapter + webhook + 双向 sync`)
+- 合入 commit: **9d37d03**(`feat(integration): Zentao 双向同步 — 领域事件钩子 + webhook + 出入站 sync + 用户映射`,2026-05-27 由并行 session 提交)
+- 实际 merged 日期:2026-05-27
+- ⚠ **代码已 merged,但 §7 实施计划未全完**(见 [reflect/2026-W22-zentao-integration.md](../reflect/2026-W22-zentao-integration.md)):
+  - **O4 / B2**:§3.2/§7 声明的 4 份测试实际只存 2 份(SyncContextTest + ZentaoFieldMapperTest);Adapter / Webhook / Inbound / Outbound 4 份**待补**
+  - **O8**:business-integration-zentao.sql 的"用户映射"菜单 2530 + 6 权限指向**尚不存在**的前端页 / Controller(设计文档自承本期不做 UI)→ 待清理或补实现
+  - **§7 Step 9**:真实禅道联调未做(防回环三道防线运行时正确性未验证)
+  - 架构决策已补 [ADR-0008 事件总线](../../03-开发/ADR/0008-in-process-domain-event-bus.md) / [ADR-0009 集成旁路](../../03-开发/ADR/0009-integration-writeback-bypasses-business-service.md)(reflect B6)
 
 ### Tracking 数据
 

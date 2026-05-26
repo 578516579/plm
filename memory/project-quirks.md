@@ -313,6 +313,24 @@
 
 ---
 
+## 集成层 (Integration) — 通用防护范式(主动设计,非踩坑)
+
+> ⚠ 本段收"主动设计出的、横跨多场景的正确范式"(不只收踩过的坑)。配套 proposal 0020 拟扩 `.claude/rules.md §L.1` gotcha 触发条件以正式接纳此类(§L.1 改动属 SSoT,待授权)。
+
+### Q-INTEG-01 — 双向同步回环防护三道防线
+
+| 字段 | 内容 |
+|---|---|
+| 场景 | 双向同步天然死循环:`A 改 → 同步到 B → B webhook → 又改回 A → ...` |
+| 防线 1 | **SyncContext(ThreadLocal `inbound` 标志)**:入站同步开始时置位,出站 `@TransactionalEventListener` 检测到标志直接 return(不把"入站导致的本地变更"再推回外部) |
+| 防线 2 | **recentSyncCache 防抖**:key=`{type}-{entityId}`,TTL 60s;短时间内同实体重复同步直接跳过 |
+| 防线 3 | **last-write-wins**:`SELECT ... FOR UPDATE` 锁行 + 比对时间戳,外部 updateTime 比本地旧则跳过 |
+| 配套幂等 | 幂等键 `external_source + external_id` 唯一索引(**NULL 不参与唯一约束**,见 Zentao 设计 §3.1 自纠坑);webhook 用 `externalEventId`(带时间戳)去重 |
+| 出处 | 禅道集成 `SyncContext` / `ZentaoOutboundSyncService`(commit 9d37d03)+ `SyncContextTest`;决策见 [ADR-0008](../03-开发/ADR/0008-in-process-domain-event-bus.md) / [ADR-0009](../03-开发/ADR/0009-integration-writeback-bypasses-business-service.md) |
+| 适用 | **任何双向集成(Jira/...)从本清单起步,不要从零再想一遍**;`integration-connector` skill(proposal 0019)的 bidirectional-sync 章引用本条为唯一来源 |
+
+---
+
 ## 流程候选(转 proposal,不入主 quirks 表)
 
 | ID | 现象 | 转向 |

@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0019 |
 | 标题 | 集成连接器三件套 SOP 固化为 `integration-connector` skill |
-| 状态 | **draft** |
+| 状态 | **merged → tracking** (solo-review) |
 | 类型 | 工具链 / skill(号段 0200-0299) |
 | 提出人 | Claude(meta-cognitive / reflect 2026-W22-zentao-integration)+ Wjl |
 | 提出日期 | 2026-05-27 |
@@ -139,7 +139,9 @@
 
 ## 10. 实施后跟踪(merged 后填)
 
-- 合入 commit:待(依 0021,无 commit 不标 merged)
+- 合入 commit(repo 锚点):**5ee6676**(CLAUDE.md Available skills 注册);skill 本体 13 文件在 `~/.claude/skills/integration-connector/`
+- 实际 merged 日期:2026-05-27
+- Step 完成度:Step 2(建 skill 13 文件)✅;模板从禅道 9d37d03 抽取,防回环对齐 0020,旁路按 ADR-0009 注释。**pilot(下一个 connector 如 Jira)= tracking 验证**
 - 最终判定:[ ] done / [ ] reverted
 
 ---

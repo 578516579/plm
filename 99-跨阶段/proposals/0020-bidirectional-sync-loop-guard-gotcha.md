@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0020 |
 | 标题 | 双向同步回环防护清单沉淀 + gotcha 触发条件扩"主动设计的正确范式" |
-| 状态 | **draft** |
+| 状态 | **implementing**(Diff 1 Q-INTEG-01 已落 project-quirks;Diff 2 改 rules.md §L.1 属 SSoT 待授权)|
 | 类型 | 架构 / 技术债(号段 0300-0399)|
 | 提出人 | Claude(meta-cognitive / reflect 2026-W22-zentao-integration)+ Wjl |
 | 提出日期 | 2026-05-27 |
