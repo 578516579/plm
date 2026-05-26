@@ -50,6 +50,8 @@ proposed    完成填写、关联数据，等 review
 ## 状态索引（手动维护）
 
 > **本表是所有 proposal 的元数据快照**。新增/状态变更时同步更新。
+>
+> ⚠ **`merged` = git 事实,不是决议**（[proposal 0021](0021-proposal-merged-requires-commit.md)）：状态标 `merged`/`merged → tracking` 的行,`merged commit` 列**必须**是真实 commit hash,不允许 `待填/待开`。决议要做但代码未提交 → 状态停 `implementing`。`User-requested-bypass` 绕过的是评审流程,**不**绕过"merged 须有 commit"这一事实约束。
 
 | 编号 | 标题 | 状态 | 提出 | 关联触发 | merged commit | tracking 期 |
 |---|---|---|---|---|---|---|

@@ -11,7 +11,7 @@
 |---|---|
 | 编号 | NNNN |
 | 标题 | |
-| 状态 | draft / proposed / accepted / implementing / merged / tracking / done / rejected / superseded |
+| 状态 | draft / proposed / accepted / implementing / merged / tracking / done / rejected / superseded（**`merged` 须有真实 commit hash,见 §10 + [0021](0021-proposal-merged-requires-commit.md)**）|
 | 类型 | 流程 / 编码规范 / 工具链 / 架构 / 实验 |
 | 提出人 | _(人名 / Claude /reflect)_ |
 | 提出日期 | YYYY-MM-DD |
@@ -124,9 +124,11 @@
 
 ## 10. 实施后跟踪（merged 后填）
 
+> ⚠ **状态置 `merged` 的充要条件 = 下面"合入 commit"有真实 hash**（proposal 0021）。无 commit 不允许标 `merged`，只能停 `accepted`/`implementing`。填 `待填/待开/TBD` 视为**未** merged，README 状态索引同理。
+
 ### 实际 PR / commit
 - PR: __
-- 合入 commit: __
+- 合入 commit: __（**必填,不允许"待填"**；skill 类资产可填其 repo 侧锚点 commit）
 - 实际 merged 日期：YYYY-MM-DD
 
 ### Tracking 数据
