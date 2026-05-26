@@ -5,11 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cn.com.bosssfot.dv.plm.common.core.event.DefectChangedEvent;
+import cn.com.bosssfot.dv.plm.common.core.event.EntityChangedEvent.Action;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -57,6 +60,7 @@ public class DefectServiceImpl implements IDefectService
     @Autowired private ProjectMapper projectMapper;
     @Autowired private SprintMapper sprintMapper;
     @Autowired private TaskMapper taskMapper;
+    @Autowired private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<Defect> selectDefectList(Defect defect) { return defectMapper.selectDefectList(defect); }
@@ -96,13 +100,18 @@ public class DefectServiceImpl implements IDefectService
         if (StringUtils.isBlank(defect.getDefectNo())) defect.setDefectNo(generateDefectNo());
         defect.setCreateBy(SecurityUtils.getUsername());
 
+        int rows;
         try {
-            return defectMapper.insertDefect(defect);
+            rows = defectMapper.insertDefect(defect);
         } catch (DuplicateKeyException e) {
             log.warn("defect_no 重号,重试: {}", defect.getDefectNo());
             defect.setDefectNo(generateDefectNo());
-            return defectMapper.insertDefect(defect);
+            rows = defectMapper.insertDefect(defect);
         }
+        if (rows > 0 && defect.getDefectId() != null) {
+            eventPublisher.publishEvent(new DefectChangedEvent(defect.getDefectId(), Action.INSERT));
+        }
+        return rows;
     }
 
     @Override
@@ -145,13 +154,23 @@ public class DefectServiceImpl implements IDefectService
         }
 
         defect.setUpdateBy(SecurityUtils.getUsername());
-        return defectMapper.updateDefect(defect);
+        int rows = defectMapper.updateDefect(defect);
+        if (rows > 0) {
+            eventPublisher.publishEvent(new DefectChangedEvent(defect.getDefectId(), Action.UPDATE));
+        }
+        return rows;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteDefectByIds(Long[] defectIds) {
-        return defectMapper.deleteDefectByIds(defectIds);
+        int rows = defectMapper.deleteDefectByIds(defectIds);
+        if (rows > 0 && defectIds != null) {
+            for (Long id : defectIds) {
+                eventPublisher.publishEvent(new DefectChangedEvent(id, Action.DELETE));
+            }
+        }
+        return rows;
     }
 
     // ───────── 私有 ─────────

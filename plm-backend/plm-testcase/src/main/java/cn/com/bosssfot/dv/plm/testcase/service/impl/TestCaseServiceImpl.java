@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cn.com.bosssfot.dv.plm.common.core.event.EntityChangedEvent.Action;
+import cn.com.bosssfot.dv.plm.common.core.event.TestCaseChangedEvent;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -54,6 +57,7 @@ public class TestCaseServiceImpl implements ITestCaseService
     @Autowired private TestCaseMapper testcaseMapper;
     @Autowired private ProjectMapper projectMapper;
     @Autowired private RequirementMapper requirementMapper;
+    @Autowired private ApplicationEventPublisher eventPublisher;
 
     @Override public List<TestCase> selectTestCaseList(TestCase t) { return testcaseMapper.selectTestCaseList(t); }
     @Override public TestCase selectTestCaseById(Long id) { return testcaseMapper.selectTestCaseById(id); }
@@ -88,13 +92,18 @@ public class TestCaseServiceImpl implements ITestCaseService
         if (StringUtils.isBlank(t.getTestcaseNo())) t.setTestcaseNo(generateTestCaseNo());
         t.setCreateBy(SecurityUtils.getUsername());
 
+        int rows;
         try {
-            return testcaseMapper.insertTestCase(t);
+            rows = testcaseMapper.insertTestCase(t);
         } catch (DuplicateKeyException e) {
             log.warn("testcase_no 重号,重试: {}", t.getTestcaseNo());
             t.setTestcaseNo(generateTestCaseNo());
-            return testcaseMapper.insertTestCase(t);
+            rows = testcaseMapper.insertTestCase(t);
         }
+        if (rows > 0 && t.getTestcaseId() != null) {
+            eventPublisher.publishEvent(new TestCaseChangedEvent(t.getTestcaseId(), Action.INSERT));
+        }
+        return rows;
     }
 
     @Override
@@ -129,13 +138,23 @@ public class TestCaseServiceImpl implements ITestCaseService
         }
 
         t.setUpdateBy(SecurityUtils.getUsername());
-        return testcaseMapper.updateTestCase(t);
+        int rows = testcaseMapper.updateTestCase(t);
+        if (rows > 0) {
+            eventPublisher.publishEvent(new TestCaseChangedEvent(t.getTestcaseId(), Action.UPDATE));
+        }
+        return rows;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteTestCaseByIds(Long[] ids) {
-        return testcaseMapper.deleteTestCaseByIds(ids);
+        int rows = testcaseMapper.deleteTestCaseByIds(ids);
+        if (rows > 0 && ids != null) {
+            for (Long id : ids) {
+                eventPublisher.publishEvent(new TestCaseChangedEvent(id, Action.DELETE));
+            }
+        }
+        return rows;
     }
 
     @Override
@@ -156,7 +175,11 @@ public class TestCaseServiceImpl implements ITestCaseService
         upd.setExecutionCount((old.getExecutionCount() == null ? 0 : old.getExecutionCount()) + 1);
         upd.setLastExecutedAt(new Date());
         upd.setUpdateBy(SecurityUtils.getUsername());
-        return testcaseMapper.updateTestCase(upd);
+        int rows = testcaseMapper.updateTestCase(upd);
+        if (rows > 0) {
+            eventPublisher.publishEvent(new TestCaseChangedEvent(id, Action.UPDATE));
+        }
+        return rows;
     }
 
     private String generateTestCaseNo() {

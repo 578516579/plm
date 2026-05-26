@@ -8,11 +8,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cn.com.bosssfot.dv.plm.common.core.event.EntityChangedEvent.Action;
+import cn.com.bosssfot.dv.plm.common.core.event.TaskChangedEvent;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -75,6 +78,9 @@ public class TaskServiceImpl implements ITaskService
 
     @Autowired
     private SprintMapper sprintMapper;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<Task> selectTaskList(Task task)
@@ -139,13 +145,18 @@ public class TaskServiceImpl implements ITaskService
 
         task.setCreateBy(SecurityUtils.getUsername());
 
+        int rows;
         try {
-            return taskMapper.insertTask(task);
+            rows = taskMapper.insertTask(task);
         } catch (DuplicateKeyException e) {
             log.warn("task_no 重号，重试一次: {}", task.getTaskNo());
             task.setTaskNo(generateTaskNo());
-            return taskMapper.insertTask(task);
+            rows = taskMapper.insertTask(task);
         }
+        if (rows > 0 && task.getTaskId() != null) {
+            eventPublisher.publishEvent(new TaskChangedEvent(task.getTaskId(), Action.INSERT));
+        }
+        return rows;
     }
 
     @Override
@@ -202,14 +213,24 @@ public class TaskServiceImpl implements ITaskService
         }
 
         task.setUpdateBy(SecurityUtils.getUsername());
-        return taskMapper.updateTask(task);
+        int rows = taskMapper.updateTask(task);
+        if (rows > 0) {
+            eventPublisher.publishEvent(new TaskChangedEvent(task.getTaskId(), Action.UPDATE));
+        }
+        return rows;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteTaskByIds(Long[] taskIds)
     {
-        return taskMapper.deleteTaskByIds(taskIds);
+        int rows = taskMapper.deleteTaskByIds(taskIds);
+        if (rows > 0 && taskIds != null) {
+            for (Long id : taskIds) {
+                eventPublisher.publishEvent(new TaskChangedEvent(id, Action.DELETE));
+            }
+        }
+        return rows;
     }
 
     @Override
