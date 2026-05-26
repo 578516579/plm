@@ -1,4 +1,13 @@
 import { defineConfig, devices } from '@playwright/test'
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+// 加载本地敏感值(plm-frontend/.env.local,已 gitignore)— 例如 DB_PASSWORD
+// shell 已 export 的值优先,文件值只填空缺(loadEnvFile 默认不覆盖现有 env)
+const envLocal = resolve(process.cwd(), '.env.local')
+if (existsSync(envLocal)) {
+  process.loadEnvFile(envLocal)
+}
 
 /**
  * Playwright 配置 — Project 模块 E2E 测试
