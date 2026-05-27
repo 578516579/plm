@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
@@ -58,6 +59,9 @@ class DefectServiceImplTest {
 
     @Mock
     private TaskMapper taskMapper;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private DefectServiceImpl service;
