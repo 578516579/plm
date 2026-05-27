@@ -10,7 +10,7 @@
 |---|---|
 | 编号 | 0024 |
 | 标题 | 产品设计编排自进化系统 |
-| 状态 | **approved → 待 commit 转 merged**（User-requested;文件已落地,commit hash 待回填见 §10）|
+| 状态 | **merged → tracking**（User-requested;commit `86bd488` + `619ac06`）|
 | 类型 | 流程 / 工具链 |
 | 提出人 | 用户 + Claude |
 | 提出日期 | 2026-05-27 |
@@ -94,7 +94,7 @@
 [x] Step 6: 建 产品设计工作流.md
 [x] Step 7: signals 模板加 §9 + 当月实例加 §10 产品设计编排
 [x] Step 8: 建本 proposal 0024
-[ ] Step 9: commit(待用户确认 [solo-review] commit)+ 回填 §10 commit hash → 转 merged
+[x] Step 9: commit(`86bd488` feat 3 agent+skill / `619ac06` docs rule+workflow+template+proposal)+ 回填 §10 → 转 merged
 [ ] Step 10: 进入 tracking 期,看首个新需求设计是否走 product-orchestrator 编排
 [ ] Step 11: 后续 — 模块工作流.md Phase 02 段加链接到本工作流(小改,下次顺带)
 ```
@@ -119,8 +119,8 @@
 
 ### 实际 PR / commit
 - PR: —（分支 `chore/local-start-backend-script`,solo-review 直接合入,未走 PR）
-- 合入 commit: **待回填**（本提案落地待用户确认 [solo-review] commit 后补 hash,参照 0023 的 c172420 回填模式）
-- 实际 merged 日期：待 commit
+- 合入 commit: `86bd488`(feat: product-orchestrator + prd-author + ux-prototype-aligner + plm-product-design skill) + `619ac06`(docs: §M.9 rule + 产品设计工作流 + template §9 + proposal + README)。注:`signals/2026-05.md §10`(当月实例)因与并行 session 抢编辑,留作后续小 commit 补入,不阻塞本系统 merged。
+- 实际 merged 日期：2026-05-27
 
 ### Tracking 数据
 

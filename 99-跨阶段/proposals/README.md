@@ -73,7 +73,7 @@ proposed    完成填写、关联数据，等 review
 | [0021](0021-proposal-merged-requires-commit.md) | proposal `merged` 必须绑定真实 commit hash(防"纸面 merged")| **merged → tracking** (solo-review) | 2026-05-27 | [reflect/2026-W22-zentao-integration](../reflect/2026-W22-zentao-integration.md) 模式 3 / B3 + 0014 实例 | ea5cd37 | 2026-05-27 → 06-24 |
 | [0022](0022-dirty-tree-stop-nudge.md) | working tree dirty>15 → Stop hook nudge 分批 commit | **accepted**(settings.json 自修改待显式授权)| 2026-05-27 | [reflect/2026-W22-modules-bulk-uplift](../reflect/2026-W22-modules-bulk-uplift.md) 模式4 / A5 | 待(auto-mode 拦截)| 待 merged |
 | [0023](0023-test-orchestration-self-evolution.md) | 测试编排自进化系统(test-orchestrator agent + plm-test-orchestrate skill + §G.5 rule + 测试工作流.md + signals 测试段) | **merged → tracking** (User-requested) | 2026-05-27 | 用户明确请求(本会话:"增加测试 agent+skill+rule+workflow,能自己做和进化")| fb95e50 + 92f97de | 2026-05-27 → 06-24 |
-| [0024](0024-product-design-orchestration.md) | 产品设计编排自进化系统(product-orchestrator + prd-author + ux-prototype-aligner agent + plm-product-design skill + §M.9 rule + 产品设计工作流.md + signals 产品设计段) | **implementing**(文件已落地,commit 待用户确认 → 转 merged)| 2026-05-27 | 用户明确请求(本会话:"增加产品经理 agent+分管子agent+skill+rule+workflow,产品设计能自己做和进化",0023 孪生)| 待 commit | 待 merged → 2026-06-24 |
+| [0024](0024-product-design-orchestration.md) | 产品设计编排自进化系统(product-orchestrator + prd-author + ux-prototype-aligner agent + plm-product-design skill + §M.9 rule + 产品设计工作流.md + signals 产品设计段) | **merged → tracking** (User-requested)| 2026-05-27 | 用户明确请求(本会话:"增加产品经理 agent+分管子agent+skill+rule+workflow,产品设计能自己做和进化",0023 孪生)| 86bd488 + 619ac06 | 2026-05-27 → 06-24 |
 
 ---
 
