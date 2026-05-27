@@ -127,9 +127,12 @@
             <el-tag v-else type="info" size="small">手动</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" align="center">
+        <el-table-column label="操作" width="300" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadTc(row)">编辑</el-button>
+            <el-button link type="warning" :loading="aiRowId === row.testcaseId" @click="aiEnrich(row)">
+              <el-icon><MagicStick /></el-icon>&nbsp;AI补全
+            </el-button>
             <el-button link type="success" @click="execTc(row, '03')">▶ 通过</el-button>
             <el-button link type="danger" @click="execTc(row, '04')">✗ 失败</el-button>
           </template>
@@ -202,7 +205,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { MagicStick, Plus } from '@element-plus/icons-vue'
 import {
   listTestCase, addTestCase, updateTestCase, delTestCase, executeTestCase,
-  getTestCase, aiGenerateTestCases, listProjectsForSelect, listRequirementsForSelect,
+  getTestCase, aiGenerateTestCases, aiGenerateTestCaseElements,
+  listProjectsForSelect, listRequirementsForSelect,
   type TestCase, type TestCaseQuery
 } from '@/api/business/testcase'
 
@@ -211,6 +215,7 @@ const aiPanelVisible = ref(false)
 const formRef = ref()
 const saving = ref(false)
 const aiLoading = ref(false)
+const aiRowId = ref<number | null>(null)  // 行内 AI 补全 loading 锁定到具体行
 const listLoading = ref(false)
 const selection = ref<TestCase[]>([])
 
@@ -285,6 +290,25 @@ async function loadTc(row: TestCase) {
   if (!row.testcaseId) return
   const res: any = await getTestCase(row.testcaseId)
   if (res.code === 200 && res.data) { Object.assign(form, res.data); dialogVisible.value = true }
+}
+
+// 行内 AI 补全用例要素 — 调 /business/testcase/ai/generate/{id},回填后打开编辑框供确认
+async function aiEnrich(row: TestCase) {
+  if (!row.testcaseId) return
+  aiRowId.value = row.testcaseId
+  try {
+    const res: any = await aiGenerateTestCaseElements(row.testcaseId)
+    if (res.code === 200 && res.data) {
+      Object.assign(form, res.data)
+      dialogVisible.value = true
+      ElMessage.success('AI 已补全用例要素,请确认后保存')
+      await getList()
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.msg || 'AI 补全失败')
+  } finally {
+    aiRowId.value = null
+  }
 }
 
 async function handleSubmit() {

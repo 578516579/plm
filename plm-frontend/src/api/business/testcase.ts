@@ -52,9 +52,13 @@ export const delTestCase = (ids: number | number[]): Promise<any> => {
 }
 
 export const executeTestCase = (id: number, result: { status: string; actualResult?: string }): Promise<any> =>
-  request({ url: `/business/testcase/execute/${id}`, method: 'post', data: result })
+  request({ url: `/business/testcase/${id}/execute`, method: 'post', data: result })
 
-// AI 生成测试用例 — PRD §F4.2 testcase-gen-flow
+// AI 补全单条用例要素(前置条件/步骤/预期结果)— PRD §F3.5,后端 /ai/generate/{id}(全模块约定)
+export const aiGenerateTestCaseElements = (id: number): Promise<any> =>
+  request({ url: `/business/testcase/ai/generate/${id}`, method: 'post' })
+
+// AI 批量生成测试用例 — PRD §F4.2 testcase-gen-flow(⚠ 后端批量端点待实现,见在途任务)
 export const aiGenerateTestCases = (params: {
   projectId: number; requirementId?: number; categories: string[]
 }): Promise<any> =>
