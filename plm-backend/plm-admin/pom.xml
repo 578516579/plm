@@ -142,6 +142,13 @@
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-mcp</artifactId></dependency>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-integration</artifactId></dependency>
 
+        <!-- 测试 (JUnit5 + Mockito + AssertJ) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
