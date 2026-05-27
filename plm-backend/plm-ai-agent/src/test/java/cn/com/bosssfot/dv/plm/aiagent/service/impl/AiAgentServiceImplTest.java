@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -403,6 +404,75 @@ class AiAgentServiceImplTest {
             when(aiAgentMapper.selectAiAgentById(1L)).thenReturn(existing("00"));
             AiChatRequest req = service.buildChatRequest(1L);
             assertThat(req).isNotNull();
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 业务化:按 agentType 注入人设 + 传入业务上下文 input
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("业务化 invoke / buildChatRequest(按 agentType 人设 + input)")
+    class BusinessContextTests {
+
+        private AiAgent runningOfType(String type) {
+            AiAgent a = existing("00");
+            a.setAgentType(type);
+            return a;
+        }
+
+        @Test
+        @DisplayName("requirement 类型 → system 注入需求分析人设")
+        void requirementPersona() {
+            when(aiAgentMapper.selectAiAgentById(1L)).thenReturn(runningOfType("requirement"));
+            AiChatRequest req = service.buildChatRequest(1L);
+            assertThat(req.getSystem()).contains("需求分析");
+            assertThat(req.firstUserContent()).contains("请对目标需求进行结构化分析");
+        }
+
+        @Test
+        @DisplayName("code 类型 → system 注入代码审查人设")
+        void codePersona() {
+            when(aiAgentMapper.selectAiAgentById(1L)).thenReturn(runningOfType("code"));
+            AiChatRequest req = service.buildChatRequest(1L);
+            assertThat(req.getSystem()).contains("代码审查");
+        }
+
+        @Test
+        @DisplayName("自定义 promptTemplate 覆盖 agentType 默认人设")
+        void promptTemplateWins() {
+            AiAgent a = runningOfType("requirement");
+            a.setPromptTemplate("你是某专用 Agent 的自定义指令X");
+            when(aiAgentMapper.selectAiAgentById(1L)).thenReturn(a);
+            AiChatRequest req = service.buildChatRequest(1L);
+            assertThat(req.getSystem()).isEqualTo("你是某专用 Agent 的自定义指令X");
+        }
+
+        @Test
+        @DisplayName("传入 input → 拼进 user message")
+        void inputAppendedToUserMessage() {
+            when(aiAgentMapper.selectAiAgentById(1L)).thenReturn(runningOfType("requirement"));
+            AiChatRequest req = service.buildChatRequest(1L, "我想做一个土壤墒情监测看板");
+            assertThat(req.firstUserContent())
+                .contains("请对目标需求进行结构化分析")
+                .contains("输入内容")
+                .contains("土壤墒情监测看板");
+        }
+
+        @Test
+        @DisplayName("invoke(id, input) → input 进入实际发给 AiService 的请求")
+        void invokeWithInputRoutesContext() {
+            when(aiAgentMapper.selectAiAgentById(1L)).thenReturn(runningOfType("test"));
+            when(aiAgentMapper.updateAiAgent(any())).thenReturn(1);
+            when(aiService.chat(any(AiChatRequest.class)))
+                .thenReturn(AiChatResult.ok("mock", "mock-model", "ok"));
+
+            service.invoke(1L, "校验登录接口的边界用例");
+
+            ArgumentCaptor<AiChatRequest> cap = ArgumentCaptor.forClass(AiChatRequest.class);
+            verify(aiService).chat(cap.capture());
+            assertThat(cap.getValue().getSystem()).contains("测试 Agent");
+            assertThat(cap.getValue().firstUserContent()).contains("校验登录接口的边界用例");
         }
     }
 

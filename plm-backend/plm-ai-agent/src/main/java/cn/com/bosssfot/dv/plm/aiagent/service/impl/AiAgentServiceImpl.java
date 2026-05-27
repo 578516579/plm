@@ -41,6 +41,35 @@ public class AiAgentServiceImpl implements IAiAgentService {
         STATUS_TRANSITIONS.put("02", Set.of("00","01"));
     }
 
+    /**
+     * 各类 Agent 的默认人设(system prompt)。Agent 未配 promptTemplate 时按 agentType 取此默认,
+     * 让 6 类 Agent 真正各司其职,而非统一一句"你是 AI Agent"。
+     */
+    private static final Map<String, String> TYPE_SYSTEM_PROMPT = Map.of(
+        "requirement", "你是 AgriPLM 的资深需求分析 Agent,擅长把粗略的农业数字化想法拆解为结构化、可验收的需求条目。"
+            + "逐条输出 [标题] [角色/场景] [验收标准] [优先级建议],只输出需求分析结果,不要寒暄。",
+        "prd", "你是 AgriPLM 的资深产品经理 Agent,擅长基于需求产出结构化 PRD:"
+            + "背景与目标 / 用户故事 / 功能点拆解 / 非功能需求 / 验收标准 / 风险与依赖。",
+        "code", "你是 AgriPLM 的资深代码审查 Agent,聚焦缺陷、空指针、并发与事务问题、SQL 注入/越权等安全隐患、性能反模式。"
+            + "逐条输出 [问题] [风险等级] [改进建议],并附最小修复示例。",
+        "test", "你是 AgriPLM 的资深测试 Agent,擅长基于需求或代码生成覆盖正向 / 反向 / 边界 / 异常的测试用例,"
+            + "每条含 [前置条件] [步骤] [预期结果]。",
+        "release", "你是 AgriPLM 的发布评审 Agent,核对发布清单、数据库迁移、回滚预案、灰度策略与风险项,"
+            + "输出 [可发布 / 阻塞] 结论及理由清单。",
+        "ops", "你是 AgriPLM 的运维巡检 Agent,根据系统指标与日志识别异常征兆,"
+            + "给出 [现象] [可能根因] [处置建议] [紧急程度]。"
+    );
+
+    /** 各类 Agent 的默认任务指令(user message),在调用方未传入业务上下文时使用 */
+    private static final Map<String, String> TYPE_TASK = Map.of(
+        "requirement", "请对目标需求进行结构化分析。",
+        "prd", "请基于需求生成一份结构化 PRD 大纲。",
+        "code", "请对目标代码进行审查并列出问题清单。",
+        "test", "请为目标需求/代码生成测试用例集。",
+        "release", "请对本次发布进行评审并给出结论。",
+        "ops", "请执行一次运维巡检并给出报告。"
+    );
+
     @Autowired private AiAgentMapper aiAgentMapper;
     @Autowired private AiService aiService;
 
@@ -100,15 +129,20 @@ public class AiAgentServiceImpl implements IAiAgentService {
     public int deleteAiAgentByIds(Long[] ids) { return aiAgentMapper.deleteAiAgentByIds(ids); }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public AiAgent invoke(Long id) {
+        return invoke(id, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public AiAgent invoke(Long id, String input) {
         AiAgent t = aiAgentMapper.selectAiAgentById(id);
         if (t == null) throw new ServiceException("AI Agent 不存在", 404);
         if (!"00".equals(t.getStatus()))
             throw new ServiceException("Agent 当前状态不可调用 (需运行中)", 601);
 
-        // === 1. 构造统一 AiChatRequest,按 agent.provider 路由 ===
-        AiChatRequest req = buildChatRequestForAgent(t);
+        // === 1. 构造统一 AiChatRequest,按 agent.provider 路由 + 按 agentType 注入人设/任务 ===
+        AiChatRequest req = buildChatRequestForAgent(t, input);
 
         AiChatResult result = aiService.chat(req);
 
@@ -146,16 +180,28 @@ public class AiAgentServiceImpl implements IAiAgentService {
 
     @Override
     public AiChatRequest buildChatRequest(Long agentId) {
+        return buildChatRequest(agentId, null);
+    }
+
+    @Override
+    public AiChatRequest buildChatRequest(Long agentId, String input) {
         AiAgent t = aiAgentMapper.selectAiAgentById(agentId);
         if (t == null) throw new ServiceException("AI Agent 不存在", 404);
         if (!"00".equals(t.getStatus()))
             throw new ServiceException("Agent 当前状态不可调用 (需运行中)", 601);
-        return buildChatRequestForAgent(t);
+        return buildChatRequestForAgent(t, input);
     }
 
-    /** invoke() / buildChatRequest() 共用的 request 拼装逻辑(V4 Phase 3 抽出) */
-    private AiChatRequest buildChatRequestForAgent(AiAgent t) {
+    /**
+     * invoke() / buildChatRequest() 共用的 request 拼装逻辑。
+     *
+     * <p>system prompt 取值优先级:agent 自定义 promptTemplate &gt; agentType 默认人设 &gt; description &gt; 通用兜底。
+     * user message = 该类型默认任务指令 +(可选)调用方传入的业务上下文 {@code input}
+     * (如需求描述 / 代码片段 / 提测摘要)。</p>
+     */
+    private AiChatRequest buildChatRequestForAgent(AiAgent t, String input) {
         String provider = StringUtils.isBlank(t.getProvider()) ? "mock" : t.getProvider().toLowerCase();
+        String type = t.getAgentType() == null ? "" : t.getAgentType();
 
         // provider=dify 时,model 字段语义为 workflow_id (优先 dify_workflow_id)
         String modelOrWorkflow;
@@ -166,13 +212,22 @@ public class AiAgentServiceImpl implements IAiAgentService {
             modelOrWorkflow = t.getModelName();
         }
 
-        // 系统指令优先用 prompt_template,否则用 description
-        String systemPrompt = StringUtils.isNotBlank(t.getPromptTemplate())
-                ? t.getPromptTemplate()
-                : (StringUtils.isBlank(t.getDescription()) ? "你是 PLM 系统中的 AI Agent" : t.getDescription());
+        // 系统指令:自定义 promptTemplate > agentType 人设 > description > 通用兜底
+        String systemPrompt;
+        if (StringUtils.isNotBlank(t.getPromptTemplate())) {
+            systemPrompt = t.getPromptTemplate();
+        } else if (TYPE_SYSTEM_PROMPT.containsKey(type)) {
+            systemPrompt = TYPE_SYSTEM_PROMPT.get(type);
+        } else {
+            systemPrompt = StringUtils.isBlank(t.getDescription()) ? "你是 PLM 系统中的 AI Agent" : t.getDescription();
+        }
 
-        // 简单的"用户问题":让 Agent 自检/巡检,真实接入由各业务模块拼装
-        String userMsg = String.format("请执行 [%s] 类型 Agent '%s' 的任务", t.getAgentType(), t.getAgentName());
+        // 用户消息:该类型默认任务指令 +(可选)调用方传入的业务上下文
+        String instruction = TYPE_TASK.getOrDefault(type,
+                String.format("请执行 [%s] 类型 Agent '%s' 的任务", type, t.getAgentName()));
+        String userMsg = StringUtils.isNotBlank(input)
+                ? instruction + "\n\n输入内容:\n" + input.trim()
+                : instruction;
 
         return AiChatRequest.builder(provider)
                 .model(modelOrWorkflow)
@@ -184,6 +239,7 @@ public class AiAgentServiceImpl implements IAiAgentService {
                 .difyInput("agent_no", t.getAgentNo())
                 .difyInput("agent_type", t.getAgentType())
                 .difyInput("description", t.getDescription() == null ? "" : t.getDescription())
+                .difyInput("input", input == null ? "" : input)
                 .build();
     }
 }
