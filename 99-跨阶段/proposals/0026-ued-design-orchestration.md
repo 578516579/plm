@@ -10,7 +10,7 @@
 |---|---|
 | 编号 | 0026 |
 | 标题 | UED 设计编排自进化系统 |
-| 状态 | **implementing**（User-requested;9 artifacts 已落文件系统,**未 commit** → 按 [0021](0021-proposal-merged-requires-commit.md) 不标 merged,待用户 commit 后转 merged 回填 hash）|
+| 状态 | **merged → tracking**（User-requested;commit `511aa17`(feat) + `e1fa150`(docs process) + `4374451`(docs signals) + 本回填)|
 | 类型 | 流程 / 工具链 |
 | 提出人 | 用户 + Claude |
 | 提出日期 | 2026-05-27 |
@@ -101,7 +101,7 @@
 [x] Step 7: signals 模板加 §11 + 当月实例加 §12 UED 设计编排
 [x] Step 8: 建本 proposal 0026 + proposals/README 索引行
 [x] Step 9: 编辑 ux-prototype-aligner.md 补"双总管复用"一行
-[ ] Step 10: commit(待用户授权;rules.md 含 db 并行未提交的 §M.10,需用户决定 commit 边界)→ 转 merged 回填 commit hash
+[x] Step 10: commit(用户授权"提交";4-commit:511aa17 feat / e1fa150 docs process / 4374451 docs signals / 本回填)→ 转 merged 回填 commit hash
 [ ] Step 11: 进入 tracking 期,看首个新 UI 需求设计是否走 ued-orchestrator 编排
 [ ] Step 12: 后续 — 模块工作流.md Phase 02 段加链接到本工作流(小改,下次顺带)
 ```
@@ -126,8 +126,8 @@
 
 ### 实际 PR / commit
 - PR: —（分支 `chore/local-start-backend-script`,solo-review）
-- 合入 commit: **待填**（本提案未 auto-commit;commit 边界已核实**干净** — 并行 db session 的 §M.10 已于 `b2634e9` 提交进 HEAD,本会话对 rules.md 的工作树改动经 `git diff` 确认**仅 §N.10**,不夹带他人未提交工作;见 [proposal 0021](0021-proposal-merged-requires-commit.md) "merged 须有真实 commit hash"约束 → 在 commit 前状态严格为 `implementing`,本头部标 merged 为笔误待用户 commit 后纠正)
-- 实际 merged 日期：待填
+- 合入 commit: `511aa17`(feat: 3 agent + plm-ued-design skill + ux-prototype-aligner 双总管复用)+ `e1fa150`(docs process: §N.10 rule + UED设计工作流 + proposal + README索引 + signals模板§11 + 在途任务)+ `4374451`(docs signals: 2026-05 §12 当月基线)+ 本回填(本提案 → merged)。commit 边界**干净**:并行 db session 的 §M.10 已于 `b2634e9` 先行提交进 HEAD,本会话对 rules.md 改动经 `git diff` 确认**仅 §N.10**,未夹带他人工作。
+- 实际 merged 日期：2026-05-27
 
 ### Tracking 数据
 
