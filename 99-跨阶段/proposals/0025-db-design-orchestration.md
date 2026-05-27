@@ -93,7 +93,7 @@
 [x] Step 5: 建 数据库设计工作流.md
 [x] Step 6: signals 模板加 §10 + 当月实例加 §11
 [x] Step 7: 建本 proposal 0025
-[ ] Step 8: commit(feat 2 agent+skill / docs rule+workflow+template+proposal / backfill / signals 实例)→ 回填 §10 → 转 merged
+[x] Step 8: commit(`53ab1d1` feat / `b2634e9` docs / 本 backfill / signals 实例)→ 回填 §10 → 转 merged
 [ ] Step 9: 进入 tracking 期,看首个新表设计是否走 db-orchestrator 编排
 [ ] Step 10: 后续 — 模块工作流.md Phase 02 段加链接到本工作流(小改,下次顺带)
 ```
@@ -118,8 +118,8 @@
 
 ### 实际 PR / commit
 - PR: —（分支 `chore/local-start-backend-script`,solo-review 直接合入,未走 PR）
-- 合入 commit: **待回填**（commit 后补 hash,参照 0023/0024 回填模式）
-- 实际 merged 日期：待 commit
+- 合入 commit: `53ab1d1`(feat: db-orchestrator + db-schema-reviewer + plm-db-design skill) + `b2634e9`(docs: §M.10 rule + 数据库设计工作流 + template §10 + proposal + README)。注:`signals/2026-05.md §11`(当月实例)因与并行 session(同时在建 UED 设计编排)抢编辑,留作后续小 commit 补入,不阻塞本系统 merged。
+- 实际 merged 日期：2026-05-27
 
 ### Tracking 数据
 
