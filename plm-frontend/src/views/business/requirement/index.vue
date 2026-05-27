@@ -167,7 +167,11 @@
             {{ statusTagFor(currentDetailReq.status).label }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="优先级">{{ currentDetailReq.priority || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="优先级">
+          <el-tag :type="priorityTag(currentDetailReq.priority)" size="small" effect="dark">
+            {{ priorityLabel(currentDetailReq.priority) }}
+          </el-tag>
+        </el-descriptions-item>
       </el-descriptions>
       <el-tabs v-model="detailTab">
         <el-tab-pane name="reviews" :label="`📝 评审记录 (${reviewsList.length})`">
@@ -238,6 +242,10 @@ import {
   listPrdByRequirementId, listUedByRequirementId, listTasksByRequirementId,
   type Requirement, type RequirementQuery, type RequirementReview
 } from '@/api/business/requirement'
+import {
+  sourceLabel, sourceTag, priorityLabel, priorityTag,
+  statusTagFor, aiEvalLabel, aiEvalTag
+} from './requirementDict'
 
 const activeTab = ref('')
 const dialogVisible = ref(false)
@@ -261,33 +269,7 @@ const statusCounts = ref<Record<string, number>>({})
 const queryParams = reactive<RequirementQuery>({ pageNum: 1, pageSize: 10 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '待评审', type: 'warning' },
-  '01': { label: '开发中', type: 'primary' },
-  '02': { label: '已完成', type: 'success' },
-  '03': { label: '已取消', type: 'danger' }
-}
-const statusTagFor = (s?: string) => statusMap[s || ''] || { label: s || '-', type: 'info' as any }
 const statusCount = (s: string) => statusCounts.value[s] || 0
-
-function sourceLabel(v?: string) {
-  return ({ '01': '客户反馈', '02': '内部提案', '03': '运营数据', '04': '竞品分析' } as Record<string,string>)[v || ''] || v || '-'
-}
-function sourceTag(v?: string): any {
-  return ({ '01': 'primary', '02': 'info', '03': 'warning', '04': 'success' } as Record<string,string>)[v || ''] || 'info'
-}
-function priorityLabel(p?: string) {
-  return ({ '00': 'P0', '01': 'P1', '02': 'P2' } as Record<string,string>)[p || ''] || p || '-'
-}
-function priorityTag(p?: string): any {
-  return ({ '00': 'danger', '01': 'warning', '02': 'info' } as Record<string,string>)[p || ''] || 'info'
-}
-function aiEvalLabel(v?: string) {
-  return ({ high: '高价值', medium: '中价值', low: '低价值' } as Record<string,string>)[v || ''] || v || '-'
-}
-function aiEvalTag(v?: string): any {
-  return ({ high: 'success', medium: 'warning', low: 'info' } as Record<string,string>)[v || ''] || 'info'
-}
 
 async function getList() {
   listLoading.value = true
