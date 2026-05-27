@@ -9,6 +9,8 @@
 !.claude/skills/**
 !.claude/commands/
 !.claude/commands/**
+!.claude/hooks/
+!.claude/hooks/**
 # Notes:
 #   settings.json       → shared (team-wide hooks/policies, in git)
 #   settings.local.json → user-specific permissions cache, stays ignored

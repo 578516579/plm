@@ -42,6 +42,24 @@
             "command": "cmd=\"$CLAUDE_TOOL_INPUT_command\"; case \"$cmd\" in *'test:e2e'*|*'playwright test'*) echo '🧪 E2E test about to run.' >&2; echo '   Pre-flight checklist (see .claude/skills/plm-e2e/SKILL.md):' >&2; echo '   ▸ netstat ports 3306/6379/8081/80 LISTENING' >&2; echo '   ▸ $DB_PASSWORD exported (helpers/db.ts throws if absent)' >&2; echo '   ▸ backend started with -Dfile.encoding=UTF-8 (encoding spec depends on it)' >&2; echo '   On full-suite green, append evidence to gate-checklists/instances/<module>/Phase03-Gate-*.md §I' >&2 ;; esac; exit 0"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/session-guard.sh\" git"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/session-guard.sh\" edit"
+          }
+        ]
       }
     ],
 

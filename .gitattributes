@@ -1,0 +1,6 @@
+# 行尾规范 — 防 Windows autocrlf 破坏脚本
+# Shell 脚本/钩子强制 LF:否则 clone 到 autocrlf=true 的机器上 .sh 会变 CRLF,
+# git-bash 执行时报 `#!/bin/sh\r: No such file`,钩子静默失效。
+# (2026-05-27 .claude/hooks/session-guard.sh 落地时加固)
+*.sh              text eol=lf
+.claude/hooks/**  text eol=lf
