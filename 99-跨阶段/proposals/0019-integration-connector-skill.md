@@ -108,7 +108,7 @@
 [ ] Step 1: solo-review approve
 [ ] Step 2: 从禅道(最新最全)+ 飞书/GitLab 真实代码抽取模板 → ~/.claude/skills/integration-connector/
             ⚠ 依赖 reflect 2026-W22-zentao B1(禅道代码先落 git),否则模板源在 working tree 不稳定
-[ ] Step 3: 以 Jira(或下一个真实需求)为 pilot 跑一次,实测耗时 + 结构 diff
+[x] Step 3: pilot 跑一次 — **2026-05-27 用 ZTF(非 Jira)为首个 pilot**,5 phase 全落地(设计 2b60855 / 代码 6682b0d / 测试 a913311 32 case 全绿 / Gate 9886560+802cfa0);**发现"纯单向 Inbound"形态未被双向模板覆盖** → 已回写 SKILL.md Phase 0 step 2 单向裁剪清单(skill 自进化闭环)
 [ ] Step 4: 把 proposal 0020 的防护清单嵌入 bidirectional-sync.md reference
 [ ] Step 5: CLAUDE.md "Available skill" 段加链;状态 → merged(须有 commit, 见 0021)
 [ ] Step 6: tracking 4 周
@@ -141,8 +141,12 @@
 
 - 合入 commit(repo 锚点):**5ee6676**(CLAUDE.md Available skills 注册);skill 本体 13 文件在 `~/.claude/skills/integration-connector/`
 - 实际 merged 日期:2026-05-27
-- Step 完成度:Step 2(建 skill 13 文件)✅;模板从禅道 9d37d03 抽取,防回环对齐 0020,旁路按 ADR-0009 注释。**pilot(下一个 connector 如 Jira)= tracking 验证**
-- 最终判定:[ ] done / [ ] reverted
+- Step 完成度:Step 2(建 skill 13 文件)✅;模板从禅道 9d37d03 抽取,防回环对齐 0020,旁路按 ADR-0009 注释。
+- **Tracking 实测(W1,2026-05-27 ZTF pilot)**:
+  - 信号"走 skill 路径的 connector 数":目标 ≥1 → **实测 1(ZTF)** ✅
+  - 信号"防回环三道防线遗漏数":目标 0 → ZTF 是单向无回环,**N/A**(pilot 反而暴露:模板默认双向,单向需裁剪)
+  - **skill 自进化闭环**:pilot 发现"纯单向 Inbound"形态(执行/结果平台,如 ZTF/CI)→ 已回写 SKILL.md Phase 0 step 2 "单向裁剪清单"(跳过 Outbound+Phase6+防回环,仅保留幂等+入站 LWW)。这是 tracking 期的第一个 skill 改进。
+- 最终判定:[ ] done(待再 1 个 connector 验证结构一致度 ≥90%)/ [ ] reverted
 
 ---
 
