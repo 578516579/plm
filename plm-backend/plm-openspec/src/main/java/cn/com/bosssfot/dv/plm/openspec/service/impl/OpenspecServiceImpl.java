@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatResult;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -102,18 +103,77 @@ public class OpenspecServiceImpl implements IOpenspecService {
     public Openspec aiGenerate(Long id) {
         Openspec t = openspecMapper.selectOpenspecById(id);
         if (t == null) throw new ServiceException("OpenSpec 不存在", 404);
-        aiService.chat(AiChatRequest.builder("")
-            .system("你是 PLM AI 规约专家,擅长 OpenAPI/JSON Schema/TypeScript 类型生成与农业 IoT 数据建模")
-            .user("请为 [" + t.getSpecName() + "] (" + t.getSpecType() + ") 生成规约")
-            .callerTag("openspec#" + id).build());
 
-        String specType = t.getSpecType() != null ? t.getSpecType() : "openapi";
-        t.setSpecContent(buildAiSpec(specType, t.getSpecName(), t.getVersion(), t.getAgriKbRef()));
+        String specType = StringUtils.isNotBlank(t.getSpecType()) ? t.getSpecType() : "openapi";
+
+        AiChatResult result = aiService.chat(AiChatRequest.builder("")
+            .system(buildSystemPrompt(specType))
+            .user(buildUserPrompt(t, specType))
+            .temperature(0.3)
+            .maxTokens(2048)
+            .callerTag("openspec#" + id)
+            .build());
+
+        // 真 provider 调用失败 → 抛 708(与 AiAgentServiceImpl 一致,不静默吞错);Mock 永远 success
+        if (!result.isSuccess()) {
+            log.warn("[OpenSpec#{}] AI 生成失败 provider={}, error={}",
+                    t.getOpenspecNo(), result.getProvider(), result.getError());
+            throw new ServiceException("AI 规约生成失败: " + result.getError(), 708);
+        }
+
+        // 真 LLM(非 mock)且返回非空 → 直接落库其输出;否则(本地 mock / 空响应)退回确定性模板,
+        // 保证 dev/CI/E2E 零外部依赖时仍生成可读规约。
+        boolean fromRealAi = !"mock".equalsIgnoreCase(result.getProvider())
+                && StringUtils.isNotBlank(result.getText());
+        String content = fromRealAi
+                ? stripCodeFence(result.getText())
+                : buildAiSpec(specType, t.getSpecName(), t.getVersion(), t.getAgriKbRef());
+
+        t.setSpecContent(content);
         t.setAiGenerated("Y");
         t.setAiGeneratedAt(new Date());
         t.setUpdateBy("ai-agent");
         openspecMapper.updateOpenspec(t);
+
+        log.info("[OpenSpec#{}] AI 生成完成 provider={}, source={}, len={}",
+                t.getOpenspecNo(), result.getProvider(),
+                fromRealAi ? "llm" : "template", content.length());
         return openspecMapper.selectOpenspecById(id);
+    }
+
+    /** 按规约类型给 LLM 设定输出格式约束(只输出规约正文,不带解释/围栏) */
+    private static String buildSystemPrompt(String specType) {
+        String fmt;
+        switch (specType) {
+            case "openapi":     fmt = "OpenAPI 3.1.0 YAML"; break;
+            case "asyncapi":    fmt = "AsyncAPI 3.0.0 YAML"; break;
+            case "ai_function": fmt = "AI Function Spec JSON(含 JSON Schema parameters)"; break;
+            default:            fmt = "GraphQL SDL"; break;
+        }
+        return "你是 PLM AI 规约专家,擅长 OpenAPI/AsyncAPI/JSON Schema/GraphQL 与农业 IoT 数据建模。"
+             + "请只输出一份合法的 " + fmt + " 规约正文,不要任何解释文字,不要 Markdown 代码块围栏。";
+    }
+
+    /** 把规约元信息拼成 LLM 输入 */
+    private static String buildUserPrompt(Openspec t, String specType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("请生成一份 ").append(specType).append(" 规约。\n");
+        sb.append("名称: ").append(t.getSpecName()).append("\n");
+        sb.append("版本: ").append(StringUtils.isNotBlank(t.getVersion()) ? t.getVersion() : "1.0.0").append("\n");
+        if (StringUtils.isNotBlank(t.getDescription())) sb.append("描述: ").append(t.getDescription()).append("\n");
+        if (StringUtils.isNotBlank(t.getAgriKbRef()))   sb.append("AgriKB 引用: ").append(t.getAgriKbRef()).append("\n");
+        return sb.toString();
+    }
+
+    /** LLM 偶尔会用 ```yaml ... ``` 包裹输出,落库前剥掉围栏 */
+    private static String stripCodeFence(String text) {
+        String s = text.trim();
+        if (s.startsWith("```")) {
+            int firstNl = s.indexOf('\n');
+            if (firstNl > 0) s = s.substring(firstNl + 1);
+            if (s.endsWith("```")) s = s.substring(0, s.length() - 3);
+        }
+        return s.trim();
     }
 
     private String buildAiSpec(String type, String name, String version, String kbRef) {
