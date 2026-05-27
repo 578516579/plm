@@ -50,6 +50,8 @@ proposed    完成填写、关联数据，等 review
 ## 状态索引（手动维护）
 
 > **本表是所有 proposal 的元数据快照**。新增/状态变更时同步更新。
+>
+> ⚠ **`merged` = git 事实,不是决议**（[proposal 0021](0021-proposal-merged-requires-commit.md)）：状态标 `merged`/`merged → tracking` 的行,`merged commit` 列**必须**是真实 commit hash,不允许 `待填/待开`。决议要做但代码未提交 → 状态停 `implementing`。`User-requested-bypass` 绕过的是评审流程,**不**绕过"merged 须有 commit"这一事实约束。
 
 | 编号 | 标题 | 状态 | 提出 | 关联触发 | merged commit | tracking 期 |
 |---|---|---|---|---|---|---|
@@ -62,6 +64,19 @@ proposed    完成填写、关联数据，等 review
 | [0007](0007-mcp-integration-modules-uplift.md) | 把 MCP/Integration 模块从 v0.5+ 提到当前迭代 | **merged → tracking** (User-requested-bypass) | 2026-05-17 | 用户明确请求 + AgriPLM-模块映射 drift | 0f75294 / eabbbe4 | 2026-05-17 → 06-30 |
 | [0008](0008-parallel-session-collaboration.md) | 并行 Session 协作规范 + 把硬性条款沉淀进 .claude/rules.md § O | **merged → tracking** (solo-review) | 2026-05-17 | 用户明确请求 + `git worktree list` 6 工作树并行 | 0fc27a3 + 2d7308d + follow-up | 2026-05-17 → 06-30 |
 | [0009](0009-session-handoff-agent.md) | 加 session-handoff Agent — 跨时间维度交接 + 防重复造轮子(补 0008) | **proposed** | 2026-05-20 | 用户明确请求 + 本会话亲历"差点重复造 0008"失败案例 | 待 merged | 待 merged → 2026-06-17 |
+| [0013](0013-main-worktree-occupation-rule.md) | 非 main 主工作树多 session 共享占用规则(补 0008 §1 盲点) | **proposed** | 2026-05-24 | W21 反思 §2 模式 2 + 本会话亲历 4 次 HEAD 漂移 + worktree 7 天 +133% | 待 merged | 待 merged → 2026-06-21 |
+| [0014](0014-zentao-bidirectional-sync.md) | 禅道(ZenTao)双向同步 — 修订 Proposal 0007 / 设计文档 §1.2 "先做单向" 取舍 | **merged → tracking** (User-requested-bypass) ⚠ **纸面merged待核** | 2026-05-25 | 用户明确请求 + 真实禅道环境可联调 | **待填 — 代码仍 untracked,见 [0021](0021-proposal-merged-requires-commit.md) + [reflect 2026-W22-zentao](../reflect/2026-W22-zentao-integration.md) 模式3** | 2026-05-25 → 06-30 |
+| [0015](0015-plm-module-uplift-skill.md) | PLM 模块批量改造 SOP 固化为 skill(🟡→🟢)— 单日 6 模块同 SOP 显形 | **merged → tracking** (solo-review) | 2026-05-25 | [reflect/2026-W22-modules-bulk-uplift](../reflect/2026-W22-modules-bulk-uplift.md) 模式 1 / A1 行动 | 5e9a17f(skill 在 ~/.claude/skills/;pilot 待)| 2026-05-27 → 06-24 |
+| [0016](0016-business-sql-template-lint.md) | business-*.sql 模板 lint hook + sys_menu URL 改动前端硬编码扫描 | **merged → tracking** (solo-review) | 2026-05-25 | [reflect/2026-W22-modules-bulk-uplift](../reflect/2026-W22-modules-bulk-uplift.md) 模式 2 + 3 / A3+A4 | c2e8b99 | 2026-05-27 → 06-24 |
+| [0019](0019-integration-connector-skill.md) | 集成连接器三件套 SOP 固化为 `integration-connector` skill(与 0015 正交)| **merged → tracking** (solo-review) | 2026-05-27 | [reflect/2026-W22-zentao-integration](../reflect/2026-W22-zentao-integration.md) 模式 1 / B4 | 5ee6676(skill 在 ~/.claude/skills/)| 2026-05-27 → 06-24 |
+| [0020](0020-bidirectional-sync-loop-guard-gotcha.md) | 双向同步回环防护沉淀 gotcha + 扩 §L.1 收"正确范式" | **implementing**(Q-INTEG-01 已落;§L.1 待授权)| 2026-05-27 | [reflect/2026-W22-zentao-integration](../reflect/2026-W22-zentao-integration.md) 模式 2 / B5 | 待(§L.1 SSoT)| 待 merged → 2026-06-24 |
+| [0021](0021-proposal-merged-requires-commit.md) | proposal `merged` 必须绑定真实 commit hash(防"纸面 merged")| **merged → tracking** (solo-review) | 2026-05-27 | [reflect/2026-W22-zentao-integration](../reflect/2026-W22-zentao-integration.md) 模式 3 / B3 + 0014 实例 | ea5cd37 | 2026-05-27 → 06-24 |
+| [0022](0022-dirty-tree-stop-nudge.md) | working tree dirty>15 → Stop hook nudge 分批 commit | **accepted**(settings.json 自修改待显式授权)| 2026-05-27 | [reflect/2026-W22-modules-bulk-uplift](../reflect/2026-W22-modules-bulk-uplift.md) 模式4 / A5 | 待(auto-mode 拦截)| 待 merged |
+| [0023](0023-test-orchestration-self-evolution.md) | 测试编排自进化系统(test-orchestrator agent + plm-test-orchestrate skill + §G.5 rule + 测试工作流.md + signals 测试段) | **merged → tracking** (User-requested) | 2026-05-27 | 用户明确请求(本会话:"增加测试 agent+skill+rule+workflow,能自己做和进化")| fb95e50 + 92f97de | 2026-05-27 → 06-24 |
+| [0024](0024-product-design-orchestration.md) | 产品设计编排自进化系统(product-orchestrator + prd-author + ux-prototype-aligner agent + plm-product-design skill + §M.9 rule + 产品设计工作流.md + signals 产品设计段) | **merged → tracking** (User-requested)| 2026-05-27 | 用户明确请求(本会话:"增加产品经理 agent+分管子agent+skill+rule+workflow,产品设计能自己做和进化",0023 孪生)| 86bd488 + 619ac06 | 2026-05-27 → 06-24 |
+| [0025](0025-db-design-orchestration.md) | 数据库设计编排自进化系统(db-orchestrator + db-schema-reviewer agent + plm-db-design skill + §M.10 rule + 数据库设计工作流.md + signals DB 段;复用 db-modeler/db-ops 等 8 agent) | **merged → tracking** (User-requested)| 2026-05-27 | 用户明确请求(本会话:"增加数据库设计工程师 agent+分管子agent+skill+rule+workflow,数据库设计能自己做和进化",0023/0024 同范式第 3 例)| 53ab1d1 + b2634e9 | 2026-05-27 → 06-24 |
+| [0026](0026-ued-design-orchestration.md) | UED 设计编排自进化系统(ued-orchestrator + ued-designer + accessibility-reviewer agent + plm-ued-design skill + §N.10 rule + UED设计工作流.md + signals UED 段;复用 ux-prototype-aligner) | **merged → tracking** (User-requested)| 2026-05-27 | 用户明确请求(本会话:"UED 设计流程总结成 agent+子agent+skill+rule+workflow",0023/0024/0025 同范式第 4 例)| 511aa17 + e1fa150 + 4374451 (+回填)| 2026-05-27 → 06-24 |
+| [0027](0027-architecture-design-orchestration.md) | 系统架构设计编排自进化系统(arch-orchestrator + arch-reviewer agent + plm-arch-design skill + §Q rule + 架构设计工作流.md + signals 架构段;复用 system-architect 为核心建模者 + 7 现成 agent) | **merged → tracking** (User-requested)| 2026-05-27 | 用户明确请求(本会话:"增加架构师 agent+分管子agent+skill+rule+workflow,系统架构设计能自己做和进化",0023/0024/0025/0026 同范式第 5 例,Phase 02 最后一个设计维度)| dff0e77 + 08a7c19 (+回填)| 2026-05-27 → 06-24 |
 
 ---
 

@@ -19,6 +19,8 @@ import cn.com.bosssfot.dv.plm.common.core.page.TableDataInfo;
 import cn.com.bosssfot.dv.plm.common.enums.BusinessType;
 import cn.com.bosssfot.dv.plm.common.utils.poi.ExcelUtil;
 import cn.com.bosssfot.dv.plm.requirement.domain.Requirement;
+import cn.com.bosssfot.dv.plm.requirement.domain.RequirementReview;
+import cn.com.bosssfot.dv.plm.requirement.service.IRequirementReviewService;
 import cn.com.bosssfot.dv.plm.requirement.service.IRequirementService;
 
 /**
@@ -33,6 +35,9 @@ public class RequirementController extends BaseController
 {
     @Autowired
     private IRequirementService requirementService;
+
+    @Autowired
+    private IRequirementReviewService requirementReviewService;
 
     /** 列表（分页 + 搜索） */
     @PreAuthorize("@ss.hasPermi('business:requirement:list')")
@@ -88,5 +93,46 @@ public class RequirementController extends BaseController
     public AjaxResult remove(@PathVariable Long[] requirementIds)
     {
         return toAjax(requirementService.deleteRequirementByIds(requirementIds));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // PRD §F2.4 需求评审管理（2026-05-25 新增）
+    // ─────────────────────────────────────────────────────────────────────
+
+    /** 评审历史：列出某需求的全部评审记录（倒序） */
+    @PreAuthorize("@ss.hasPermi('business:requirement:query')")
+    @GetMapping("/{requirementId}/reviews")
+    public AjaxResult listReviews(@PathVariable("requirementId") Long requirementId)
+    {
+        List<RequirementReview> reviews = requirementReviewService.selectByRequirementId(requirementId);
+        return success(reviews);
+    }
+
+    /** 单条评审详情 */
+    @PreAuthorize("@ss.hasPermi('business:requirement:query')")
+    @GetMapping("/review/{reviewId}")
+    public AjaxResult getReview(@PathVariable("reviewId") Long reviewId)
+    {
+        return success(requirementReviewService.selectRequirementReviewById(reviewId));
+    }
+
+    /** 提交评审（业务核心：状态机 00→01 的前置） */
+    @PreAuthorize("@ss.hasPermi('business:requirement:review')")
+    @Log(title = "需求评审", businessType = BusinessType.INSERT)
+    @PostMapping("/{requirementId}/review")
+    public AjaxResult submitReview(
+            @PathVariable("requirementId") Long requirementId,
+            @RequestBody RequirementReview review)
+    {
+        return toAjax(requirementReviewService.submitReview(requirementId, review));
+    }
+
+    /** 撤回评审（逻辑删除） */
+    @PreAuthorize("@ss.hasPermi('business:requirement:review')")
+    @Log(title = "需求评审", businessType = BusinessType.DELETE)
+    @DeleteMapping("/review/{reviewIds}")
+    public AjaxResult removeReviews(@PathVariable Long[] reviewIds)
+    {
+        return toAjax(requirementReviewService.deleteRequirementReviewByIds(reviewIds));
     }
 }

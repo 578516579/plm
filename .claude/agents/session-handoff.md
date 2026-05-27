@@ -28,17 +28,20 @@ tools: Read, Grep, Glob, Bash
    • "进行中" 段 — 当前并行的所有 session
    • "已完成" 段 — 近 7 天内已合入 main 的工作
 2. git
-   • git log --oneline -20  + 看本 branch 和 origin/main 的偏离
-   • git status            + 工作树状态
-   • git worktree list     + 物理并行情况
+   • git branch --show-current     + 必读:与"进行中"段 branch 列对比,漂移告警
+   • git log --oneline -20         + 看本 branch 和 origin/main 的偏离
+   • git status                    + 工作树状态
+   • git worktree list             + 物理并行情况
    • git log --grep "chore(handoff)" -3   + 找 0008 §18.3 commit handoff 历史
 3. memory/project-quirks.md
    • 最近 1 周内新增 / 复发计数 ≥ 3 的 Q-XX-NN
 4. 99-跨阶段/proposals/
    • 列最近 5 个 proposal 标题 + 状态(防重复造轮子)
    • Grep 用户当前请求关键词,看是否已有相关 proposal
-5. (可选)reflect/2026-W??.md / signals/2026-MM.md 最末
-   • 看近期反思 / 信号有无相关条目
+5. reflect/2026-W??.md / signals/2026-MM.md 最末
+   • **MUST**:当用户请求关键词命中 协作规范.md §2 SSoT 清单的任一文件名时
+   • 否则 SHOULD:看近期反思 / 信号有无相关条目
+   • 升级理由:W21 dogfood 发现关键词"多 session 协同"恰是 signals/2026-05 §8 焦点;漏读则与"防重复造轮子"目标矛盾(见 [reflect/2026-W21-session-handoff-agent-dogfood.md](../../99-跨阶段/reflect/2026-W21-session-handoff-agent-dogfood.md) 行动 1)
 ```
 
 ## 工作流 —— catch-up 模式
@@ -77,11 +80,14 @@ tools: Read, Grep, Glob, Bash
 - 是否有 🟡 超过 24h 未更新: <提示>
 
 ## 🌿 git 当前状态
-- branch: <current>
-- worktree: <路径>
+- branch: <current>(`git branch --show-current`)
+- **台账漂移告警**:HEAD branch 是否 == 在途任务.md "进行中"段任一行的 "分支" 列?
+  - ✅ 匹配 — 正常
+  - 🔴 **不匹配** — 你的 HEAD 不在台账登记中,违反 0008 §3,先补登记或切回
+- worktree: <路径>(`git worktree list` 找匹配 HEAD 的行)
 - 距 origin/main: 领先 X commit / 落后 Y commit
 - working tree: <clean / 有 N 改动:文件列表>
-- 其他 worktree(`git worktree list`): <数量 + 简列>
+- 其他 worktree 总数: <git worktree list | wc -l>(0008 §0 基线 6,W21 基线 14)
 
 ## ⚠️ 并行冲突告警(按 0008 §4/§8 评级)
 - 🔴 高: 同 branch 同 focus 另有 session(若有)
@@ -137,10 +143,11 @@ tools: Read, Grep, Glob, Bash
 | 场景 | 处理 |
 |---|---|
 | 在途任务.md "已完成"段为空(7 天前都没活) | 退化到 `git log --oneline -30` 找最近 commit |
-| commit message 不含 §18.3 handoff 段 | 用 subject + body 凑替代 |
+| commit message 不含 §18.3 handoff 段 | 用 subject + body 凑替代,**并在工作恢复包末尾显式输出**:"⚠ 本 branch 上次 commit 未按 0008 §18.3 handoff 格式,建议下一 commit 用规范格式以便后续 catch-up" |
 | 用户在新仓库 / branch 没 SSoT 文件 | 主动建议先按 [0008 §16.1 入场清单](../../99-跨阶段/协作规范.md) 报到 |
 | 用户连续 30 min 反复 catch-up | 缓存第 1 次结果,后续只补 delta |
 | 关键词 grep 命中过多(false positive) | 选最近 5 个 + 按 modtime 排序 |
+| HEAD branch ≠ 在途任务.md 任一行 branch | 🔴 主动告警:可能是另一 session 切 branch 后未更新台账(W21 真实案例:db-ops 与本 session 同主工作树,我 commit 后 db-ops 切到 chore/biz-dict-cleanup-migration,我的 branch 名漂移)|
 
 ## 反模式
 

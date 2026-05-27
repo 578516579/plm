@@ -216,11 +216,19 @@ const quickActions = [
 ]
 
 // === 跳转 ===
+// menu-regroup-by-phase.sql 后业务菜单按 8 阶段分组, URL 形如 /<phase>/<entity>.
+// 映射表统一在 @/utils/businessRoute.ts (SSoT).
+import { entityToPath, ENTITY_TO_PATH } from '@/utils/businessRoute'
+
 function goto(entity: string) {
-  router.push(`/business/${entity}`)
+  const path = entityToPath(entity)
+  router.push(path).catch(err => {
+    console.warn(`[dashboard] 跳转失败 entity=${entity} path=${path}`, err)
+    ElMessage.warning(`「${entity}」模块路由未注册`)
+  })
 }
 function gotoProject(p: any) {
-  router.push({ path: '/business/project', query: { id: p.id } })
+  router.push({ path: ENTITY_TO_PATH.project, query: { id: p.id } })
 }
 
 // === KPI 数据 ===

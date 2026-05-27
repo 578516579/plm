@@ -130,6 +130,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { entityToPath } from '@/utils/businessRoute'
 import {
   listSprint, addSprint, updateSprint, delSprint, getSprint, listProjectsForSelect,
   type Sprint, type SprintQuery
@@ -200,7 +201,8 @@ async function handleDelete(row: Sprint) {
 }
 
 function gotoKanban(row: Sprint) {
-  router.push({ path: '/business/task', query: { sprintId: String(row.sprintId) } })
+  // menu-regroup-by-phase 后 task 实际 path 是 /phase-dev/task, 走 SSoT.
+  router.push({ path: entityToPath('task'), query: { sprintId: String(row.sprintId) } })
 }
 
 onMounted(() => { getList(); loadProjects() })

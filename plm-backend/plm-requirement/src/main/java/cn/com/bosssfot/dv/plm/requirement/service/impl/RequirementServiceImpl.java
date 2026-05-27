@@ -5,11 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cn.com.bosssfot.dv.plm.common.core.event.EntityChangedEvent.Action;
+import cn.com.bosssfot.dv.plm.common.core.event.RequirementChangedEvent;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -17,6 +20,7 @@ import cn.com.bosssfot.dv.plm.project.domain.Project;
 import cn.com.bosssfot.dv.plm.requirement.domain.Requirement;
 import cn.com.bosssfot.dv.plm.project.mapper.ProjectMapper;
 import cn.com.bosssfot.dv.plm.requirement.mapper.RequirementMapper;
+import cn.com.bosssfot.dv.plm.requirement.service.IRequirementReviewService;
 import cn.com.bosssfot.dv.plm.requirement.service.IRequirementService;
 
 /**
@@ -53,6 +57,12 @@ public class RequirementServiceImpl implements IRequirementService
 
     @Autowired
     private ProjectMapper projectMapper;
+
+    @Autowired
+    private IRequirementReviewService requirementReviewService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<Requirement> selectRequirementList(Requirement requirement)
@@ -103,13 +113,18 @@ public class RequirementServiceImpl implements IRequirementService
 
         requirement.setCreateBy(SecurityUtils.getUsername());
 
+        int rows;
         try {
-            return requirementMapper.insertRequirement(requirement);
+            rows = requirementMapper.insertRequirement(requirement);
         } catch (DuplicateKeyException e) {
             log.warn("requirement_no 重号，重试一次: {}", requirement.getRequirementNo());
             requirement.setRequirementNo(generateRequirementNo());
-            return requirementMapper.insertRequirement(requirement);
+            rows = requirementMapper.insertRequirement(requirement);
         }
+        if (rows > 0 && requirement.getRequirementId() != null) {
+            eventPublisher.publishEvent(new RequirementChangedEvent(requirement.getRequirementId(), Action.INSERT));
+        }
+        return rows;
     }
 
     @Override
@@ -132,6 +147,15 @@ public class RequirementServiceImpl implements IRequirementService
                     601
                 );
             }
+            // PRD §F2.4 评审前置: 00待评审 → 01开发中 必须存在通过的评审记录
+            if ("00".equals(old.getStatus()) && "01".equals(requirement.getStatus())) {
+                if (!requirementReviewService.hasPassedReview(requirement.getRequirementId())) {
+                    throw new ServiceException(
+                        "需求推进到「开发中」前,必须存在至少 1 条「通过」的评审记录",
+                        701
+                    );
+                }
+            }
         }
 
         // 若改了 projectId，校验存在
@@ -144,14 +168,24 @@ public class RequirementServiceImpl implements IRequirementService
         }
 
         requirement.setUpdateBy(SecurityUtils.getUsername());
-        return requirementMapper.updateRequirement(requirement);
+        int rows = requirementMapper.updateRequirement(requirement);
+        if (rows > 0) {
+            eventPublisher.publishEvent(new RequirementChangedEvent(requirement.getRequirementId(), Action.UPDATE));
+        }
+        return rows;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteRequirementByIds(Long[] requirementIds)
     {
-        return requirementMapper.deleteRequirementByIds(requirementIds);
+        int rows = requirementMapper.deleteRequirementByIds(requirementIds);
+        if (rows > 0 && requirementIds != null) {
+            for (Long id : requirementIds) {
+                eventPublisher.publishEvent(new RequirementChangedEvent(id, Action.DELETE));
+            }
+        }
+        return rows;
     }
 
     @Override

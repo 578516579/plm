@@ -45,3 +45,15 @@ INSERT INTO sys_dict_data (dict_sort, dict_label, dict_value, dict_type, css_cla
 (2, '评审中', '01', 'biz_ued_status', '', 'warning', 'N', '0', 'admin', SYSDATE(), ''),
 (3, '已确认', '02', 'biz_ued_status', '', 'success', 'N', '0', 'admin', SYSDATE(), ''),
 (4, '已废弃', '03', 'biz_ued_status', '', 'danger',  'N', '0', 'admin', SYSDATE(), '终态');
+
+-- 菜单与权限 (menu_id 2140-2145, 挂 2000 业务管理 — 旧 schema 兼容)
+-- 注: 跑完 menu-regroup-by-phase.sql 后 parent_id 会被 UPDATE 为 2920 需求与设计 order=3
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, menu_type, visible, status, perms, icon, create_by, create_time, remark) VALUES
+(2140, 'UED 设计', 2000, 15, 'ued', 'business/ued/index', 'C', '0', '0', 'business:ued:list',   'rate', 'admin', SYSDATE(), 'UED 设计协同 F2.3'),
+(2141, 'UED 查询', 2140, 1,  '#',   '',                   'F', '0', '0', 'business:ued:query',  '#',    'admin', SYSDATE(), ''),
+(2142, 'UED 新增', 2140, 2,  '#',   '',                   'F', '0', '0', 'business:ued:add',    '#',    'admin', SYSDATE(), ''),
+(2143, 'UED 修改', 2140, 3,  '#',   '',                   'F', '0', '0', 'business:ued:edit',   '#',    'admin', SYSDATE(), ''),
+(2144, 'UED 删除', 2140, 4,  '#',   '',                   'F', '0', '0', 'business:ued:remove', '#',    'admin', SYSDATE(), ''),
+(2145, 'UED 导出', 2140, 5,  '#',   '',                   'F', '0', '0', 'business:ued:export', '#',    'admin', SYSDATE(), '');
+
+INSERT INTO sys_role_menu (role_id, menu_id) VALUES (1, 2140), (1, 2141), (1, 2142), (1, 2143), (1, 2144), (1, 2145);

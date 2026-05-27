@@ -127,6 +127,29 @@
 
 详细操作见 [`04-测试/测试用例库/E2E-运行手册.md`](../04-测试/测试用例库/E2E-运行手册.md) 与 [`plm-e2e` skill](skills/plm-e2e/SKILL.md)。
 
+### G.5 测试编排与自进化（MUST — Test Orchestration）
+
+E2E 是准入的"最后一道"，但**整个测试过程**(测什么/分几层/谁来做/算不算过/怎么进化)由 **`test-orchestrator` agent + `plm-test-orchestrate` skill** 统一编排。proposal 0023 落地。
+
+**G.5.1 测试金字塔分层（MUST）** — 不许用 E2E 测本该单测覆盖的逻辑分支(金字塔别倒挂)：
+
+| 层 | 工具 | 何时必做 |
+|---|---|---|
+| L1 单元 | JUnit5 + Mockito | ServiceImpl 有分支/状态机/校验逻辑 |
+| L2 组件 | Vitest + MSW | 复杂前端组合式逻辑/store/工具函数 |
+| L3 契约 | 5 层命名对齐(interface↔domain↔column↔DTO↔resultMap) | 改了 domain/DTO/Mapper XML/前端 interface |
+| L4 E2E | Playwright | Phase 03→04 准入(强制) / 改业务字段·状态机·FK·编码 |
+| 守门 | encoding.spec(6 case) | 每次准入**一票否决** |
+
+**G.5.2 编排总管（MUST）** — 满足下列任一,Claude **必须**先走 `test-orchestrator`(出计划+DAG)再分派,不许散乱手测：
+- 测试任务跨 ≥ 3 个子 agent(test-engineer / api-contract-keeper / e2e-validator / troubleshooter / security-reviewer)
+- 用户说"提测 / Phase 04 准入 / 全回归 / 这模块测试怎么搭 / 覆盖够不够"
+- 子 agent **不能再 spawn 子 agent**:总管出 DAG,主 Claude 按序调。
+
+**G.5.3 Gate 裁决（MUST）** — 判"通过"的充要条件(并入 §G.4)：encoding 6/6 且 DB HEX 无 `EFBFBD` · 全套件 `N passed` 且 **0 fail / 0 did-not-run**(flake 经 `--retries=1` 复测仍绿)· 新模块覆盖 CRUD+状态机合法/非法+FK+编码+UI 可达 5 类 · 契约改动经 api-contract-keeper 确认 · 证据为**本轮真实输出**已落 Gate §I。任一不满足 = **驳回**,指明回哪个 agent 修,**禁**"再跑一次试试"、**禁**贴历史证据。
+
+**G.5.4 自进化（MUST）** — 每轮测试编排收口必须沉淀测试 signals(见 [signals §8 测试编排](../99-跨阶段/signals/README.md))：`e2e_flake_count` 与 `e2e_real_fail_count` **必须分开记**、`coverage_gap`、`rca_category`(env/schema/stale-jvm/code/contract/encoding)、`gate_evidence_backfill_attempt`(应=0)。触发提案:同类 flake 月 ≥3 → 稳定性提案;覆盖缺口反复 → 补模板提案。详见 [测试工作流.md](../99-跨阶段/测试工作流.md)。
+
 ## H. 文档落位（MUST）
 
 - 项目过程文档 **必须** 放进对应阶段目录 `0?-<阶段名>/` 或 `99-跨阶段/`，不要散在源码目录或根目录。
@@ -295,6 +318,59 @@
 - **P3（扩展）**：`ai-agent` / `openspec` / `pipeline` / `feature-flag` / `dora`
 
 每次攻坚一个模块走完 §M.2 的 9 项 DoD + 提交一次 `feat(prd-align): <entity> PRD-aligned per F? + <html>`。
+
+### M.9 产品设计编排与自进化（MUST — Product Design Orchestration）
+
+§M.1~M.8 是 PRD 驱动的"硬规则",但**整个产品设计过程**(需求拆什么/字段哪来/原型对不对得上/算不算设计就绪/怎么进化)由 **`product-orchestrator` agent + `plm-product-design` skill** 统一编排。proposal 0024 落地。本节与开发后的 **§G.5 测试编排** 串成完整生命周期:**设计就绪 Gate = Phase 02→03 准入**,测试 Gate = Phase 03→04 准入。
+
+**M.9.1 产品设计漏斗分层（MUST）** — 从一句模糊想法收敛到可 100% 追溯到 PRD+原型 的规格,越下层越收敛:
+
+| 层 | 子 agent | 何时必做 |
+|---|---|---|
+| L1 澄清 | `requirement-clarifier` | 用户给模糊词(全部/优化下/弄一下) |
+| L2 范围 | `scope-decider` | 跨 ≥2 模块 / 开放目标 |
+| L3 PRD 建模 | `prd-author` | 新模块/新字段/新状态 — 字段对照表+状态机+错误码 |
+| L4 数据/架构 | `db-modeler` + `system-architect` | 建表 / 引入抽象层 |
+| L5 原型对齐 | `ux-prototype-aligner` | 任何 UI 呈现 — §N(UED) 守门 |
+| L6 契约 | `api-contract-keeper` | 为开发铺路,5 层命名一致 |
+| L7 文档 | `technical-writer` | 概念稳定后出设计 .md |
+
+铁律:**字段对照表(L3)必须先于代码 commit**(§M.2);原型指不出的字段**不进 L3**,回 L1 走 §M.1。
+
+**M.9.2 编排总管（MUST）** — 满足下列任一,Claude **必须**先走 `product-orchestrator`(出漏斗计划+DAG)再分派,不许散乱手设计:
+- 产品设计任务跨 ≥ 3 个子 agent
+- 用户说"这模块怎么设计 / 加 XX 需求 / Phase 02 准入 / PRD 对得上吗 / 需求拆一下"
+- 子 agent **不能再 spawn 子 agent**:总管出 DAG,主 Claude 按序调。
+
+**M.9.3 设计就绪 Gate 裁决（MUST）** — 判"设计就绪 / 可进开发"(Phase 02→03 准入)的充要条件:**可追溯**(每个字段/状态/错误码/文案指得出 PRD § + 原型元素) · **字段对照表先行**(§M.2) · **状态合法**(只来自 PRD §3.2 / 原型徽章类 / PRD-MAPPING §3,§M.4) · **错误码登记**(§M.5) · **原型保真**(无 §N 违规) · **三者一致**(PRD/原型/MAPPING)。任一不满足 = **驳回**,指明回哪个 agent 修,**禁**"先开发着回头补设计"、**禁**凭直觉补字段(§M.1)。
+
+**M.9.4 自进化（MUST）** — 每轮产品设计编排收口必须沉淀产品设计 signals(见 [signals 产品设计编排段](../99-跨阶段/signals/README.md)):`prd_drift_count`、`prototype_deviation_count`、`untraceable_field_count`(应趋 0)、`field_table_lag`(字段表晚于代码 commit,应=0)、`prd_change_via_proposal`(PRD 演化正确走 proposal 的占比)。触发提案:同类 PRD drift 月 ≥3 → PRD-MAPPING 补全提案;某类字段反复指不出原型 → 原型补画提案;§N 违规集中某子项 → UED 加 hook 提案。详见 [产品设计工作流.md](../99-跨阶段/产品设计工作流.md)。
+
+### M.10 数据库设计编排与自进化（MUST — Database Design Orchestration）
+
+承接 §M.9:prd-author 出的**字段对照表**(PRD-MAPPING §2)是数据库设计的输入。**整个数据库设计过程**(表怎么建/类型字典怎么定/索引够不够/迁移安不安全/charset 对不对/算不算 schema 就绪/怎么进化)由 **`db-orchestrator` agent + `plm-db-design` skill** 统一编排。proposal 0025 落地。本节与 §M.9(产品设计)、§G.5(测试)串成 **产品设计 → 数据库设计 → 开发 → 测试** 生命周期链。
+
+**M.10.1 数据库设计漏斗分层（MUST）** — 从字段对照表收敛到可建表、5 层契约一致的物理 schema:
+
+| 层 | 子 agent | 何时必做 |
+|---|---|---|
+| L1 字段来源 | `prd-author` | 每列对得上 PRD-MAPPING §2;指不出→停(§M.1) |
+| L2 概念/逻辑 | `system-architect` | 跨模块共享表 / 范式取舍 |
+| L3~L6 物理/字典/索引/迁移 | `db-modeler` | 建表 / 改字段 / 加索引 / 迁移脚本 |
+| L7 设计评审守门 | `db-schema-reviewer` | 范式/索引/charset/FK/迁移安全/命名/sys_menu |
+| L8 契约 | `api-contract-keeper` | column↔resultMap↔domain↔DTO↔interface 5 层 |
+| L9 应用核验 | `db-ops` | 应用 SQL(utf8mb4)+ schema 实际=期望 |
+
+铁律:**字段对照表先于 DDL**;原型/PRD 指不出的列**不进 schema**(回 §M.1)。`utf8mb4`(gotcha #2)与 `business-*.sql 必含 sys_menu`(gotcha #7)是 L7 守门**一票否决**。
+
+**M.10.2 编排总管（MUST）** — 满足下列任一,Claude **必须**先走 `db-orchestrator`(出漏斗计划+DAG)再分派,不许散乱手建表:
+- 数据库设计任务跨 ≥ 3 个子 agent
+- 用户说"这表怎么设计 / 加字段 / 改索引 / 迁移脚本 / 数据库设计准入 / schema 对得上吗"
+- 子 agent **不能再 spawn 子 agent**:总管出 DAG,主 Claude 按序调。
+
+**M.10.3 schema 设计就绪 Gate 裁决（MUST）** — 判"schema 就绪 / 可建表可应用"的充要条件:**可追溯**(每列对得上 PRD-MAPPING §2) · **命名合规**(tb_/<entity>_id/<entity>_no/idx_/uk_/biz_ + §M.7 跨模块同名,无 creator_id 漂移) · **charset 合规**(utf8mb4,gotcha #2 + 字段标配齐) · **索引充分**(覆盖查询模式 + uk_<entity>_no) · **迁移安全**(幂等 + 向后兼容 + 大表锁表评估) · **sys_menu**(business-*.sql 含 INSERT,gotcha #7,或 @no-menu 豁免) · **契约一致**(api-contract-keeper 确认 5 层) · **应用核验**(db-ops 确认 DB 实际=sql 期望)。任一不满足 = **驳回**,指明回 db-modeler/db-ops 修,**禁**"先建着回头补"、**禁**自己造列、**禁**放过非 utf8mb4。
+
+**M.10.4 自进化（MUST）** — 每轮数据库设计编排收口必须沉淀 DB signals(见 [signals 数据库设计编排段](../99-跨阶段/signals/README.md)):`schema_naming_drift_count`、`index_gap_count`、`charset_violation_count`(gotcha #2,应=0)、`migration_unsafe_count`、`missing_sys_menu_count`(gotcha #7)、`schema_drift_count`(DB 实际≠sql)。触发提案:`charset_violation` > 0 → **P0 复盘**(gotcha #2 复发);`schema_naming_drift` 月 ≥3 → §M.7 强化 / 加命名 lint hook;`index_gap` 集中 → 补索引 checklist。详见 [数据库设计工作流.md](../99-跨阶段/数据库设计工作流.md)。
 
 ## N. GitHub 工作流（MUST — 涉及 PR / Issue / Release 时）
 
@@ -492,6 +568,64 @@ PR 涉及 UI 改动时，PR 描述中包含 UED规范.md §13 的 8 项自检 Ch
 ### N.9 新组件/新 CSS 类（SHOULD）
 
 现有 CSS 类无法覆盖新需求时：先检查 UED规范.md §附录A；没有合适类时，先在 UED规范.md 对应章节注册（先改规范，再写代码），新类命名遵循 `agriplm.css` 缩写风格。
+
+### N.10 UED 设计编排与自进化（MUST — UED Design Orchestration）
+
+§N.1~N.9 是 UED 的"硬规则",但**整个 UED 设计过程**(信息架构怎么排/交互流怎么走/用哪些 Token 与组件/原型对不对得上/无障碍达不达标/算不算 UED 就绪/怎么进化)由 **`ued-orchestrator` agent + `plm-ued-design` skill** 统一编排。proposal 0026 落地。本节与 §M.9(产品设计)、§M.10(数据库设计)是 Phase 02 设计期的**三个平级维度**:product 出字段/状态/错误码,db 出 schema,UED 出 UI 规格;三者各自就绪 Gate 都过 = **Phase 02→03 准入**。
+
+**N.10.1 UED 设计漏斗分层（MUST）** — 从一句 UI 需求收敛到可 100% 追溯到 UED规范.md + 原型 的规格,越下层越收敛:
+
+| 层 | 子 agent | 何时必做 |
+|---|---|---|
+| U1 信息架构 | `ued-designer`(+`system-architect`) | 新页面/新模块入口 — 导航位置/分组/Tab |
+| U2 交互流 | `ued-designer` | 有交互的页面 — 操作路径/hover/focus/三态 |
+| U3 视觉/组件 | `ued-designer` | 任何 UI 呈现 — Token/栅格/按钮/徽章/表单,选自 UED规范库 |
+| U4 原型保真 | `ux-prototype-aligner` | 任何 UI 呈现 — 表单/徽章/AI 按钮 ↔ 原型 + §N 守门 |
+| U5 无障碍 | `accessibility-reviewer` | 任何 UI 呈现 — WCAG AA 对比度/focus/label/不靠颜色 |
+| U6 交付 | `technical-writer` | UED §12.3 设计交付 6 项 DoD |
+
+铁律:**视觉决策(颜色/间距/组件)必须指得出 UED规范 § + 原型出处**(§N.1/N.9);规范没有的颜色/组件**先走 §N.9 注册再用**,原型没有的页面回 §M.1,**禁前端自由发挥**;UI 规格 commit 先于前端实现 commit(`ued_handoff_lag`=0)。
+
+**N.10.2 编排总管（MUST）** — 满足下列任一,Claude **必须**先走 `ued-orchestrator`(出漏斗计划+DAG)再分派,不许散乱手设计 UI:
+- UI 设计任务跨 ≥ 3 个子 agent
+- 用户说"这页面/模块 UI 怎么设计 / 信息架构怎么排 / 交互流怎么走 / 用什么组件 / Phase 02 UED 准入 / 对得上 UED 规范吗"
+- 子 agent **不能再 spawn 子 agent**:总管出 DAG,主 Claude 按序调。
+
+**N.10.3 UED 设计就绪 Gate 裁决（MUST）** — 判"UED 设计就绪 / 可进前端开发"的充要条件:**Token 合规**(颜色全走 `var(--xx)` 无裸 hex §N.1 / 间距 4px 倍数 §N.6) · **组件选自库**(用 UED规范 附录A CSS 类,新类已走 §N.9 注册) · **状态徽章正确**(色对 PRD-MAPPING §3,§N.2) · **AI 区分**(AI 触发用 `.btn-ai`✨,§N.3) · **三态齐全**(空/载/错,§N.5) · **原型保真**(ux-prototype-aligner 确认无 §N 违规) · **无障碍达标**(accessibility-reviewer 确认 WCAG AA:对比度/focus/label/不靠颜色,§11) · **设计交付 DoD**(UED §12.3 的 6 项) · **与产品设计一致**(状态/字段对 prd-author 的 PRD-MAPPING §2/§3,不另起状态)。任一不满足 = **驳回**,指明回哪个 agent 修,**禁**"先让前端写着 UED 回头补"、**禁**前端凭感觉造 UI(§N.1/N.9)。
+
+**N.10.4 自进化（MUST）** — 每轮 UED 设计编排收口必须沉淀 UED signals(见 [signals UED 设计编排段](../99-跨阶段/signals/README.md)):`ued_token_violation_count`(裸 hex/非 4px 间距/匿名颜色,应=0)、`component_reuse_gap`(没用库组件/用未登记新类,应趋 0)、`a11y_violation_count`(WCAG AA 违规)、`three_state_miss_count`(空/载/错缺失,应=0)、`ued_handoff_lag`(前端实现先于 UED 规格就绪,应=0)。触发提案:同类 token 违规月 ≥3 → 加 stylelint/PreToolUse hook 提案;a11y 反复某项 → axe-core 纳入 E2E 提案;反复用未登记组件 → UED规范补组件章节提案;三态反复遗漏 → 组件模板默认带骨架提案。详见 [UED设计工作流.md](../99-跨阶段/UED设计工作流.md)。
+
+---
+
+## Q. 系统架构设计编排（MUST — System Architecture Design Orchestration）
+
+§A(包名/分层/命名)与 CLAUDE.md "Architecture"(依赖图)是架构的"硬规则",但**整个系统架构设计过程**(引入新维度怎么抽象/模块边界怎么切/分层依赖方向对不对/跨模块共享怎么横切/要不要上门面 SPI/演进与向后兼容怎么保证/算不算架构就绪/怎么进化)由 **`arch-orchestrator` agent + `plm-arch-design` skill** 统一编排。proposal 0027 落地。本节与 §M.9(产品设计)、§M.10(数据库设计)、§N.10(UED 设计)是 Phase 02 设计期的**四个平级维度**:product 出字段/状态/错误码,db 出 schema,UED 出 UI 规格,**arch 出架构(分层/边界/抽象/演进/ADR)**;四者各自就绪 Gate 都过 = **Phase 02→03 准入**。
+
+> SSoT:[03-开发/模块拆分架构.md](../03-开发/模块拆分架构.md)(分层/模块边界)+ [03-开发/ADR/](../03-开发/ADR/)(决策留痕)+ 根 CLAUDE.md "Architecture"(依赖图)+ §A(命名)。架构维度**不是每个模块都强制全漏斗**:纯 CRUD 沿用现有分层 → 仅 `arch-reviewer` 轻量核分层/边界/命名;**仅在"引入新维度 / 跨模块共享 / 抽象层不够用 / 改公开接口 / 重大选型"时强制全漏斗**(避免小模块也摆架构 DAG)。
+
+**Q.1 架构设计漏斗分层（MUST）** — 从一句架构需求收敛到分层合规、抽象适度、可演进的架构设计,越下层越收敛:
+
+| 层 | 子 agent | 何时必做 |
+|---|---|---|
+| A1 架构驱动力 | `scope-decider`+`system-architect` | 质量属性/约束/为什么要这架构 |
+| A2 概念架构 | `system-architect` | 引入新维度/新模块 — C4/模块边界/依赖方向 |
+| A3 抽象层设计 | `system-architect` | 多实现/跨模块共享 — 门面+SPI/可选注入/横切独立事务 |
+| A4 演进路径 | `system-architect` | 改公开接口/多版本 — 兼容性表/V1→V2→V3/迁移 |
+| A5 架构评审守门 | `arch-reviewer` | 分层依赖方向/循环/边界/ADR 完整/接口兼容/§13 校准 |
+| A6 契约 | `api-contract-keeper` | 跨层/SPI 接口 interface↔impl↔调用方 一致 |
+| A7 装配 | `config-engineer` | Bean/AutoConfiguration/yml `${VAR:default}` 占位 |
+| A8 交付 | `technical-writer` | 架构设计 .md + ADR + §13 落地校准 |
+
+铁律:**依赖方向单向**(admin→framework→system→common),**禁循环依赖与反向 import**;跨模块共享走 SPI/接口反向依赖(common 定接口下游实现);**重大/不可逆决策必须先落 ADR**(§L.1);抽象**适度**(1 实现不上 SPI / N 实现不硬编码 if-else);架构含新表 → 转 `db-orchestrator`。
+
+**Q.2 编排总管（MUST）** — 满足下列任一,Claude **必须**先走 `arch-orchestrator`(出漏斗计划+DAG)再分派,不许散乱手设计架构:
+- 架构设计任务跨 ≥ 3 个子 agent
+- 用户说"这架构怎么设计 / 分层对不对 / 要不要上抽象层 / 跨模块共享怎么搞 / 演进路径 / 架构准入 / 依赖方向对吗"
+- 子 agent **不能再 spawn 子 agent**:总管出 DAG,主 Claude 按序调。
+
+**Q.3 架构设计就绪 Gate 裁决（MUST）** — 判"架构设计就绪 / 可进开发"的充要条件:**分层合规**(依赖方向单向 admin→framework→system→common,无循环依赖/反向 import;业务在 system.business.<entity>,§A) · **边界清晰**(职责单一;跨模块共享走 SPI/接口反向依赖) · **抽象适度**(不过度:1 实现不上门面/SPI;不欠设计:N 实现不硬编码 if-else) · **演进可追溯**(重大决策有 ADR §L.1 + 兼容性表/演进路径) · **接口稳定**(公开 API 向后兼容,破坏性变更有迁移说明) · **决策点收尾**(草案给 user 1-3 个决策点,system-architect §12) · **落地校准承诺**(头部标状态 + 约定落地后补 §13) · **配置外置**(secret 走 `${VAR:default}` §C,横切独立事务/AutoConfiguration) · **安全合规**(涉认证/权限/数据隔离经 security-reviewer)。任一不满足 = **驳回**,指明回 system-architect/arch-reviewer/config-engineer 修,**禁**"先开发着架构回头补"、**禁**放过循环依赖/反向 import(P0 地基红线)、**禁**重大决策"口头定了就写"(必落 ADR)。
+
+**Q.4 自进化（MUST）** — 每轮架构设计编排收口必须沉淀架构 signals(见 [signals 架构设计编排段](../99-跨阶段/signals/README.md)):`layering_violation_count`(依赖方向倒置/循环依赖,应=0)、`boundary_breach_count`(跨模块越界/业务塞错模块/反向 import)、`abstraction_fit_gap`(过度/欠设计被发现数)、`missing_adr_count`(重大决策无 ADR,§L.1,应=0)、`interface_break_count`(破坏性接口变更无迁移/兼容表)、`arch_calibration_lag`(落地后未补 §13 校准,应=0)。触发提案:`layering_violation_count` > 0 → **P0 复盘** + 加 ArchUnit/依赖方向检查 hook 提案;`missing_adr_count` 反复 → ADR 模板/commit 关联 ADR 编号强化提案;`abstraction_fit_gap` 集中过度设计 → 架构加 YAGNI checklist 提案;`interface_break_count` > 0 → 公开接口版本化 + 兼容性测试纳入 CI 提案。详见 [架构设计工作流.md](../99-跨阶段/架构设计工作流.md)。
 
 ---
 

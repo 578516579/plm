@@ -139,14 +139,14 @@ test.describe('字符编码回归 (Mojibake guard)', () => {
   // UI 层验证: 通过 Vue 表单提交也无乱码 (覆盖 fetch / axios 链路)
   // ----------------------------------------------------------------
 
-  test('UI 层: 浏览器表单提交中文,DB 存储无乱码', async ({ page, context }) => {
-    // 注入 token cookie
-    await context.addCookies([{
-      name: 'Admin-Token',
-      value: token,
-      url: 'http://localhost'
-    }])
+  test('UI 层: 浏览器表单提交中文,DB 存储无乱码', async ({ page, context, request }) => {
+    // 用 loginAsAdmin 给 test context 注入完整 cookie + 触发 fresh login
+    await loginAsAdmin(request, context)
 
+    // 先进 /index 让 router.beforeEach 跑完 generateRoutes + addRoute
+    // (直接 goto 业务路由会偶发 catch-all 404 抢先匹配,见 project.spec.ts 同样会 fail)
+    await page.goto('/index')
+    await page.waitForLoadState('networkidle')
     await page.goto('/business/project')
     await page.waitForSelector('.el-table', { timeout: 60_000 })
 

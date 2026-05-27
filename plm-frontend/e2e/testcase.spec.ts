@@ -161,11 +161,13 @@ test.describe('TestCase 模块 E2E', () => {
     expect(r.code).toBe(602)
   })
 
-  test('UI 层: 测试用例管理菜单可访问', async ({ page, context }) => {
-    await context.addCookies([{ name: 'Admin-Token', value: token, url: 'http://localhost' }])
+  test('UI 层: 测试用例管理菜单可访问', async ({ page, context, request }) => {
+    // 用 loginAsAdmin 给 fresh context 注入完整 cookie + 触发 fresh login
+    // (vue-router 动态路由场景下,旧 context.addCookies 拿不到菜单 → /business/testcase 404)
+    await loginAsAdmin(request, context)
     await page.goto('/business/testcase')
     await expect(page.locator('.el-table')).toBeVisible({ timeout: 10_000 })
-    // 验证有"自动化"字段(用例独有)
-    await expect(page.getByText(/自动化/).first()).toBeVisible()
+    // 验证表格列名含"是否自动化"(用例独有),用更精确的 selector 避开侧边菜单同名项
+    await expect(page.locator('.el-table .el-table__header').getByText(/自动化/).first()).toBeVisible()
   })
 })

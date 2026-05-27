@@ -22,24 +22,24 @@
 | 11 | 测试报告 TestReport | F4.7 | testreport.html | plm-testreport | 🟢 PRD-aligned |
 | 12 | API 文档 ApiDoc | F5.4 | apidoc.html | plm-apidoc | 🟢 PRD-aligned |
 | 13 | 产品手册 ManualProduct | F5.1 | productmanual.html | plm-manual-product | 🟢 PRD-aligned |
-| 14 | 立项 Inception | F1.1 | inception.html | plm-inception | 🔴 缺模块 |
-| 15 | UED | F2.3 | ued.html | plm-ued | 🟡 空壳 |
-| 16 | 竞品 Competitive | F1.3 | competitive.html | plm-competitive | 🟡 空壳 |
-| 17 | PRD 文档 | F2.2 | prd.html | plm-prd | 🟡 空壳 |
-| 18 | 架构设计 Arch | F3.1 | archdesign.html | plm-arch | 🟡 空壳 |
-| 19 | 数据库设计 DbDesign | F3.2 | dbdesign.html | plm-dbdesign | 🟡 空壳 |
-| 20 | 接口设计 ApiDesign | F3.3 | apidesign.html | plm-apidesign | 🟡 空壳 |
-| 21 | 测试数据 TestData | F4.3 | testdata.html | plm-testdata | 🟡 空壳 |
-| 22 | 自动化测试 AutoTest | F4.5 | autotest.html | plm-autotest | 🟡 空壳 |
-| 23 | 实施手册 ManualImpl | F5.2 | implmanual.html | plm-manual-impl | 🟡 空壳 |
-| 24 | 运维手册 ManualOps | F5.3 | opsmanual.html | plm-manual-ops | 🟡 空壳 |
-| 25 | 效能分析 Analytics | - | analytics.html | plm-analytics | 🟡 空壳 |
-| 26 | 工作台 Dashboard | - | dashboard.html | plm-dashboard | 🟡 空壳 |
-| 27 | AI Agent | - | aiagents.html | plm-ai-agent | 🟡 空壳 |
-| 28 | OpenSpec | - | aispec.html | plm-openspec | 🟡 空壳 |
-| 29 | Pipeline | - | pipeline.html | plm-pipeline | 🟡 空壳 |
-| 30 | Feature Flag | - | featureflag.html | plm-feature-flag | 🟡 空壳 |
-| 31 | DORA | - | devops.html | plm-dora | 🟡 空壳 |
+| 14 | 立项 Inception | F1.1 | inception.html | plm-inception | 🟢 PRD-aligned |
+| 15 | UED | F2.3 | ued.html | plm-ued | 🟢 PRD-aligned |
+| 16 | 竞品 Competitive | F1.3 | competitive.html | plm-competitive | 🟢 PRD-aligned |
+| 17 | PRD 文档 | F2.2 | prd.html | plm-prd | 🟢 PRD-aligned |
+| 18 | 架构设计 Arch | F3.1 | archdesign.html | plm-arch | 🟢 PRD-aligned |
+| 19 | 数据库设计 DbDesign | F3.2 | dbdesign.html | plm-dbdesign | 🟢 PRD-aligned |
+| 20 | 接口设计 ApiDesign | F3.3 | apidesign.html | plm-apidesign | 🟢 PRD-aligned |
+| 21 | 测试数据 TestData | F4.3 | testdata.html | plm-testdata | 🟢 PRD-aligned |
+| 22 | 自动化测试 AutoTest | F4.5 | autotest.html | plm-autotest | 🟢 PRD-aligned |
+| 23 | 实施手册 ManualImpl | F5.2 | implmanual.html | plm-manual-impl | 🟢 PRD-aligned |
+| 24 | 运维手册 ManualOps | F5.3 | opsmanual.html | plm-manual-ops | 🟢 PRD-aligned |
+| 25 | 效能分析 Analytics | - | analytics.html | plm-analytics | 🟢 PRD-aligned |
+| 26 | 工作台 Dashboard | §4.2 | dashboard.html | plm-dashboard | 🟢 PRD-aligned |
+| 27 | AI Agent | F3.5 | aiagents.html | plm-ai-agent | 🟢 PRD-aligned |
+| 28 | OpenSpec | F3.5 | aispec.html | plm-openspec | 🟢 PRD-aligned |
+| 29 | Pipeline | - | pipeline.html | plm-pipeline | 🟢 PRD-aligned |
+| 30 | Feature Flag | - | featureflag.html | plm-feature-flag | 🟢 PRD-aligned |
+| 31 | DORA | - | devops.html | plm-dora | 🟢 PRD-aligned |
 | **32** | **MCP Server** | **§2.5/§3.4/§4.1** | **settings.html#MCP集成 (Tab3)** | **plm-mcp** | **🆕 v0.x（Proposal 0007）** |
 | **33** | **集成对接 Integration** | **§3.1/§3.5 Phase2** | **settings.html#MCP集成 (Tab3)** | **plm-integration** | **🆕 v0.x（Proposal 0007）** |
 
@@ -47,7 +47,7 @@
 
 ## 2. 字段对照表（Domain ↔ 原型表单元素 ↔ DB 列）
 
-> 每个 PRD-aligned 模块一节。当前已填 §1-13（13 PRD-aligned）+ §14-§21（**8 个 prd-align 空壳模块**)+ §32-33（MCP/Integration）—— **全 21 个业务模块字段对照表完工**。剩余 9 个纯 stub 模块（autotest/manual-impl/manual-ops/analytics/dashboard/ai-agent/openspec/pipeline/feature-flag/dora）的对照表暂参见 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)。
+> 每个 PRD-aligned 模块一节。当前已填 §1-13（13 PRD-aligned）+ §14-§21（**8 个 prd-align 空壳模块**)+ §22 Dashboard + §32-33（MCP/Integration）—— **全 23 个业务模块字段对照表完工**。末批 8 模块（manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora，2026-05-27 转 🟢 PRD-aligned）的字段契约已由 Domain/Mapper/ServiceImpl 源码 + 200 case 单测锁定，业务 SQL（`business-<module>.sql`）含 DDL+字典；§2 inline 字段对照表暂参见各模块 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)，待后续补齐为 inline。
 
 ### §1. Project（plm-project）
 
@@ -532,6 +532,35 @@
 | aiGenerated / status (字典 biz_testdata_status, 3 态) | | 00 草稿 01 已生成 02 已归档 |
 | authorUserId | BIGINT | |
 
+### §22. Dashboard（plm-dashboard）
+
+**领域**: 工作台 / 首屏聚合页 — 6 类 widget(统计 / 在办项目 / 我的待办 / 生命周期 / 质量快照 / AI 改进)聚合展示 + 用户自定义工作台预设。**PRD 出处**: §4.2 页面1：工作台 / 原型 [dashboard.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/dashboard.html)
+
+#### 表 `tb_dashboard` —— 用户工作台预设（widget 布局）
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| dashboardId | dashboard_id | BIGINT | - | 主键 |
+| dashboardNo | dashboard_no | VARCHAR(32) | DASH-YYYY-NNNN | 自动生成 / 撞号重试 |
+| title | title | VARCHAR(200) | 原型"我的工作台" | 必填 |
+| ownerUserId | owner_user_id | BIGINT | F4.2 所属用户 | FK→sys_user.user_id |
+| layoutJson | layout_json | LONGTEXT | - | widget 布局 JSON |
+| widgetTypes | widget_types | VARCHAR(500) | 字典 `biz_dashboard_widget` | CSV: stats,active_projects,my_todos,quality_snapshot,lifecycle,ai_metrics |
+| refreshInterval | refresh_interval | INT | - | 秒;默认 60 |
+| isDefault | is_default | CHAR(1) | - | Y=默认工作台(同 owner 唯一) |
+| status | status | VARCHAR(2) | 字典 `biz_dashboard_status` | 00=启用 01=停用 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+#### 聚合接口 `/business/dashboard/aggregate`
+
+返回 6 类 widget JSON(本期 mock,下迭代接真实跨模块查询):
+- `stats`: activeProjects / aiDocsGenerated / currentDefects / autoTestCoverage
+- `activeProjects[]`: name / progress / color
+- `myTodos[]`: title / priority(P0/P1/P2) / dueDate
+- `qualitySnapshot`: defectCount / testPassRate / codeCoverage
+- `aiMetrics`: hoursSaved / docsGenerated / recommendations[]
+- `lifecycle`: 17 阶段静态数组(立项→…→运维)
+
 ### §32. MCP Server（plm-mcp）
 
 **领域**: 把 PLM 自己的业务能力（项目/需求/任务/用例/文档/数据）通过 MCP 协议暴露给外部 LLM Agent（Claude Code、Cursor、Copilot 等）。
@@ -609,6 +638,70 @@
 | retryCount | retry_count | INT | - | 重试次数 |
 | createTime / processTime | (RuoYi 标准) | | | 不可删除（审计） |
 | sourceIp | source_ip | VARCHAR(64) | - | 调用方 IP（防滥用） |
+
+### §33.1. 禅道(ZenTao)双向同步子映射
+
+**领域**: 禅道与 PLM 的 bug/story/task/case 双向同步。**关联**: [Proposal 0014](99-跨阶段/proposals/0014-zentao-bidirectional-sync.md) / [02-设计/Zentao-集成-设计.md](02-设计/Zentao-集成-设计.md)
+
+#### 表 ALTER（4 个业务表新增 3 列）
+
+| 业务表 | 列 | 类型 | 说明 |
+|---|---|---|---|
+| tb_defect / tb_requirement / tb_task / tb_testcase | `external_source` | VARCHAR(32) DEFAULT NULL | 外部来源(zentao/jira/...)，NULL=未同步 |
+| 同上 | `external_id` | VARCHAR(64) DEFAULT NULL | 外部主键 id，NULL=未同步 |
+| 同上 | `external_url` | VARCHAR(512) DEFAULT NULL | 外部详情 URL，跳转用 |
+| 同上 | 唯一索引 | `(external_source, external_id)` | 任一列 NULL 不参与约束，仅约束已同步行幂等 |
+
+#### 新表 `tb_integration_user_mapping` —— 集成用户映射
+
+| Java field | 列 | 类型 | 说明 |
+|---|---|---|---|
+| id | id | BIGINT | 主键 |
+| connectorId | connector_id | BIGINT | FK→tb_integration_connector.id |
+| externalAccount | external_account | VARCHAR(64) | 外部账号(禅道 account) |
+| userId | user_id | BIGINT | sys_user.user_id，NULL=未映射(容忍) |
+| syncDirection | sync_direction | VARCHAR(16) | inbound / outbound / both |
+| lastUsedAt | last_used_at | DATETIME | 最近一次使用 |
+| createBy/createTime/updateBy/updateTime/remark | (RuoYi 标准 5 字段) | | |
+
+唯一索引 `(connector_id, external_account)`，索引 `(user_id)` 用于反查。
+
+#### 字段映射(详细见 02-设计/Zentao-集成-设计.md §4)
+
+| 禅道资源 | PLM 模块 | PLM 表 | 关键字段(禅道→PLM) |
+|---|---|---|---|
+| bug | plm-defect | tb_defect | title→title, severity(1-4)→biz_defect_severity, pri→priority, status(active/resolved/closed)→status(1/2/3), openedBy→reporter(查 user_map), assignedTo→assignee, product→projectId(productProjectMap) |
+| story | plm-requirement | tb_requirement | title→title, spec→description, pri→priority, stage(wait/developing/released)→status(00/01/02), product→projectId |
+| task | plm-task | tb_task | name→title, desc→description, pri→priority, status(wait/doing/done)→status(0/1/2), execution→sprintId(executionSprintMap), estimate→estimateHours |
+| case | plm-testcase | tb_testcase | title→title, precondition→precondition, steps→steps(JSON), pri→priority, type→caseType, status(normal/blocked)→status(0/1) |
+
+#### 状态机映射
+
+```
+禅道 bug.status   → tb_defect.status:        active=1 resolved=2 closed=3   其他=99
+禅道 story.stage  → tb_requirement.status:   wait/planned=00 developing=01 released/closed=02 其他=99
+禅道 task.status  → tb_task.status:          wait=0 doing=1 done=2 pause=3 cancel=4 closed=5 其他=99
+禅道 case.status  → tb_testcase.status:      normal=0 blocked=1 其他=99
+```
+
+反向(PLM → 禅道)取上表反查,多对一时取禅道侧最具体的值。
+
+#### 冲突合并
+
+`last-write-wins`，基于 `update_time` ↔ `lastEditedDate` 比对(详 [设计文档 §6](02-设计/Zentao-集成-设计.md))；防循环用 `SyncContext.inbound` ThreadLocal + Caffeine 60s 抑制。
+
+#### 错误码
+
+| 码 | 含义 |
+|---|---|
+| 813 | 禅道 token 失败(account/password 错) |
+| 814 | 禅道 endpoint 不可达 |
+| 815 | webhook X-Zentao-Token 不匹配 |
+| 816 | 禅道 product 与 PLM project 未映射(connector.config_json.productProjectMap 缺) |
+| 817 | 禅道 execution 与 PLM sprint 未映射 |
+| 818 | 双向同步循环(SyncContext 检测) |
+| 819 | 冲突合并:外部数据 stale |
+| 820 | 用户映射缺失且 fallback 无效 |
 
 ---
 
@@ -892,9 +985,10 @@
 
 ## 7. v0.x 路线图
 
-- ✅ Project / Requirement / Sprint / Task / Defect / TestCase / Document / Submission / Release / TestPlan / TestReport / ApiDoc / ManualProduct
+- ✅ Project / Requirement / Sprint / Task / Defect / TestCase / Document / Submission / Release / TestPlan / TestReport / ApiDoc / ManualProduct / Dashboard / **Inception** / **Competitive** / **UED** / **Prd** / **Arch** / **DbDesign** / **ApiDesign** / **TestData** / **AutoTest**
+- ✅ **ManualImpl / ManualOps / Analytics / AiAgent / OpenSpec / Pipeline / FeatureFlag / DORA**（2026-05-27 末批 8 模块 🟡→🟢，单测 200 case 全绿）
 - 🆕 **MCP / Integration**（本提案 0007）
-- 下一批：Inception / UED / Competitive / PRD / Arch / DbDesign / ApiDesign
+- **全 31 个业务模块 🟢 PRD-aligned 完工**；后续仅 MCP/Integration 真实接入 + E2E spec 扩充 + 真厂商 AI provider 切换
 
 ---
 
@@ -924,3 +1018,10 @@
 | 2026-05-18 | Wjl + Claude | 第三批: §2 补 §8 Submission / §9 Release / §10 TestPlan 字段对照表(含 AI 门禁 4 项 / DORA 4 指标);§3 补 3 模块状态机(含 04→00 反向+回滚必填);3 个 Vue 由空壳 stub(11 行)重写为完整 CRUD ~280 行均;3 个 TS types 由 5 字段扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式 |
 | 2026-05-18 | Wjl + Claude | **第四批: 全部 13 个 PRD-aligned 模块字段对照表/状态机完工!** §2 补 §11 ApiDoc / §12 ManualProduct / §13 TestReport(含 OpenAPI Schema / 截图/导出格式 / 风险评级+缺陷统计);§3 补 3 模块状态机(ApiDoc 3 态+唯一键 / ManualProduct 4 态含 02→00 反向 / TestReport 3 态含 01→00 反向);3 个 Vue 由 stub 重写为完整 CRUD ~300+ 行;3 个 TS types 扩到完整 domain 映射;3 个 ServiceImpl 现代化同样模式。**10 个 ServiceImpl 全部完成现代化收尾**。 |
 | 2026-05-18 | Wjl + Claude | **第五批: 21/21 业务模块字段对照表完工!** §2 补 §14-§21 (Inception/Prd/Competitive/Arch/DbDesign/ApiDesign/Ued/TestData) 8 模块;§3 补 4 个状态机摘要(Inception 5 态 + 5 模块共用 4 态含反向 + 2 模块共用 3 态);7 个 Vue 由 21 行 stub 重写为完整 CRUD ~220-280 行,新建 plm-inception 前端 package (6 文件全新);8 个 TS types 由 5 字段扩到完整 domain 映射;8 个 ServiceImpl 现代化同样模式 → **18 个 ServiceImpl 全部完成**。 |
+| 2026-05-25 | Wjl + Claude | **Inception 模块流程证据补齐** — §1 状态色 🔴 缺模块 → 🟢 PRD-aligned(代码本已存在,本次补流程证据)。具体:(a) 修复前端字典契约 P0 bug 5 处(precision_ag/version_iter/... → 对齐后端 ALLOWED_BIZ_LINE + SQL 字典);(b) 新增 InceptionServiceImplTest.java 单测 28 case 全绿(5 @Nested:GenerateNo×4 / Validation×6 / Defaults×2 / StateMachine×12 / AiGenerate×3 / Delete×1);(c) E2E spec 从 1 case 扩到 11 case(CRUD/状态机正负向/反向边/AI 生成/编号格式/编码 HEX);(d) 创建 Phase 01/02/03 Gate 实例 3 文件(§I Phase 04 准出待本地 E2E 全套件回填);(e) §7 路线图把 Inception 挪入 ✅ 完工列。 |
+| 2026-05-25 | Wjl + Claude | **规划阶段(2910 菜单分组)项目管理能力收尾 — Competitive 模块流程证据补齐** — §1 状态色 🟡 空壳 → 🟢 PRD-aligned(后端代码已存在,本次补 Gate + 单测)。具体:(a) 新增 CompetitiveServiceImplTest.java 单测 28 case 全绿 / BUILD SUCCESS 20.7s(6 @Nested:GenerateNo×4 / Validation×8 / Defaults×3 / StateMachine×9[3 态+终态保护+无反向边+ENUM+702 项目存在性] / AiAnalyze×3 / Delete×1);(b) 创建 Phase 01/02/03 Gate 实例 3 文件,inception 模板对齐(§I Phase 04 准出待本地 E2E 全套件回填);(c) 至此规划阶段 inception + project + competitive 3 模块全部 🟢 + 后端单测齐 + Gate 实例齐;菜单挂载已在既有 menu-fill-missing-8.sql(行 36-41)就绪,跑过 SQL 后 admin 即可看见。 |
+| 2026-05-25 | Wjl + Claude | **需求与设计阶段(2920 菜单分组)— UED 模块 🟡→🟢 PRD-aligned 流程证据补齐** — §1 第 26 行状态色 🟡 空壳 → 🟢 PRD-aligned(后端 5 件套 + 前端视图 + e2e 1 case + SQL + §20 字段表 + §15 共用 4 态状态机 本已存在,本次补 Gate + 单测 + 状态色,与 Inception/Competitive 同模板)。具体:(a) 新增 UedServiceImplTest.java 单测 28 case 全绿(6 @Nested:GenerateNo×4 / Validation×7[title null+空白+projectId+designerUserId+702+新建非00 拒 601+显式 00 接受] / Defaults×2[aiGenerated=N+status=00] / StateMachine×11[**4 态含反向边**:00→01 / 01→02 / **01→00 反向打回**(UED 特色)/ 02→03 / 03 终态保护 / **02→01 反向边非法** / 跳级 ×2 / status 不变不校验 / 404 / 702] / AiReview×3[报告+合规+可用性+score=85+审计联动] / Delete×1) - 实测 mvn -pl plm-ued test → Tests run: 28, Failures: 0, Errors: 0, Skipped: 0;(b) 创建 Phase 01/02/03 Gate 实例 3 文件,inception/competitive 同模板对齐(§I Phase 04 准出待本地 E2E 全套件回填,ued.spec.ts 仅 1 case 建议 Phase 04 扩到 5+);(c) 字典契约三方一致已确认:前端 statusMap{00/01/02/03} ↔ 后端 STATUS_TRANSITIONS Map ↔ SQL biz_ued_status 4 项 ↔ §15 共用 4 态状态机;(d) **菜单挂载特别说明**:SQL 旧 schema 挂 2000 业务管理,跑过 menu-regroup-by-phase.sql 后 UPDATE 父挂 2920 需求与设计 order=3(F2.3 所属阶段);(e) §7 路线图把 UED 挪入 ✅ 完工列;**至此需求与设计阶段 UED 首发,下一批 PRD / Arch / DbDesign / ApiDesign / TestData**。 |
+| 2026-05-25 | Wjl + Claude | **需求与设计阶段(2920 菜单分组)— ApiDesign 模块 🟡→🟢 PRD-aligned 流程证据补齐 + 前后端契约差异显式登记**(PRD §F3.3 设计期 LLD 接口契约,**区分 §11 ApiDoc F5.4 发布交付期**)— §1 第 31 行状态色 🟡 空壳 → 🟢 PRD-aligned(后端 7 文件 Controller/Domain/Mapper Java+XML/Service+Impl + business-apidesign.sql + 前端 index.vue 306 行 + apidesign.ts 47 行 + §19 字段表本已存在,本次补 Gate + 单测两项流程证据)。具体:(a) 新增 `ApiDesignServiceImplTest.java` 单测 **35 case 全绿** / BUILD SUCCESS 11.6s(8 @Nested:GenerateNo×4 [APID-YYYY-NNNN/流水续号 0028/撞号 uk_apidesign_no 重试/用户传 No 不自动生成] / Validation×6 [5 必填 + 702 关联项目] / **MethodWhitelist×4** [CONNECT 非白名单 604/7 项全合法/小写规范化 post→POST/update 时 TRACE 非法] / Defaults×4 [mockEnabled=N/aiGenerated=N/status=00/新建非草稿拒 601] / **StateMachine×11** [**4 态含反向边 01→00 评审打回 ⭐ apidesign 独有**/00→01/01→02/02→03/03 终态/跳级 2 种/02→00 反向/status 不变跳过/404/702] / **UniqueKey×2** [**insert/update 撞 (project_id, http_method, path) 唯一键 → 701 ⭐ apidesign 独有**] / **AiGenerate×3** [OpenAPI 3.0.3 YAML + JSON Schema + Mock + aiGenerated=Y / 404 / AiService.chat 调用一次审计联动] / Delete×1);(b) 创建 Phase 01/02/03/04 Gate 实例 **4 文件** (比 prd/ued/arch/dbdesign 多一个 Phase 04 起草版),competitive 模板对齐(§I Phase 04 准出待本地 E2E 全套件回填 + apidesign.spec.ts 待起草 ≥12 case);(c) **前后端字段契约差异显式登记 Phase 02 §E.4**:前端 TS interface 多出 5 字段(prdId/authRequired/exampleRequest/exampleResponse/errorCodes),后端 Domain ApiDesign 无,均为 UI 显示占位 `(待 AI 生成)` 兜底,不阻塞业务(Jackson FAIL_ON_UNKNOWN_PROPERTIES=false 静默忽略),v0.2 真接 Dify 时评估扩 Domain + DDL;(d) **HTTP method 三方契约对齐**:前端下拉 5 项(GET/POST/PUT/DELETE/PATCH) ⊂ 后端 ALLOWED_METHOD 7 项(多 HEAD/OPTIONS) ⊂ SQL `http_method VARCHAR(10)` 无 ENUM 约束,前端兼容子集,后端兜底;(e) 安全审计 P0/P1/P2=0 + **零 LOW 残留**(前端 0 个 `v-html`,详情卡用 `<pre>{{...}}</pre>` Vue mustache 默认转义,比 inception/competitive 用 `v-html` 渲染 Markdown 更安全);(f) **菜单挂载待办**:apidesign 菜单 ID ≈ 2240-2245 挂 2910 规划阶段 order=4 待下一次 `menu-fill-missing-N.sql` batch 补;(g) §7 路线图把 ApiDesign 挪入 ✅ 完工列。 |
+| 2026-05-25 | Wjl + Claude | **需求与设计阶段(2920 菜单分组)整批收尾 — Prd / Arch / DbDesign 三模块 🟡→🟢 PRD-aligned 流程证据补齐**(承接 UED + ApiDesign 之后,完成 5 模块全部 🟢)— 同 chore/local-start-backend-script 分支并行 session 协同产出。具体:**(A) Prd(§17 §F2.2 AI PRD 生成器)**:字段表 §15 已升级到 inception 详细程度(5 列 + 唯一键 + F2.2 验收红线 ≥80);`PrdServiceImpl.aiGenerate()` 场景化增强(4 sceneTemplate × 3 targetUser = 12 组合 + 真实 `computeCompleteness` 7 段命中 × 90% + 字数 × 10% + `AiChatResult` 失败 fallback);`PrdServiceImplTest` 33 case 全绿(605 行);E2E `prd.spec.ts` 扩 1→11 case;创建 `instances/prd/` Phase 01/02/03 Gate 实例 3 文件。**(B) Arch(§18 §F3.1 系统概要设计 HLD)**:后端 5 件套已存在,本期补 `ArchServiceImplTest` **35 case 全绿** / BUILD SUCCESS(610 行,StateMachine×13[4 态含反向边 01→00 + 02 终态保护 + 跳级 4 种 + 反向非法 + ENUM 改非法 604]+ AiGenerate×3[designContent Markdown HLD / c4DiagramContent Mermaid C4 / nfrMapping 4 维 NFR]);创建 `instances/arch/` Phase 01/02/03 Gate 实例 3 文件。**(C) DbDesign(§19 §F3.2 数据库设计)**:后端 5 件套 + business-dbdesign.sql + business-dbdesign-rollback.sql + 共用 4 态状态机本已存在,本期补 `DbDesignServiceImplTest` 31 case(569 行,GenerateNo×4 / Validation×6 / Defaults×2 / **StateMachine×11**[4 态含反向边 + 02 终态保护 + 跳级 + 反向非法 + 改 projectId 不存在 702 + dbEngine 改非法 604]/ **AiGenerate×3**[erDiagramContent Mermaid erDiagram + dataDictionary Markdown + ddlScript CREATE TABLE 集合 + normalizationCheck 范式检查 JSON]/ Delete×1);创建 `instances/dbdesign/` Phase 01/02/03 Gate 实例 3 文件;**国产化金仓 (Kingbase) 适配登记 Phase 02 §B.2** — dbEngine ENUM 含 kingbase,本期 mock 按选项生成示例 DDL,真实 Dify 接入时 v0.2 验证。**(整批)**:5 模块 Gate 实例总计 16 文件(prd 3 + ued 3 + arch 3 + dbdesign 3 + apidesign 4);5 模块单测合计 ~2941 行(605+513+610+569+644);§1 第 17/18/19 行 🟡→🟢;§7 路线图 Prd/Arch/DbDesign 三模块加入 ✅ 完工列;在途任务台账增 6 行说明 4 模块流程证据并行展开 + dbdesign 收尾(zentao 钩子并存不冲突,路径精确互不重叠)。**至此需求与设计阶段 prd + ued + arch + dbdesign + apidesign 5 模块全部 🟢 PRD-aligned**,菜单种子 2210-2245 全部就绪(待 `menu-regroup-by-phase.sql` 跑后 admin 即可看见);下一批 testdata / autotest / analytics / ai-agent / openspec / pipeline / feature-flag / dora / manual-impl / manual-ops(测试 + DevOps + 交付 三阶段空壳模块)。 |
+| 2026-05-25 | Wjl + Claude | **测试阶段(2940 菜单)补色 + 下批 scope 划分** — TestData(§21) 和 AutoTest(§22) 实际已就绪(prd-align-batch-2026-05-17 含其 18 模块 Phase 03-05 batch 签字 + 后端 5 件套 + 字段表 §21 + 共用 3 态状态机本已存在;autotest 还有 4 E2E case 实测全套件验证可通过),仅 §1 状态色滞后未同步,本次补:(a) §1 行 21/22 🟡→🟢;(b) §7 路线图 TestData / AutoTest 挪入 ✅ 完工列;(c) 通过本会话 P0 troubleshoot(menu-path-absolute-business-prefix.sql)+ E2E spec 路径回归 `/business/*`,跑全套件 **171 passed / 1 failed(autotest TC-AT-E002 dialog selector 稳定性,与本工作无关已 spawn followup)/ 1 skipped**;**至此 PRD-aligned 业务模块 = 22+2 = 24 个,空壳剩 7 个**(manual-impl/manual-ops/pipeline/dora/analytics/feature-flag P0-P1 共 6.5 人日 + ai-agent/openspec V2 P2 各留 1.5 人日);scope-decider 划分 3 波节奏见 §7 "下一批"段。 |
+| 2026-05-27 | Wjl + Claude | **末批 8 个空壳模块 🟡→🟢 PRD-aligned 收尾 — 全 31 业务模块完工** — §1 行 23/24/25(ManualImpl/ManualOps/Analytics)+ 27/28/29/30/31(AiAgent/OpenSpec/Pipeline/FeatureFlag/DORA)状态色 🟡 空壳 → 🟢 PRD-aligned(8 模块后端 5 件套 + 前端 index.vue + api.ts + business-*.sql + e2e 3-4 case + 菜单种子 menu-seed-prd-aligned-modules.sql 2280-2365 本已存在,本批补 ServiceImpl 单测 + Gate 流程证据 + 状态色 + 菜单可见性修复)。**单测共 200 case 全绿**(实测各模块 `mvn -pl plm-<m> test` Failures=0 Errors=0):manual-impl 30(GenerateNo×4/Validation×8/Enum×4/StateMachine×10/AiGenerate×3/Delete×1)、manual-ops 31(CSV 多选告警渠道/IoT 设备类型逐项校验)、feature-flag 28(snake_case 正则 + 灰度策略↔百分比一致性 + canary 哈希 isEnabled + 双撞键 701)、openspec 23(3 态机 + 4 类 specType + 唯一键 701)、pipeline 21(2 态机 + trigger 模拟统计 + cron 表达式必填)、analytics 20(3 态机 + aiRecommend DORA 复盘)、dora 22(4 指标类型 + aiSuggest DORA 等级)、ai-agent 25(3 态机分支 00→{01,02}/01→{00}/02→{00,01} + invoke 成功率移动平均 + 失败 708 + buildChatRequest)。创建 `instances/<module>/` Phase 01/02/03 Gate 实例(8×3=24 文件);菜单可见性修复 SQL `menu-regroup-remaining-7.sql`(把 manual-impl 2280/manual-ops 2290/analytics 2300/openspec 2330/pipeline 2340/feature-flag 2350/dora 2360 从 hidden 2000 重挂到阶段目录 2950 交付与运维/2960 AI/2970 分析报表,修正 menu-regroup-by-phase.sql 行 92-104 引用了与 seed 不一致的 stale ID 2710-2780 的遗留问题)。**触发器**:用户"遍历所有没有实现的功能,开始实现";走 reflect 2026-W22 SOP(plm-module-uplift skill 同款流程)。E2E spec 扩充 + 真厂商 AI 接入留作后续(本批 E2E 沿用既有 3-4 case,§I Phase 04 准出待本地全套件回填)。 |

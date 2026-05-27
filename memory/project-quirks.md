@@ -125,6 +125,17 @@
 | 复发次数 | 1(已统一对齐) |
 | **预防** | api-contract-keeper Agent 改前后端任一字段时,grep 另一侧 |
 
+### Q-BIZ-04 — 前端硬编码 `/business/<entity>` 跳转,菜单 regroup 后大面积 404
+
+| 字段 | 内容 |
+|---|---|
+| 现象 | menu-regroup-by-phase.sql 把菜单父级分组改了,前端 push(`/business/xxx`)大量 404 |
+| 根因 | entity → URL 没有 SSoT,各 view/router 各自硬编码,菜单 schema 一动就漂移 |
+| 修复 | 抽 `src/utils/businessRoute.ts`,所有跳转走 `businessRoutePath(entity)`,SSoT 化 |
+| 首次发现 | commit 5c4e70d / 7b14807(menu regroup 后修 hardcoded 路径) |
+| 复发次数 | 1 |
+| **预防** | 新增模块跳转一律走 `businessRoute.ts`;CI grep `'/business/'` 字面量出现即 fail |
+
 ---
 
 ## 数据库层 (DB)
@@ -158,6 +169,17 @@
 | 修复 | 重跑该 entity 的 `business-*.sql`(`--force` 跳过字典 dup) |
 | 复发次数 | 1 |
 | **预防** | 切 branch 后第一件事:`mvn install + 重跑相关 sql + 重启 backend` |
+
+### Q-DB-04 — business-*.sql 漏写 sys_menu INSERT 致前端无入口
+
+| 字段 | 内容 |
+|---|---|
+| 现象 | 新模块表建成 + Controller 通,但前端侧边栏无菜单入口,功能不可达 |
+| 根因 | business-*.sql 模板未强制要求同时 INSERT sys_menu(目录 + CRUD 按钮),容易漏 |
+| 修复 | 对照已存在模块补 INSERT sys_menu(parent_id 跟 menu-regroup-by-phase 分组对齐)|
+| 首次发现 | commit 81bc1ba(补 business-ued.sql 漏写的 sys_menu INSERT) |
+| 复发次数 | 1 |
+| **预防** | business-*.sql 模板 checklist:CREATE TABLE + dict_type/data + **sys_menu(M/C/D 三件套)** 缺一不可 |
 
 ---
 
@@ -291,8 +313,36 @@
 
 ---
 
+## 集成层 (Integration) — 通用防护范式(主动设计,非踩坑)
+
+> ⚠ 本段收"主动设计出的、横跨多场景的正确范式"(不只收踩过的坑)。配套 proposal 0020 拟扩 `.claude/rules.md §L.1` gotcha 触发条件以正式接纳此类(§L.1 改动属 SSoT,待授权)。
+
+### Q-INTEG-01 — 双向同步回环防护三道防线
+
+| 字段 | 内容 |
+|---|---|
+| 场景 | 双向同步天然死循环:`A 改 → 同步到 B → B webhook → 又改回 A → ...` |
+| 防线 1 | **SyncContext(ThreadLocal `inbound` 标志)**:入站同步开始时置位,出站 `@TransactionalEventListener` 检测到标志直接 return(不把"入站导致的本地变更"再推回外部) |
+| 防线 2 | **recentSyncCache 防抖**:key=`{type}-{entityId}`,TTL 60s;短时间内同实体重复同步直接跳过 |
+| 防线 3 | **last-write-wins**:`SELECT ... FOR UPDATE` 锁行 + 比对时间戳,外部 updateTime 比本地旧则跳过 |
+| 配套幂等 | 幂等键 `external_source + external_id` 唯一索引(**NULL 不参与唯一约束**,见 Zentao 设计 §3.1 自纠坑);webhook 用 `externalEventId`(带时间戳)去重 |
+| 出处 | 禅道集成 `SyncContext` / `ZentaoOutboundSyncService`(commit 9d37d03)+ `SyncContextTest`;决策见 [ADR-0008](../03-开发/ADR/0008-in-process-domain-event-bus.md) / [ADR-0009](../03-开发/ADR/0009-integration-writeback-bypasses-business-service.md) |
+| 适用 | **任何双向集成(Jira/...)从本清单起步,不要从零再想一遍**;`integration-connector` skill(proposal 0019)的 bidirectional-sync 章引用本条为唯一来源 |
+
+---
+
+## 流程候选(转 proposal,不入主 quirks 表)
+
+| ID | 现象 | 转向 |
+|---|---|---|
+| P-FLOW-2026-05-25 | 未提交工作量过大(17 modified + 30+ untracked,Zentao 集成 + 评审 + dbdesign/arch 测试同时在途),回滚困难 | W22 主线反思 A5(settings.json dirty>15 Stop hook nudge,待授权)+ Zentao 反思模式3 / proposal 0021;候选独立 proposal:"在途任务上限 / 分支拆分阈值"。(原误标 0015,实为 skill 提案,与 WIP 无关) |
+
+---
+
 ## 变更记录
 
 | 日期 | 版本 | 变更 |
 |---|---|---|
 | 2026-05-19 | V1.0 | 首次沉淀,从 V1 反思 (commit 545ff2f) 提取 10+ quirks |
+| 2026-05-25 | V1.1 | +Q-DB-04 (sys_menu INSERT 漏写, 81bc1ba) / +Q-BIZ-04 (硬编码 /business/ URL 漂移, 5c4e70d+7b14807) / +P-FLOW-2026-05-25 (在途量过大) |
+| 2026-05-27 | V1.2 | 修正 P-FLOW 转向(0015 误标→实为 W22 A5/0021;0015 是 skill 提案) |

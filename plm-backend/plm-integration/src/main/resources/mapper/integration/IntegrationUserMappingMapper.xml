@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bosssfot.dv.plm.integration.mapper.IntegrationUserMappingMapper">
+
+    <resultMap type="cn.com.bosssfot.dv.plm.integration.domain.IntegrationUserMapping" id="UserMappingResult">
+        <result property="id"               column="id"                />
+        <result property="connectorId"      column="connector_id"      />
+        <result property="externalAccount"  column="external_account"  />
+        <result property="userId"           column="user_id"           />
+        <result property="syncDirection"    column="sync_direction"    />
+        <result property="lastUsedAt"       column="last_used_at"      />
+        <result property="createBy"         column="create_by"         />
+        <result property="createTime"       column="create_time"       />
+        <result property="updateBy"         column="update_by"         />
+        <result property="updateTime"       column="update_time"       />
+        <result property="remark"           column="remark"            />
+    </resultMap>
+
+    <sql id="selectVo">
+        select id, connector_id, external_account, user_id, sync_direction, last_used_at,
+               create_by, create_time, update_by, update_time, remark
+        from tb_integration_user_mapping
+    </sql>
+
+    <select id="selectList" parameterType="cn.com.bosssfot.dv.plm.integration.domain.IntegrationUserMapping" resultMap="UserMappingResult">
+        <include refid="selectVo"/>
+        <where>
+            <if test="connectorId != null">and connector_id = #{connectorId}</if>
+            <if test="externalAccount != null and externalAccount != ''">and external_account = #{externalAccount}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="syncDirection != null and syncDirection != ''">and sync_direction = #{syncDirection}</if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="selectById" parameterType="Long" resultMap="UserMappingResult">
+        <include refid="selectVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectByConnectorAndAccount" resultMap="UserMappingResult">
+        <include refid="selectVo"/>
+        where connector_id = #{connectorId} and external_account = #{externalAccount}
+        limit 1
+    </select>
+
+    <select id="selectByConnectorAndUserId" resultMap="UserMappingResult">
+        <include refid="selectVo"/>
+        where connector_id = #{connectorId} and user_id = #{userId}
+        limit 1
+    </select>
+
+    <insert id="insert" parameterType="cn.com.bosssfot.dv.plm.integration.domain.IntegrationUserMapping" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_integration_user_mapping
+        (connector_id, external_account, user_id, sync_direction, last_used_at,
+         create_by, create_time, remark)
+        values
+        (#{connectorId}, #{externalAccount}, #{userId}, #{syncDirection}, #{lastUsedAt},
+         #{createBy}, sysdate(), #{remark})
+    </insert>
+
+    <update id="update" parameterType="cn.com.bosssfot.dv.plm.integration.domain.IntegrationUserMapping">
+        update tb_integration_user_mapping
+        <trim prefix="set" suffixOverrides=",">
+            <if test="externalAccount != null">external_account = #{externalAccount},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="syncDirection != null">sync_direction = #{syncDirection},</if>
+            <if test="lastUsedAt != null">last_used_at = #{lastUsedAt},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deleteByIds" parameterType="Long">
+        delete from tb_integration_user_mapping where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="touchLastUsed">
+        update tb_integration_user_mapping set last_used_at = sysdate() where id = #{id}
+    </update>
+
+</mapper>

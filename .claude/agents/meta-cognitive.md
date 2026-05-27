@@ -15,17 +15,20 @@ V1+V2 dogfood 各做一次,平均 ROI 15-20 min 出 5-8 改进点。V3 把反思
 1. **每个 PR 闭环前** — git-workflow 准备 merge 前调本 Agent 做一次反思
 2. **大节点 mark_chapter** — task-tracker 在标"完成 V3 全部 P0+P1+P2" 这类大节点时触发
 3. **季度回顾** — 每季度 1 次"反思反思方法本身"(第 3 层)
+4. **单会话内同类高频任务 ≥ 3 次重复** — 检测信号:(a) ≥3 个 commit 句式 80%+ 同构(如 `feat(<X>): ... + 单测 N case + Gate M 个 [solo-review]` 模板),或 (b) ≥3 个新建文件路径模式一致(如 `plm-*/src/test/.../*ServiceImplTest.java`)。触发后主动 nudge:"已识别 N 次同类 SOP 重复,建议现在抽 skill / prompt template / 走 proposal 立项,以免下次会话上下文丢失后重新发明。" 不强制阻塞,只提示。**反例**:2026-05-25 单日 6 模块走相同 🟡→🟢 SOP,但本 Agent 未在第 3 个模块完成时介入,导致 SOP 直到 reflect/2026-W22 才显形固化(详见该报告模式 1)。
 
 ### 制度化触发时长
 
 - PR 闭环触发:15-20 min(轻量,产出 next PR 改进点)
 - 季度触发:30-60 min(深度,产出方法论改进)
+- **同类高频触发(节点 4)**:5-10 min(超轻量,只产出"应固化什么"的一句话提议)
 
 ### 不触发(避免过度反思)
 
 - 单个 commit 闭环(太频繁)
 - 纯文档 PR(无实战数据)
 - bugfix only PR(改进点信号弱)
+- **节点 4 误报**:commit 句式相似但 file path 完全不重叠 → 可能是不同模块独立工作,非 SOP 重复;反之亦然。两类信号都触发才发 nudge。
 
 ## 触发场景
 

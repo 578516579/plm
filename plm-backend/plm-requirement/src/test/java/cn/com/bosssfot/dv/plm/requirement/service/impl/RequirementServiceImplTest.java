@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
@@ -29,6 +30,7 @@ import cn.com.bosssfot.dv.plm.project.domain.Project;
 import cn.com.bosssfot.dv.plm.project.mapper.ProjectMapper;
 import cn.com.bosssfot.dv.plm.requirement.domain.Requirement;
 import cn.com.bosssfot.dv.plm.requirement.mapper.RequirementMapper;
+import cn.com.bosssfot.dv.plm.requirement.service.IRequirementReviewService;
 
 /**
  * RequirementServiceImpl 单元测试
@@ -47,6 +49,12 @@ class RequirementServiceImplTest {
 
     @Mock
     private ProjectMapper projectMapper;
+
+    @Mock
+    private IRequirementReviewService requirementReviewService;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private RequirementServiceImpl service;
@@ -205,10 +213,11 @@ class RequirementServiceImplTest {
     class StatusMachineTests {
 
         @Test
-        @DisplayName("合法转换 00→01（待评审→开发中）")
+        @DisplayName("合法转换 00→01（待评审→开发中）— PRD §F2.4 前置:已有通过评审")
         void legal_00_to_01() {
             Requirement old = existingReq("00");
             when(requirementMapper.selectRequirementById(1L)).thenReturn(old);
+            when(requirementReviewService.hasPassedReview(1L)).thenReturn(true);
             when(requirementMapper.updateRequirement(any())).thenReturn(1);
 
             Requirement upd = updateReq(1L, "01");
@@ -218,6 +227,22 @@ class RequirementServiceImplTest {
                 assertThat(rows).isEqualTo(1);
             }
             verify(requirementMapper).updateRequirement(any());
+            verify(requirementReviewService).hasPassedReview(1L);
+        }
+
+        @Test
+        @DisplayName("评审前置失败:00→01 但无通过评审 → 抛 701（PRD §F2.4 新增 2026-05-25）")
+        void illegal_00_to_01_no_review() {
+            Requirement old = existingReq("00");
+            when(requirementMapper.selectRequirementById(1L)).thenReturn(old);
+            when(requirementReviewService.hasPassedReview(1L)).thenReturn(false);
+
+            Requirement upd = updateReq(1L, "01");
+            assertThatThrownBy(() -> service.updateRequirement(upd))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("评审")
+                .hasMessageContaining("通过");
+            verify(requirementMapper, never()).updateRequirement(any());
         }
 
         @Test

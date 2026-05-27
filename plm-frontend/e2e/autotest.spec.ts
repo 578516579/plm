@@ -54,11 +54,11 @@ test.describe.serial('Autotest 模块 E2E (PRD §F4.5)', () => {
   })
 
   // === 场景 1: 列表加载 + 4 统计卡 ===
-  test('TC-AT-E001 列表加载 + 4 统计卡渲染', async ({ page, context }) => {
-    await context.addCookies([
-      { name: 'Admin-Token', value: token, url: 'http://localhost' }
-    ])
-    await page.goto('/business/autotest/index')
+  test('TC-AT-E001 列表加载 + 4 统计卡渲染', async ({ page, context, request }) => {
+    // 用 loginAsAdmin 给 fresh context 注入完整 cookie + 触发 fresh login
+    // (vue-router 动态路由场景下,旧 context.addCookies 拿不到菜单 → /business/autotest 404)
+    await loginAsAdmin(request, context)
+    await page.goto('/business/autotest')
 
     // 页面标题 (h2 page-title 含 emoji)
     await expect(page.locator('h2.page-title')).toContainText('自动化测试', { timeout: 10_000 })
@@ -74,11 +74,9 @@ test.describe.serial('Autotest 模块 E2E (PRD §F4.5)', () => {
   })
 
   // === 场景 2: 新增套件 (UI Dialog 全字段) ===
-  test('TC-AT-E002 新增套件 — Dialog 全字段创建', async ({ page, context }) => {
-    await context.addCookies([
-      { name: 'Admin-Token', value: token, url: 'http://localhost' }
-    ])
-    await page.goto('/business/autotest/index')
+  test('TC-AT-E002 新增套件 — Dialog 全字段创建', async ({ page, context, request }) => {
+    await loginAsAdmin(request, context)
+    await page.goto('/business/autotest')
     await expect(page.locator('.el-table')).toBeVisible({ timeout: 10_000 })
 
     // 点 "新增套件"
@@ -136,12 +134,10 @@ test.describe.serial('Autotest 模块 E2E (PRD §F4.5)', () => {
   })
 
   // === 场景 3: AI 生成脚本 ===
-  test('TC-AT-E003 AI 生成脚本 → toast + scriptContent 非空', async ({ page, context }) => {
+  test('TC-AT-E003 AI 生成脚本 → toast + scriptContent 非空', async ({ page, context, request }) => {
     test.skip(!createdAutotestId, '依赖 TC-AT-E002 创建的套件')
-    await context.addCookies([
-      { name: 'Admin-Token', value: token, url: 'http://localhost' }
-    ])
-    await page.goto('/business/autotest/index')
+    await loginAsAdmin(request, context)
+    await page.goto('/business/autotest')
     await expect(page.locator('.el-table')).toBeVisible({ timeout: 10_000 })
 
     // 表格里点中新建的那行 (highlight-current-row + @current-change 触发 current 选中)
@@ -172,7 +168,7 @@ test.describe.serial('Autotest 模块 E2E (PRD §F4.5)', () => {
   })
 
   // === 场景 4: 立即执行 + RCA ===
-  test('TC-AT-E004 立即执行 (status 01 前置) → 统计 3 项 + 失败时 RCA 可见', async ({ page, context }) => {
+  test('TC-AT-E004 立即执行 (status 01 前置) → 统计 3 项 + 失败时 RCA 可见', async ({ page, context, request }) => {
     test.skip(!createdAutotestId, '依赖 TC-AT-E002 创建的套件')
 
     // API 旁路: 先把状态切到 01 已激活 (绕 UI,前端 runNow 自检要求 status==='01')
@@ -182,10 +178,8 @@ test.describe.serial('Autotest 模块 E2E (PRD §F4.5)', () => {
     })
     expect(u.code, 'PUT status=01 应成功').toBe(200)
 
-    await context.addCookies([
-      { name: 'Admin-Token', value: token, url: 'http://localhost' }
-    ])
-    await page.goto('/business/autotest/index')
+    await loginAsAdmin(request, context)
+    await page.goto('/business/autotest')
     await expect(page.locator('.el-table')).toBeVisible({ timeout: 10_000 })
 
     // 选中那行

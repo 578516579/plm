@@ -22,6 +22,8 @@ public class Prd extends BaseEntity
     private Long prdId;
     @Excel(name = "PRD编号") private String prdNo;
     @Excel(name = "项目ID") private Long projectId;
+    /** 反向关联需求 (FK→tb_requirement.requirement_id, 可空) — 2026-05-25 新增，PRD §F2.2 */
+    @Excel(name = "关联需求ID") private Long requirementId;
     @Excel(name = "功能名称") private String title;
     private String description;
     @Excel(name = "业务场景") private String sceneTemplate;
@@ -42,6 +44,8 @@ public class Prd extends BaseEntity
     public void setPrdNo(String v) { this.prdNo = v; }
     public Long getProjectId() { return projectId; }
     public void setProjectId(Long v) { this.projectId = v; }
+    public Long getRequirementId() { return requirementId; }
+    public void setRequirementId(Long v) { this.requirementId = v; }
     public String getTitle() { return title; }
     public void setTitle(String v) { this.title = v; }
     public String getDescription() { return description; }

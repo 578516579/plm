@@ -44,8 +44,8 @@
                 <el-form-item label="业务线" prop="businessLine">
                   <el-select v-model="form.businessLine" placeholder="选择业务线" style="width: 100%">
                     <el-option label="植保服务" value="plant_protection" />
-                    <el-option label="精准农业" value="precision_ag" />
-                    <el-option label="农资流通" value="ag_supply" />
+                    <el-option label="精准农业" value="precision_farming" />
+                    <el-option label="农资流通" value="agri_supply" />
                     <el-option label="质量溯源" value="traceability" />
                   </el-select>
                 </el-form-item>
@@ -54,9 +54,9 @@
                 <el-form-item label="项目类型" prop="inceptionType">
                   <el-select v-model="form.inceptionType" placeholder="选择类型" style="width: 100%">
                     <el-option label="新产品研发" value="new_product" />
-                    <el-option label="版本迭代" value="version_iter" />
-                    <el-option label="技术重构" value="tech_refactor" />
-                    <el-option label="平台建设" value="platform_build" />
+                    <el-option label="版本迭代" value="iteration" />
+                    <el-option label="技术重构" value="refactor" />
+                    <el-option label="平台建设" value="platform" />
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -255,7 +255,7 @@ const listLoading = ref(false)
 
 const emptyForm = (): Inception => ({
   projectName: '',
-  businessLine: 'precision_ag',
+  businessLine: 'precision_farming',
   inceptionType: 'new_product',
   background: '',
   estimatedDurationMonths: 6,
@@ -292,8 +292,8 @@ const statusTag = computed(() => statusTagFor(current.status))
 function businessLineLabel(v?: string) {
   return ({
     plant_protection: '植保服务',
-    precision_ag: '精准农业',
-    ag_supply: '农资流通',
+    precision_farming: '精准农业',
+    agri_supply: '农资流通',
     traceability: '质量溯源'
   } as Record<string, string>)[v || ''] || v || '-'
 }
@@ -301,9 +301,9 @@ function businessLineLabel(v?: string) {
 function inceptionTypeLabel(v?: string) {
   return ({
     new_product: '新产品研发',
-    version_iter: '版本迭代',
-    tech_refactor: '技术重构',
-    platform_build: '平台建设'
+    iteration: '版本迭代',
+    refactor: '技术重构',
+    platform: '平台建设'
   } as Record<string, string>)[v || ''] || v || '-'
 }
 

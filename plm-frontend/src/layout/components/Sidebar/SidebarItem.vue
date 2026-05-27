@@ -83,6 +83,14 @@ function resolvePath(routePath: string, routeQuery?: string): string | { path: s
   if (isExternal(props.basePath)) {
     return props.basePath
   }
+  // 业务子菜单 path 为绝对路径(/business/<entity>,见 menu-path-absolute-business-prefix.sql):
+  // 直接使用,不拼父级 basePath,否则 /phase-plan + /business/x → /phase-plan/business/x 与已注册路由不匹配 → 404
+  if (routePath.startsWith('/')) {
+    if (routeQuery) {
+      return { path: routePath, query: JSON.parse(routeQuery) }
+    }
+    return routePath
+  }
   if (routeQuery) {
     const query = JSON.parse(routeQuery)
     return { path: getNormalPath(props.basePath + '/' + routePath), query: query }

@@ -34,6 +34,15 @@ cd plm-backend
 "$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < sql/quartz.sql
 # Verify: 31 tables, sys_user shows admin/若依 and ry/若依 with correct CJK.
 
+# --- Business modules + menu regroup (run in order; idempotent) ---
+for f in sql/business-*.sql; do
+  "$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < "$f"
+done
+"$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < sql/menu-regroup-by-phase.sql   # 8 阶段分组重组
+"$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < sql/menu-fill-missing-8.sql     # 补 8 个 PRD-aligned 缺菜单
+# Verify: 10 可见一级目录 (2400/2500 + 2900-2970), 旧 2000 业务管理 visible=1
+# Rollback: 对应 *-rollback.sql 反向逆操作
+
 # === 2. Backend build (Maven needs JDK 17, NOT system default) ===
 export JAVA_HOME="/c/Program Files/Microsoft/jdk-17.0.18.8-hotspot"   # adjust per machine
 cd plm-backend
@@ -67,7 +76,7 @@ All sensitive yml values are wrapped in `${VAR:default}` placeholders. The defau
 
 Spring Boot does not auto-read `.env` files. Inject via IDE run config, shell `export`, docker-compose `env_file:`, or K8s Secret. The `.env` file itself is gitignored (see root `.gitignore`).
 
-The 6 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](memory/project-quirks.md)):
+The 8 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](memory/project-quirks.md)):
 
 | # | Symptom | Fix | 复发 |
 |---|---|---|---|
@@ -77,6 +86,8 @@ The 6 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](m
 | 4 | `Failed to resolve import @/utils/ruoyi` on certain frontend pages | `vite/plugins/auto-import.ts` was missed during rename — re-run sed there | 1 |
 | 5 | `mvn install` fails: `Unable to rename '.../plm-admin.jar' to '.../plm-admin.jar.original'` | Backend 在跑锁住 jar — 先 `taskkill //PID <pid> //F` 再 build。从 V2 quirks (Q-BUILD-02) promote, 复发 9+ | 9+ |
 | 6 | Backend 抛 ServiceException 字符串但 grep 当前代码无此字符串 | Stale JVM 进程加载旧字节码(切 branch 后没重启)— 对比 `ls -la <jar>` mtime vs `wmic process get CreationDate` startTime,kill + rebuild | 1 |
+| 7 | `business-*.sql` 漏写 `sys_menu` INSERT → 前端无菜单入口、功能不可达 | `.githooks/pre-commit` lint 1 自动拦截(缺 `INSERT INTO sys_menu`);仅扩字典/子表的脚本顶部加 `-- @no-menu: <原因>` 豁免。Q-DB-04,首例 81bc1ba | 1+ |
+| 8 | `sys_menu` path 列改动后,前端 `/business/<entity>` 按钮 404 大面积复发 | `.githooks/pre-commit` lint 2 自动 grep `plm-frontend/src/views/**` 给清单;跳转必须经 `src/utils/businessRoute.ts` SSoT,**禁止硬编码 `router.push('/business/...)`**。Q-BIZ-04,首例 5c4e70d+7b14807 | 2+ |
 
 ## Architecture (where things live)
 
@@ -119,9 +130,13 @@ The P0 rename deliberately left these alone — **do NOT mass-rewrite them witho
 - `README.md`, `LICENSE`, `doc/若依环境使用手册.docx` → upstream framework docs, retained for future upgrades.
 - Code-generator Velocity templates in [plm-generator/src/main/resources/vm/](plm-backend/plm-generator/src/main/resources/vm/) → content already updated by the rename; structure preserved so the in-app generator at `/tool/gen` still works.
 
-## Available skill: `ruoyi-bootstrap`
+## Available skills
 
-A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the entire RuoYi-scaffold-to-named-project flow (the very flow that built this repo's commits `4e9777d → 2679a61 → e2e37c3`). It also ships a `Project` CRUD module template that can be dropped in via Phase 7. Trigger it on future fresh-RuoYi imports by saying "用若依新建项目", "把若依改名", or similar.
+**`ruoyi-bootstrap`** — A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the entire RuoYi-scaffold-to-named-project flow (the very flow that built this repo's commits `4e9777d → 2679a61 → e2e37c3`). It also ships a `Project` CRUD module template that can be dropped in via Phase 7. Trigger it on future fresh-RuoYi imports by saying "用若依新建项目", "把若依改名", or similar.
+
+**`plm-module-uplift`** — 固化「业务模块 🟡 空壳 → 🟢 PRD-aligned」SOP(proposal 0015;2026-05-25 单日 6 模块同流程显形)。装在 `~/.claude/skills/plm-module-uplift/`,模板从真实 🟢 模块(apidesign / ued)抽取。触发词:「把 X 模块从 🟡 改成 🟢」「🟡→🟢 落地」「uplift module」或直接说 🟡 模块名(manual-impl / manual-ops / analytics / ai-agent / openspec / pipeline / feature-flag / dora)。**只搭骨架,业务逻辑仍要人写**。与 ruoyi-bootstrap 区分:后者脚手架→正名(P0 一次性),本 skill 空壳→PRD-aligned(N 次复用)。
+
+**`integration-connector`** — 固化「接入第三方系统做数据同步(集成连接器)」SOP(proposal 0019;飞书/GitLab/禅道第 3 次同范式)。装在 `~/.claude/skills/integration-connector/`,模板从真实禅道集成(commit 9d37d03)抽取:ConnectorAdapter + WebhookController + Inbound/OutboundSyncService(防回环三道防线,见 [Q-INTEG-01](memory/project-quirks.md))+ 业务 Event 钩子 + 设计文档模板。触发词:「接入 XX 第三方系统做同步」「双向同步 <系统名>」「integrate <system>」。与 plm-module-uplift **正交**(那个造业务模块,本 skill 接外部系统)。
 
 ## 🎯 PRD/原型驱动开发 — 单一事实来源 (SSoT)
 
@@ -136,9 +151,10 @@ A skill is installed at `~/.claude/skills/ruoyi-bootstrap/` that automates the e
 4. 详细硬规则见 [.claude/rules.md §M](.claude/rules.md)
 
 **实现进度速览** (详 [PRD-MAPPING.md §1](PRD-MAPPING.md)):
-- 🟢 PRD-aligned 17 个: inception / project / competitive / requirement / prd / **ued** / sprint / task / defect / testcase / document / submission / release / testplan / testreport / apidoc / manual-product
-- 🟡 空壳 13 个: arch / dbdesign / apidesign / testdata / autotest / manual-impl / manual-ops / analytics / dashboard / ai-agent / openspec / pipeline / feature-flag / dora
+- 🟢 PRD-aligned **31 个(全部业务模块)**: 规划 inception/project/competitive/dashboard · 需求设计 requirement/prd/ued/arch/dbdesign/apidesign · 研发 sprint/task/document · 测试 testplan/testcase/testdata/submission/autotest/defect/testreport · 交付运维 apidoc/manual-product/manual-impl/manual-ops/pipeline/release/feature-flag/dora · 分析 analytics · AI openspec/ai-agent
+- 🟡 空壳 **0 个**（2026-05-27 末批 8 模块 manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora 全部 🟢，单测 200 case 全绿）
 - 🔴 缺模块 0 个
+- 🆕 v0.x: MCP / Integration（Proposal 0007，真实接入中）
 
 ## Rules & playbooks
 
@@ -155,6 +171,8 @@ Three layers of project-wide rules — read these before non-trivial work:
 Tool-enforced:
 - [.editorconfig](.editorconfig) — auto-applied indent/charset/EOL by editors
 - [.githooks/commit-msg](.githooks/commit-msg) — Conventional Commits validation. **First-time setup per clone**: `git config core.hooksPath .githooks`
+- [.githooks/pre-commit](.githooks/pre-commit) — `business-*.sql` 模板 lint(必含 `sys_menu` INSERT,否则加 `-- @no-menu` 豁免)+ `sys_menu` path 改动→前端硬编码 `/business/` grep。proposal 0016 落地。绕过:`git commit --no-verify`(计入 signals)。
+- [.githooks/pre-push](.githooks/pre-push) — 分支名 `<type>/<desc>` 校验 + 禁止直推 `main`/`release/*`。
 - [.claude/settings.json](.claude/settings.json) — Claude Code hooks (Stop / PreToolUse / UserPromptSubmit) for runtime reminders. Design + troubleshooting in [.claude/hooks-design.md](.claude/hooks-design.md).
 
 ## Self-evolution loop

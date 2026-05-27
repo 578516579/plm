@@ -156,9 +156,10 @@ function generateRoutes(routes: any, basePath = '', prefixTitle: string[] = []):
   let res: SearchItem[] = []
   for (const r of routes) {
     if (r.hidden) { continue }
-    const p = r.path.length > 0 && r.path[0] === '/' ? r.path : '/' + r.path
+    const isAbsolute = r.path.length > 0 && r.path[0] === '/'
     const data: SearchItem = {
-      path: !isHttp(r.path) ? getNormalPath(basePath + p) : r.path,
+      // 绝对路径子菜单(/business/<entity>)直接用,不拼 basePath(与 SidebarItem.resolvePath 一致),否则 → /phase-plan/business/x 404
+      path: isHttp(r.path) ? r.path : (isAbsolute ? r.path : getNormalPath(basePath + '/' + r.path)),
       title: [...prefixTitle],
       icon: ''
     }
