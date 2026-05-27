@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.project.domain.Project;
@@ -55,6 +56,9 @@ class RequirementServiceImplTest {
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private AiService aiService;
 
     @InjectMocks
     private RequirementServiceImpl service;
@@ -325,6 +329,84 @@ class RequirementServiceImplTest {
             assertThatThrownBy(() -> service.updateRequirement(upd))
                 .isInstanceOf(ServiceException.class)
                 .hasMessageContaining("关联项目不存在");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // AI 优先级初评 (PRD §F2.1)
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("AI 优先级初评 (PRD §F2.1)")
+    class AiEvaluateTests {
+
+        private void stubFound(Requirement old) {
+            when(requirementMapper.selectRequirementById(1L)).thenReturn(old);
+            when(requirementMapper.updateRequirement(any())).thenReturn(1);
+        }
+
+        @Test
+        @DisplayName("含「紧急/崩溃」关键词 → high（并触发一次 AiService 审计）")
+        void evalHighByKeyword() {
+            Requirement old = existingReq("00");
+            old.setTitle("紧急:支付系统崩溃");
+            old.setPriority("02");
+            stubFound(old);
+            try (MockedStatic<SecurityUtils> m = Mockito.mockStatic(SecurityUtils.class)) {
+                m.when(SecurityUtils::getUsername).thenReturn("admin");
+                Requirement res = service.aiEvaluate(1L);
+                assertThat(res.getAiEvaluation()).isEqualTo("high");
+            }
+            verify(aiService).chat(any());
+        }
+
+        @Test
+        @DisplayName("P0 优先级（无关键词）→ high")
+        void evalHighByPriority() {
+            Requirement old = existingReq("00");
+            old.setTitle("普通需求");
+            old.setPriority("00");
+            stubFound(old);
+            try (MockedStatic<SecurityUtils> m = Mockito.mockStatic(SecurityUtils.class)) {
+                m.when(SecurityUtils::getUsername).thenReturn("admin");
+                assertThat(service.aiEvaluate(1L).getAiEvaluation()).isEqualTo("high");
+            }
+        }
+
+        @Test
+        @DisplayName("含「优化/性能」关键词 → medium")
+        void evalMediumByKeyword() {
+            Requirement old = existingReq("00");
+            old.setTitle("后台列表性能优化");
+            old.setPriority("02");
+            stubFound(old);
+            try (MockedStatic<SecurityUtils> m = Mockito.mockStatic(SecurityUtils.class)) {
+                m.when(SecurityUtils::getUsername).thenReturn("admin");
+                assertThat(service.aiEvaluate(1L).getAiEvaluation()).isEqualTo("medium");
+            }
+        }
+
+        @Test
+        @DisplayName("普通需求 + P2 → low")
+        void evalLowDefault() {
+            Requirement old = existingReq("00");
+            old.setTitle("增加一个导出按钮");
+            old.setPriority("02");
+            stubFound(old);
+            try (MockedStatic<SecurityUtils> m = Mockito.mockStatic(SecurityUtils.class)) {
+                m.when(SecurityUtils::getUsername).thenReturn("admin");
+                assertThat(service.aiEvaluate(1L).getAiEvaluation()).isEqualTo("low");
+            }
+        }
+
+        @Test
+        @DisplayName("需求不存在 → 404，且不调用 AiService")
+        void notFound() {
+            when(requirementMapper.selectRequirementById(99L)).thenReturn(null);
+            assertThatThrownBy(() -> service.aiEvaluate(99L))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("需求不存在");
+            verify(aiService, never()).chat(any());
         }
     }
 

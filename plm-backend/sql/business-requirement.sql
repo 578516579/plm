@@ -21,6 +21,7 @@ CREATE TABLE tb_requirement (
     status            VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT '状态（字典 biz_req_status）',
     assignee_user_id  BIGINT(20)    DEFAULT NULL             COMMENT '指派给的用户 FK→sys_user.user_id',
     review_note       VARCHAR(500)  DEFAULT NULL             COMMENT '评审简要纪要（状态推进时填）',
+    ai_evaluation     VARCHAR(20)   DEFAULT NULL             COMMENT 'AI 优先级初评 high/medium/low（PRD §F2.1，非字典前端约定值）',
     create_by         VARCHAR(64)   DEFAULT ''               COMMENT '创建者',
     create_time       DATETIME      DEFAULT NULL             COMMENT '创建时间',
     update_by         VARCHAR(64)   DEFAULT ''               COMMENT '更新者',

@@ -95,6 +95,15 @@ public class RequirementController extends BaseController
         return toAjax(requirementService.deleteRequirementByIds(requirementIds));
     }
 
+    /** AI 优先级初评（PRD §F2.1 req-priority-flow）— 根据需求内容评估 high/medium/low */
+    @PreAuthorize("@ss.hasPermi('business:requirement:edit')")
+    @Log(title = "需求-AI优先级初评", businessType = BusinessType.OTHER)
+    @PostMapping("/ai/evaluate/{id}")
+    public AjaxResult aiEvaluate(@PathVariable("id") Long id)
+    {
+        return success(requirementService.aiEvaluate(id));
+    }
+
     // ─────────────────────────────────────────────────────────────────────
     // PRD §F2.4 需求评审管理（2026-05-25 新增）
     // ─────────────────────────────────────────────────────────────────────
