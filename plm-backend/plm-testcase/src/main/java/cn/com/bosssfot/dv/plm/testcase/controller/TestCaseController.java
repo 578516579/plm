@@ -72,10 +72,10 @@ public class TestCaseController extends BaseController
         return toAjax(testcaseService.executeTestCase(testcaseId, req.getStatus(), req.getActualResult()));
     }
 
-    /** AI 生成用例要素(前置条件/步骤/预期结果)— PRD §F3.5 */
+    /** AI 生成用例要素(前置条件/步骤/预期结果)— PRD §F3.5;路径对齐全模块 /ai/generate/{id} 约定 */
     @PreAuthorize("@ss.hasPermi('business:testcase:edit')")
-    @Log(title = "测试用例-AI生成", businessType = BusinessType.UPDATE)
-    @PostMapping("/{testcaseId}/ai-generate")
+    @Log(title = "测试用例-AI生成", businessType = BusinessType.OTHER)
+    @PostMapping("/ai/generate/{testcaseId}")
     public AjaxResult aiGenerate(@PathVariable Long testcaseId) {
         return success(testcaseService.aiGenerate(testcaseId));
     }
