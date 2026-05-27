@@ -45,7 +45,7 @@
         </el-table-column>
         <el-table-column label="优先级" width="90" align="center">
           <template #default="{ row }">
-            <el-tag :type="priorityTag(row.priority)" size="small" effect="dark">{{ row.priority || '-' }}</el-tag>
+            <el-tag :type="priorityTag(row.priority)" size="small" effect="dark">{{ priorityLabel(row.priority) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100" align="center">
@@ -93,19 +93,19 @@
           <el-col :span="12">
             <el-form-item label="来源" prop="source">
               <el-select v-model="form.source" style="width: 100%">
-                <el-option label="客户反馈" value="customer" />
-                <el-option label="内部提案" value="internal" />
-                <el-option label="竞品分析" value="competitive" />
-                <el-option label="运营数据" value="data" />
+                <el-option label="客户反馈" value="01" />
+                <el-option label="内部提案" value="02" />
+                <el-option label="运营数据" value="03" />
+                <el-option label="竞品分析" value="04" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="优先级" prop="priority">
               <el-select v-model="form.priority" style="width: 100%">
-                <el-option label="P0 - 紧急" value="P0" />
-                <el-option label="P1 - 重要" value="P1" />
-                <el-option label="P2 - 一般" value="P2" />
+                <el-option label="P0 - 紧急" value="00" />
+                <el-option label="P1 - 重要" value="01" />
+                <el-option label="P2 - 一般" value="02" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -247,7 +247,7 @@ const aiLoading = ref(false)
 const listLoading = ref(false)
 
 const emptyForm = (): Requirement => ({
-  projectId: 0, title: '', description: '', source: 'customer', priority: 'P1', status: '00'
+  projectId: 0, title: '', description: '', source: '01', priority: '01', status: '00'
 })
 const form = reactive<Requirement>(emptyForm())
 const rules = {
@@ -271,13 +271,16 @@ const statusTagFor = (s?: string) => statusMap[s || ''] || { label: s || '-', ty
 const statusCount = (s: string) => statusCounts.value[s] || 0
 
 function sourceLabel(v?: string) {
-  return ({ customer: '客户反馈', internal: '内部提案', competitive: '竞品分析', data: '运营数据' } as Record<string,string>)[v || ''] || v || '-'
+  return ({ '01': '客户反馈', '02': '内部提案', '03': '运营数据', '04': '竞品分析' } as Record<string,string>)[v || ''] || v || '-'
 }
 function sourceTag(v?: string): any {
-  return ({ customer: 'primary', internal: 'success', competitive: 'warning', data: 'info' } as Record<string,string>)[v || ''] || 'info'
+  return ({ '01': 'primary', '02': 'info', '03': 'warning', '04': 'success' } as Record<string,string>)[v || ''] || 'info'
+}
+function priorityLabel(p?: string) {
+  return ({ '00': 'P0', '01': 'P1', '02': 'P2' } as Record<string,string>)[p || ''] || p || '-'
 }
 function priorityTag(p?: string): any {
-  return ({ P0: 'danger', P1: 'warning', P2: 'info' } as Record<string,string>)[p || ''] || 'info'
+  return ({ '00': 'danger', '01': 'warning', '02': 'info' } as Record<string,string>)[p || ''] || 'info'
 }
 function aiEvalLabel(v?: string) {
   return ({ high: '高价值', medium: '中价值', low: '低价值' } as Record<string,string>)[v || ''] || v || '-'

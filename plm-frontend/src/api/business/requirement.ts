@@ -10,9 +10,9 @@ export interface Requirement {
   projectId: number
   title: string
   description?: string
-  source?: string  // customer / internal / competitive / data
-  priority?: string  // P0 / P1 / P2
-  status?: string  // 00 / 01 / 02 / 03
+  source?: string  // biz_req_source: 01 客户反馈 / 02 内部提案 / 03 运营数据 / 04 竞品分析
+  priority?: string  // biz_req_priority: 00 P0紧急 / 01 P1重要 / 02 P2一般
+  status?: string  // biz_req_status: 00 待评审 / 01 开发中 / 02 已完成 / 03 已取消
   aiEvaluation?: string  // high / medium / low
   assigneeUserId?: number
   reviewNote?: string
