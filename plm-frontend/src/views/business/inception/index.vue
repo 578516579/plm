@@ -247,6 +247,7 @@ import {
   listInception, addInception, updateInception, delInception,
   aiGenerateInception, getInception, type Inception, type InceptionQuery
 } from '@/api/business/inception'
+import { businessLineLabel, inceptionTypeLabel, statusTagFor } from './inceptionDict'
 
 const formRef = ref()
 const saving = ref(false)
@@ -274,38 +275,7 @@ const list = ref<Inception[]>([])
 const total = ref(0)
 const queryParams = reactive<InceptionQuery>({ pageNum: 1, pageSize: 10, projectName: '' })
 
-// === 状态标签映射 ===
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿',   type: 'info' },
-  '01': { label: '已提交', type: 'warning' },
-  '02': { label: '审批中', type: 'primary' },
-  '03': { label: '已批准', type: 'success' },
-  '04': { label: '已驳回', type: 'danger' }
-}
-
-function statusTagFor(s?: string) {
-  return statusMap[s || '00'] || { label: s || '-', type: 'info' }
-}
-
 const statusTag = computed(() => statusTagFor(current.status))
-
-function businessLineLabel(v?: string) {
-  return ({
-    plant_protection: '植保服务',
-    precision_farming: '精准农业',
-    agri_supply: '农资流通',
-    traceability: '质量溯源'
-  } as Record<string, string>)[v || ''] || v || '-'
-}
-
-function inceptionTypeLabel(v?: string) {
-  return ({
-    new_product: '新产品研发',
-    iteration: '版本迭代',
-    refactor: '技术重构',
-    platform: '平台建设'
-  } as Record<string, string>)[v || ''] || v || '-'
-}
 
 // === 简化 Markdown 渲染 (避免引入大依赖) ===
 const renderedProposal = computed(() => {
