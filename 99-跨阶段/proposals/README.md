@@ -75,6 +75,7 @@ proposed    完成填写、关联数据，等 review
 | [0023](0023-test-orchestration-self-evolution.md) | 测试编排自进化系统(test-orchestrator agent + plm-test-orchestrate skill + §G.5 rule + 测试工作流.md + signals 测试段) | **merged → tracking** (User-requested) | 2026-05-27 | 用户明确请求(本会话:"增加测试 agent+skill+rule+workflow,能自己做和进化")| fb95e50 + 92f97de | 2026-05-27 → 06-24 |
 | [0024](0024-product-design-orchestration.md) | 产品设计编排自进化系统(product-orchestrator + prd-author + ux-prototype-aligner agent + plm-product-design skill + §M.9 rule + 产品设计工作流.md + signals 产品设计段) | **merged → tracking** (User-requested)| 2026-05-27 | 用户明确请求(本会话:"增加产品经理 agent+分管子agent+skill+rule+workflow,产品设计能自己做和进化",0023 孪生)| 86bd488 + 619ac06 | 2026-05-27 → 06-24 |
 | [0025](0025-db-design-orchestration.md) | 数据库设计编排自进化系统(db-orchestrator + db-schema-reviewer agent + plm-db-design skill + §M.10 rule + 数据库设计工作流.md + signals DB 段;复用 db-modeler/db-ops 等 8 agent) | **merged → tracking** (User-requested)| 2026-05-27 | 用户明确请求(本会话:"增加数据库设计工程师 agent+分管子agent+skill+rule+workflow,数据库设计能自己做和进化",0023/0024 同范式第 3 例)| 53ab1d1 + b2634e9 | 2026-05-27 → 06-24 |
+| [0026](0026-ued-design-orchestration.md) | UED 设计编排自进化系统(ued-orchestrator + ued-designer + accessibility-reviewer agent + plm-ued-design skill + §N.10 rule + UED设计工作流.md + signals UED 段;复用 ux-prototype-aligner) | **implementing**(User-requested,9 artifacts 已落,未 commit)| 2026-05-27 | 用户明确请求(本会话:"UED 设计流程总结成 agent+子agent+skill+rule+workflow",0023/0024/0025 同范式第 4 例)| 待 commit(§N.10 与 db §M.10 同文件,待用户定边界)| 2026-05-27 → 06-24 |
 
 ---
 

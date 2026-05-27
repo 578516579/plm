@@ -569,6 +569,32 @@ PR 涉及 UI 改动时，PR 描述中包含 UED规范.md §13 的 8 项自检 Ch
 
 现有 CSS 类无法覆盖新需求时：先检查 UED规范.md §附录A；没有合适类时，先在 UED规范.md 对应章节注册（先改规范，再写代码），新类命名遵循 `agriplm.css` 缩写风格。
 
+### N.10 UED 设计编排与自进化（MUST — UED Design Orchestration）
+
+§N.1~N.9 是 UED 的"硬规则",但**整个 UED 设计过程**(信息架构怎么排/交互流怎么走/用哪些 Token 与组件/原型对不对得上/无障碍达不达标/算不算 UED 就绪/怎么进化)由 **`ued-orchestrator` agent + `plm-ued-design` skill** 统一编排。proposal 0026 落地。本节与 §M.9(产品设计)、§M.10(数据库设计)是 Phase 02 设计期的**三个平级维度**:product 出字段/状态/错误码,db 出 schema,UED 出 UI 规格;三者各自就绪 Gate 都过 = **Phase 02→03 准入**。
+
+**N.10.1 UED 设计漏斗分层（MUST）** — 从一句 UI 需求收敛到可 100% 追溯到 UED规范.md + 原型 的规格,越下层越收敛:
+
+| 层 | 子 agent | 何时必做 |
+|---|---|---|
+| U1 信息架构 | `ued-designer`(+`system-architect`) | 新页面/新模块入口 — 导航位置/分组/Tab |
+| U2 交互流 | `ued-designer` | 有交互的页面 — 操作路径/hover/focus/三态 |
+| U3 视觉/组件 | `ued-designer` | 任何 UI 呈现 — Token/栅格/按钮/徽章/表单,选自 UED规范库 |
+| U4 原型保真 | `ux-prototype-aligner` | 任何 UI 呈现 — 表单/徽章/AI 按钮 ↔ 原型 + §N 守门 |
+| U5 无障碍 | `accessibility-reviewer` | 任何 UI 呈现 — WCAG AA 对比度/focus/label/不靠颜色 |
+| U6 交付 | `technical-writer` | UED §12.3 设计交付 6 项 DoD |
+
+铁律:**视觉决策(颜色/间距/组件)必须指得出 UED规范 § + 原型出处**(§N.1/N.9);规范没有的颜色/组件**先走 §N.9 注册再用**,原型没有的页面回 §M.1,**禁前端自由发挥**;UI 规格 commit 先于前端实现 commit(`ued_handoff_lag`=0)。
+
+**N.10.2 编排总管（MUST）** — 满足下列任一,Claude **必须**先走 `ued-orchestrator`(出漏斗计划+DAG)再分派,不许散乱手设计 UI:
+- UI 设计任务跨 ≥ 3 个子 agent
+- 用户说"这页面/模块 UI 怎么设计 / 信息架构怎么排 / 交互流怎么走 / 用什么组件 / Phase 02 UED 准入 / 对得上 UED 规范吗"
+- 子 agent **不能再 spawn 子 agent**:总管出 DAG,主 Claude 按序调。
+
+**N.10.3 UED 设计就绪 Gate 裁决（MUST）** — 判"UED 设计就绪 / 可进前端开发"的充要条件:**Token 合规**(颜色全走 `var(--xx)` 无裸 hex §N.1 / 间距 4px 倍数 §N.6) · **组件选自库**(用 UED规范 附录A CSS 类,新类已走 §N.9 注册) · **状态徽章正确**(色对 PRD-MAPPING §3,§N.2) · **AI 区分**(AI 触发用 `.btn-ai`✨,§N.3) · **三态齐全**(空/载/错,§N.5) · **原型保真**(ux-prototype-aligner 确认无 §N 违规) · **无障碍达标**(accessibility-reviewer 确认 WCAG AA:对比度/focus/label/不靠颜色,§11) · **设计交付 DoD**(UED §12.3 的 6 项) · **与产品设计一致**(状态/字段对 prd-author 的 PRD-MAPPING §2/§3,不另起状态)。任一不满足 = **驳回**,指明回哪个 agent 修,**禁**"先让前端写着 UED 回头补"、**禁**前端凭感觉造 UI(§N.1/N.9)。
+
+**N.10.4 自进化（MUST）** — 每轮 UED 设计编排收口必须沉淀 UED signals(见 [signals UED 设计编排段](../99-跨阶段/signals/README.md)):`ued_token_violation_count`(裸 hex/非 4px 间距/匿名颜色,应=0)、`component_reuse_gap`(没用库组件/用未登记新类,应趋 0)、`a11y_violation_count`(WCAG AA 违规)、`three_state_miss_count`(空/载/错缺失,应=0)、`ued_handoff_lag`(前端实现先于 UED 规格就绪,应=0)。触发提案:同类 token 违规月 ≥3 → 加 stylelint/PreToolUse hook 提案;a11y 反复某项 → axe-core 纳入 E2E 提案;反复用未登记组件 → UED规范补组件章节提案;三态反复遗漏 → 组件模板默认带骨架提案。详见 [UED设计工作流.md](../99-跨阶段/UED设计工作流.md)。
+
 ---
 
 ## 索引：相关规则文件
