@@ -5,7 +5,7 @@
 | 版本 | **v3.0** |
 | 框架 | Playwright 1.60+ (Chromium) |
 | 落地日期 | 2026-05-16（v1.0） / 2026-05-17（v2.0 全 13 模块） / 2026-05-27（v3.0 全 31 模块） |
-| 当前总用例数 | **251 case (37 spec 文件)** — 业务 229 + 跨切 22 |
+| 当前总用例数 | **277 case (37 spec 文件)** — 业务 255 + 跨切 22 |
 | 跨层 SSoT | 完整覆盖表（E2E + 后端单测）见 [测试计划.md §1.1](../测试计划.md)；本文聚焦 E2E 维度的逐 case 矩阵 |
 | 强制级别 | **MUST** — Phase 03→04 准入条件之一（[.claude/rules.md §G.4](../../.claude/rules.md)） |
 | 关联 skill | [.claude/skills/plm-e2e/SKILL.md](../../.claude/skills/plm-e2e/SKILL.md) |
@@ -53,18 +53,17 @@
 | 21 | TestData | [testdata.spec.ts](../../plm-frontend/e2e/testdata.spec.ts) | 11 | 3 状态机 + ENUM 白名单 + FK + 编码 HEX + generate |
 | 22 | AutoTest | [autotest.spec.ts](../../plm-frontend/e2e/autotest.spec.ts) | 4 | CRUD + 706 脚本 + FK + 编码 |
 | 26 | Dashboard | [dashboard.spec.ts](../../plm-frontend/e2e/dashboard.spec.ts) | 3（+button-fix 6） | 卡片 + 按钮跳转回归 |
+| 15 | UED | [ued.spec.ts](../../plm-frontend/e2e/ued.spec.ts) | 9 | 4 态状态机含反向边 01→00 + aiReview + FK + 编码 HEX |
+| 18 | Arch | [arch.spec.ts](../../plm-frontend/e2e/arch.spec.ts) | 10 | 4 态状态机含反向边 + 6 ENUM 604 + C4 生成 + FK + 编码 |
+| 19 | DbDesign | [dbdesign.spec.ts](../../plm-frontend/e2e/dbdesign.spec.ts) | 10 | 4 态状态机含反向边 + dbEngine 604 + ER/DDL 生成 + FK + 编码 |
 
-**小计：149 case。** 逐 case 断言明细待补（见 §2.17），当前以 spec 文件为准。
+**小计：178 case。** 逐 case 断言明细待补（见 §2.17），当前以 spec 文件为准。
 
-### 1.3 仅占位待扩（1 case — 仅验 POST 200 + 页面可达）
+### 1.3 占位待扩 — ✅ 已清零（2026-05-28）
 
-| 模块 | spec | 后端单测 | 待补 |
-|---|---|---|---|
-| UED | [ued.spec.ts](../../plm-frontend/e2e/ued.spec.ts) | ✅ 28 case | E2E 扩状态机 + AI 检查 + FK + 编码 |
-| Arch | [arch.spec.ts](../../plm-frontend/e2e/arch.spec.ts) | ✅ 35 case | E2E 扩状态机 + C4 + NFR + FK + 编码 |
-| DbDesign | [dbdesign.spec.ts](../../plm-frontend/e2e/dbdesign.spec.ts) | ✅ 31 case | E2E 扩状态机 + ER/DDL + FK + 编码 |
-
-> ✅ **TestData 已于 2026-05-27 闭环**（原双缺口）：`TestDataServiceImplTest` 30 case + `testdata.spec.ts` 11 case，均实跑绿,见 §1.2。
+> 全 31 模块 E2E 均为真实覆盖,**无占位 spec**。
+> - TestData 2026-05-27 闭环：`testdata.spec.ts` 11 case（+ `TestDataServiceImplTest` 30）。
+> - UED / Arch / DbDesign 2026-05-28 闭环：`ued/arch/dbdesign.spec.ts` 扩到 **9 / 10 / 10 case**（4 态状态机含反向边 01→00 + AI 动作 + FK 702 + 必填 602 + ENUM 604 + 编码 HEX），实跑 29 passed,见 §1.2。
 
 ### 1.4 跨切关注 / 烟雾测试
 
@@ -232,19 +231,13 @@
 | Nav-Menu | 30 模块菜单可达性烟雾测试 |
 | Nav-Stub | stub packages 文件结构完整 |
 
-### 2.16 占位 spec（1 case — 仅验 POST 返 200 + 页面可达，待扩）
+### 2.16 占位 spec — ✅ 已清零（2026-05-28）
 
-> ⚠ 空壳模块已清零；下列 3 个是 E2E **深度**未达标（详 §1.3）。原 inception / competitive / prd / apidesign / **testdata**（2026-05-27 闭环）已转真实覆盖（详 §1.2），不再属此列。
-
-| spec | 模块 |
-|---|---|
-| `ued.spec.ts` | UED |
-| `arch.spec.ts` | 架构设计 |
-| `dbdesign.spec.ts` | 数据库设计 |
+> 全 31 模块 E2E 均真实覆盖,**无占位 spec**。最后的 UED / 架构设计 / 数据库设计 三占位已于 2026-05-28 扩到 9 / 10 / 10 case（详 §1.2 / §1.3）。
 
 ### 2.17 §1.2 批次模块逐 case 明细（待补）
 
-§1.2 的 15 个后续转 🟢 模块（inception/competitive/prd/apidesign/manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora/autotest/dashboard/testdata，共 149 case）已有真实 spec，但本矩阵的**逐 case 断言表**尚未逐一回填。在补齐前，以各 `*.spec.ts` 源文件的 `test('TC-…')` 标题为准（命名遵循 [测试策略.md §7 军规 5](../测试策略.md) `TC-{模块}-{编号}` 格式）。
+§1.2 的 18 个后续转 🟢 模块（inception/competitive/prd/apidesign/manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora/autotest/dashboard/testdata/ued/arch/dbdesign，共 178 case）已有真实 spec，但本矩阵的**逐 case 断言表**尚未逐一回填。在补齐前，以各 `*.spec.ts` 源文件的 `test('TC-…')` 标题为准（命名遵循 [测试策略.md §7 军规 5](../测试策略.md) `TC-{模块}-{编号}` 格式）。
 
 ---
 
@@ -321,3 +314,4 @@
 | v2.0 | 2026-05-17 | 全面覆盖 13/13 PRD-aligned 模块；补 5 个浅 spec → 各 3-4 case (release/apidoc/manual-product/testplan/testreport)；列出 16 空壳 + 1 缺模块 spec；登记 plm-e2e skill 引用。总 case ~91。 |
 | v3.0 | 2026-05-27 | **全 31 模块同步**：§1.1 改为"原 13 深度覆盖"；§1.2 新增 14 个后续转 🟢 模块（~127 case，inception 含原"缺模块"已落地）；§1.3 占位收敛到 4 个（UED/Arch/DbDesign/TestData，TestData 双缺口）；§1.4 跨切 3→6 spec=22；§2.16 占位列表纠正（移除 inception/competitive/prd/apidesign）；新增 §2.17 批次模块逐 case 明细待补说明。总 case ~91→**241 / 37 spec**。与 [测试计划.md v0.5](../测试计划.md) 对齐。 |
 | v3.1 | 2026-05-27 | **TestData 闭环**：§1.2 加 testdata 行（11 case）小计→149；§1.3 占位 4→3（移除 TestData）；§2.16 占位列表移除 testdata；§2.17 14→15 模块·149 case。总 case 241→**251 / 37 spec**。与 [测试计划.md v0.6](../测试计划.md) 对齐。 |
+| v3.2 | 2026-05-28 | **三占位 E2E 闭环（占位清零）**：§1.2 加 ued/arch/dbdesign（9/10/10 case）小计 149→178；§1.3 占位 3→0（✅ 清零）；§2.16 占位列表清空；§2.17 15→18 模块·178 case。总 case 251→**277 / 37 spec**（业务 255 + 跨切 22）。与 [测试计划.md v0.8](../测试计划.md) 对齐。 |
