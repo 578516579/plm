@@ -29,6 +29,18 @@ npx playwright test --headed                # 看着浏览器跑
 
 **错误码速查**：`601` 状态机非法转换 · `602` 必填缺失 · `604` 字典/白名单非法 · `701` 唯一键冲突/前置失败 · `702` 外键(FK)不存在 · `703` 业务硬规则 · `706/707/708` 特定场景必填 · `ENC001` getFieldHex 不含 `EFBFBD`。
 
+## 脚本分类：API 型 / UI 型 / 混合型
+
+按是否真正驱动浏览器（`page.goto`）分三类（共 37 个脚本）：
+
+| 类别 | 数量 | 脚本 | 说明 |
+|---|---|---|---|
+| 🟦 **纯 UI 型** | 7 | `all-pages`(63) · `project`(5) · `autotest`(4) · `dashboard-button-fix`(6) · `navigation`(3) · `menu-sidebar-click` · `screenshot-tour` | 每个用例都开浏览器：goto → 点击/填表/截图 → 断言 DOM/URL（autotest 用 api 仅做断言）|
+| 🟩 **纯 API 型** | 23 | `inception` · `competitive` · `prd` · `ued` · `arch` · `dbdesign` · `apidesign`(15) · `dashboard` · `testplan` · `testdata` · `submission` · `testreport` · `apidoc` · `manual-product` · `manual-impl` · `manual-ops` · `pipeline` · `release` · `feature-flag` · `dora` · `analytics` · `openspec` · `ai-agent` | 不开浏览器，直打后端：`api.post/put/get` + 断言 `code/msg/data`，验必填/字典/FK/唯一键/状态机/编码 |
+| 🟨 **混合型** | 7 | `requirement`(8+1) · `sprint`(5+1) · `task`(9+1) · `document`(7+1) · `testcase`(7+1) · `defect`(7+1) · `encoding`(5+1) | API 深测为主体 + 末尾 1 个「UI 菜单可达/表单」用例（`encoding` 的 UI 用例是浏览器提交中文表单后验 DB 无乱码）|
+
+> 广度靠 🟦 `all-pages`（63 页全可达），深度靠 🟩 23 个纯 API（快而稳，验后端契约/状态机/编码），🟨 混合型在深测之上补一条"页面真能打开"的兜底。各脚本逐条操作步骤见下文分组明细。
+
 ---
 
 # 一、跨切面 / 基础
