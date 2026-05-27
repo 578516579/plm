@@ -127,6 +127,29 @@
 
 详细操作见 [`04-测试/测试用例库/E2E-运行手册.md`](../04-测试/测试用例库/E2E-运行手册.md) 与 [`plm-e2e` skill](skills/plm-e2e/SKILL.md)。
 
+### G.5 测试编排与自进化（MUST — Test Orchestration）
+
+E2E 是准入的"最后一道"，但**整个测试过程**(测什么/分几层/谁来做/算不算过/怎么进化)由 **`test-orchestrator` agent + `plm-test-orchestrate` skill** 统一编排。proposal 0023 落地。
+
+**G.5.1 测试金字塔分层（MUST）** — 不许用 E2E 测本该单测覆盖的逻辑分支(金字塔别倒挂)：
+
+| 层 | 工具 | 何时必做 |
+|---|---|---|
+| L1 单元 | JUnit5 + Mockito | ServiceImpl 有分支/状态机/校验逻辑 |
+| L2 组件 | Vitest + MSW | 复杂前端组合式逻辑/store/工具函数 |
+| L3 契约 | 5 层命名对齐(interface↔domain↔column↔DTO↔resultMap) | 改了 domain/DTO/Mapper XML/前端 interface |
+| L4 E2E | Playwright | Phase 03→04 准入(强制) / 改业务字段·状态机·FK·编码 |
+| 守门 | encoding.spec(6 case) | 每次准入**一票否决** |
+
+**G.5.2 编排总管（MUST）** — 满足下列任一,Claude **必须**先走 `test-orchestrator`(出计划+DAG)再分派,不许散乱手测：
+- 测试任务跨 ≥ 3 个子 agent(test-engineer / api-contract-keeper / e2e-validator / troubleshooter / security-reviewer)
+- 用户说"提测 / Phase 04 准入 / 全回归 / 这模块测试怎么搭 / 覆盖够不够"
+- 子 agent **不能再 spawn 子 agent**:总管出 DAG,主 Claude 按序调。
+
+**G.5.3 Gate 裁决（MUST）** — 判"通过"的充要条件(并入 §G.4)：encoding 6/6 且 DB HEX 无 `EFBFBD` · 全套件 `N passed` 且 **0 fail / 0 did-not-run**(flake 经 `--retries=1` 复测仍绿)· 新模块覆盖 CRUD+状态机合法/非法+FK+编码+UI 可达 5 类 · 契约改动经 api-contract-keeper 确认 · 证据为**本轮真实输出**已落 Gate §I。任一不满足 = **驳回**,指明回哪个 agent 修,**禁**"再跑一次试试"、**禁**贴历史证据。
+
+**G.5.4 自进化（MUST）** — 每轮测试编排收口必须沉淀测试 signals(见 [signals §8 测试编排](../99-跨阶段/signals/README.md))：`e2e_flake_count` 与 `e2e_real_fail_count` **必须分开记**、`coverage_gap`、`rca_category`(env/schema/stale-jvm/code/contract/encoding)、`gate_evidence_backfill_attempt`(应=0)。触发提案:同类 flake 月 ≥3 → 稳定性提案;覆盖缺口反复 → 补模板提案。详见 [测试工作流.md](../99-跨阶段/测试工作流.md)。
+
 ## H. 文档落位（MUST）
 
 - 项目过程文档 **必须** 放进对应阶段目录 `0?-<阶段名>/` 或 `99-跨阶段/`，不要散在源码目录或根目录。
