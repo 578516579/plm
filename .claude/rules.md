@@ -597,6 +597,38 @@ PR 涉及 UI 改动时，PR 描述中包含 UED规范.md §13 的 8 项自检 Ch
 
 ---
 
+## Q. 系统架构设计编排（MUST — System Architecture Design Orchestration）
+
+§A(包名/分层/命名)与 CLAUDE.md "Architecture"(依赖图)是架构的"硬规则",但**整个系统架构设计过程**(引入新维度怎么抽象/模块边界怎么切/分层依赖方向对不对/跨模块共享怎么横切/要不要上门面 SPI/演进与向后兼容怎么保证/算不算架构就绪/怎么进化)由 **`arch-orchestrator` agent + `plm-arch-design` skill** 统一编排。proposal 0027 落地。本节与 §M.9(产品设计)、§M.10(数据库设计)、§N.10(UED 设计)是 Phase 02 设计期的**四个平级维度**:product 出字段/状态/错误码,db 出 schema,UED 出 UI 规格,**arch 出架构(分层/边界/抽象/演进/ADR)**;四者各自就绪 Gate 都过 = **Phase 02→03 准入**。
+
+> SSoT:[03-开发/模块拆分架构.md](../03-开发/模块拆分架构.md)(分层/模块边界)+ [03-开发/ADR/](../03-开发/ADR/)(决策留痕)+ 根 CLAUDE.md "Architecture"(依赖图)+ §A(命名)。架构维度**不是每个模块都强制全漏斗**:纯 CRUD 沿用现有分层 → 仅 `arch-reviewer` 轻量核分层/边界/命名;**仅在"引入新维度 / 跨模块共享 / 抽象层不够用 / 改公开接口 / 重大选型"时强制全漏斗**(避免小模块也摆架构 DAG)。
+
+**Q.1 架构设计漏斗分层（MUST）** — 从一句架构需求收敛到分层合规、抽象适度、可演进的架构设计,越下层越收敛:
+
+| 层 | 子 agent | 何时必做 |
+|---|---|---|
+| A1 架构驱动力 | `scope-decider`+`system-architect` | 质量属性/约束/为什么要这架构 |
+| A2 概念架构 | `system-architect` | 引入新维度/新模块 — C4/模块边界/依赖方向 |
+| A3 抽象层设计 | `system-architect` | 多实现/跨模块共享 — 门面+SPI/可选注入/横切独立事务 |
+| A4 演进路径 | `system-architect` | 改公开接口/多版本 — 兼容性表/V1→V2→V3/迁移 |
+| A5 架构评审守门 | `arch-reviewer` | 分层依赖方向/循环/边界/ADR 完整/接口兼容/§13 校准 |
+| A6 契约 | `api-contract-keeper` | 跨层/SPI 接口 interface↔impl↔调用方 一致 |
+| A7 装配 | `config-engineer` | Bean/AutoConfiguration/yml `${VAR:default}` 占位 |
+| A8 交付 | `technical-writer` | 架构设计 .md + ADR + §13 落地校准 |
+
+铁律:**依赖方向单向**(admin→framework→system→common),**禁循环依赖与反向 import**;跨模块共享走 SPI/接口反向依赖(common 定接口下游实现);**重大/不可逆决策必须先落 ADR**(§L.1);抽象**适度**(1 实现不上 SPI / N 实现不硬编码 if-else);架构含新表 → 转 `db-orchestrator`。
+
+**Q.2 编排总管（MUST）** — 满足下列任一,Claude **必须**先走 `arch-orchestrator`(出漏斗计划+DAG)再分派,不许散乱手设计架构:
+- 架构设计任务跨 ≥ 3 个子 agent
+- 用户说"这架构怎么设计 / 分层对不对 / 要不要上抽象层 / 跨模块共享怎么搞 / 演进路径 / 架构准入 / 依赖方向对吗"
+- 子 agent **不能再 spawn 子 agent**:总管出 DAG,主 Claude 按序调。
+
+**Q.3 架构设计就绪 Gate 裁决（MUST）** — 判"架构设计就绪 / 可进开发"的充要条件:**分层合规**(依赖方向单向 admin→framework→system→common,无循环依赖/反向 import;业务在 system.business.<entity>,§A) · **边界清晰**(职责单一;跨模块共享走 SPI/接口反向依赖) · **抽象适度**(不过度:1 实现不上门面/SPI;不欠设计:N 实现不硬编码 if-else) · **演进可追溯**(重大决策有 ADR §L.1 + 兼容性表/演进路径) · **接口稳定**(公开 API 向后兼容,破坏性变更有迁移说明) · **决策点收尾**(草案给 user 1-3 个决策点,system-architect §12) · **落地校准承诺**(头部标状态 + 约定落地后补 §13) · **配置外置**(secret 走 `${VAR:default}` §C,横切独立事务/AutoConfiguration) · **安全合规**(涉认证/权限/数据隔离经 security-reviewer)。任一不满足 = **驳回**,指明回 system-architect/arch-reviewer/config-engineer 修,**禁**"先开发着架构回头补"、**禁**放过循环依赖/反向 import(P0 地基红线)、**禁**重大决策"口头定了就写"(必落 ADR)。
+
+**Q.4 自进化（MUST）** — 每轮架构设计编排收口必须沉淀架构 signals(见 [signals 架构设计编排段](../99-跨阶段/signals/README.md)):`layering_violation_count`(依赖方向倒置/循环依赖,应=0)、`boundary_breach_count`(跨模块越界/业务塞错模块/反向 import)、`abstraction_fit_gap`(过度/欠设计被发现数)、`missing_adr_count`(重大决策无 ADR,§L.1,应=0)、`interface_break_count`(破坏性接口变更无迁移/兼容表)、`arch_calibration_lag`(落地后未补 §13 校准,应=0)。触发提案:`layering_violation_count` > 0 → **P0 复盘** + 加 ArchUnit/依赖方向检查 hook 提案;`missing_adr_count` 反复 → ADR 模板/commit 关联 ADR 编号强化提案;`abstraction_fit_gap` 集中过度设计 → 架构加 YAGNI checklist 提案;`interface_break_count` > 0 → 公开接口版本化 + 兼容性测试纳入 CI 提案。详见 [架构设计工作流.md](../99-跨阶段/架构设计工作流.md)。
+
+---
+
 ## 索引：相关规则文件
 
 | 文件 | 受众 | 强制层 |
