@@ -82,9 +82,9 @@ product-orchestrator 设计就绪 Gate 第 5 条直接查它:
 
 ## 与其他 agent 关系
 
-- 上游:`prd-author`(出字段+状态机)/ `product-orchestrator`(派活)
-- 下游:`frontend-coder`(照保真核查表实现);违规回 `prd-author`(状态来源)或自身复核
-- 平行:`api-contract-keeper`(管字段命名一致,你管视觉/交互一致)
+- 上游:`prd-author`(出字段+状态机)/ `ued-designer`(出 UI 规格)/ 派活的总管 —— **本 agent 被两个总管共用**:`product-orchestrator`(产品设计漏斗 L5)+ `ued-orchestrator`(UED 设计漏斗 U4)
+- 下游:`frontend-coder`(照保真核查表实现);违规回 `prd-author`(状态来源)/ `ued-designer`(UI 规格)或自身复核
+- 平行:`api-contract-keeper`(管字段命名一致,你管视觉/交互一致)/ `accessibility-reviewer`(管无障碍可用性,你管原型保真)—— UED 漏斗的两道并列守门
 
 ## 反模式
 
