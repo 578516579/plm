@@ -72,7 +72,7 @@ proposed    完成填写、关联数据，等 review
 | [0020](0020-bidirectional-sync-loop-guard-gotcha.md) | 双向同步回环防护沉淀 gotcha + 扩 §L.1 收"正确范式" | **implementing**(Q-INTEG-01 已落;§L.1 待授权)| 2026-05-27 | [reflect/2026-W22-zentao-integration](../reflect/2026-W22-zentao-integration.md) 模式 2 / B5 | 待(§L.1 SSoT)| 待 merged → 2026-06-24 |
 | [0021](0021-proposal-merged-requires-commit.md) | proposal `merged` 必须绑定真实 commit hash(防"纸面 merged")| **merged → tracking** (solo-review) | 2026-05-27 | [reflect/2026-W22-zentao-integration](../reflect/2026-W22-zentao-integration.md) 模式 3 / B3 + 0014 实例 | ea5cd37 | 2026-05-27 → 06-24 |
 | [0022](0022-dirty-tree-stop-nudge.md) | working tree dirty>15 → Stop hook nudge 分批 commit | **accepted**(settings.json 自修改待显式授权)| 2026-05-27 | [reflect/2026-W22-modules-bulk-uplift](../reflect/2026-W22-modules-bulk-uplift.md) 模式4 / A5 | 待(auto-mode 拦截)| 待 merged |
-| [0023](0023-test-orchestration-self-evolution.md) | 测试编排自进化系统(test-orchestrator agent + plm-test-orchestrate skill + §G.5 rule + 测试工作流.md + signals 测试段) | **implementing**(落地完成,待 commit 回填)(User-requested) | 2026-05-27 | 用户明确请求(本会话:"增加测试 agent+skill+rule+workflow,能自己做和进化")| 待(commit 后回填)| 待 merged → 2026-06-24 |
+| [0023](0023-test-orchestration-self-evolution.md) | 测试编排自进化系统(test-orchestrator agent + plm-test-orchestrate skill + §G.5 rule + 测试工作流.md + signals 测试段) | **merged → tracking** (User-requested) | 2026-05-27 | 用户明确请求(本会话:"增加测试 agent+skill+rule+workflow,能自己做和进化")| fb95e50 + 92f97de | 2026-05-27 → 06-24 |
 
 ---
 

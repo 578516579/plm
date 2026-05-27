@@ -10,7 +10,7 @@
 |---|---|
 | 编号 | 0023 |
 | 标题 | 测试编排自进化系统 |
-| 状态 | implementing（落地完成，待 commit 回填 §10；commit 后转 merged）|
+| 状态 | **merged → tracking**（User-requested；commit `fb95e50` + `92f97de`）|
 | 类型 | 流程 / 工具链 |
 | 提出人 | 用户 + Claude |
 | 提出日期 | 2026-05-27 |
@@ -79,7 +79,7 @@
 [x] Step 3: rules.md 加 §G.5
 [x] Step 4: 建 测试工作流.md
 [x] Step 5: signals 模板 + 当月实例加 §8 测试编排
-[ ] Step 6: commit + push（回填 §10 commit hash → 转 merged）
+[x] Step 6: commit(`fb95e50` + `92f97de`)+ push → 回填 §10 → 转 merged
 [ ] Step 7: 后续 — 模块工作流.md Phase 04 段加链接到本工作流（小改，下次顺带）
 [ ] Step 8: 进入 tracking 期，看测试 signals 是否被持续记录
 ```
@@ -103,9 +103,9 @@
 ## 10. 实施后跟踪（merged 后填）
 
 ### 实际 PR / commit
-- PR: —
-- 合入 commit: _(待填 — commit 后回填,届时状态转 merged)_
-- 实际 merged 日期：_(待填)_
+- PR: —（分支 `chore/local-start-backend-script`,solo-review 直接合入,未走 PR）
+- 合入 commit: `fb95e50`(test-orchestrator agent + plm-test-orchestrate skill) + `92f97de`(§G.5 rule + 测试工作流.md + 本 proposal + signals 测试段)
+- 实际 merged 日期：2026-05-27
 
 ### Tracking 数据
 
