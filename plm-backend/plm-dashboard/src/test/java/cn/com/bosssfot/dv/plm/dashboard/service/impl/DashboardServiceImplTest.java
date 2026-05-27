@@ -40,7 +40,7 @@ import cn.com.bosssfot.dv.plm.dashboard.mapper.DashboardMapper;
  *   - 字段校验: title / ownerUserId 必填
  *   - 默认值填充: isDefault=N / status=00 / refreshInterval=60 / widgetTypes
  *   - 同用户默认唯一性: isDefault=Y 时 clearDefaultForOwner
- *   - 更新场景: 切换为默认 / 不存在抛 404
+ *   - 更新场景: 切换为默认 / 取消默认(Y→N) / 仅改其他字段(isDefault=null 空安全) / 不存在抛 404
  */
 @ExtendWith(MockitoExtension.class)
 class DashboardServiceImplTest {
@@ -363,6 +363,51 @@ class DashboardServiceImplTest {
             assertThatThrownBy(() -> service.updateDashboard(update))
                 .isInstanceOf(ServiceException.class)
                 .hasMessageContaining("工作台不存在");
+        }
+
+        @Test
+        @DisplayName("updateDashboard 仅改其他字段(isDefault=null)时空安全、不 clear")
+        void updatePartialWithoutDefaultFieldNoClear() {
+            // F002 边界:partial update 不带 isDefault → "Y".equals(null) 必须空安全 → 不误清默认
+            Dashboard old = new Dashboard();
+            old.setDashboardId(10L);
+            old.setOwnerUserId(1L);
+            old.setIsDefault("Y");
+
+            Dashboard update = new Dashboard();
+            update.setDashboardId(10L);
+            update.setTitle("只改标题");      // isDefault 不传 → null
+            update.setIsDefault(null);
+
+            when(dashboardMapper.selectDashboardById(10L)).thenReturn(old);
+            when(dashboardMapper.updateDashboard(any())).thenReturn(1);
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                service.updateDashboard(update);
+            }
+            verify(dashboardMapper, never()).clearDefaultForOwner(any());
+        }
+
+        @Test
+        @DisplayName("updateDashboard 取消默认(Y→N)时不 clear")
+        void updateUnsetDefaultNoClear() {
+            // F002 边界:取消默认不应触发 clearDefaultForOwner(只在 →Y 时清)
+            Dashboard old = new Dashboard();
+            old.setDashboardId(10L);
+            old.setOwnerUserId(1L);
+            old.setIsDefault("Y");
+
+            Dashboard update = new Dashboard();
+            update.setDashboardId(10L);
+            update.setIsDefault("N");
+
+            when(dashboardMapper.selectDashboardById(10L)).thenReturn(old);
+            when(dashboardMapper.updateDashboard(any())).thenReturn(1);
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                service.updateDashboard(update);
+            }
+            verify(dashboardMapper, never()).clearDefaultForOwner(any());
         }
     }
 }
