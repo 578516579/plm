@@ -16,7 +16,7 @@ CREATE TABLE tb_release (
     released_at          DATETIME      DEFAULT NULL             COMMENT '实际发布时间',
     rollback_at          DATETIME      DEFAULT NULL             COMMENT '回滚时间',
     rollback_reason      VARCHAR(500)  DEFAULT NULL             COMMENT '回滚原因',
-    status               VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_release_status',
+    status               VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_release_status',
     ai_review_score      DECIMAL(3,1)  DEFAULT NULL             COMMENT 'AI 发布评审分 0-10',
     ai_review_notes      TEXT                                   COMMENT 'AI 发布评审意见',
     deployment_frequency DECIMAL(5,2)  DEFAULT NULL             COMMENT 'DORA: 部署频率',

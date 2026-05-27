@@ -21,7 +21,7 @@ CREATE TABLE tb_ued (
     agri_component_tags VARCHAR(500)  DEFAULT NULL             COMMENT '农业 UI 组件 CSV',
     ai_generated        CHAR(1)       DEFAULT 'N'              COMMENT 'Y=AI 生成评审',
     ai_generated_at     DATETIME      DEFAULT NULL             COMMENT 'AI 评审时间',
-    status              VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_ued_status 4 状态',
+    status              VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_ued_status 4 状态',
     designer_user_id    BIGINT(20)    NOT NULL                 COMMENT '设计师',
     reviewer_user_id    BIGINT(20)    DEFAULT NULL             COMMENT '评审人',
     create_by           VARCHAR(64)   DEFAULT '',

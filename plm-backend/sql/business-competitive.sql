@@ -23,7 +23,7 @@ CREATE TABLE tb_competitive (
     monitor_enabled       CHAR(1)       DEFAULT 'N'              COMMENT 'Y=订阅竞品动态推送',
     monitor_keywords      VARCHAR(500)  DEFAULT NULL             COMMENT '订阅关键词 CSV',
     last_monitored_at     DATETIME      DEFAULT NULL             COMMENT '最近一次监控时间',
-    status                VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_competitive_status 3 状态',
+    status                VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_competitive_status 3 状态',
     author_user_id        BIGINT(20)    NOT NULL                 COMMENT '创建人',
     create_by             VARCHAR(64)   DEFAULT '',
     create_time           DATETIME      DEFAULT NULL,

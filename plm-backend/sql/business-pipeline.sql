@@ -19,7 +19,7 @@ CREATE TABLE tb_pipeline (
     total_runs        INT           DEFAULT 0                COMMENT '总执行次数',
     success_count     INT           DEFAULT 0                COMMENT '成功次数',
     success_rate      DECIMAL(5,2)  DEFAULT 0                COMMENT '成功率 %',
-    status            VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_pipeline_status',
+    status            VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_pipeline_status',
     author_user_id    BIGINT(20)    NOT NULL                 COMMENT '创建者',
     create_by         VARCHAR(64)   DEFAULT '',
     create_time       DATETIME      DEFAULT NULL,

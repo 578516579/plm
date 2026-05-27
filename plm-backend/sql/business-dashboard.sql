@@ -12,7 +12,7 @@ CREATE TABLE tb_dashboard (
     widget_types      VARCHAR(500)                           COMMENT 'CSV 启用 widget: stats,active_projects,my_todos,quality_snapshot,lifecycle,ai_metrics',
     refresh_interval  INT           DEFAULT 60               COMMENT '刷新间隔 (秒); 默认 60',
     is_default        CHAR(1)       DEFAULT 'N'              COMMENT 'Y=用户默认工作台',
-    status            VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_dashboard_status',
+    status            VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_dashboard_status',
     create_by         VARCHAR(64)   DEFAULT '',
     create_time       DATETIME      DEFAULT NULL,
     update_by         VARCHAR(64)   DEFAULT '',

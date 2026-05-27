@@ -17,7 +17,7 @@ CREATE TABLE tb_apidoc (
     source_class         VARCHAR(200)  DEFAULT NULL             COMMENT '源代码类全限定名',
     source_method        VARCHAR(100)  DEFAULT NULL             COMMENT '源方法名',
     version              VARCHAR(20)   NOT NULL DEFAULT 'v1.0'  COMMENT '接口版本',
-    status               VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_apidoc_status',
+    status               VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_apidoc_status',
     last_synced_at       DATETIME      DEFAULT NULL             COMMENT '最近同步时间',
     auto_extracted       CHAR(1)       DEFAULT 'N'              COMMENT 'Y=代码注释自动提取',
     create_by            VARCHAR(64)   DEFAULT '',

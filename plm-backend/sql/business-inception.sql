@@ -16,7 +16,7 @@ CREATE TABLE tb_inception (
     ai_proposal_content       LONGTEXT                               COMMENT 'AI 立项建议书 Markdown',
     ai_risks                  TEXT                                   COMMENT 'AI 识别的风险列表',
     ai_generated_at           DATETIME      DEFAULT NULL             COMMENT 'AI 生成时间',
-    status                    VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_inception_status 5 状态机',
+    status                    VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_inception_status 5 状态机',
     reject_reason             VARCHAR(500)  DEFAULT NULL             COMMENT '驳回原因 (status=04 必填)',
     submitter_user_id         BIGINT(20)    NOT NULL                 COMMENT '提交人',
     approver_user_id          BIGINT(20)    DEFAULT NULL             COMMENT '审批人',

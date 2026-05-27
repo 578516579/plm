@@ -20,7 +20,7 @@ CREATE TABLE tb_arch (
     nfr_mapping        TEXT                                   COMMENT '非功能需求映射 (性能/安全/兼容性)',
     ai_generated       CHAR(1)       DEFAULT 'N'              COMMENT 'Y=AI 生成',
     ai_generated_at    DATETIME      DEFAULT NULL             COMMENT 'AI 生成时间',
-    status             VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_arch_status 4 状态',
+    status             VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_arch_status 4 状态',
     author_user_id     BIGINT(20)    NOT NULL                 COMMENT '架构师',
     reviewer_user_id   BIGINT(20)    DEFAULT NULL             COMMENT '评审人',
     create_by          VARCHAR(64)   DEFAULT '',

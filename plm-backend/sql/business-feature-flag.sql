@@ -13,7 +13,7 @@ CREATE TABLE tb_feature_flag (
     rollout_percentage   INT           NOT NULL DEFAULT 0       COMMENT '灰度百分比 0-100',
     rollout_strategy     VARCHAR(20)   NOT NULL DEFAULT 'all_off' COMMENT '字典 biz_ff_strategy: all_on/canary/all_off',
     target_user_segment  VARCHAR(500)                           COMMENT '目标用户分群 (CSV 用户ID 或表达式)',
-    status               VARCHAR(2)    NOT NULL DEFAULT '01'    COMMENT 'biz_ff_status: 00 开启/01 关闭',
+    status               VARCHAR(20)   NOT NULL DEFAULT '01'    COMMENT 'biz_ff_status: 00 开启/01 关闭',
     author_user_id       BIGINT(20)    NOT NULL                 COMMENT '创建者',
     create_by            VARCHAR(64)   DEFAULT '',
     create_time          DATETIME      DEFAULT NULL,

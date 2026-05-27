@@ -19,7 +19,7 @@ CREATE TABLE tb_dora_metric (
     ai_suggestions       LONGTEXT                               COMMENT 'AI 改进建议 Markdown',
     ai_generated         CHAR(1)       DEFAULT 'N'              COMMENT 'Y=AI 生成',
     ai_generated_at      DATETIME      DEFAULT NULL             COMMENT 'AI 生成时间',
-    status               VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_dora_status',
+    status               VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_dora_status',
     author_user_id       BIGINT(20)    NOT NULL                 COMMENT '创建者',
     create_by            VARCHAR(64)   DEFAULT '',
     create_time          DATETIME      DEFAULT NULL,
