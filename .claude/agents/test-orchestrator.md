@@ -39,6 +39,8 @@ tools: Read, Grep, Glob, Bash
 | **守门** | encoding.spec(6) | `e2e-validator` | **每次准入一票否决** | DB HEX 无 `EFBFBD`,缺 1 即不通过 |
 
 > 金字塔比例:底层多(单元快)、顶层精(E2E 慢)。不要用 E2E 测本该单测覆盖的分支逻辑。
+>
+> **判覆盖缺口前必读实测文件(MUST)**:声明 `coverage_gap` / 「某分支无单测」之前,**必须** Read 对应的 `*ServiceImplTest.java`(后端单元)或 `*.spec.ts`(E2E)交叉核对**实际已覆盖什么** —— 禁止仅凭 E2E spec 用例名或方法签名**推断**缺口。教训(2026-05-27 dashboard):orchestrator 凭 E2E 断言「F002 默认互斥分支无 ServiceImpl 单测」,实则 `DashboardServiceImplTest$DefaultUniquenessTests` 早已覆盖该分支(5 例),系**假阳性**,险些浪费一次 test-engineer 派工。真缺口仅 2 个边界(null 空安全 / Y→N 取消),复核后才定位。
 
 ## 子 agent 分派矩阵
 
