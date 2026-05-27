@@ -176,7 +176,7 @@ public class PrdServiceImpl implements IPrdService
         if (prd == null) {
             throw new ServiceException("PRD 不存在", 404);
         }
-        // 1. 场景化 prompt → AiService.chat() 走审计 (V3 规范:本期不取 result.getText() 业务输出)
+        // 1. 场景化 prompt → AiService.chat()
         String systemPrompt = buildSystemPrompt(prd.getSceneTemplate(), prd.getTargetUser());
         String userPrompt = buildUserPrompt(prd);
         AiChatResult result = aiService.chat(AiChatRequest.builder("")
@@ -186,14 +186,25 @@ public class PrdServiceImpl implements IPrdService
             .temperature(0.7)
             .maxTokens(2000)
             .build());
-        if (result != null && !result.isSuccess()) {
-            // defensive: chat 失败不阻塞业务,场景化 mock 仍然生成(降级路径)
-            log.warn("[prd#{}] AiService.chat failed (provider={}, error={}),fallback to scene-template mock",
-                prdId, result.getProvider(), result.getError());
+
+        // 2. 真 LLM(非 mock)且返回非空 → 直接采用其输出;否则(mock / 失败 / 空)退回场景化模板。
+        //    PRD 模块刻意选择"业务连续性优先,不阻塞"(失败不抛 708,降级到富模板),
+        //    模板兜底保证 dev/CI 零外部依赖时 PRD §F2.2 完整度红线(≥80%)仍达成。
+        boolean fromRealAi = result != null && result.isSuccess()
+                && !"mock".equalsIgnoreCase(result.getProvider())
+                && StringUtils.isNotBlank(result.getText());
+        String content;
+        if (fromRealAi) {
+            content = stripFence(result.getText());
+        } else {
+            if (result != null && !result.isSuccess()) {
+                log.warn("[prd#{}] AiService.chat 失败 (provider={}, error={}),fallback 场景化模板",
+                    prdId, result.getProvider(), result.getError());
+            }
+            content = buildSceneContent(prd);
         }
-        // 2. 场景化 mock 内容(7 段完整 Markdown)
-        String content = buildSceneContent(prd);
-        // 3. 真实计算完整度(替代 hardcode 85.0)
+
+        // 3. 真实计算完整度(对真 LLM 输出同样适用)
         BigDecimal completeness = computeCompleteness(content);
         prd.setAiGenerated("Y");
         prd.setContent(content);
@@ -201,7 +212,20 @@ public class PrdServiceImpl implements IPrdService
         prd.setAiGeneratedAt(new Date());
         prd.setUpdateBy(SecurityUtils.getUsername());
         prdMapper.updatePrd(prd);
+        log.info("[prd#{}] AI 生成完成 source={}, completeness={}",
+            prdId, fromRealAi ? "llm" : "template", completeness);
         return prd;
+    }
+
+    /** LLM 偶尔用 ```markdown ... ``` 围栏包裹,落库前剥掉 */
+    private static String stripFence(String text) {
+        String s = text.trim();
+        if (s.startsWith("```")) {
+            int nl = s.indexOf('\n');
+            if (nl > 0) s = s.substring(nl + 1);
+            if (s.endsWith("```")) s = s.substring(0, s.length() - 3);
+        }
+        return s.trim();
     }
 
     // ─────────────────────────────────────────────────────────────────────

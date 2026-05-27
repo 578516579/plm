@@ -12,6 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatResult;
 import cn.com.bosssfot.dv.plm.common.core.event.EntityChangedEvent.Action;
 import cn.com.bosssfot.dv.plm.common.core.event.TestCaseChangedEvent;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
@@ -58,6 +63,7 @@ public class TestCaseServiceImpl implements ITestCaseService
     @Autowired private ProjectMapper projectMapper;
     @Autowired private RequirementMapper requirementMapper;
     @Autowired private ApplicationEventPublisher eventPublisher;
+    @Autowired private AiService aiService;
 
     @Override public List<TestCase> selectTestCaseList(TestCase t) { return testcaseMapper.selectTestCaseList(t); }
     @Override public TestCase selectTestCaseById(Long id) { return testcaseMapper.selectTestCaseById(id); }
@@ -180,6 +186,95 @@ public class TestCaseServiceImpl implements ITestCaseService
             eventPublisher.publishEvent(new TestCaseChangedEvent(id, Action.UPDATE));
         }
         return rows;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public TestCase aiGenerate(Long id) {
+        TestCase t = testcaseMapper.selectTestCaseById(id);
+        if (t == null) throw new ServiceException("用例不存在", 404);
+        if (StringUtils.isBlank(t.getTitle())) throw new ServiceException("请先填写用例标题再用 AI 生成", 602);
+
+        AiChatResult result = aiService.chat(AiChatRequest.builder("")
+            .system("你是 AgriPLM 资深测试工程师,擅长农业 IoT / DevOps 场景的用例设计。"
+                + "根据用例标题与描述,产出可执行的测试用例要素。"
+                + "只输出一个 JSON 对象,字段: preconditions(前置条件), steps(测试步骤,多步用换行分隔), "
+                + "expectedResult(预期结果)。不要解释,不要 Markdown 代码块围栏。")
+            .user(buildAiPrompt(t))
+            .temperature(0.3)
+            .maxTokens(1024)
+            .callerTag("testcase#" + id)
+            .build());
+
+        // 真 provider 失败 → 708(与 OpenSpec / AiAgent 一致,不静默吞错);Mock 永远 success
+        if (!result.isSuccess()) {
+            log.warn("[TestCase#{}] AI 用例生成失败 provider={}, error={}",
+                    t.getTestcaseNo(), result.getProvider(), result.getError());
+            throw new ServiceException("AI 用例生成失败: " + result.getError(), 708);
+        }
+
+        // 真 LLM 且能解析出 JSON 字段 → 落库;否则(mock / 解析失败)退回确定性骨架,保证 dev/CI 可用
+        boolean applied = false;
+        if (!"mock".equalsIgnoreCase(result.getProvider()) && StringUtils.isNotBlank(result.getText())) {
+            applied = applyAiJson(t, result.getText());
+        }
+        if (!applied) {
+            applyTemplate(t);
+        }
+
+        t.setUpdateBy("ai-agent");
+        testcaseMapper.updateTestCase(t);
+        log.info("[TestCase#{}] AI 用例生成完成 provider={}, source={}",
+                t.getTestcaseNo(), result.getProvider(), applied ? "llm" : "template");
+        return testcaseMapper.selectTestCaseById(id);
+    }
+
+    private static String buildAiPrompt(TestCase t) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("用例标题: ").append(t.getTitle()).append("\n");
+        if (StringUtils.isNotBlank(t.getDescription())) sb.append("用例描述: ").append(t.getDescription()).append("\n");
+        if (StringUtils.isNotBlank(t.getCategory()))    sb.append("用例分类码: ").append(t.getCategory()).append("\n");
+        sb.append("请给出该用例的前置条件、可执行步骤、预期结果。");
+        return sb.toString();
+    }
+
+    /** 解析 LLM 返回的 JSON,填充 preconditions/steps/expectedResult。成功填到 steps 或 expectedResult 则返回 true */
+    private boolean applyAiJson(TestCase t, String aiText) {
+        try {
+            JSONObject obj = JSON.parseObject(stripFence(aiText));
+            if (obj == null) return false;
+            String pre = obj.getString("preconditions");
+            String steps = obj.getString("steps");
+            String exp = obj.getString("expectedResult");
+            if (StringUtils.isNotBlank(pre))   t.setPreconditions(pre.trim());
+            if (StringUtils.isNotBlank(steps)) t.setSteps(steps.trim());
+            if (StringUtils.isNotBlank(exp))   t.setExpectedResult(exp.trim());
+            return StringUtils.isNotBlank(steps) || StringUtils.isNotBlank(exp);
+        } catch (Exception e) {
+            log.warn("[TestCase#{}] AI 输出非合法 JSON,退回模板: {}", t.getTestcaseNo(), e.toString());
+            return false;
+        }
+    }
+
+    /** mock / 解析失败时的确定性骨架,保证 AI 生成始终产出可读用例要素 */
+    private static void applyTemplate(TestCase t) {
+        String title = t.getTitle();
+        if (StringUtils.isBlank(t.getPreconditions())) {
+            t.setPreconditions("1. 系统已部署并可访问\n2. 测试账号已就绪");
+        }
+        t.setSteps("1. 进入「" + title + "」相关功能入口\n2. 按正常路径执行主流程\n3. 输入边界值与非法值各验证一次");
+        t.setExpectedResult("正常路径成功并给出正确反馈;边界/非法输入被正确校验拦截并提示。");
+    }
+
+    /** LLM 偶尔用 ```json ... ``` 包裹,解析前剥掉围栏 */
+    private static String stripFence(String text) {
+        String s = text.trim();
+        if (s.startsWith("```")) {
+            int nl = s.indexOf('\n');
+            if (nl > 0) s = s.substring(nl + 1);
+            if (s.endsWith("```")) s = s.substring(0, s.length() - 3);
+        }
+        return s.trim();
     }
 
     private String generateTestCaseNo() {
