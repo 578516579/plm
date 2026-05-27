@@ -352,6 +352,94 @@
         </plugins>
     </build>
 
+    <!-- ============================================================ -->
+    <!-- 覆盖率门槛 (opt-in profile)                                   -->
+    <!-- 用法: mvn test -Pcoverage  (建议在已有 ServiceImplTest 的业务  -->
+    <!--       模块上跑)。默认 mvn test / mvn install 不激活本 profile, -->
+    <!--       零风险、不改变现有构建与 CI。                            -->
+    <!-- 规则: 仅对 *ServiceImpl 类设 60% 行覆盖硬门槛 (31 业务模块均有  -->
+    <!--       ServiceImplTest)。基础设施模块 (system/framework/quartz/ -->
+    <!--       generator/common/web) 与外部集成 (mcp/integration) 的     -->
+    <!--       ServiceImpl 无/部分单测,排除以避免误失败。              -->
+    <!-- 报告: 各模块 target/site/jacoco/index.html (+ jacoco.csv)。     -->
+    <!-- ============================================================ -->
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <!-- jacoco.exec 写到 ASCII 临时路径,规避项目所在 CJK 路径 (【12-trae】)
+                     被 surefire 转发到 fork JVM 命令行时损坏 → agent 写不出 exec 的坑 -->
+                <jacoco.execFile>${java.io.tmpdir}/plm-jacoco/${project.artifactId}.exec</jacoco.execFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.12</version>
+                        <executions>
+                            <execution>
+                                <id>jacoco-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>${jacoco.execFile}</destFile>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jacoco-report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <dataFile>${jacoco.execFile}</dataFile>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jacoco-check-serviceimpl</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <configuration>
+                                    <dataFile>${jacoco.execFile}</dataFile>
+                                    <haltOnFailure>true</haltOnFailure>
+                                    <rules>
+                                        <rule>
+                                            <element>CLASS</element>
+                                            <includes>
+                                                <include>*ServiceImpl</include>
+                                            </includes>
+                                            <excludes>
+                                                <exclude>cn/com/bosssfot/dv/plm/system/*</exclude>
+                                                <exclude>cn/com/bosssfot/dv/plm/framework/*</exclude>
+                                                <exclude>cn/com/bosssfot/dv/plm/quartz/*</exclude>
+                                                <exclude>cn/com/bosssfot/dv/plm/generator/*</exclude>
+                                                <exclude>cn/com/bosssfot/dv/plm/common/*</exclude>
+                                                <exclude>cn/com/bosssfot/dv/plm/web/*</exclude>
+                                                <exclude>cn/com/bosssfot/dv/plm/mcp/*</exclude>
+                                                <exclude>cn/com/bosssfot/dv/plm/integration/*</exclude>
+                                            </excludes>
+                                            <limits>
+                                                <limit>
+                                                    <counter>LINE</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>0.60</minimum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <repositories>
         <repository>
             <id>public</id>
