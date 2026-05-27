@@ -10,13 +10,13 @@
 |---|---|
 | 编号 | 0027 |
 | 标题 | 系统架构设计编排自进化系统 |
-| 状态 | **implementing**（User-requested;6 新文件 + 5 处 SSoT 编辑已落,待用户授权 commit → 届时按 [0021](0021-proposal-merged-requires-commit.md) 回填真实 commit hash 转 merged → tracking）|
+| 状态 | **merged → tracking**（User-requested;commit `dff0e77`(feat: 2 agent + skill + system-architect 角色段) + `08a7c19`(docs: §Q + 架构设计工作流 + signals §12/§13 + proposal/README/ledger) + 本回填）|
 | 类型 | 流程 / 工具链 |
 | 提出人 | 用户 + Claude |
 | 提出日期 | 2026-05-27 |
 | 评审人 | 用户（项目 owner,AskUserQuestion 选"是,建架构设计编排体系" + "全套现在落地 + proposal 0027 记录" + "+1:新建 arch-reviewer 守门"）|
 | 评审日期 | 2026-05-27 |
-| Tracking 截止 | commit 后 4 周 |
+| Tracking 截止 | 2026-06-24（merged 后 4 周）|
 
 > **编号/章节说明**:0023(测试 §G.5)/ 0024(产品 §M.9)/ 0025(数据库 §M.10)/ 0026(UED §N.10)已占。本提案(架构)取 **0027**;rule 章节 §M(PRD 驱动)、§N(UED/GitHub)、§O(并行 session)、§P(前端 TS)已占,架构维度自成一节取 **§Q**;signals 段 db §11、UED §12 已占,架构取模板 **§12** / 当月实例 **§13**,顺位无冲突。
 
@@ -103,7 +103,7 @@
 [x] Step 7: 建本 proposal 0027 + proposals/README 索引行
 [x] Step 8: 编辑 system-architect.md 补"作为 arch-orchestrator 核心建模者"一段
 [x] Step 9: 在途任务.md 加落地台账行
-[ ] Step 10: commit(待用户授权"提交")→ 按 0021 回填真实 commit hash → 转 merged → tracking
+[x] Step 10: commit(用户授权"按建议拆分提交";2 笔功能提交 dff0e77 feat / 08a7c19 docs + 1 笔 hash 回填)→ 转 merged → tracking
 [ ] Step 11: 进入 tracking 期,看首个引入新维度/跨模块的架构设计是否走 arch-orchestrator 编排(MCP/Integration 最可能首发)
 [ ] Step 12: 后续 — 模块工作流.md Phase 02 段加链接到本工作流(小改,下次顺带)
 ```
@@ -114,7 +114,7 @@
 - 架构设计任务是否经 arch-orchestrator 编排：tracking 期内引入新维度/跨模块共享的架构设计 100% 走编排(基线=0 → 目标=首个用例即走)。
 - `missing_adr_count` / `arch_calibration_lag`：维持 = 0(重大决策必有 ADR、草案落地后必校准)。
 
-跟踪期：commit 当日 ~ +4 周。
+跟踪期：2026-05-27 ~ 2026-06-24（4 周）。
 
 ## 9. 评审记录
 
@@ -127,9 +127,9 @@
 ## 10. 实施后跟踪（merged 后填）
 
 ### 实际 PR / commit
-- PR: —（分支 `chore/local-start-backend-script`,solo-review）
-- 合入 commit: **待 commit**（6 新文件 + 5 处 SSoT 编辑已落文件系统,待用户授权提交;按 [proposal 0021](0021-proposal-merged-requires-commit.md) "merged = git 事实",未 commit 前状态停 `implementing`,commit 后回填真实 hash 转 merged → tracking)
-- 实际 merged 日期：待填
+- PR: —（分支 `chore/local-start-backend-script`,solo-review;待合 main）
+- 合入 commit: `dff0e77`(feat: arch-orchestrator + arch-reviewer + plm-arch-design skill + system-architect 角色段)+ `08a7c19`(docs: §Q rule + 架构设计工作流 + signals 模板 §12/当月 §13 + 本提案/README/在途任务)+ 本回填(本提案 → merged + 真实 hash)。按用户"按建议拆分"授权,拆 feat/docs 2 笔功能提交 + 1 笔 hash 回填([proposal 0021](0021-proposal-merged-requires-commit.md):proposal 不能自引用尚未生成的 commit hash)。commit 边界**干净**:经 `git diff HEAD` 确认 6 处 SSoT 编辑全为纯插入(73 行,0 删除),未夹带并行 MCP session 的 `02-设计/MCP-集成-设计.md` 未提交改动。
+- 实际 merged 日期：2026-05-27
 
 ### Tracking 数据
 
@@ -150,3 +150,4 @@
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-27 | Claude | 首次创建：10 artifacts 落地记录(对位 proposal 0024 产品 / 0025 数据库 / 0026 UED;取 0027 / §Q / signals §12·§13;Phase 02 第四个、也是最后一个设计维度编排体系)|
+| 2026-05-27 | Claude | commit 回填:用户"按建议拆分"授权 → feat `dff0e77` + docs `08a7c19` + 本回填;状态 implementing → merged → tracking(2026-05-27 ~ 06-24)|
