@@ -258,6 +258,11 @@ import {
   listTestReport, getTestReport, addTestReport, updateTestReport, delTestReport,
   listProjectsForSelect, type TestReport, type TestReportQuery
 } from '@/api/business/testreport'
+import {
+  statusTagFor, riskTagFor,
+  riskIcon as getRiskIcon, riskLongLabel as getRiskLabel,
+  riskHint as getRiskHint, riskCls as getRiskCls
+} from './testreportDict'
 
 const formRef = ref()
 const saving = ref(false)
@@ -282,36 +287,13 @@ const rules = {
   projectId: [{ required: true, message: '请选择关联项目', trigger: 'change' }]
 }
 
-// === 状态 + 风险标签 ===
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿', type: 'info' },
-  '01': { label: '审核中', type: 'warning' },
-  '02': { label: '已发布', type: 'success' }
-}
-function statusTagFor(s?: string) { return statusMap[s || '00'] || { label: s, type: 'info' } }
+// === 状态 + 风险标签 (字典已抽到 testreportDict.ts SSoT,这里只剩组件态 computed) ===
 const statusTag = computed(() => statusTagFor(current.status))
-
-const riskMap: Record<string, { label: string; type: any }> = {
-  green:  { label: '🟢 绿灯', type: 'success' },
-  yellow: { label: '🟡 黄灯', type: 'warning' },
-  red:    { label: '🔴 红灯', type: 'danger' }
-}
-function riskTagFor(s?: string) { return riskMap[s || 'green'] || { label: s, type: 'info' } }
-
 const riskLevel = computed(() => current.testreportId ? current.riskLevel : form.riskLevel)
-const riskIcon = computed(() => ({ green: '🟢', yellow: '🟡', red: '🔴' } as any)[riskLevel.value || 'green'] || '⚪')
-const riskLabel = computed(() => ({
-  green: '绿灯 - 可以发布',
-  yellow: '黄灯 - 需谨慎,建议二次评审',
-  red: '红灯 - 禁止上线'
-} as any)[riskLevel.value || 'green'] || '未评级')
-const riskCls = computed(() => `risk-${riskLevel.value || 'green'}`)
-
-const riskHint = computed(() => ({
-  green: '所有指标达标,可走标准发布流程',
-  yellow: '存在风险,建议增加灰度观察期或补充测试',
-  red: '必须先修复 P0 / 提升覆盖率才能上线'
-} as any)[form.riskLevel || 'green'])
+const riskIcon = computed(() => getRiskIcon(riskLevel.value))
+const riskLabel = computed(() => getRiskLabel(riskLevel.value))
+const riskCls = computed(() => getRiskCls(riskLevel.value))
+const riskHint = computed(() => getRiskHint(form.riskLevel))
 
 const coverageStatus = computed(() => {
   const c = form.coverageRate || 0
