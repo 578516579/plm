@@ -236,6 +236,7 @@ import {
   listArch, addArch, updateArch, delArch, aiGenerateArch, getArch, listProjectsForSelect,
   type Arch, type ArchQuery
 } from '@/api/business/arch'
+import { statusTagFor, enumLabel } from './archDict'
 
 const formRef = ref()
 const saving = ref(false)
@@ -268,26 +269,7 @@ const total = ref(0)
 const queryParams = reactive<ArchQuery>({ pageNum: 1, pageSize: 10 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿',   type: 'info' },
-  '01': { label: '评审中', type: 'warning' },
-  '02': { label: '已确认', type: 'success' },
-  '03': { label: '已废弃', type: 'danger' }
-}
-
-function statusTagFor(s?: string) {
-  return statusMap[s || '00'] || { label: s || '-', type: 'info' }
-}
-
 const statusTag = computed(() => statusTagFor(current.status))
-
-function enumLabel(kind: 'arch' | 'stack', v?: string): string {
-  const maps: Record<string, Record<string, string>> = {
-    arch: { microservice: '微服务', monolith: '单体', serverless: 'Serverless', layered: '分层' },
-    stack: { java_sb3: 'Java SB3', go_gin: 'Go Gin', python_fastapi: 'Python', nodejs: 'Node.js' }
-  }
-  return maps[kind]?.[v || ''] || v || '-'
-}
 
 const renderedDesign = computed(() => {
   const md = current.designContent || ''
