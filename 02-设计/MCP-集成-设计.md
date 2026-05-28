@@ -20,7 +20,7 @@
 - agriplm-cli（Node.js 包发布到 npm，独立项目 v0.6+）
 - Dify 工作流引擎接入（依然在 [99-跨阶段/AgriPLM-模块映射-2026-05-16.md](../99-跨阶段/AgriPLM-模块映射-2026-05-16.md) 剥离清单）
 - Figma 设计稿语义解析（v0.5+）
-- 双向同步的冲突合并策略（先做单向：PLM ↔ 外部主从单一方向）
+- ~~双向同步的冲突合并策略（先做单向：PLM ↔ 外部主从单一方向）~~ **见 [Proposal 0014](../99-跨阶段/proposals/0014-zentao-bidirectional-sync.md)（merged 2026-05-25）**：禅道（zentao）↔ PLM 走双向，采用 last-write-wins（update_time 比对）；飞书 / GitLab 仍按本文原议做单向（飞书主要出站通知、GitLab 主要入站 webhook）。禅道专用设计见 [02-设计/Zentao-集成-设计.md](Zentao-集成-设计.md)
 
 ---
 

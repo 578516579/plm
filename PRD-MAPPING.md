@@ -42,12 +42,15 @@
 | 31 | DORA | - | devops.html | plm-dora | 🟢 PRD-aligned |
 | **32** | **MCP Server** | **§2.5/§3.4/§4.1** | **settings.html#MCP集成 (Tab3)** | **plm-mcp** | **🆕 v0.x（Proposal 0007）** |
 | **33** | **集成对接 Integration** | **§3.1/§3.5 Phase2** | **settings.html#MCP集成 (Tab3)** | **plm-integration** | **🆕 v0.x（Proposal 0007）** |
+| 34 | 立项建议书 Proposal | (v0.4 路线图) | — | plm-proposal | 🟡 Maven 占位 — 仅 `package-info.java`，功能由 **#7 Document (`doc_type=proposal`)** 承载（详 [03-开发/Stubs-Roadmap.md §2.1](03-开发/Stubs-Roadmap.md)）；保留模块坐标以便将来真拆分时无破坏迁移 |
+
+> 注：CLAUDE.md 顶部 "🟡 空壳 0 个" 指 31 个**业务模块**，不含 plm-proposal 这种 Maven 占位（实际承载体已 🟢）。
 
 ---
 
 ## 2. 字段对照表（Domain ↔ 原型表单元素 ↔ DB 列）
 
-> 每个 PRD-aligned 模块一节。当前已填 §1-13（13 PRD-aligned）+ §14-§21（**8 个 prd-align 空壳模块**)+ §22 Dashboard + §32-33（MCP/Integration）—— **全 23 个业务模块字段对照表完工**。末批 8 模块（manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora，2026-05-27 转 🟢 PRD-aligned）的字段契约已由 Domain/Mapper/ServiceImpl 源码 + 200 case 单测锁定，业务 SQL（`business-<module>.sql`）含 DDL+字典；§2 inline 字段对照表暂参见各模块 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)，待后续补齐为 inline。
+> 每个 PRD-aligned 模块一节。当前已填 §1-13（13 PRD-aligned）+ §14-§21（**8 个 prd-align 空壳模块**)+ §22 Dashboard + §32-33（MCP/Integration）—— **全 23 个业务模块字段对照表完工**。末批 8 模块（manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora，2026-05-27 转 🟢 PRD-aligned）的**字段契约权威以 Domain/Mapper/ServiceImpl 源码 + 200 case 单测 + `business-<module>.sql` (DDL+字典) + [02-设计/<模块>-数据库设计.md / -API设计.md](02-设计/) 为准**；§2 inline 表暂未补全，追踪登记在 [99-跨阶段/在途任务.md](99-跨阶段/在途任务.md) P1-4 行，**不阻塞业务**（前后端契约一致性由 `api-contract-keeper` 子 agent 把关,最近一轮抽查 8 模块 7 个完全一致）。
 
 ### §1. Project（plm-project）
 

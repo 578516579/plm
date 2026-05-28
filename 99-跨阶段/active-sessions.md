@@ -33,6 +33,7 @@
 <!-- 当前无活跃认领。开工时仿下例加真行(去掉本注释包裹),完工/提交后删除你的行:
 CLAIM | <session 标签> | <分支> | <repo 相对路径;分号分隔> | <心跳日期>
 -->
+CLAIM | Claude (Wjl 会话, 2026-05-28) — ai-agent 字典 SSoT 抽取 (solo-review) | chore/local-start-backend-script | plm-frontend/src/views/business/ai-agent/index.vue;plm-frontend/src/views/business/ai-agent/aiAgentDict.ts | 2026-05-28
 <!-- CLAIMS:END -->
 
 ---
