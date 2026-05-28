@@ -317,6 +317,7 @@ import {
   listSubmission, getSubmission, addSubmission, updateSubmission, delSubmission,
   listProjectsForSelect, type Submission, type SubmissionQuery
 } from '@/api/business/submission'
+import { statusTagFor } from './submissionDict'
 
 const formRef = ref()
 const saving = ref(false)
@@ -343,15 +344,6 @@ const rules = {
   projectId: [{ required: true, message: '请选择关联项目', trigger: 'change' }]
 }
 
-// === 状态机 ===
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿',     type: 'info' },
-  '01': { label: '已提交',   type: 'warning' },
-  '02': { label: '质量门禁中', type: 'primary' },
-  '03': { label: '已通过',   type: 'success' },
-  '04': { label: '已退回',   type: 'danger' }
-}
-function statusTagFor(s?: string) { return statusMap[s || '00'] || { label: s, type: 'info' } }
 const statusTag = computed(() => statusTagFor(current.status))
 
 // 5 态合法转换 (含反向边 04→00)
