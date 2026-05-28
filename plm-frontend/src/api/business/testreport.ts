@@ -26,6 +26,10 @@ export interface TestReport {
   generatedAt?: string
   status?: string
   reviewerUserId?: number
+  // Proposal 0028 P0-3C — 真聚合标记
+  isAggregated?: 'Y' | 'N'
+  aggregatedAt?: string
+  isManualOverride?: 'Y' | 'N'
 }
 
 export interface TestReportQuery {
@@ -56,3 +60,7 @@ export const delTestReport = (ids: number | number[]): Promise<any> => {
 
 export const listProjectsForSelect = (): Promise<any> =>
   request({ url: '/business/project/list', method: 'get', params: { pageSize: 200 } })
+
+/** Proposal 0028 P0-3C — 实时聚合 testcase + defect 到 totalCases/passedCases/failedCases/p0..p2 */
+export const refreshAggregate = (id: number): Promise<any> =>
+  request({ url: `/business/testreport/${id}/refresh-aggregate`, method: 'post' })

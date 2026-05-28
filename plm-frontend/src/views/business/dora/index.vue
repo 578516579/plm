@@ -10,11 +10,29 @@
         <p class="page-subtitle">DORA 指标、部署热力图、前置时间拆解,AI 持续改进建议</p>
       </div>
       <div class="header-actions">
+        <el-select
+          v-model="queryParams.projectId"
+          placeholder="选择项目"
+          clearable
+          filterable
+          style="width: 180px"
+          @change="getList"
+        >
+          <el-option v-for="p in projects" :key="p.id" :label="p.projectName" :value="p.id" />
+        </el-select>
         <el-select v-model="periodFilter" style="width: 120px" @change="getList">
           <el-option label="本月" value="month" />
           <el-option label="本季度" value="quarter" />
         </el-select>
         <el-button plain @click="openAdd"><el-icon><Plus /></el-icon>&nbsp;录入指标</el-button>
+        <el-button
+          type="success"
+          :loading="recomputing"
+          v-hasPermi="['business:dora:edit']"
+          @click="handleRefreshCompute"
+        >
+          <el-icon><MagicStick /></el-icon>&nbsp;🔄 重新聚合 4 指标
+        </el-button>
         <el-button type="primary" @click="getList">
           <el-icon><Refresh /></el-icon>&nbsp;🔄 刷新
         </el-button>
@@ -90,6 +108,14 @@
             <el-tag :type="rowLevelTag(row.level)" size="small">{{ rowLevelLabel(row.level) }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="来源" width="150" align="center">
+          <template #default="{ row }">
+            <el-tag v-if="row.isComputed === 'Y'" type="success" size="small">自动算</el-tag>
+            <el-tag v-else type="warning" size="small">人工录</el-tag>
+            <div v-if="row.computedAt" class="compute-time">{{ parseTime(row.computedAt, '{m}-{d} {h}:{i}') }}</div>
+            <div v-if="row.periodDays" class="compute-time">窗口 {{ row.periodDays }} 天</div>
+          </template>
+        </el-table-column>
         <el-table-column label="AI 建议" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">{{ row.aiSuggestion || '(未生成)' }}</template>
         </el-table-column>
@@ -143,15 +169,21 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, MagicStick } from '@element-plus/icons-vue'
-import { listDora, addDora, delDora, aiAnalyzeDora, type DoraMetric, type DoraQuery } from '@/api/business/dora'
+import {
+  listDora, addDora, delDora, aiAnalyzeDora, refreshCompute, listProjectsForSelect,
+  type DoraMetric, type DoraQuery
+} from '@/api/business/dora'
 import { metricLabel, rowLevelLabel, rowLevelTag } from './doraDict'
+import { parseTime } from '@/utils/plm'
 
 const dialogVisible = ref(false)
 const formRef = ref()
 const saving = ref(false)
 const aiLoading = ref(false)
 const listLoading = ref(false)
+const recomputing = ref(false)
 const periodFilter = ref('month')
+const projects = ref<any[]>([])
 
 const emptyForm = (): DoraMetric => ({ metricType: 'deploy_frequency', metricValue: 0, metricUnit: '次/天', level: 'medium', periodLabel: new Date().toISOString().slice(0, 7) })
 const form = reactive<DoraMetric>(emptyForm())
@@ -215,7 +247,36 @@ async function handleDelete(row: DoraMetric) {
   await delDora(row.metricId); ElMessage.success('删除成功'); await getList()
 }
 
-onMounted(getList)
+async function loadProjects() {
+  try {
+    const res: any = await listProjectsForSelect()
+    projects.value = res.rows || []
+  } catch { /* ignore */ }
+}
+
+async function handleRefreshCompute() {
+  if (!queryParams.projectId) {
+    ElMessage.warning('请先在顶栏选择项目')
+    return
+  }
+  recomputing.value = true
+  try {
+    const res: any = await refreshCompute(queryParams.projectId, 30)
+    if (res.code === 200) {
+      const n = Array.isArray(res.data) ? res.data.length : 4
+      ElMessage.success(`已重算 ${n} 个 DORA 指标(窗口 30 天)`)
+      await getList()
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.msg || '聚合失败')
+  } finally {
+    recomputing.value = false
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([loadProjects(), getList()])
+})
 </script>
 
 <style scoped>
@@ -236,4 +297,5 @@ onMounted(getList)
 .dora-unit { color: #9ca3af; font-size: 12px; margin-bottom: 10px; }
 .empty-state { text-align: center; padding: 30px; color: #6b7280; }
 .suggestion-box pre { white-space: pre-wrap; font-size: 13px; line-height: 1.7; color: #374151; padding: 8px; background: #f9fafb; border-radius: 6px; }
+.compute-time { font-size: 10px; color: #9ca3af; margin-top: 2px; }
 </style>
