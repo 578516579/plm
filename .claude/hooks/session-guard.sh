@@ -69,14 +69,50 @@ case "$mode" in
       done)
     fi
 
+    # 显式后门(proposal 0030):本次 Bash 调用内 export CLAUDE_BULK_OK="<≥10 字符 reason>"
+    # 适用 epic 多模块批量 commit / bulk-refactor / 模板化改造等合法 bulk 场景。
+    # reason 会进 stderr 日志,后续 signals 月度统计 bulk_ok_count(>5/月 触发审视)。
+    if [ "$bulk" = 1 ] && [ -n "$CLAUDE_BULK_OK" ] && [ "${#CLAUDE_BULK_OK}" -ge 10 ]; then
+      echo "ℹ️  [session-guard] CLAUDE_BULK_OK 后门生效:" >&2
+      echo "   reason: $CLAUDE_BULK_OK" >&2
+      echo "   放行本次 bulk add。注意 reason 会进 signals 月度统计。" >&2
+      exit 0
+    fi
+
+    # 一次性绕过(proposal 0030):export CLAUDE_BYPASS_SESSION_GUARD=1
+    # 计入 signals 月度 bypass(同 git commit --no-verify 等价语义)
+    if [ "$bulk" = 1 ] && [ "$CLAUDE_BYPASS_SESSION_GUARD" = "1" ]; then
+      echo "⚠️  [session-guard] CLAUDE_BYPASS_SESSION_GUARD=1 一次性绕过(计入 signals bypass)。" >&2
+      exit 0
+    fi
+
     # 无任何风险信号(非 bulk + 单文件脏 + 无认领冲突)→ 静默放行,不啰嗦
     if [ "$bulk" = 0 ] && [ "$n" -lt 2 ] && [ -z "$hits" ]; then exit 0; fi
 
-    echo "🔀 [session-guard] 多-session 暂存守门(协作规范 §2/§4):working tree 现有 $n 个改动文件。" >&2
-    if [ "$bulk" = 1 ]; then
-      echo "   ⚠ 高危:命令里用了  git add . / -A / -u / commit -a  这类批量暂存 —— 共享工作树里它会卷进**别人未提交的 WIP**!" >&2
-      echo "     → 改用显式路径:git add <你自己的文件1> <文件2> …,然后 git commit(不加 -a)。" >&2
+    # ─── proposal 0030 硬拦核心:bulk add + working tree 有脏文件 = race 必然路径 ───
+    if [ "$bulk" = 1 ] && [ "$n" -ge 1 ]; then
+      echo "" >&2
+      echo "⛔ [session-guard] HARD-BLOCK: bulk add 在共享 working tree 是协作 race 源头。" >&2
+      echo "   ❗ working tree 有 $n 个改动文件,bulk add 会卷进所有 — 含别 session 的 WIP。" >&2
+      echo "   📜 历史事故:3ae00fd(P0-1 22 文件被偷)/ 656a6a4(P0-2C 11 文件被偷)" >&2
+      if [ -n "$hits" ]; then
+        echo "   🚨 其中以下文件在 active-sessions.md 里被他人认领:" >&2
+        printf '%s\n' "$hits" >&2
+      fi
+      echo "" >&2
+      echo "   修复方式(任选):" >&2
+      echo "   a) 推荐:用显式路径 — git add <文件1> <文件2> ..." >&2
+      echo "   b) epic / bulk-refactor 合法 bulk:" >&2
+      echo "      export CLAUDE_BULK_OK=\"<reason 不少于 10 字>\" && <原命令>" >&2
+      echo "   c) 一次性绕过(计入 signals bypass):" >&2
+      echo "      export CLAUDE_BYPASS_SESSION_GUARD=1 && <原命令>" >&2
+      echo "" >&2
+      echo "   参考:99-跨阶段/proposals/0030 / project-quirks Q-COLLAB-01" >&2
+      exit 2
     fi
+
+    # bulk=0 但有他人认领冲突 → 保留原 nudge(不升级硬拦,避免误杀人工只动单文件场景)
+    echo "🔀 [session-guard] 多-session 暂存守门(协作规范 §2/§4):working tree 现有 $n 个改动文件。" >&2
     if [ -n "$hits" ]; then
       echo "   ⛔ 下列脏文件在 active-sessions.md 里被认领,**勿 stage**(除非确认是你这条 session 的认领):" >&2
       printf '%s\n' "$hits" >&2
