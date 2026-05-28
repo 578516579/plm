@@ -113,6 +113,7 @@ import {
   listApiDoc, delApiDoc, syncFromCode, debugApi, listProjectsForSelect,
   type ApiDoc, type ApiDocQuery
 } from '@/api/business/apidoc'
+import { methodTag } from './apiDocDict'
 
 const listLoading = ref(false)
 const syncLoading = ref(false)
@@ -126,10 +127,6 @@ const queryParams = reactive<ApiDocQuery>({ pageNum: 1, pageSize: 10 })
 
 const debugParams = ref('{}')
 const debugResult = ref('')
-
-function methodTag(m?: string): any {
-  return ({ GET: 'success', POST: 'primary', PUT: 'warning', DELETE: 'danger', PATCH: 'info' } as Record<string,string>)[m || ''] || 'info'
-}
 
 async function getList() {
   listLoading.value = true
