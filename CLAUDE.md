@@ -76,7 +76,7 @@ All sensitive yml values are wrapped in `${VAR:default}` placeholders. The defau
 
 Spring Boot does not auto-read `.env` files. Inject via IDE run config, shell `export`, docker-compose `env_file:`, or K8s Secret. The `.env` file itself is gitignored (see root `.gitignore`).
 
-The 8 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](memory/project-quirks.md)):
+The 9 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](memory/project-quirks.md)):
 
 | # | Symptom | Fix | 复发 |
 |---|---|---|---|
@@ -88,6 +88,7 @@ The 8 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](m
 | 6 | Backend 抛 ServiceException 字符串但 grep 当前代码无此字符串 | Stale JVM 进程加载旧字节码(切 branch 后没重启)— 对比 `ls -la <jar>` mtime vs `wmic process get CreationDate` startTime,kill + rebuild | 1 |
 | 7 | `business-*.sql` 漏写 `sys_menu` INSERT → 前端无菜单入口、功能不可达 | `.githooks/pre-commit` lint 1 自动拦截(缺 `INSERT INTO sys_menu`);仅扩字典/子表的脚本顶部加 `-- @no-menu: <原因>` 豁免。Q-DB-04,首例 81bc1ba | 1+ |
 | 8 | `sys_menu` path 列改动后,前端 `/business/<entity>` 按钮 404 大面积复发 | `.githooks/pre-commit` lint 2 自动 grep `plm-frontend/src/views/**` 给清单;跳转必须经 `src/utils/businessRoute.ts` SSoT,**禁止硬编码 `router.push('/business/...)`**。Q-BIZ-04,首例 5c4e70d+7b14807 | 2+ |
+| 9 | 并行 session 在共享 working tree 里用 `git add . / -A / -u / commit -a` → 偷别 session 已 staged 但未 commit 的文件,commit msg 与实际改动失配 | `.claude/hooks/session-guard.sh` (proposal 0030 升级)bulk add + dirty>=1 → exit 2 硬拦;合法 bulk 走 `export CLAUDE_BULK_OK="<≥10字 reason>"` 后门;紧急绕过 `export CLAUDE_BYPASS_SESSION_GUARD=1`(计入 signals bypass)。**永远显式 `git add file1 file2 ...`**。Q-COLLAB-01,首例 3ae00fd+656a6a4 单日 2 次 | 2 |
 
 ## Architecture (where things live)
 
