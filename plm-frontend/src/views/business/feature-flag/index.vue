@@ -123,6 +123,7 @@ import {
   listFeatureFlag, addFeatureFlag, updateFeatureFlag, delFeatureFlag, getFeatureFlag, listProjectsForSelect,
   type FeatureFlag, type FlagQuery
 } from '@/api/business/feature-flag'
+import { envLabel, envTag, modeLabel, modeTag } from './featureFlagDict'
 
 const dialogVisible = ref(false)
 const formRef = ref()
@@ -143,11 +144,6 @@ const list = ref<FeatureFlag[]>([])
 const total = ref(0)
 const queryParams = reactive<FlagQuery>({ pageNum: 1, pageSize: 10 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
-
-const envLabel = (v?: string) => ({ dev: '开发', staging: '预发', prod: '生产' } as Record<string,string>)[v||''] || v || '-'
-const envTag = (v?: string): any => ({ dev: 'info', staging: 'warning', prod: 'danger' } as Record<string,string>)[v||''] || 'info'
-const modeLabel = (v?: string) => ({ all_on: '全量', all_off: '关闭', canary: '灰度' } as Record<string,string>)[v||''] || v || '-'
-const modeTag = (v?: string): any => ({ all_on: 'success', all_off: 'danger', canary: 'warning' } as Record<string,string>)[v||''] || 'info'
 
 async function getList() {
   listLoading.value = true
