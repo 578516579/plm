@@ -34,10 +34,13 @@ cd plm-backend
 "$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < sql/quartz.sql
 # Verify: 31 tables, sys_user shows admin/若依 and ry/若依 with correct CJK.
 
-# --- Business modules + menu regroup (run in order; idempotent) ---
-for f in sql/business-*.sql; do
-  "$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < "$f"
-done
+# --- Business modules + menu regroup (推荐用 db-migrate.sh 走台账,见下) ---
+# 首次空库:
+./scripts/db-migrate.sh --init=fresh      # 全跑 sql/business-*.sql,写 sql/.applied-scripts
+# 已经手动建过库 (旧机器迁移):
+# ./scripts/db-migrate.sh --init=existing # 只入账不跑
+# 后续 pull / 切 branch:
+# ./scripts/db-migrate.sh                 # 只跑新增脚本 (Q-DB-05)
 "$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < sql/menu-regroup-by-phase.sql   # 8 阶段分组重组
 "$MYSQL" -uroot -p"$DB_PASSWORD" --default-character-set=utf8mb4 plm < sql/menu-fill-missing-8.sql     # 补 8 个 PRD-aligned 缺菜单
 # Verify: 10 可见一级目录 (2400/2500 + 2900-2970), 旧 2000 业务管理 visible=1
@@ -76,7 +79,7 @@ All sensitive yml values are wrapped in `${VAR:default}` placeholders. The defau
 
 Spring Boot does not auto-read `.env` files. Inject via IDE run config, shell `export`, docker-compose `env_file:`, or K8s Secret. The `.env` file itself is gitignored (see root `.gitignore`).
 
-The 9 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](memory/project-quirks.md)):
+The 10 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](memory/project-quirks.md)):
 
 | # | Symptom | Fix | 复发 |
 |---|---|---|---|
@@ -89,6 +92,7 @@ The 9 gotchas, one-liner(完整 quirks 知识库在 [memory/project-quirks.md](m
 | 7 | `business-*.sql` 漏写 `sys_menu` INSERT → 前端无菜单入口、功能不可达 | `.githooks/pre-commit` lint 1 自动拦截(缺 `INSERT INTO sys_menu`);仅扩字典/子表的脚本顶部加 `-- @no-menu: <原因>` 豁免。Q-DB-04,首例 81bc1ba | 1+ |
 | 8 | `sys_menu` path 列改动后,前端 `/business/<entity>` 按钮 404 大面积复发 | `.githooks/pre-commit` lint 2 自动 grep `plm-frontend/src/views/**` 给清单;跳转必须经 `src/utils/businessRoute.ts` SSoT,**禁止硬编码 `router.push('/business/...)`**。Q-BIZ-04,首例 5c4e70d+7b14807 | 2+ |
 | 9 | 并行 session 在共享 working tree 里用 `git add . / -A / -u / commit -a` → 偷别 session 已 staged 但未 commit 的文件,commit msg 与实际改动失配 | `.claude/hooks/session-guard.sh` (proposal 0030 升级)bulk add + dirty>=1 → exit 2 硬拦;合法 bulk 走 `export CLAUDE_BULK_OK="<≥10字 reason>"` 后门;紧急绕过 `export CLAUDE_BYPASS_SESSION_GUARD=1`(计入 signals bypass)。**永远显式 `git add file1 file2 ...`**。Q-COLLAB-01,首例 3ae00fd+656a6a4 单日 2 次 | 2 |
+| 10 | 切 branch 后启动报 `Table doesn't exist` / `Unknown column` — `sql/business-*-(add\|widen\|...).sql` 增量脚本漏跑 → schema drift | `cd plm-backend && ./scripts/db-migrate.sh` 走 `sql/.applied-scripts` 台账,自动 diff+apply 未跑的;`local-start-backend.sh` 启动前已内置调用,失败硬阻断。首次:`--init=fresh`(空库)/ `--init=existing`(已建库)。Q-DB-05,首例 2026-05-28 | 2+ |
 
 ## Architecture (where things live)
 

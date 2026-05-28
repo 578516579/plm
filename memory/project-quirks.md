@@ -181,6 +181,19 @@
 | 复发次数 | 1 |
 | **预防** | business-*.sql 模板 checklist:CREATE TABLE + dict_type/data + **sys_menu(M/C/D 三件套)** 缺一不可 |
 
+### Q-DB-05 — branch 拉新后 business-*-(add\|widen\|ai-eval\|review\|...).sql 漏跑致 schema drift
+
+| 字段 | 内容 |
+|---|---|
+| 现象 | `pull` 或切 branch 后启动报 `Table 'plm.tb_xxx' doesn't exist` / `Unknown column 'xxx'`,但代码确实引用此列 |
+| 根因 | sql/ 下增量脚本(`-add-requirement-id` / `-widen-dict-cols` / `-ai-eval` / `-review` / `-integration-ztf` 等)单纯手动应用,无台账追踪;切 branch 时人工很难记住哪几个新增的没跑 |
+| 修复(被动)| 对照 `git log --name-only -- 'plm-backend/sql/business-*.sql'` 自己 diff 哪些新增,逐个 mysql 导入 |
+| 修复(主动 = 推荐)| `cd plm-backend && ./scripts/db-migrate.sh` — 用 `sql/.applied-scripts` 台账比对 sql/ 全集,只跑未入账的;`local-start-backend.sh` 启动前自动调用 |
+| 首次发现 | 2026-05-28 用户反馈 schema drift 反复出现(对话 + Q-DB-03 复发) |
+| 复发次数 | 2+(Q-DB-03 同根因 1 次 + 本次反馈)|
+| **预防 SOP** | ① 新机器/重置库 → `./scripts/db-migrate.sh --init=fresh` ② 已有数据库 → `./scripts/db-migrate.sh --init=existing`(只入账不跑) ③ 后续 pull/切 branch → 直接 `local-start-backend.sh` 自动 diff+apply ④ 应急跳过 → `local-start-backend.sh --skip-migrate` |
+| **不入仓** | `sql/.applied-scripts` 在 plm-backend/.gitignore;每台机器独立维护 |
+
 ---
 
 ## JVM 层 (JVM)
