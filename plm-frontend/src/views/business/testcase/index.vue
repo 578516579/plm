@@ -224,6 +224,7 @@ import {
   listProjectsForSelect, listRequirementsForSelect,
   type TestCase, type TestCaseQuery
 } from '@/api/business/testcase'
+import { statusTagFor, categoryLabel, categoryTag, priorityTag } from './testcaseDict'
 
 const dialogVisible = ref(false)
 const aiPanelVisible = ref(false)
@@ -269,22 +270,6 @@ const passRate = computed(() => {
   if (exec === 0) return '—'
   return Math.round((passedCount.value / exec) * 100)
 })
-
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿', type: 'info' },
-  '01': { label: '待执行', type: 'warning' },
-  '02': { label: '执行中', type: 'primary' },
-  '03': { label: '已通过', type: 'success' },
-  '04': { label: '已失败', type: 'danger' }
-}
-const statusTagFor = (s?: string) => statusMap[s || ''] || { label: s || '-', type: 'info' as any }
-
-const categoryLabel = (v?: string) =>
-  ({ functional: '功能', boundary: '边界', exception: '异常', agri: '农业专项', performance: '性能' } as Record<string,string>)[v || ''] || v || '-'
-const categoryTag = (v?: string): any =>
-  ({ functional: 'primary', boundary: 'warning', exception: 'danger', agri: 'success', performance: 'info' } as Record<string,string>)[v || ''] || 'info'
-const priorityTag = (p?: string): any =>
-  ({ P0: 'danger', P1: 'warning', P2: 'info' } as Record<string,string>)[p || ''] || 'info'
 
 async function getList() {
   listLoading.value = true
