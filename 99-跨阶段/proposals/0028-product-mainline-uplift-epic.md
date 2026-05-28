@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0028 |
 | 标题 | 产品主线贯通迭代 — P0-1 跨模块外键 + P0-2 详情页跨模块跳转 + P0-3 真聚合 TestReport/DORA + P0-4 AiButton 紫渐变组件 + P0-5 Dashboard 错态显形 |
-| 状态 | **P0-1 + P0-4 + P0-5 merged → tracking**(2026-05-28 commits `3ae00fd` / `5c01814`,详 §10);P0-2 + P0-3 仍 proposed |
+| 状态 | **P0-1 + P0-2 + P0-4 + P0-5 merged → tracking**(2026-05-28 commits `3ae00fd` / `5c01814` / `21b7166` / `656a6a4`,详 §10);**仅 P0-3 仍 proposed**(epic 进度 80%) |
 | 类型 | 架构 + 编码规范 + UED(epic 跨域) |
 | 提出人 | Claude (PM 视角验收) + Wjl |
 | 提出日期 | 2026-05-28 |
@@ -221,7 +221,10 @@ if (failed.length > 0) {
     [x] 2d: pipeline + release_id(反向)— ⚠ **应用层 FK 校验留 known limitation**(详 §5 风险表新增行),DDL + Domain + Mapper XML 已落
 [x] Step 3: P0-4 AiButton 组件 + 6 模块批量替换 9 处(frontend-coder)— commit `5c01814`
 [x] Step 4: P0-5 Dashboard 错态显形(frontend-coder + 单测)— 同 commit `5c01814`
-[ ] Step 5: P0-2 businessRoute 扩展 + 5 详情页按钮 + 后端 promote/attach endpoint(arch-orchestrator + backend-coder + frontend-coder)
+[x] Step 5: P0-2 businessRoute 扩展 + 5 详情页按钮 + 后端 promote/attach endpoint —
+    [x] 5a P0-2A SPI ProjectScopedLookup 下沉 plm-common(commit `21b7166`)
+    [x] 5b P0-2B 2 endpoint inception/promote-to-project + submission/attach-testplan(同 commit `21b7166`)
+    [x] 5c P0-2C 前端 businessRoute composable + 5 详情页 12 按钮(⚠ commit `656a6a4` msg 写 "README 索引登记 0029" — 第 2 次协作 race 偷文件事故,详 §10)
 [ ] Step 6: P0-3 TestReport/DORA 聚合服务 + Quartz 任务(backend-coder + db-orchestrator)
 [ ] Step 7: PRD-MAPPING §2 + 4 ADR + 4 Gate 实例(technical-writer)
 [ ] Step 8: 5 PR 分批合并,每 PR 单独 [solo-review];E2E 全套件回归
@@ -274,8 +277,19 @@ if (failed.length > 0) {
 - P0-4 替换 9 个 AI 按钮(dashboard 1 / requirement 2 / task 2 / defect 1 / release 1 / inception 2),收敛紫渐变 + ✨ Token,解除 UED §N.3 一票否决
 - P0-5 错态显形:dashboard `Promise.allSettled` 失败聚合 `ElMessage.warning` 单 toast + `console.warn` 详记 panel reason + `__failed` 标记防覆盖既有 state
 
-### P0-2 + P0-3 状态
-均仍 proposed,待开工授权(P0-2 包括 release ↔ pipeline SPI 下沉解决 P0-1 known limitation)。
+### P0-2 合入(2026-05-28,3 commits)
+
+- **P0-2A + P0-2B 后端**:commit `21b7166` `feat(backend): 0028 P0-2A SPI + P0-2B 跨模块 endpoint [solo-review]` 15 文件 / 649 insertions
+  - SPI ProjectScopedLookup 下沉 plm-common,plm-pipeline/plm-release @Component 实现,Map<String,...> 注入解循环依赖
+  - **彻底解 P0-1 known limitation**(release ↔ pipeline 应用层 FK 校验)
+  - 2 endpoint:`POST /business/inception/{id}/promote-to-project` + `POST /business/submission/{id}/attach-testplan`
+  - 测试:plm-common 30 / plm-release 20 / plm-pipeline 25 / inception 33 / submission 25 全绿(+16 新 case)
+  - 0 SQL(复用现有 edit perm)
+- **P0-2C 前端**:**commit `656a6a4`** ⚠ **第 2 次协作事故** — commit message 写 `docs(proposal): README 索引登记 0029 [solo-review]`,实际**并行 session 跑 `git add .` 偷走本会话已 staged 的 P0-2C 11 文件**塞进去(12 文件总数 = 0029 README 1 行 + P0-2C 11 文件)。git 事实:P0-2C 已 in main(business `useBusinessRoute()` composable + 4 API client + 5 详情页 12 按钮 + 4 P1 TODO + vitest 500 全绿 + vue-tsc 无新错)。**事故**:即便已在 commit `4bfe206`/0028 §10 第一次注解里明确"绝不 git add .",并行 session 仍重蹈覆辙 — 强烈建议升级到 hook pre-commit 硬拦 `git add -A`/`git add .`(走 proposal 0030 范围)。
+- 4 处 P1 TODO 已记:requirement 详情 5 跳页 query 过滤后续接;testcase 跳 defect 自动新建回填后续接;release attach-pipeline 独立 picker dialog 后续接
+
+### P0-3 状态
+仅剩 P0-3 (TestReport / DORA 真聚合)仍 proposed。预估 2 天,backend-coder + Quartz Job。
 
 ### Tracking 数据
 
@@ -301,3 +315,4 @@ if (failed.length > 0) {
 | 2026-05-28 | Claude(PM 验收会话)+ Wjl | 初版 — 验收报告 → epic proposal,5 子项拆解 |
 | 2026-05-28 | Claude(PM 验收会话)| P0-1 落地完成,补 §5 风险段 known limitation(release ↔ pipeline 循环依赖)+ §10 合入 commit `3ae00fd`(协作事故注解:并行 session race 偷文件)+ §1 元信息状态升级 P0-1 merged → tracking |
 | 2026-05-28 | Claude(PM 验收会话)| P0-4 + P0-5 落地完成,commit `5c01814`(精确 add 8 文件避协作事故复发);§1 元信息升级 P0-1+P0-4+P0-5 merged → tracking;§7 Steps 3/4 勾选;§10 加 P0-4+P0-5 合入小段 |
+| 2026-05-28 | Claude(PM 验收会话)| P0-2 全部落地(P0-2A SPI + P0-2B 2 endpoint commit `21b7166` 后端 15 文件;P0-2C 前端 11 文件 ⚠ commit `656a6a4` 第 2 次协作 race 偷走);§1 升级 P0-1+P0-2+P0-4+P0-5 merged → tracking 仅 P0-3 剩;§7 Step 5 拆 5a/5b/5c 勾选;§10 加 P0-2 合入大段 + 第 2 次事故注解 + hook 升级建议(proposal 0030 范围) |
