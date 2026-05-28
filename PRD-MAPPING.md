@@ -153,6 +153,7 @@
 | projectId | project_id | BIGINT | F4.6 | FK→tb_project.id（必填） |
 | sprintId | sprint_id | BIGINT | F4.6 | FK→tb_sprint.id（可空） |
 | taskId | task_id | BIGINT | F4.6 | FK→tb_task.id（可空） |
+| testcaseId | testcase_id | BIGINT | **0028 P0-1b** | FK→tb_testcase.id（可空,用例失败→缺陷溯源;同 projectId 强校验 → 702）|
 | title | title | VARCHAR | 原型 defects.html "标题" | 必填 |
 | description | description | TEXT | 原型 "详细描述" | |
 | severity | severity | VARCHAR | 字典 `biz_defect_severity` | 严重级别 |
@@ -230,6 +231,7 @@
 | submissionNo | submission_no | VARCHAR | ADR | 编号 SUB-YYYY-NNNN |
 | projectId | project_id | BIGINT | F4.4 | FK→tb_project.id（必填） |
 | sprintId | sprint_id | BIGINT | F4.4 | FK→tb_sprint.id（可空） |
+| testplanId | testplan_id | BIGINT | **0028 P0-1a** | FK→tb_testplan.id（可空,提测拉起测试方案;同 projectId 强校验 → 702;状态 ≥01 必填）|
 | title | title | VARCHAR | 原型 "提测标题" | 必填 |
 | scope | scope | TEXT | 原型 "范围" | 本次提测范围 |
 | environment | environment | VARCHAR | 原型 "环境" | dev/sit/uat/prod |
@@ -261,6 +263,7 @@
 | version | version | VARCHAR | 原型 "版本号" | 如 v1.0.0,必填 |
 | projectId | project_id | BIGINT | - | FK→tb_project.id（必填） |
 | sprintId | sprint_id | BIGINT | - | FK→tb_sprint.id（可空） |
+| pipelineId | pipeline_id | BIGINT | **0028 P0-1c** | FK→tb_pipeline.id（可空,发布关联流水线;同 projectId 校验经 ProjectScopedLookup SPI → 702;状态 ≥01 必填）|
 | strategy | strategy | VARCHAR | 字典 `biz_release_strategy` | blue_green / canary / rolling |
 | environment | environment | VARCHAR | 原型 "环境" | dev/sit/uat/prod |
 | releaseNotes | release_notes | TEXT | 原型 "发布说明" | 变更内容 |
@@ -384,6 +387,9 @@
 | status | status | VARCHAR | 字典 `biz_testreport_status` | 00=草稿 01=审核中 02=已发布 |
 | generatedAt | generated_at | DATETIME | - | AI 生成时自动填 |
 | reviewerUserId | reviewer_user_id | BIGINT | - | FK→sys_user |
+| isAggregated | is_aggregated | CHAR(1) | **0028 P0-3A** | Y/N,默认 N。`aggregateFromTestplan` 跑完置 Y(自动从 testcase + defect 聚合 totalCases/passedCases/failedCases/p0Defects/p1Defects/coverageRate)|
+| aggregatedAt | aggregated_at | DATETIME | **0028 P0-3A** | 聚合时间戳;`POST /business/testreport/{id}/refresh-aggregate` 端点触发 |
+| isManualOverride | is_manual_override | CHAR(1) | **0028 P0-3A** | Y/N,默认 N。Y 时聚合服务**直接 return 不动数据**(尊重人工填的字段)— 防覆盖语义关键字段 |
 | createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
 
 ### §14. Inception（plm-inception）
@@ -710,6 +716,7 @@
 | pipelineId | pipeline_id | BIGINT | - | 主键 |
 | pipelineNo | pipeline_no | VARCHAR(32) | PL-YYYY-NNNN | 自动生成 / 撞号重试 |
 | projectId | project_id | BIGINT | F1.2 关联项目 | FK→tb_project.id |
+| releaseId | release_id | BIGINT | **0028 P0-1d** | FK→tb_release.id（可空,流水线→所属发布反向;同 projectId 校验经 ProjectScopedLookup SPI → 702;known limit 已关闭 commit `21b7166`）|
 | pipelineName | pipeline_name | VARCHAR(200) | 原型 "流水线名称" | 必填 |
 | repoName | repo_name | VARCHAR(200) | 原型 "代码仓库" | git@... 或 https URL |
 | repoBranch | repo_branch | VARCHAR(100) | 原型 "分支" | main / develop / feature/* |
@@ -774,14 +781,21 @@
 | aiGeneratedAt | ai_generated_at | DATETIME | - | AI 生成时间戳 |
 | status | status | VARCHAR(20) | 字典 `biz_dora_status`（验收 P2-12：UI 未渲染） | 00 草稿 / 01 已发布 |
 | authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| periodStart | period_start | DATE | **0028 P0-3B** | 聚合窗口起,默认 now - periodDays |
+| periodEnd | period_end | DATE | **0028 P0-3B** | 聚合窗口止,默认 now |
+| periodDays | period_days | INT | **0028 P0-3B** | 窗口天数,默认 30(对应"近 30 天 DORA 4 指标") |
+| isComputed | is_computed | CHAR(1) | **0028 P0-3B** | Y/N,默认 N。`computeMetrics(projectId, periodStart, periodEnd)` 跑完置 Y;Y 时再算覆盖,N 时跳过尊重人工录入 |
+| computedAt | computed_at | DATETIME | **0028 P0-3B** | 聚合时间戳;`POST /business/dora/refresh-compute` 端点触发 + `DoraComputeTask` 每日 03:00 cron 自动跑 |
 | createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
 
-> ⚠️ **dora 模块已知 5 处跨层契约漂移**（commit `f3dfa01` ledger 记录,锁当前 + spec 显式记录,api-contract 评审走任务卡）:
-> 1. metric_type 码 2/4 错位：前端 `deploy_frequency` ↔ SQL `deploy_freq` 等
-> 2. label emoji 装饰差异
-> 3. LEVEL 前端独有,SQL 无字典且表无列
-> 4. `biz_dora_status` 字典定义但 UI 未渲染
-> 5. `biz_dora_period` 用裸值,字典定义但未应用
+**联合索引**（0028 P0-3B）：`(project_id, metric_type, period_start)` — 防同窗口同指标重算冲突 + 加速 dashboard 查询。
+
+> ⚠️ **dora 模块已知 5 处跨层契约漂移**（commit `f3dfa01` 首登 + commit `5f93f77` P0-3B 部分修齐）:
+> 1. ~~metric_type 码 2/4 错位~~ → **0028 P0-3B 后端已修齐**：SQL `biz_dora_metric_type` 实际码为 `deploy_freq` / `lead_time` / `mttr` / `change_fail_rate`(非 PRD 描述的 deployment_frequency 全名);`DoraMetricServiceImpl.computeMetrics` 与 SQL 码对齐;前端 `doraDict.ts` 待 0029 子任务修齐(详 0029 漂移分类 A2)
+> 2. label emoji 装饰差异(显示层,锁当前)
+> 3. LEVEL 前端独有,SQL 无字典且表无列(仍待评审,0029 漂移分类 C4)
+> 4. `biz_dora_status` 字典定义但 UI 未渲染(0029 漂移分类 C1)
+> 5. ~~`biz_dora_period` 用裸值~~ → **0028 P0-3B 部分修齐**:后端引入 period_start/period_end/period_days 显式三列,不再裸值;前端字典渲染待 0029 C2 修齐
 
 ### §32. MCP Server（plm-mcp）
 
