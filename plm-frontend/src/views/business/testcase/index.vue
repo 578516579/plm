@@ -127,7 +127,7 @@
             <el-tag v-else type="info" size="small">手动</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="300" align="center">
+        <el-table-column label="操作" width="380" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadTc(row)">编辑</el-button>
             <el-button link type="warning" :loading="aiRowId === row.testcaseId" @click="aiEnrich(row)">
@@ -135,6 +135,13 @@
             </el-button>
             <el-button link type="success" @click="execTc(row, '03')">▶ 通过</el-button>
             <el-button link type="danger" @click="execTc(row, '04')">✗ 失败</el-button>
+            <!-- 0028 P0-2C: 已失败用例 (status='04') 一键提缺陷, 携 testcaseId / projectId / requirementId 给目标 -->
+            <el-button
+              v-if="row.status === '04'"
+              link
+              type="danger"
+              @click="raiseDefect(row)"
+            >🐛 一键提缺陷</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -225,6 +232,10 @@ import {
   type TestCase, type TestCaseQuery
 } from '@/api/business/testcase'
 import { statusTagFor, categoryLabel, categoryTag, priorityTag } from './testcaseDict'
+import { useBusinessRoute } from '@/utils/businessRoute'
+
+// 0028 P0-2C: 跨模块导航 composable
+const nav = useBusinessRoute()
 
 const dialogVisible = ref(false)
 const aiPanelVisible = ref(false)
@@ -365,6 +376,24 @@ async function batchDelete() {
   const ids = selection.value.map(t => t.testcaseId).filter(Boolean) as number[]
   await delTestCase(ids); ElMessage.success('批量删除完成')
   selection.value = []; await getList()
+}
+
+/**
+ * 0028 P0-2C: 一键提缺陷
+ * 失败用例 (status='04') → 跳到缺陷模块列表页, 携 testcaseId / projectId / requirementId + openDetail
+ * ⚠ 第一版: 缺陷模块尚未实现 `route.query.openDetail` 监听 → 跳过去后用户需手动点"新增缺陷"
+ *    粘贴 testcaseId. 完整自动回填留 P1。
+ */
+async function raiseDefect(row: TestCase) {
+  if (!row.testcaseId) return
+  const query: Record<string, string> = {
+    testcaseId: String(row.testcaseId),
+    projectId: String(row.projectId),
+    openDetail: '1'
+  }
+  if (row.requirementId) query.requirementId = String(row.requirementId)
+  await nav.goEntityList('defect', query)
+  ElMessage.info(`已跳转到缺陷模块。失败用例 ${row.testcaseNo || '#' + row.testcaseId} 信息已传递, 请点击「新增缺陷」并填写其他字段。`)
 }
 
 onMounted(() => { getList(); loadOpts() })

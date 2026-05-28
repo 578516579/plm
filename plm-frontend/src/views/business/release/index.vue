@@ -241,9 +241,23 @@
             <el-tag :type="statusTagFor(row.status).type" size="small">{{ statusTagFor(row.status).label }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="280" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadRelease(row)">编辑</el-button>
+            <!-- 0028 P0-2C: 已关联流水线 → 直接跳, 未关联 → 提示走编辑表单填 pipelineId
+                 (P1 待后端开放 attach-pipeline endpoint, 先用现有 updateRelease 写入) -->
+            <el-button
+              v-if="row.pipelineId"
+              link
+              type="info"
+              @click="nav.goEntityDetail('pipeline', row.pipelineId!)"
+            >🔧 查看流水线</el-button>
+            <el-button
+              v-else
+              link
+              type="warning"
+              @click="attachPipelineHint(row)"
+            >关联流水线</el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -280,6 +294,10 @@ import {
   statusTagFor, strategyLabel,
   strategyHint as getStrategyHint
 } from './releaseDict'
+import { useBusinessRoute } from '@/utils/businessRoute'
+
+// 0028 P0-2C: 跨模块导航 composable
+const nav = useBusinessRoute()
 
 const formRef = ref()
 const saving = ref(false)
@@ -549,6 +567,21 @@ function newRelease() {
   Object.assign(form, emptyForm())
   Object.keys(current).forEach(k => delete (current as any)[k])
   formRef.value?.clearValidate()
+}
+
+/**
+ * 0028 P0-2C: 关联流水线 (软提示)
+ * ⚠ 后端 P0-1 已加列 release.pipelineId + P0-2A 的 SPI 校验,
+ *    但 P0-2B 未做独立 attach-pipeline endpoint。
+ * 第一版: 提示用户走"编辑"在表单内填 pipelineId, 后端 SPI 会校验流水线归属同项目。
+ * 完整 attach 流程留 P1 (与 attachTestplan 同样 picker dialog 模式)。
+ */
+function attachPipelineHint(row: Release) {
+  ElMessageBox.confirm(
+    `请点击「编辑」打开发布单 ${row.releaseNo} 并在表单中填入 pipelineId 后保存。\n\n后端会校验流水线必须归属同一项目 (601)。\n\n要现在打开编辑吗?`,
+    '关联流水线 (P1 完整流程开发中)',
+    { type: 'info', confirmButtonText: '打开编辑', cancelButtonText: '取消' }
+  ).then(() => loadRelease(row)).catch(() => {})
 }
 
 onMounted(async () => {

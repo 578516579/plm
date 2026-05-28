@@ -221,6 +221,15 @@
         </el-tab-pane>
       </el-tabs>
       <template #footer>
+        <!-- 0028 P0-2C: 跨模块跳转 (按需求 ID 过滤;目标页 query.requirementId 过滤待 P1 接) -->
+        <div class="cross-nav-row">
+          <span class="cross-nav-label">查看关联文档:</span>
+          <el-button size="small" link type="primary" @click="jumpToLinked('prd')">📄 PRD</el-button>
+          <el-button size="small" link type="primary" @click="jumpToLinked('ued')">🎨 UED</el-button>
+          <el-button size="small" link type="primary" @click="jumpToLinked('arch')">🏗 架构</el-button>
+          <el-button size="small" link type="primary" @click="jumpToLinked('dbdesign')">🗄 数据库</el-button>
+          <el-button size="small" link type="primary" @click="jumpToLinked('apidesign')">🔌 接口</el-button>
+        </div>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </template>
     </el-dialog>
@@ -243,6 +252,10 @@ import {
   sourceLabel, sourceTag, priorityLabel, priorityTag,
   statusTagFor, aiEvalLabel, aiEvalTag
 } from './requirementDict'
+import { useBusinessRoute } from '@/utils/businessRoute'
+
+// 0028 P0-2C: 跨模块导航 composable
+const nav = useBusinessRoute()
 
 const activeTab = ref('')
 const dialogVisible = ref(false)
@@ -431,6 +444,22 @@ async function openDetail(row: Requirement) {
   ])
 }
 
+/**
+ * 0028 P0-2C: 跨模块跳转到关联文档列表
+ *
+ * 携带 requirementId query 给目标页, 目标页支持 ?requirementId=NN 过滤即可"按需求过滤"。
+ * ⚠ TODO P1: prd / ued / arch / dbdesign / apidesign 5 个目标列表页当前未实现
+ *    onMounted 内 `route.query.requirementId` → queryParams 自动应用过滤,
+ *    第一版仅完成跳转动作, 用户落到目标页后看到完整列表。
+ *
+ * 5 个 entity 由 requirementDict 详情对话框 footer 按钮触发。
+ */
+async function jumpToLinked(entity: 'prd' | 'ued' | 'arch' | 'dbdesign' | 'apidesign') {
+  if (!currentDetailReq.value?.requirementId) return
+  detailDialogVisible.value = false
+  await nav.goEntityList(entity, { requirementId: String(currentDetailReq.value.requirementId) })
+}
+
 async function handleDeleteReview(row: RequirementReview) {
   if (!row.reviewId) return
   await ElMessageBox.confirm('确认撤回这条评审记录?', '提示', { type: 'warning' })
@@ -453,4 +482,10 @@ onMounted(() => { getList(); loadProjects() })
 .status-tabs { background: #fff; padding: 0 16px; border-radius: 8px; margin-bottom: 14px; }
 .muted { color: #9ca3af; font-size: 12px; }
 .mb12 { margin-bottom: 12px; }
+/* 0028 P0-2C 跨模块跳转 footer */
+.cross-nav-row {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-right: 16px;
+}
+.cross-nav-label { color: #6b7280; font-size: 12px; }
 </style>

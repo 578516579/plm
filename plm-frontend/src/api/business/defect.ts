@@ -22,6 +22,9 @@ export interface Defect {
   actualResult?: string
   resolution?: string
   tags?: string
+  // 0028 epic P0-1 加列: 缺陷 → 关联测试用例 (testcase "一键提缺陷"回填)
+  testcaseId?: number
+  requirementId?: number
 }
 
 export interface DefectQuery {

@@ -25,6 +25,8 @@ export interface Release {
   changeFailureRate?: number
   releasedByUserId?: number
   status?: string
+  // 0028 epic P0-1 加列: 发布单 ↔ 流水线
+  pipelineId?: number
 }
 
 export interface ReleaseQuery {

@@ -64,3 +64,10 @@ export function delInception(ids: number | number[]): Promise<any> {
 export function aiGenerateInception(id: number): Promise<any> {
   return request({ url: `/business/inception/ai/generate/${id}`, method: 'post' })
 }
+
+// 立项 → 项目晋升 — 0028 P0-2C, 后端 21b7166
+// 仅当 inception.status='03' (已批准) 且 projectId IS NULL 时合法; 后端返回 newProjectId
+// 权限 business:inception:edit
+export function promoteInceptionToProject(id: number): Promise<any> {
+  return request({ url: `/business/inception/${id}/promote-to-project`, method: 'post' })
+}

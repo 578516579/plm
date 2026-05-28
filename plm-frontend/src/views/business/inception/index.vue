@@ -212,10 +212,24 @@
             <el-tag :type="statusTagFor(row.status).type" size="small">{{ statusTagFor(row.status).label }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center">
+        <el-table-column label="操作" width="320" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadInception(row)">载入编辑</el-button>
             <el-button link type="success" @click="quickAi(row)" :disabled="row.aiGenerated === 'Y'">AI 分析</el-button>
+            <!-- 0028 P0-2C: 已批准 (status='03') 且未晋升 → 显示晋升按钮 -->
+            <el-button
+              v-if="row.status === '03' && !row.projectId"
+              link
+              type="warning"
+              @click="handlePromote(row)"
+            >晋升项目</el-button>
+            <!-- 已晋升 → 跳到已生成项目 -->
+            <el-button
+              v-else-if="row.projectId"
+              link
+              type="info"
+              @click="nav.goEntityDetail('project', row.projectId!)"
+            >查看项目#{{ row.projectId }}</el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -241,9 +255,14 @@ import {
 import AiButton from '@/components/AiButton/index.vue'
 import {
   listInception, addInception, updateInception, delInception,
-  aiGenerateInception, getInception, type Inception, type InceptionQuery
+  aiGenerateInception, getInception, promoteInceptionToProject,
+  type Inception, type InceptionQuery
 } from '@/api/business/inception'
 import { businessLineLabel, inceptionTypeLabel, statusTagFor } from './inceptionDict'
+import { useBusinessRoute } from '@/utils/businessRoute'
+
+// 0028 P0-2C: 跨模块导航 composable
+const nav = useBusinessRoute()
 
 const formRef = ref()
 const saving = ref(false)
@@ -397,6 +416,34 @@ function resetForm() {
   Object.assign(form, emptyForm())
   Object.keys(current).forEach(k => delete (current as any)[k])
   formRef.value?.clearValidate()
+}
+
+/**
+ * 0028 P0-2C: 立项 → 项目晋升
+ * 前置条件: status='03' (已批准) 且 projectId 为空, 由模板按钮显隐控制
+ * 后端 POST /business/inception/{id}/promote-to-project 返 newProjectId
+ */
+async function handlePromote(row: Inception) {
+  if (!row.inceptionId) return
+  await ElMessageBox.confirm(
+    `确认将立项 "${row.inceptionNo}" 晋升为正式项目?\n晋升后会生成项目记录并把立项 projectId 写回。`,
+    '晋升项目',
+    { type: 'warning', confirmButtonText: '确认晋升' }
+  )
+  try {
+    const res: any = await promoteInceptionToProject(row.inceptionId)
+    const newProjectId = res?.data?.newProjectId ?? res?.data
+    if (res?.code === 200 && newProjectId) {
+      ElMessage.success(`已晋升为项目 #${newProjectId}`)
+      await getList()
+      await nav.goEntityDetail('project', newProjectId)
+    } else {
+      ElMessage.error(res?.msg || '晋升失败')
+    }
+  } catch (e: any) {
+    if (e?.code === 601) ElMessage.error('立项状态不合法 (需为已批准 03 且未晋升)')
+    else ElMessage.error(e?.msg || e?.message || '晋升失败')
+  }
 }
 
 onMounted(() => {

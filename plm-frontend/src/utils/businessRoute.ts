@@ -81,3 +81,69 @@ export const ENTITY_TO_PATH: Record<string, string> = {
 export function entityToPath(entity: string): string {
   return ENTITY_TO_PATH[entity] || `/business/${entity}`
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// 跨模块导航 composable (0028 epic P0-2C)
+//
+// **设计**: 用 composable 包装是因为 `useRouter()` 必须在 Vue `setup()` 期被同步调用
+// (依赖当前活动的 Vue Instance)。若直接导出 `goEntityList()` 等函数, 在 setup 外
+// (如纯异步 helper) 调用会拿到 null router。所以约定:
+//   在组件 setup 顶部一次性调用 `const nav = useBusinessRoute()`,
+//   再传给任何业务函数 / 异步回调 / dialog 处理器。
+//
+// **跨模块跳转契约**:
+// - `goEntityList(entity, query?)`: 跳到列表页 (`/business/<entity>`),
+//   query 用于"按 XX 过滤"或"携回填字段"(目标页可读 route.query 兼做过滤/打开新建)。
+// - `goEntityDetail(entity, id)`: 跳到详情. 当前各模块未拆独立 detail 路由, 走
+//   `/business/<entity>?id=N&openDetail=1`, 由目标 view 监听并自行打开 detail 弹窗。
+//   ⚠ 现状各模块尚未统一接 `openDetail=1` 监听, 标定为 P1 增强项; 第一版作为
+//   "跳转 + 用户手动定位"亦可用。
+// - `backToParent(parentEntity, parentId)`: 语义糖, 同 goEntityDetail。
+// - `goEntity(entity)`: 兜底, 仅 path 不带 query。
+// ─────────────────────────────────────────────────────────────────────────
+import { useRouter } from 'vue-router'
+import type { LocationQueryRaw } from 'vue-router'
+
+export interface BusinessRouteApi {
+  goEntityList: (entity: string, query?: LocationQueryRaw) => Promise<void>
+  goEntityDetail: (entity: string, id: number | string) => Promise<void>
+  backToParent: (parentEntity: string, parentId: number | string) => Promise<void>
+  goEntity: (entity: string) => Promise<void>
+}
+
+/**
+ * 在 setup 中调用一次, 返回所有跨模块导航函数 (避免 `useRouter()` 上下文丢失)。
+ *
+ * @example
+ * ```ts
+ * // setup 顶部
+ * const nav = useBusinessRoute()
+ * // 按钮 click
+ * await nav.goEntityDetail('project', 42)
+ * // 列表带过滤
+ * await nav.goEntityList('defect', { testcaseId: tc.id, openDetail: '1' })
+ * ```
+ */
+export function useBusinessRoute(): BusinessRouteApi {
+  const router = useRouter()
+  return {
+    goEntityList: async (entity, query) => {
+      await router.push({ path: entityToPath(entity), query })
+    },
+    goEntityDetail: async (entity, id) => {
+      await router.push({
+        path: entityToPath(entity),
+        query: { id: String(id), openDetail: '1' }
+      })
+    },
+    backToParent: async (parentEntity, parentId) => {
+      await router.push({
+        path: entityToPath(parentEntity),
+        query: { id: String(parentId), openDetail: '1' }
+      })
+    },
+    goEntity: async (entity) => {
+      await router.push({ path: entityToPath(entity) })
+    }
+  }
+}
