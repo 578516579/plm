@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0028 |
 | 标题 | 产品主线贯通迭代 — P0-1 跨模块外键 + P0-2 详情页跨模块跳转 + P0-3 真聚合 TestReport/DORA + P0-4 AiButton 紫渐变组件 + P0-5 Dashboard 错态显形 |
-| 状态 | **🎉 epic 100% 全部 5 P0 merged → tracking**(2026-05-28 单日完工,commits `3ae00fd` / `21b7166` / `5c01814` / `5f93f77` / `9467bd1` + `656a6a4`(⚠race)+ 3 docs commit;详 §10) |
+| 状态 | **🟡 P0 代码 100% merged → tracking,🟠 Step 7 文档/Gate follow-up**(2026-05-28 单日完工 5 P0 代码,commits `3ae00fd` / `21b7166` / `5c01814` / `5f93f77` / `9467bd1` + `656a6a4`(⚠race)+ 3 docs commit;**Step 7 PRD-MAPPING §2 字段表 + 4 ADR + 4 Gate 实例尚未补**,详 §7 拆 follow-up 子任务 & §10) |
 | 类型 | 架构 + 编码规范 + UED(epic 跨域) |
 | 提出人 | Claude (PM 视角验收) + Wjl |
 | 提出日期 | 2026-05-28 |
@@ -195,7 +195,8 @@ if (failed.length > 0) {
 | 4 表加列在生产是 DDL 锁表 | utf8mb4 + InnoDB Online DDL 8.0 算法,字段都 NULL allowed 不阻写;迁移 SQL 单独 PR 走 db-ops 评审 |
 | AiButton 强制替换会撞 ongoing 字典抽取工作 | 协作规范 §4 同模块串行,等当前 11 个字典抽取 commit 完后再做 |
 | Inception promote 重复触发 | 服务方法加幂等:inception.projectId IS NOT NULL 时直接返回已有 projectId,不重复建项 |
-| **release ↔ pipeline 互引的 Maven 循环依赖**(2026-05-28 P0-1 落地实测发现) | **本期 known limitation**:release/pipeline 互引列(`pipeline_id`/`release_id`)只在 DDL + Domain + Mapper 落地,**应用层 FK 校验缺位**。submission/defect 的强 FK 校验(同 projectId → 702)已正常落,业务主收益保留。**修复路径**:P0-2 或后续单独 ADR 推 SPI 接口 `ProjectScopedLookup` 下沉到 plm-common,各 ServiceImpl `@Component` 实现 + Map 注入(详 backend-coder 2026-05-28 会话报告)。当前缓解:数据层 NULL allowed,业务可正常运作,不强约束同 projectId 不会有重大事故;若需临时强校验,在 ReleaseController/PipelineController 层手工 query 对方表 |
+| **release ↔ pipeline 互引的 Maven 循环依赖**(2026-05-28 P0-1 落地实测发现) | **本期 known limitation**:release/pipeline 互引列(`pipeline_id`/`release_id`)只在 DDL + Domain + Mapper 落地,**应用层 FK 校验缺位**。submission/defect 的强 FK 校验(同 projectId → 702)已正常落,业务主收益保留。**修复路径**:P0-2 或后续单独 ADR 推 SPI 接口 `ProjectScopedLookup` 下沉到 plm-common,各 ServiceImpl `@Component` 实现 + Map 注入(详 backend-coder 2026-05-28 会话报告)。当前缓解:数据层 NULL allowed,业务可正常运作,不强约束同 projectId 不会有重大事故;若需临时强校验,在 ReleaseController/PipelineController 层手工 query 对方表。**实施期已解**:commit `21b7166` (P0-2A) 落 SPI 模式,known limitation 关闭。 |
+| **并行 session 共享 working tree race add-all 偷文件**(2026-05-28 reviewer 复盘补登,B-2)| **structural,not incidental**:本 epic 期间 2 次复发(`3ae00fd` 偷 P0-1 22 文件 / `656a6a4` 偷 P0-2C 11 文件),commit msg subject 与实际改动 80%+ 失配。proposal 0008 留 session-guard.sh nudge 已证失效(`exit 0` 形同放行)。**修复路径**:proposal 0030 已 implementing — hook 升级到 `exit 2` 硬拦 + `CLAUDE_BULK_OK` 显式后门 + Q-COLLAB-01 quirk 登记 + CLAUDE.md gotcha 9。**本期残留**:`3ae00fd` / `656a6a4` 两 commit history 归属不忠实(commit msg ≠ 实际 diff);见 §9 评审记录 reviewer 注脚。 |
 
 ---
 
@@ -229,7 +230,12 @@ if (failed.length > 0) {
     [x] 6a P0-3A TestReport aggregateFromTestplan(commit `5f93f77`)5 case
     [x] 6b P0-3B DORA 4 指标 computeMetrics + DoraComputeTask Quartz(同 commit)6 case + 3 模块 SPI 扩展
     [x] 6c P0-3C testreport+dora 前端「🔄 刷新聚合」按钮 + 状态徽章(commit `9467bd1`)
-[ ] Step 7: PRD-MAPPING §2 + 4 ADR + 4 Gate 实例(technical-writer)
+[ ] Step 7: 文档 / Gate follow-up(reviewer 2026-05-28 拆为 4 子任务,B-3)
+    [ ] 7a PRD-MAPPING §2 — submission/defect/release/pipeline + testreport/dora 6 节字段表追加 (+ 6 新增 isAggregated/aggregatedAt/isManualOverride/isComputed/computedAt/periodDays 字段)
+    [ ] 7b ADR-promote-to-project(inception → project 幂等晋升语义 + projectId 锁定)
+    [ ] 7c ADR-real-aggregation(testreport / DORA 真聚合 + 人工覆盖 is_manual_override / is_computed='N' 跳过约定)
+    [ ] 7d ADR-spi-scoped-lookup(ProjectScopedLookup + DoraAggregationSource SPI 模式,可复用范式入 03-开发/ADR/)
+    [ ] 7e Gate 实例 — Phase 03 测试准入 4 模块(submission/release/testreport/dora)各 1 份 instance(对照已签字 defect/document/testcase 模板)
 [ ] Step 8: 5 PR 分批合并,每 PR 单独 [solo-review];E2E 全套件回归
 [ ] Step 9: 进入 tracking 期,signals 加"主线贯通度"段
 ```
@@ -261,6 +267,8 @@ if (failed.length > 0) {
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
 | Wjl | ✅ 通过(solo-review,User-requested-bypass)| 2026-05-28 | PM 验收报告产出后用户答 "需要",同意进入 proposal + 开干 P0-1。P0-2..P0-5 仍待开工授权 |
+| Claude (独立 reviewer 复盘) | 🟡 Approve with comments | 2026-05-28 | 反向独立评审 7 维度评分卡(详会话 review 报告 §1.1);**3 处必须改**已在本提案落地:B-1(本行 reviewer 注脚)+ B-2(§5 风险表加并行 race 行)+ B-3(§1 状态降级 + §7 Step 7 拆 7a-7e 子任务)。**Reviewer 注脚**:`3ae00fd` + `656a6a4` 2 commit 历史归属不忠实(commit msg ≠ 实际 diff)。决策:**不重做**(避免 force-push 风险 + 并行 session 也指着此 hash + 内容已 in main 可追溯);需 **Wjl 签字本行接受此既成事实**。亮点:P0-2A SPI 同 commit 既做 P0-2A 又解 P0-1 known limitation,DoraAggregationSource SPI 同 ProjectScopedLookup 范式复用(应入 ADR-7d) |
+| Wjl | _待签_ | _待定_ | 上行 Claude reviewer 复盘建议接受:**(a) Step 7 7a-7e 进 follow-up 单独 PR**;**(b) 3ae00fd/656a6a4 commit history 既成事实接受不重做**(明确签字防后续质询)|
 
 ---
 
@@ -338,3 +346,4 @@ if (failed.length > 0) {
 | 2026-05-28 | Claude(PM 验收会话)| P0-4 + P0-5 落地完成,commit `5c01814`(精确 add 8 文件避协作事故复发);§1 元信息升级 P0-1+P0-4+P0-5 merged → tracking;§7 Steps 3/4 勾选;§10 加 P0-4+P0-5 合入小段 |
 | 2026-05-28 | Claude(PM 验收会话)| P0-2 全部落地(P0-2A SPI + P0-2B 2 endpoint commit `21b7166` 后端 15 文件;P0-2C 前端 11 文件 ⚠ commit `656a6a4` 第 2 次协作 race 偷走);§1 升级 P0-1+P0-2+P0-4+P0-5 merged → tracking 仅 P0-3 剩;§7 Step 5 拆 5a/5b/5c 勾选;§10 加 P0-2 合入大段 + 第 2 次事故注解 + hook 升级建议(proposal 0030 范围) |
 | 2026-05-28 | Claude(PM 验收会话)| 🎉 **epic 100% 完工** — P0-3A+B 后端 commit `5f93f77` 30 文件(testreport aggregateFromTestplan + DORA 4 指标 + Quartz DoraComputeTask + 11 case)+ P0-3C 前端 commit `9467bd1` 4 文件(双模块"刷新聚合"按钮 + 三态徽章);§1 状态升级 epic 100%;§7 Step 6 拆 6a/6b/6c 勾选;§10 加 P0-3 合入大段 + 收官总结(80 文件 / 40 case / 9 commit / 2 race / 贯通度 15→60%) |
+| 2026-05-28 | Claude(独立 reviewer 复盘)| **B-1/B-2/B-3 三处必须改落地**:§1 状态从 "🎉 100%" 降级为 "🟡 P0 代码 100% + 🟠 Step 7 文档/Gate follow-up"(B-3);§5 风险表加并行 race add-all 行 + P0-2A 解 release↔pipeline known limitation 补注(B-2);§7 Step 7 拆 7a-7e 子任务(B-3);§9 评审记录加 reviewer 复盘行 + Wjl 待签接受 commit history 既成事实(B-1)。**0028 epic 状态**:从"宣布完工"修正为"代码完工 + 文档 follow-up + 待 Wjl 双签字"。 |

@@ -115,6 +115,7 @@ exit 0
 | 触发方式 | 单次 Bash 调用内 `export CLAUDE_BULK_OK="..." && <cmd>`(env 不跨 Bash 调用)|
 | reason 最小长度 | 10 字符,防空 reason 滥用 |
 | reason 推荐格式 | `<proposal#> <scope>: <N 文件> <原因摘要>` 例 `0028 P0-3A+B: 30 文件 testreport+dora 后端聚合` |
+| reason 质量分(C-2 reviewer 补)| reason 格式不在 hook 层强校验(POSIX sh 难判语义);**signals 月报抽样 N 例 reason 做"free-text 质量分"**:① 含 proposal# 引用 / ② 含具体 scope(模块名 / commit hash)/ ③ 含文件数。三项满足 ≥ 2 视为合格;月度合格率 < 50% 触发"加强校验"子提案(候选 0032)。**反模式拒绝清单**:`fix` / `bulk` / `update` / `wip` / `test`(凑 ≥10 字符的敷衍样本)|
 | 失效 | 单次 Bash 调用结束 env 即丢,无持久化 |
 | 统计 | 后续 signals 加 `bulk_ok_count` 维度,> 5/月触发月度审视是否常态化滥用(本提案 §8 跟踪)|
 
@@ -163,14 +164,19 @@ exit 0
 ## 7. 实施计划
 
 ```
-[x] Step 1: 升级 .claude/hooks/session-guard.sh git 分支 — bulk + dirty ≥ 1 改 exit 2 + CLAUDE_BULK_OK 后门(本 commit)
-[ ] Step 2: 改 .claude/rules.md §L 加协作 race 防线段
-[ ] Step 3: 改 CLAUDE.md gotcha 表 8→9, 加 Q-COLLAB-01 一行
-[ ] Step 4: memory/project-quirks.md 新登 Q-COLLAB-01 详条
-[ ] Step 5: 99-跨阶段/proposals/README.md + 在途任务.md ledger 索引
-[ ] Step 6: 本地双跑模拟 — 还原 3ae00fd / 656a6a4 场景,确认硬拦;export CLAUDE_BULK_OK 后确认放行
+[x] Step 1: 升级 .claude/hooks/session-guard.sh git 分支 — bulk + dirty ≥ 1 改 exit 2 + CLAUDE_BULK_OK 后门(commit `9ed456e`)
+[x] Step 2: 改 .claude/rules.md §L.5 加协作 race 防线段(commit `2af35df`)
+[x] Step 3: 改 CLAUDE.md gotcha 表 8→9, 加 Q-COLLAB-01 一行(同 `2af35df`)
+[x] Step 4: memory/project-quirks.md 新建「协作层(COLLAB)」分类 + Q-COLLAB-01 详条(同 `2af35df`)
+[x] Step 5: 99-跨阶段/proposals/README.md 索引登记(`9ed456e`)+ 在途任务.md ledger(`2af35df`)
+[x] Step 6: 本地双跑 5 自检测试 — syntax OK / HARD-BLOCK exit 2 / CLAUDE_BULK_OK 放行 / 短 reason 拒绝 / 显式路径放行 / BYPASS 绕过 全绿(`9ed456e` 自检)
 [ ] Step 7: Wjl solo-review 签字 → 状态 implementing → merged
 [ ] Step 8: tracking 4 周(2026-05-28 ~ 2026-06-25),按 §8 信号观察
+[ ] Step 9(reviewer C-1 补):**tracking 期满 owner**:2026-06-25 当天 Claude 自动跑 signals 月报扫两项触发条件:
+    ① race 复发计数(基线 2,目标 0)
+    ② BULK_OK 后门使用次数(目标 ≤ 5/月)+ reason 质量分(目标合格率 ≥ 50%,详 §3.3 反模式清单)
+    任一超阈则**同会话内起 proposal 0031 草稿**(lint 3 commit msg scope vs staged files 路径前缀错配,§6 备选 C);均未超阈则提案归档 done
+[ ] Step 10(reviewer C-2 补):tracking 期内每月 5 日,Claude 在月度反思中抽样 ≥ 3 例 BULK_OK reason 做质量分检查(§3.3 表),记入 reflect/2026-MM.md
 ```
 
 ---
@@ -227,3 +233,4 @@ exit 0
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-28 | Claude(Wjl 会话,0028 epic 收官)| V1.0 — 初稿,2 次事故复盘后立项;同 commit 落 Step 1 实装等待 review 转 merged |
+| 2026-05-28 | Claude(独立 reviewer 复盘)| V1.1 — 反向独立评审 7 维度评分卡(详会话 review 报告 §2.1)。**2 处建议改**已落地:**C-1**:§7 加 Step 9 tracking 期满 owner(2026-06-25 Claude 自动跑 signals 扫两项触发,任一超阈起 0031 草稿)+ Step 10 月度 reason 质量分抽样;**C-2**:§3.3 后门设计表加 reason 质量分细则 + 反模式拒绝清单(fix/bulk/update/wip/test)。**Verdict**:🟢 Approve(可签字转 merged),C-1/C-2 不阻塞 merged;**特别建议**:proposal 0030 是 self-evolution 闭环范本(事故 → 同会话立 proposal + 实装 + dogfood + 5 自检 + 提请 review),应入 `.claude/rules.md §L.2` "fast-track 例外条款"适用 hook/工具类小提案 |
