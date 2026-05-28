@@ -12,6 +12,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
@@ -139,10 +140,10 @@ public class DbDesignServiceImpl implements IDbDesignService
         if (d == null) {
             throw new ServiceException("DB 设计不存在", 404);
         }
-        aiService.chat(AiChatRequest.builder("")
+        AiChatRequest aiReq = AiChatRequest.builder("")
             .system("你是 PLM 资深数据库架构师,擅长 ER 设计与规范化")
             .user("请生成 [" + d.getTitle() + "] 的 ER 图与 DDL")
-            .callerTag("dbdesign#" + dbdesignId).build());
+            .callerTag("dbdesign#" + dbdesignId).build();
         String engine = d.getDbEngine() == null ? "mysql" : d.getDbEngine();
         String er = "erDiagram\n"
             + "  PROJECT ||--o{ REQUIREMENT : has\n"
@@ -168,7 +169,7 @@ public class DbDesignServiceImpl implements IDbDesignService
             + "\"normalization\":\"pass (3NF)\"}";
         d.setErDiagramContent(er);
         d.setDataDictionary(dict);
-        d.setDdlScript(ddl);
+        d.setDdlScript(AiTexts.generate(aiService,aiReq, () -> ddl));
         d.setNormalizationCheck(check);
         d.setAiGenerated("Y");
         d.setAiGeneratedAt(new Date());

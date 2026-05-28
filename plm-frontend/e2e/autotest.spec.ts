@@ -95,12 +95,13 @@ test.describe.serial('Autotest 模块 E2E (PRD §F4.5)', () => {
     await dialog.getByPlaceholder(/灌溉决策/).fill(suiteTitle)
 
     // 类型 = UI (默认值已是 ui,显式重选稳点)
-    await dialog.locator('.el-form-item').filter({ hasText: /^类型$/ })
+    // 注意: el-select 选中后 form-item 文本含值 ("类型UI"),不能用锚定 /^类型$/,用子串匹配 (同"关联项目")
+    await dialog.locator('.el-form-item').filter({ hasText: '类型' })
       .locator('.el-select').click()
     await page.locator('.el-select-dropdown__item').filter({ hasText: /^UI$/ }).first().click()
 
-    // 框架 = Playwright (默认即可,显式确保)
-    await dialog.locator('.el-form-item').filter({ hasText: /^框架$/ })
+    // 框架 = Playwright (默认即可,显式确保) — 同上,子串匹配避免锚定漏选中值
+    await dialog.locator('.el-form-item').filter({ hasText: '框架' })
       .locator('.el-select').click()
     await page.locator('.el-select-dropdown__item').filter({ hasText: /^Playwright$/ }).first().click()
 
@@ -193,10 +194,11 @@ test.describe.serial('Autotest 模块 E2E (PRD §F4.5)', () => {
     await expect(page.locator('.el-message').filter({ hasText: /执行完成/ }))
       .toBeVisible({ timeout: 15_000 })
 
-    // 右侧 3 统计 (总用例 / 通过 / 失败) — el-statistic 的 title 文本
-    await expect(page.getByText('总用例', { exact: true })).toBeVisible()
-    await expect(page.getByText('通过', { exact: true })).toBeVisible()
-    await expect(page.getByText('失败', { exact: true })).toBeVisible()
+    // 右侧 3 统计 (总用例 / 通过 / 失败) — 限定 el-statistic 标题,避免与表格"通过/失败"结果 tag 文本冲突 (strict mode)
+    const statHeads = page.locator('.el-statistic__head')
+    await expect(statHeads.filter({ hasText: '总用例' })).toBeVisible()
+    await expect(statHeads.filter({ hasText: '通过' })).toBeVisible()
+    await expect(statHeads.filter({ hasText: '失败' })).toBeVisible()
 
     // API 直查最终态校验数值合理性
     const detail = await api.get(`/business/autotest/${createdAutotestId}`)

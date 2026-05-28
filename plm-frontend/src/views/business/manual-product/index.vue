@@ -202,8 +202,8 @@ const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 const screenshotCount = computed(() => (form.screenshotsUrls || '').split(',').filter(Boolean).length)
 
 const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿', type: 'info' }, '01': { label: '评审中', type: 'warning' },
-  '02': { label: '已发布', type: 'success' }, '03': { label: '已废弃', type: 'danger' }
+  '00': { label: '草稿', type: 'info' }, '01': { label: '生成中', type: 'warning' },
+  '02': { label: '已生成', type: 'success' }, '03': { label: '已发布', type: 'primary' }
 }
 const statusTagFor = (s?: string) => statusMap[s || '00'] || { label: s || '-', type: 'info' as any }
 const statusTag = computed(() => statusTagFor(current.status))

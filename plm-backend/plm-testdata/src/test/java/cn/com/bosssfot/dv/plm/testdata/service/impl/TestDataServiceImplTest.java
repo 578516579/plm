@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.project.domain.Project;
@@ -55,6 +56,9 @@ class TestDataServiceImplTest {
 
     @Mock
     private ProjectMapper projectMapper;
+
+    @Mock
+    private AiService aiService;  // P0-1b: 默认未 stub,chat() 返回 null → AiTexts 走 fallback,断言保持原样
 
     @InjectMocks
     private TestDataServiceImpl service;

@@ -62,4 +62,12 @@ public class ReleaseController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(releaseService.deleteReleaseByIds(ids));
     }
+
+    /** P0-1b: AI 发布评审 — 综合 DORA 4 指标 + release 元信息,产出 Markdown 评审说明 + 评分。 */
+    @PreAuthorize("@ss.hasPermi('business:release:edit')")
+    @Log(title = "发布管理-AI评审", businessType = BusinessType.UPDATE)
+    @PostMapping("/ai/review/{id}")
+    public AjaxResult aiReview(@PathVariable("id") Long id) {
+        return success(releaseService.aiReview(id));
+    }
 }

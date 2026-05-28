@@ -12,6 +12,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
@@ -166,12 +167,12 @@ public class InceptionServiceImpl implements IInceptionService
         // V3 审计:走一次 AiService 产生 invocation log,业务输出仍用下方 mock(保 E2E)。
         // 当 plm.ai.default-provider 切到真厂商时,审计表能立刻看到真实 tokens/elapsed,
         // 业务侧可逐步替换 result.getText() (本期保持 mock 输出兼容现有 E2E 断言)。
-        aiService.chat(AiChatRequest.builder("")
+        AiChatRequest aiReq = AiChatRequest.builder("")
             .system("你是 PLM 资深立项专家,擅长农业 IoT 项目可行性分析")
             .user("请生成项目 [" + inc.getProjectName() + "] 的立项建议书,业务线:" + inc.getBusinessLine())
             .callerTag("inception#" + inceptionId)
-            .build());
-        // 本期 mock
+            .build();
+        // P0-1: 真 provider 时 aiProposalContent 采用 LLM 输出;mock/失败时下方模板兜底(aiRisks 保持模板)
         String proposal = "# 立项建议书:" + inc.getProjectName() + "\n\n"
             + "## 1. 背景与诉求\n" + (inc.getBackground() == null ? "(待补充)" : inc.getBackground()) + "\n\n"
             + "## 2. 业务价值\n- 业务线:" + inc.getBusinessLine() + "\n- 项目类型:" + inc.getInceptionType() + "\n\n"
@@ -182,7 +183,7 @@ public class InceptionServiceImpl implements IInceptionService
             + "2. 弱网/离线场景比例较高,需评估离线能力\n"
             + "3. 跨部门协同 (产品/算法/实施) 沟通成本";
         inc.setAiGenerated("Y");
-        inc.setAiProposalContent(proposal);
+        inc.setAiProposalContent(AiTexts.generate(aiService,aiReq, () -> proposal));
         inc.setAiRisks(risks);
         inc.setAiGeneratedAt(new Date());
         inc.setUpdateBy(SecurityUtils.getUsername());

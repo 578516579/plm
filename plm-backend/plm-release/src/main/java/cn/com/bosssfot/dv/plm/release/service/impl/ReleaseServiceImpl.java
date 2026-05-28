@@ -1,5 +1,6 @@
 package cn.com.bosssfot.dv.plm.release.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -49,6 +53,7 @@ public class ReleaseServiceImpl implements IReleaseService
 
     @Autowired private ReleaseMapper releaseMapper;
     @Autowired private ProjectMapper projectMapper;
+    @Autowired private AiService aiService;
 
     @Override
     public List<Release> selectReleaseList(Release t) {
@@ -152,6 +157,75 @@ public class ReleaseServiceImpl implements IReleaseService
     @Transactional(rollbackFor = Exception.class)
     public int deleteReleaseByIds(Long[] ids) {
         return releaseMapper.deleteReleaseByIds(ids);
+    }
+
+    /**
+     * P0-1b: AI 发布评审。说明文本走 LLM(真 provider 非空采用,否则回退结构化模板);
+     * 评分由 DORA 4 指标确定性计算(不交给 LLM,避免幻觉)。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Release aiReview(Long releaseId) {
+        Release r = releaseMapper.selectReleaseById(releaseId);
+        if (r == null) {
+            throw new ServiceException("发布单不存在", 404);
+        }
+        String doraSummary = "策略=" + r.getStrategy() + ", 环境=" + r.getEnvironment()
+            + ", 部署频率=" + nz(r.getDeploymentFrequency())
+            + ", 前置时间(h)=" + nz(r.getLeadTimeHours())
+            + ", MTTR(min)=" + nz(r.getMttrMinutes())
+            + ", 变更失败率(%)=" + nz(r.getChangeFailureRate());
+        AiChatRequest req = AiChatRequest.builder("")
+            .system("你是 PLM 资深 SRE / 发布评审专家,精通 DORA 4 指标的解读。"
+                + "输出格式:Markdown,含\"## 评审摘要 / ## DORA 解读 / ## 风险与建议\"3 段,"
+                + "300-500 字,不要给出数字评分(评分由系统计算)。")
+            .user("评审发布单:版本 " + r.getVersion() + " / " + doraSummary
+                + ". 发布说明: " + (r.getReleaseNotes() == null ? "" : r.getReleaseNotes()))
+            .callerTag("release#" + releaseId)
+            .temperature(0.5)
+            .maxTokens(1500)
+            .build();
+        String notes = AiTexts.generate(aiService, req, () -> buildReleaseReviewTemplate(r, doraSummary));
+        r.setAiReviewNotes(notes);
+        r.setAiReviewScore(computeReviewScore(r));
+        r.setUpdateBy(SecurityUtils.getUsername());
+        releaseMapper.updateRelease(r);
+        return r;
+    }
+
+    /** DORA 确定性评分: 基线 85, 失败率/MTTR 扣分, clamp [0,100]。 */
+    private static BigDecimal computeReviewScore(Release r) {
+        BigDecimal score = BigDecimal.valueOf(85);
+        if (r.getChangeFailureRate() != null) {
+            // 每 1% 失败率扣 1 分,>15% 时再额外扣 10
+            score = score.subtract(r.getChangeFailureRate());
+            if (r.getChangeFailureRate().compareTo(BigDecimal.valueOf(15)) > 0) {
+                score = score.subtract(BigDecimal.TEN);
+            }
+        }
+        if (r.getMttrMinutes() != null && r.getMttrMinutes().compareTo(BigDecimal.valueOf(60)) > 0) {
+            score = score.subtract(BigDecimal.TEN);
+        }
+        if (r.getDeploymentFrequency() != null
+                && r.getDeploymentFrequency().compareTo(BigDecimal.ONE) >= 0) {
+            score = score.add(BigDecimal.valueOf(5));
+        }
+        if (score.compareTo(BigDecimal.ZERO) < 0)   score = BigDecimal.ZERO;
+        if (score.compareTo(BigDecimal.valueOf(100)) > 0) score = BigDecimal.valueOf(100);
+        return score;
+    }
+
+    private static String buildReleaseReviewTemplate(Release r, String doraSummary) {
+        return "## 评审摘要\n版本 " + r.getVersion() + " 发布评审(策略 " + r.getStrategy()
+            + ",环境 " + r.getEnvironment() + ")。\n\n"
+            + "## DORA 解读\n" + doraSummary + "\n\n"
+            + "## 风险与建议\n- 部署频率与变更失败率请持续监控\n"
+            + "- MTTR 偏高时优先治理告警链路\n"
+            + "- 蓝绿/金丝雀策略下,关注切流后的 5 分钟黄金窗口\n";
+    }
+
+    private static String nz(BigDecimal v) {
+        return v == null ? "N/A" : v.toPlainString();
     }
 
     private String generateReleaseNo() {

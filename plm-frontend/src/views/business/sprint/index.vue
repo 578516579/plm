@@ -108,7 +108,7 @@
         </el-form-item>
         <el-form-item v-if="form.sprintId" label="状态">
           <el-select v-model="form.status" style="width: 100%">
-            <el-option label="草稿" value="00" />
+            <el-option label="计划中" value="00" />
             <el-option label="进行中" value="01" />
             <el-option label="已完成" value="02" />
             <el-option label="已取消" value="03" />
@@ -155,7 +155,7 @@ const queryParams = reactive<SprintQuery>({ pageNum: 1, pageSize: 10 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
 const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿', type: 'info' },
+  '00': { label: '计划中', type: 'info' },
   '01': { label: '进行中', type: 'primary' },
   '02': { label: '已完成', type: 'success' },
   '03': { label: '已取消', type: 'danger' }

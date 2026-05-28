@@ -89,4 +89,29 @@ test.describe('TestPlan 模块 E2E', () => {
     })
     expect.soft(r.code, 'FK 不存在应返 702').toBe(ERROR_CODES.FK_NOT_EXISTS)
   })
+
+  test('TC-TP-F009 AI 生成 → aiGenerated=Y / 策略+范围非空 / 工具含 playwright', async () => {
+    const title = `AI 生成方案-${RUN_ID}`
+    const created = await api.post('/business/testplan', {
+      projectId,
+      title,
+      testTypes: 'functional,api,automation',
+      testCycleDays: 7,
+      authorUserId: 1
+    })
+    expect(created.code).toBe(200)
+
+    const list = await api.get('/business/testplan/list', { pageSize: 100 })
+    const id = list.rows.find((x: any) => x.title === title)?.testplanId
+    expect(id).toBeDefined()
+
+    const r = await api.post(`/business/testplan/ai/generate/${id}`, {})
+    expect(r.code).toBe(200)
+    expect(r.data.aiGenerated).toBe('Y')
+    expect(r.data.strategy).toBeTruthy()
+    expect(r.data.scope).toBeTruthy()
+    // testTypes CSV → 中文标签映射 (functional → 功能测试)
+    expect(r.data.strategy).toContain('功能测试')
+    expect(r.data.toolsRecommended).toContain('playwright')
+  })
 })

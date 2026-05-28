@@ -281,8 +281,11 @@ async function loadProjects() {
 }
 
 function onSelect(row: AutoTest | null) {
+  // 仅在用户选中某行时同步详情。不处理 row=null:
+  // getList() 刷新会替换 :data 数组,el-table 按对象引用丢失 current-row 并触发 current-change(null);
+  // 若此时清空 current,会导致「AI 生成脚本 / 立即执行」回写 current 后详情面板塌缩(script-code / 执行统计消失)。
+  // 保留当前选中即可,初始空态由 current 初始为空保证。
   if (row) Object.assign(current, row)
-  else Object.keys(current).forEach(k => delete (current as any)[k])
 }
 
 function openAdd() { Object.assign(form, emptyForm()); dialogVisible.value = true }

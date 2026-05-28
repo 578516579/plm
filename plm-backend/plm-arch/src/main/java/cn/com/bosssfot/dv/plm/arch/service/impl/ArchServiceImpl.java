@@ -15,6 +15,7 @@ import cn.com.bosssfot.dv.plm.arch.domain.Arch;
 import cn.com.bosssfot.dv.plm.arch.mapper.ArchMapper;
 import cn.com.bosssfot.dv.plm.arch.service.IArchService;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
@@ -148,10 +149,10 @@ public class ArchServiceImpl implements IArchService
         if (a == null) {
             throw new ServiceException("架构方案不存在", 404);
         }
-        aiService.chat(AiChatRequest.builder("")
+        AiChatRequest aiReq = AiChatRequest.builder("")
             .system("你是 PLM 资深架构师,擅长 C4 模型与国产化技术选型")
             .user("请生成 [" + a.getTitle() + "] 的 HLD 架构方案")
-            .callerTag("arch#" + archId).build());
+            .callerTag("arch#" + archId).build();
         String design = "# " + a.getTitle() + " — 架构方案\n\n"
             + "## 1. 架构模式\n" + label(a.getArchMode()) + "\n\n"
             + "## 2. 技术选型\n- 主语言/框架: " + label(a.getPrimaryStack()) + "\n"
@@ -176,7 +177,7 @@ public class ArchServiceImpl implements IArchService
             + "可靠性: ≥99.5%,离线弱网兜底\n"
             + "安全: TLS 1.3 + RBAC + 审计 + AI 内容水印\n"
             + "部署: " + label(a.getDeploymentType()) + ",支持私有化";
-        a.setDesignContent(design);
+        a.setDesignContent(AiTexts.generate(aiService,aiReq, () -> design));
         a.setC4DiagramContent(c4);
         a.setNfrMapping(nfr);
         a.setAiGenerated("Y");

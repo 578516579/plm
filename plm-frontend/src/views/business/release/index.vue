@@ -11,7 +11,7 @@
         <p class="page-subtitle">蓝绿 / 金丝雀 / 滚动发布策略,AI 发布评审,一键回滚</p>
       </div>
       <div class="btn-row">
-        <el-button type="success" plain :disabled="!current.releaseId" @click="aiReview">
+        <el-button type="success" plain :loading="aiReviewLoading" :disabled="!current.releaseId" @click="aiReview">
           <el-icon><MagicStick /></el-icon>&nbsp;AI 发布评审
         </el-button>
         <el-button type="primary" @click="newRelease">
@@ -275,7 +275,7 @@ import {
 } from '@element-plus/icons-vue'
 import {
   listRelease, getRelease, addRelease, updateRelease, delRelease,
-  listProjectsForSelect, type Release, type ReleaseQuery
+  aiReviewRelease, listProjectsForSelect, type Release, type ReleaseQuery
 } from '@/api/business/release'
 
 const formRef = ref()
@@ -515,31 +515,28 @@ async function confirmDeprecate() {
   await transition('04')
 }
 
+const aiReviewLoading = ref(false)
 async function aiReview() {
   if (!current.releaseId) {
     ElMessage.warning('请先保存发布单')
     return
   }
-  // 后端没有 ai/review 端点;模拟前端打分 (基于 release notes 长度 + 策略)
-  const score = Math.min(95, 60 + (current.releaseNotes?.length || 0) / 30)
-  const notes = `## AI 发布评审\n\n` +
-    `- **策略**: ${strategyLabel(current.strategy)} (${current.strategy === 'blue_green' ? '✓ 风险最低' : current.strategy === 'canary' ? '✓ 可控渐进' : '⚠ 滚动周期偏长'})\n` +
-    `- **环境**: ${current.environment}\n` +
-    `- **Release Notes**: ${current.releaseNotes?.length || 0} 字符,${(current.releaseNotes?.length || 0) > 100 ? '✓ 充分' : '⚠ 偏少,建议补充影响范围'}\n` +
-    `- **AI 建议**: ${score >= 80 ? '可以发布' : '建议补充测试用例后再上线'}\n`
+  // 后端真端点 POST /business/release/ai/review/{id} (plm-release P0-1b)
+  // 文本走 LLM(AiTexts,默认 mock provider 走模板兜底),
+  // 评分由后端 DORA 4 指标确定性计算(基线 85 + 失败率/MTTR 扣分 + 部署频率加分,clamp[0,100]),
+  // 不让 LLM 幻觉数字
+  aiReviewLoading.value = true
   try {
-    const res: any = await updateRelease({
-      releaseId: current.releaseId,
-      version: current.version,
-      aiReviewScore: score,
-      aiReviewNotes: notes
-    })
-    if (res.code === 200) {
-      Object.assign(current, { aiReviewScore: score, aiReviewNotes: notes })
-      ElMessage.success(`AI 评分 ${score.toFixed(0)} 已写入`)
+    const res: any = await aiReviewRelease(current.releaseId)
+    if (res.code === 200 && res.data) {
+      Object.assign(current, res.data)
+      ElMessage.success(`AI 评分 ${Number(res.data.aiReviewScore || 0).toFixed(0)} 已写入`)
+      await getList()
     }
   } catch (e: any) {
     ElMessage.error(e?.msg || 'AI 评审失败')
+  } finally {
+    aiReviewLoading.value = false
   }
 }
 

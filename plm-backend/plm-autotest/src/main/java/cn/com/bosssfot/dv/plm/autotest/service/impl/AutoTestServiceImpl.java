@@ -16,6 +16,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
@@ -138,13 +139,13 @@ public class AutoTestServiceImpl implements IAutoTestService
     public AutoTest aiGenerate(Long autotestId) {
         AutoTest t = autotestMapper.selectAutoTestById(autotestId);
         if (t == null) throw new ServiceException("自动化套件不存在", 404);
-        aiService.chat(AiChatRequest.builder("")
+        AiChatRequest aiReq = AiChatRequest.builder("")
             .system("你是 PLM 资深测试架构师,擅长自动化测试框架与脚本生成")
             .user("请基于 [" + t.getFramework() + "] 为 [" + t.getTargetUrl() + "] 生成自动化脚本")
-            .callerTag("autotest#" + autotestId).build());
+            .callerTag("autotest#" + autotestId).build();
 
-        // mock: Dify auto-test-flow 占位 — 根据框架生成脚本骨架
-        String script = generateMockScript(t.getFramework(), t.getTargetUrl());
+        // P0-1: 真 provider 时 scriptContent 采用 LLM 输出;mock/失败时按框架生成脚本骨架兜底
+        String script = AiTexts.generate(aiService,aiReq, () -> generateMockScript(t.getFramework(), t.getTargetUrl()));
         t.setScriptContent(script);
         t.setAiGenerated("Y");
         t.setAiGeneratedAt(new Date());
@@ -181,11 +182,11 @@ public class AutoTestServiceImpl implements IAutoTestService
 
         // 失败 > 0 触发 AI 根因分析,否则清除上次根因
         if (failed > 0) {
-            aiService.chat(AiChatRequest.builder("")
+            AiChatRequest rcaReq = AiChatRequest.builder("")
                 .system("你是 PLM 资深测试架构师,擅长失败用例根因分析")
                 .user("套件【" + t.getTitle() + "】(" + t.getFramework() + ")本次执行 "
                     + total + " 用例 / 失败 " + failed + " 个。请分析最可能的根因(3-5 条)。")
-                .callerTag("autotest-rca#" + autotestId).build());
+                .callerTag("autotest-rca#" + autotestId).build();
 
             String rca = "## AI 根因分析\n\n"
                 + "本次执行 " + total + " 用例,失败 " + failed + " 个(通过率 " + passRate + "%)。\n\n"
@@ -197,7 +198,7 @@ public class AutoTestServiceImpl implements IAutoTestService
                 + "- 增加 retry 至 2 次,降低 flake 影响\n"
                 + "- 改用 data-testid 替换 CSS 类选择器\n"
                 + "- 给关键测试账号加 worker 隔离锁\n";
-            t.setLastRootCauseAnalysis(rca);
+            t.setLastRootCauseAnalysis(AiTexts.generate(aiService,rcaReq, () -> rca));
         } else {
             t.setLastRootCauseAnalysis(null);
         }

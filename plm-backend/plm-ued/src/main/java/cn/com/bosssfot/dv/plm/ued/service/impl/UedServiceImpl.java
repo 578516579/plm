@@ -13,6 +13,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
@@ -132,10 +133,10 @@ public class UedServiceImpl implements IUedService
         if (u == null) {
             throw new ServiceException("UED 设计不存在", 404);
         }
-        aiService.chat(AiChatRequest.builder("")
+        AiChatRequest aiReq = AiChatRequest.builder("")
             .system("你是 PLM 资深 UED 设计师,擅长可用性评审与无障碍审查")
             .user("请评审 UED 设计 [" + u.getTitle() + "]")
-            .callerTag("ued#" + uedId).build());
+            .callerTag("ued#" + uedId).build();
         String report = "# UED 设计评审报告:" + u.getTitle() + "\n\n"
             + "## 设计规范遵从度\n- 布局:符合 8px 栅格规范\n- 配色:符合主题色规范\n- 字体:正文 14px 符合无障碍\n\n"
             + "## 可用性建议\n1. 移动端核心操作按钮需 ≥44pt 触控热区\n"
@@ -143,7 +144,7 @@ public class UedServiceImpl implements IUedService
             + "3. 弱网场景下加载提示需明确\n";
         String compliance = "{\"layout\":\"pass\",\"color\":\"pass\",\"typography\":\"pass\",\"accessibility\":\"warn\"}";
         String usability = "1. 主要操作按钮触控热区不足\n2. 错误提示文案过技术化\n3. 加载状态视觉反馈缺失";
-        u.setAiReviewReport(report);
+        u.setAiReviewReport(AiTexts.generate(aiService,aiReq, () -> report));
         u.setComplianceCheck(compliance);
         u.setUsabilityIssues(usability);
         u.setAiReviewScore(new BigDecimal("85.00"));

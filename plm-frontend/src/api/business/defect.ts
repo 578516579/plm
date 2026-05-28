@@ -1,6 +1,6 @@
 /**
  * 缺陷管理 API — PRD §F4.6 + 原型 defects.html
- * 6 态: 00 新建 → 01 已确认 → 02 修复中 → 03 待验证 → 04 已关闭 / 05 重开 (反向边)
+ * 5 态: 00 新建 → 01 已确认 → 02 处理中 → 03 已解决 → 04 已关闭 (含反向边; 对齐 biz_defect_status 字典)
  */
 import request from '@/utils/request'
 

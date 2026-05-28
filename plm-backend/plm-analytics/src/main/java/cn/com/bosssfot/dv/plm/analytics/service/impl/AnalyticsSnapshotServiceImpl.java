@@ -16,6 +16,7 @@ import cn.com.bosssfot.dv.plm.analytics.domain.AnalyticsSnapshot;
 import cn.com.bosssfot.dv.plm.analytics.mapper.AnalyticsSnapshotMapper;
 import cn.com.bosssfot.dv.plm.analytics.service.IAnalyticsSnapshotService;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
@@ -113,12 +114,11 @@ public class AnalyticsSnapshotServiceImpl implements IAnalyticsSnapshotService {
     public AnalyticsSnapshot aiRecommend(Long id) {
         AnalyticsSnapshot t = analyticsMapper.selectAnalyticsById(id);
         if (t == null) throw new ServiceException("效能分析快照不存在", 404);
-        aiService.chat(AiChatRequest.builder("")
+        t.setAiRecommendations(AiTexts.generate(aiService,AiChatRequest.builder("")
             .system("你是 PLM 资深效能分析师,擅长 DORA 指标解读与改进建议")
             .user("请基于快照 [" + t.getSnapshotNo() + "] 生成 AI 复盘改进建议")
-            .callerTag("analytics#" + id).build());
-
-        t.setAiRecommendations(buildAiRecommendations(t));
+            .callerTag("analytics#" + id).build(),
+            () -> buildAiRecommendations(t)));
         t.setAiGenerated("Y");
         t.setAiGeneratedAt(new Date());
         t.setUpdateBy("ai-agent");

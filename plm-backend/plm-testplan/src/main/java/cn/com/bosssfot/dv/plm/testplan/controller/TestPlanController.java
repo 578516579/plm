@@ -62,4 +62,12 @@ public class TestPlanController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(testplanService.deleteTestPlanByIds(ids));
     }
+
+    /** PRD §F4.1 AI 生成测试方案 — test-plan-flow */
+    @PreAuthorize("@ss.hasPermi('business:testplan:edit')")
+    @Log(title = "测试方案-AI生成", businessType = BusinessType.OTHER)
+    @PostMapping("/ai/generate/{id}")
+    public AjaxResult aiGenerate(@PathVariable("id") Long id) {
+        return success(testplanService.aiGenerate(id));
+    }
 }

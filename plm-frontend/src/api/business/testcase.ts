@@ -1,6 +1,6 @@
 /**
  * 测试用例管理 API — PRD §F4.2 + 原型 testcase.html
- * 5 态: 00 待执行 → 01 准备中 → 02 执行中 → 03 通过 → 04 失败 (含反向边 03/04 → 01)
+ * 5 态: 00 草稿 → 01 待执行 → 02 执行中 → 03 已通过 → 04 已失败 (含反向边 03/04 → 01; 对齐 biz_testcase_status 字典)
  */
 import request from '@/utils/request'
 
@@ -19,7 +19,7 @@ export interface TestCase {
   expectedResult?: string
   actualResult?: string
   isAutomated?: string  // Y / N
-  automationScript?: string
+  automationScriptPath?: string
   executionCount?: number
   lastExecutedAt?: string
 }

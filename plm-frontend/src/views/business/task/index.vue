@@ -205,7 +205,8 @@ const kanbanColumns = [
   { status: '01', label: '开发中' },
   { status: '02', label: '代码评审' },
   { status: '03', label: '测试中' },
-  { status: '04', label: '已完成' }
+  { status: '04', label: '已完成' },
+  { status: '05', label: '已取消' }
 ]
 
 const emptyForm = (): Task => ({ projectId: 0, title: '', priority: 'P1', estimatedHours: 8, status: '00' })
@@ -229,7 +230,7 @@ function priorityTag(p?: string): any {
 function taskStatusTag(s?: string): { label: string; type: any } {
   const col = kanbanColumns.find(c => c.status === s)
   return col
-    ? { label: col.label, type: ({ '00':'info', '01':'primary', '02':'warning', '03':'warning', '04':'success' } as any)[s || ''] || 'info' }
+    ? { label: col.label, type: ({ '00':'info', '01':'primary', '02':'warning', '03':'warning', '04':'success', '05':'danger' } as any)[s || ''] || 'info' }
     : { label: s || '-', type: 'info' }
 }
 

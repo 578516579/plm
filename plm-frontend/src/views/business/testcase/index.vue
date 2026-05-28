@@ -188,6 +188,21 @@
         <el-form-item label="预期结果" prop="expectedResult">
           <el-input v-model="form.expectedResult" type="textarea" :rows="2" placeholder="期望的系统响应/输出" />
         </el-form-item>
+        <el-row :gutter="10">
+          <el-col :span="8">
+            <el-form-item label="是否自动化" prop="isAutomated">
+              <el-select v-model="form.isAutomated" style="width: 100%">
+                <el-option label="手动" value="N" />
+                <el-option label="自动化" value="Y" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="16">
+            <el-form-item v-if="form.isAutomated === 'Y'" label="脚本路径" prop="automationScriptPath">
+              <el-input v-model="form.automationScriptPath" placeholder="如 src/test/e2e/login.spec.ts" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -226,11 +241,17 @@ const catBoundary = ref(true)
 const catException = ref(true)
 const catAgri = ref(true)
 
-const emptyForm = (): TestCase => ({ projectId: 0, title: '', category: 'functional', priority: 'P1', status: '00' })
+const emptyForm = (): TestCase => ({ projectId: 0, title: '', category: 'functional', priority: 'P1', status: '00', isAutomated: 'N', automationScriptPath: '' })
 const form = reactive<TestCase>(emptyForm())
 const rules = {
   projectId: [{ required: true, message: '请选择项目', trigger: 'change' }],
-  title: [{ required: true, message: '请输入用例标题', trigger: 'blur' }]
+  title: [{ required: true, message: '请输入用例标题', trigger: 'blur' }],
+  // 对齐后端 706: is_automated='Y' 时脚本路径必填
+  automationScriptPath: [{
+    validator: (_rule: any, value: string, cb: (e?: Error) => void) =>
+      cb(form.isAutomated === 'Y' && !value ? new Error('自动化用例必须填写脚本路径') : undefined),
+    trigger: 'blur'
+  }]
 }
 
 const list = ref<TestCase[]>([])
@@ -250,11 +271,11 @@ const passRate = computed(() => {
 })
 
 const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '待执行', type: 'info' },
-  '01': { label: '准备中', type: 'warning' },
+  '00': { label: '草稿', type: 'info' },
+  '01': { label: '待执行', type: 'warning' },
   '02': { label: '执行中', type: 'primary' },
-  '03': { label: '通过', type: 'success' },
-  '04': { label: '失败', type: 'danger' }
+  '03': { label: '已通过', type: 'success' },
+  '04': { label: '已失败', type: 'danger' }
 }
 const statusTagFor = (s?: string) => statusMap[s || ''] || { label: s || '-', type: 'info' as any }
 

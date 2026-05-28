@@ -13,6 +13,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
@@ -102,12 +103,11 @@ public class DoraMetricServiceImpl implements IDoraMetricService {
     public DoraMetric aiSuggest(Long id) {
         DoraMetric t = doraMapper.selectDoraById(id);
         if (t == null) throw new ServiceException("DORA 指标不存在", 404);
-        aiService.chat(AiChatRequest.builder("")
+        t.setAiSuggestions(AiTexts.generate(aiService,AiChatRequest.builder("")
             .system("你是 PLM 资深 DevOps 顾问,擅长 DORA 4 指标(DF/LT/MTTR/CFR)解读与优化")
             .user("请为 DORA 指标 [" + t.getDoraNo() + "] 生成改进建议(包含 MTTR 与农情专项关联)")
-            .callerTag("dora#" + id).build());
-
-        t.setAiSuggestions(buildSuggestions(t));
+            .callerTag("dora#" + id).build(),
+            () -> buildSuggestions(t)));
         t.setAiGenerated("Y");
         t.setAiGeneratedAt(new Date());
         t.setUpdateBy("ai-agent");

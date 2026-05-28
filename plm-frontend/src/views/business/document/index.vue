@@ -118,7 +118,7 @@
         <el-form-item v-if="form.documentId && !readOnly" label="状态">
           <el-select v-model="form.status" style="width: 100%">
             <el-option label="草稿" value="00" />
-            <el-option label="评审中" value="01" />
+            <el-option label="待评审" value="01" />
             <el-option label="已发布" value="02" />
             <el-option label="已归档" value="03" />
           </el-select>
@@ -188,7 +188,7 @@ const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
 const statusMap: Record<string, { label: string; type: any }> = {
   '00': { label: '草稿', type: 'info' },
-  '01': { label: '评审中', type: 'warning' },
+  '01': { label: '待评审', type: 'warning' },
   '02': { label: '已发布', type: 'success' },
   '03': { label: '已归档', type: 'danger' }
 }

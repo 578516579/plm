@@ -1,6 +1,6 @@
 <!--
   缺陷管理 — PRD §F4.6 + 原型 defects.html
-  严格对齐: 4 统计卡 (总/严重/修复中/已关闭) + 缺陷列表 + AI 相似检测
+  严格对齐: 4 统计卡 (总/严重/处理中/已关闭) + 缺陷列表 + AI 相似检测
 -->
 <template>
   <div class="app-container defect-page">
@@ -31,7 +31,7 @@
       </el-col>
       <el-col :span="6">
         <el-card shadow="never" class="stat-card">
-          <div class="stat-label">修复中</div>
+          <div class="stat-label">处理中</div>
           <div class="stat-value am">{{ fixingCount }}</div>
         </el-card>
       </el-col>
@@ -152,10 +152,9 @@
           <el-select v-model="form.status" style="width: 100%">
             <el-option label="新建" value="00" />
             <el-option label="已确认" value="01" />
-            <el-option label="修复中" value="02" />
-            <el-option label="待验证" value="03" />
+            <el-option label="处理中" value="02" />
+            <el-option label="已解决" value="03" />
             <el-option label="已关闭" value="04" />
-            <el-option label="重开" value="05" />
           </el-select>
         </el-form-item>
         <el-form-item v-if="form.defectId" label="解决方案" prop="resolution">
@@ -210,10 +209,9 @@ const closedCount = computed(() => list.value.filter(d => d.status === '04').len
 const statusMap: Record<string, { label: string; type: any }> = {
   '00': { label: '新建', type: 'info' },
   '01': { label: '已确认', type: 'warning' },
-  '02': { label: '修复中', type: 'primary' },
-  '03': { label: '待验证', type: 'warning' },
-  '04': { label: '已关闭', type: 'success' },
-  '05': { label: '重开', type: 'danger' }
+  '02': { label: '处理中', type: 'primary' },
+  '03': { label: '已解决', type: 'success' },
+  '04': { label: '已关闭', type: 'info' }
 }
 const statusTagFor = (s?: string) => statusMap[s || ''] || { label: s || '-', type: 'info' as any }
 
