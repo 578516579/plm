@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0028 |
 | 标题 | 产品主线贯通迭代 — P0-1 跨模块外键 + P0-2 详情页跨模块跳转 + P0-3 真聚合 TestReport/DORA + P0-4 AiButton 紫渐变组件 + P0-5 Dashboard 错态显形 |
-| 状态 | proposed → accepted(User-requested,等开工授权) |
+| 状态 | **P0-1 merged → tracking**(2026-05-28 commit `3ae00fd`,详 §10);P0-2..P0-5 仍 proposed |
 | 类型 | 架构 + 编码规范 + UED(epic 跨域) |
 | 提出人 | Claude (PM 视角验收) + Wjl |
 | 提出日期 | 2026-05-28 |
@@ -254,17 +254,20 @@ if (failed.length > 0) {
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| Wjl | 待签字 | 2026-05-28 | User-requested:验收报告产出后明确说 "需要"。预期 solo-review-bypass 走 [0021] 真实 commit hash 绑定流程 |
+| Wjl | ✅ 通过(solo-review,User-requested-bypass)| 2026-05-28 | PM 验收报告产出后用户答 "需要",同意进入 proposal + 开干 P0-1。P0-2..P0-5 仍待开工授权 |
 
 ---
 
 ## 10. 实施后跟踪(merged 后填)
 
-### 实际 PR / commit
+### 实际 PR / commit(P0-1 部分)
 
-- PR: 待开(本 epic 自身一 PR 立项;5 子 PR 后续)
-- 合入 commit: 待填(本 proposal 文件初始 commit hash 占位)
-- 实际 merged 日期:待填
+- PR: 待开(直接 commit 流入 chore/local-start-backend-script 分支,后续 PR 一并合 main)
+- **合入 commit: `3ae00fd`** ⚠ **协作事故**:本 commit message 写作 `test(openspec): 抽取 openspecDict SSoT + 6 例 [solo-review]`,实际是**并行 openspec 字典抽取 session 跑了 `git add .` 全量 add**,把本会话已 staged 的 0028 epic + 4 SQL + 4 模块 Java FK 改造 25 个文件**一并偷走塞进同一 commit**。git 事实 = P0-1 已 in main 树(`git show 3ae00fd` 可见 27 文件清单);commit 历史归属不忠实但**不重做**(避免 force-push 风险 + 并行 session 也指着这 commit)。教训:多 session 共享 working tree 时,绝不允许 `git add .` / `git add -A`,必须精确 add 自己的文件路径。新 quirk Q-COLLAB-XX 待登记。
+- 实际 merged 日期:2026-05-28(随 commit 3ae00fd 入 chore branch HEAD)
+
+### P0-2..P0-5 状态
+均仍 proposed,待开工授权。
 
 ### Tracking 数据
 
@@ -288,3 +291,4 @@ if (failed.length > 0) {
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-28 | Claude(PM 验收会话)+ Wjl | 初版 — 验收报告 → epic proposal,5 子项拆解 |
+| 2026-05-28 | Claude(PM 验收会话)| P0-1 落地完成,补 §5 风险段 known limitation(release ↔ pipeline 循环依赖)+ §10 合入 commit `3ae00fd`(协作事故注解:并行 session race 偷文件)+ §1 元信息状态升级 P0-1 merged → tracking |
