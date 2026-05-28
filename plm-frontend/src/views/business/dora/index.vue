@@ -144,6 +144,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, MagicStick } from '@element-plus/icons-vue'
 import { listDora, addDora, delDora, aiAnalyzeDora, type DoraMetric, type DoraQuery } from '@/api/business/dora'
+import { metricLabel, rowLevelLabel, rowLevelTag } from './doraDict'
 
 const dialogVisible = ref(false)
 const formRef = ref()
@@ -164,8 +165,6 @@ const list = ref<DoraMetric[]>([])
 const total = ref(0)
 const queryParams = reactive<DoraQuery>({ pageNum: 1, pageSize: 50 })
 
-const metricLabel = (v?: string) => ({ deploy_frequency: '📈 部署频率', lead_time: '⏱️ 前置时间', mttr: '🚨 MTTR', change_failure_rate: '❌ 变更失败率' } as Record<string,string>)[v||''] || v || '-'
-
 function getMetric(type: string) {
   const m = list.value.find(x => x.metricType === type)
   return m?.metricValue ?? '-'
@@ -177,12 +176,6 @@ function levelLabel(type: string) {
 function levelTag(type: string): any {
   const m = list.value.find(x => x.metricType === type)
   return rowLevelTag(m?.level)
-}
-function rowLevelLabel(v?: string) {
-  return ({ elite: '🥇 Elite', high: '🥈 High', medium: '🥉 Medium', low: '⚠️ Low' } as Record<string,string>)[v||''] || '-'
-}
-function rowLevelTag(v?: string): any {
-  return ({ elite: 'success', high: 'primary', medium: 'warning', low: 'danger' } as Record<string,string>)[v||''] || 'info'
 }
 
 async function getList() {
