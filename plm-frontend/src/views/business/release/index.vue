@@ -277,6 +277,10 @@ import {
   listRelease, getRelease, addRelease, updateRelease, delRelease,
   aiReviewRelease, listProjectsForSelect, type Release, type ReleaseQuery
 } from '@/api/business/release'
+import {
+  statusTagFor, strategyLabel,
+  strategyHint as getStrategyHint
+} from './releaseDict'
 
 const formRef = ref()
 const saving = ref(false)
@@ -301,15 +305,6 @@ const rules = {
   projectId: [{ required: true, message: '请选择关联项目', trigger: 'change' }]
 }
 
-// === 状态机 (5 态) ===
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '计划中', type: 'info' },
-  '01': { label: '发布中', type: 'warning' },
-  '02': { label: '已发布', type: 'success' },
-  '03': { label: '已回滚', type: 'danger' },
-  '04': { label: '已废弃', type: 'info' }
-}
-function statusTagFor(s?: string) { return statusMap[s || '00'] || { label: s, type: 'info' } }
 const statusTag = computed(() => statusTagFor(current.status))
 
 // 5 态合法转换 (含废弃)
@@ -321,16 +316,8 @@ function canTransition(to: string): boolean {
   return TRANSITIONS[from]?.includes(to) || false
 }
 
-// === 策略提示 ===
-const strategyHints: Record<string, string> = {
-  blue_green: '🟦 蓝绿:同时存在新旧两套环境,流量切换瞬时完成;回滚最快但资源 2x',
-  canary: '🐤 金丝雀:先放 5%~10% 流量到新版本,观察 metrics 再渐进扩量',
-  rolling: '🔄 滚动:批次替换实例(如每次 25%);资源占用少但回滚慢'
-}
-const strategyHint = computed(() => strategyHints[form.strategy || ''] || '')
-function strategyLabel(s?: string) {
-  return ({ blue_green: '蓝绿', canary: '金丝雀', rolling: '滚动' } as Record<string, string>)[s || ''] || s || '-'
-}
+// === 策略提示 (computed 引用 releaseDict.ts 的纯函数,避免命名冲突用别名) ===
+const strategyHint = computed(() => getStrategyHint(form.strategy))
 
 // === DORA 4 (静态聚合显示;真实数据应来自后端 dora 模块) ===
 const doraMetrics = computed(() => {
