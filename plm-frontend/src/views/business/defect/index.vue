@@ -163,9 +163,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button v-if="!form.defectId" type="success" :loading="aiLoading" @click="aiCheck">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 相似缺陷检测
-        </el-button>
+        <AiButton v-if="!form.defectId" :loading="aiLoading" @click="aiCheck">AI 相似缺陷检测</AiButton>
         <el-button type="primary" :loading="saving" @click="handleSubmit">
           {{ form.defectId ? '保存' : '✅ 提交缺陷' }}
         </el-button>
@@ -177,7 +175,8 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { MagicStick, Plus } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
+import AiButton from '@/components/AiButton/index.vue'
 import {
   listDefect, addDefect, updateDefect, delDefect, getDefect, aiMatchDefect, listProjectsForSelect,
   type Defect, type DefectQuery

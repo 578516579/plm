@@ -11,9 +11,7 @@
         <p class="page-subtitle">全链路需求追踪,AI 辅助需求分析与优先级评估</p>
       </div>
       <div class="header-actions">
-        <el-button type="success" :loading="aiLoading" @click="aiAnalyzeAll">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 分析优先级
-        </el-button>
+        <AiButton :loading="aiLoading" @click="aiAnalyzeAll">AI 分析优先级</AiButton>
         <el-button type="primary" @click="openAdd">
           <el-icon><Plus /></el-icon>&nbsp;新增需求
         </el-button>
@@ -121,9 +119,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="success" :loading="aiLoading" @click="aiEvalCurrent" v-if="form.requirementId">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 评估
-        </el-button>
+        <AiButton v-if="form.requirementId" :loading="aiLoading" @click="aiEvalCurrent">AI 评估</AiButton>
         <el-button type="primary" :loading="saving" @click="handleSubmit">
           {{ form.requirementId ? '保存' : '✅ 提交需求' }}
         </el-button>
@@ -234,7 +230,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { MagicStick, Plus } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
+import AiButton from '@/components/AiButton/index.vue'
 import {
   listRequirement, addRequirement, updateRequirement, delRequirement,
   aiEvaluateRequirement, getRequirement, listProjectsForSelect,

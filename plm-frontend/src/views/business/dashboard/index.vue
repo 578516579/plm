@@ -13,9 +13,7 @@
           <strong class="hl-risk">{{ riskCount }} 个</strong>项目存在风险预警
         </p>
       </div>
-      <el-button type="success" plain @click="goto('inception')">
-        <el-icon><MagicStick /></el-icon>&nbsp;AI 快速立项
-      </el-button>
+      <AiButton plain @click="goto('inception')">AI 快速立项</AiButton>
     </div>
 
     <!-- AgriAI 智能助手 (对齐原型 .aip) -->
@@ -185,7 +183,8 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { MagicStick, Operation } from '@element-plus/icons-vue'
+import { Operation } from '@element-plus/icons-vue'
+import AiButton from '@/components/AiButton/index.vue'
 import {
   fetchProjects, fetchMyTasks, fetchDefects, fetchPrds, fetchInceptions,
   fetchAutotests, fetchReleases, fetchTestReports, fetchManualProducts
@@ -367,50 +366,79 @@ async function loadAll() {
     fetchTestReports()
   ]
 
+  // P0028-P0-5: 错态显形 — Promise.allSettled 失败时 toast 告警 + 控制台详记
+  const taskLabels = [
+    'fetchProjects', 'fetchMyTasks', 'fetchDefects', 'fetchPrds', 'fetchInceptions',
+    'fetchManualProducts', 'fetchAutotests', 'fetchReleases', 'fetchTestReports'
+  ]
+  const settled = await Promise.allSettled(tasks)
+  const failed = settled
+    .map((r, idx) => ({ r, idx }))
+    .filter(x => x.r.status === 'rejected')
+  if (failed.length > 0) {
+    ElMessage.warning(`${failed.length} 个工作台面板数据加载失败,请检查网络或后端`)
+    failed.forEach(x => console.warn(
+      `[dashboard] panel "${taskLabels[x.idx] || x.idx}" failed:`,
+      (x.r as PromiseRejectedResult).reason
+    ))
+  }
+  // 失败 fallback 为空,但不清空之前可能成功的 reactive state(KPI/quality 保留)
   const [projRes, taskRes, defRes, prdRes, incRes, mpRes, autoRes, relRes, trRes]: any[] =
-    await Promise.allSettled(tasks).then(r => r.map(p => p.status === 'fulfilled' ? p.value : { rows: [], total: 0 }))
+    settled.map(p => p.status === 'fulfilled' ? p.value : { rows: [], total: 0, __failed: true })
 
+  // P0028-P0-5: 任何 panel 失败时不覆盖之前成功 state(保留上次有效数据)
   // 在办项目 (status=1 或 status=2)
-  const allProjects = projRes.rows || []
-  activeProjects.value = allProjects.filter((p: any) => p.status === '1' || p.status === '2').slice(0, 5)
-  kpiData.activeProjectCount = allProjects.filter((p: any) => p.status === '1' || p.status === '2').length
-  // 本月新增 (简单估算)
-  const thisMonth = new Date().toISOString().slice(0, 7)
-  kpiData.projectNewThisMonth = allProjects.filter((p: any) => (p.createTime || '').startsWith(thisMonth)).length
+  if (!projRes.__failed) {
+    const allProjects = projRes.rows || []
+    activeProjects.value = allProjects.filter((p: any) => p.status === '1' || p.status === '2').slice(0, 5)
+    kpiData.activeProjectCount = allProjects.filter((p: any) => p.status === '1' || p.status === '2').length
+    const thisMonth = new Date().toISOString().slice(0, 7)
+    kpiData.projectNewThisMonth = allProjects.filter((p: any) => (p.createTime || '').startsWith(thisMonth)).length
+  }
 
   // 我的待办 (status<>已完成)
-  const myTasksAll = taskRes.rows || []
-  myTodos.value = myTasksAll.filter((t: any) => t.status !== '04').slice(0, 6)
-  todoCount.value = myTasksAll.filter((t: any) => t.status !== '04').length
+  if (!taskRes.__failed) {
+    const myTasksAll = taskRes.rows || []
+    myTodos.value = myTasksAll.filter((t: any) => t.status !== '04').slice(0, 6)
+    todoCount.value = myTasksAll.filter((t: any) => t.status !== '04').length
+  }
 
-  // 风险预警 (defect P0/P1 + risk testreport.riskLevel=red)
-  riskCount.value = (defRes.rows || []).filter((d: any) => d.priority === '00' || d.priority === '01').length
+  // 风险预警 (defect P0/P1)
+  if (!defRes.__failed) {
+    riskCount.value = (defRes.rows || []).filter((d: any) => d.priority === '00' || d.priority === '01').length
+    kpiData.defectCount = defRes.total || 0
+    kpiData.defectChangePct = -34  // mock,真实从上迭代统计算
+  }
 
-  // AI 文档数 (PRD + Inception + ManualProduct 已生成)
-  kpiData.aiDocCount = (prdRes.total || 0) + (incRes.total || 0) + (mpRes.total || 0)
-
-  // 当前缺陷
-  kpiData.defectCount = defRes.total || 0
-  kpiData.defectChangePct = -34  // mock,真实从上迭代统计算
+  // AI 文档数 (PRD + Inception + ManualProduct 已生成) — 任一失败则不更新
+  if (!prdRes.__failed && !incRes.__failed && !mpRes.__failed) {
+    kpiData.aiDocCount = (prdRes.total || 0) + (incRes.total || 0) + (mpRes.total || 0)
+  }
 
   // 自动化覆盖率 (按 autotest 套件的 pass_rate 平均)
-  const autoSuites = autoRes.rows || []
-  if (autoSuites.length) {
-    const passRates = autoSuites.filter((a: any) => a.passRate != null).map((a: any) => Number(a.passRate))
-    kpiData.autoTestCoverage = passRates.length
-      ? passRates.reduce((s: number, r: number) => s + r, 0) / passRates.length
-      : 0
+  if (!autoRes.__failed) {
+    const autoSuites = autoRes.rows || []
+    if (autoSuites.length) {
+      const passRates = autoSuites.filter((a: any) => a.passRate != null).map((a: any) => Number(a.passRate))
+      kpiData.autoTestCoverage = passRates.length
+        ? passRates.reduce((s: number, r: number) => s + r, 0) / passRates.length
+        : 0
+    }
   }
 
   // 质量快照
-  const releases = relRes.rows || []
-  qualitySnapshot.releaseCount = releases.filter((r: any) => r.status === '02').length
-  qualitySnapshot.autoTestCoverage = kpiData.autoTestCoverage
-  qualitySnapshot.cfr = releases.length
-    ? releases.filter((r: any) => r.status === '03').length / releases.length * 100
-    : 0
-  const latestReport = (trRes.rows || [])[0]
-  qualitySnapshot.riskLevel = latestReport?.riskLevel || 'green'
+  if (!relRes.__failed) {
+    const releases = relRes.rows || []
+    qualitySnapshot.releaseCount = releases.filter((r: any) => r.status === '02').length
+    qualitySnapshot.autoTestCoverage = kpiData.autoTestCoverage
+    qualitySnapshot.cfr = releases.length
+      ? releases.filter((r: any) => r.status === '03').length / releases.length * 100
+      : 0
+  }
+  if (!trRes.__failed) {
+    const latestReport = (trRes.rows || [])[0]
+    qualitySnapshot.riskLevel = latestReport?.riskLevel || 'green'
+  }
 
   loading.projects = false
   loading.todos = false

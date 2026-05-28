@@ -13,9 +13,7 @@
         <el-select v-model="filterSprintId" placeholder="按迭代过滤" clearable style="width: 200px" @change="getList">
           <el-option v-for="s in sprintOptions" :key="s.sprintId" :label="s.name" :value="s.sprintId" />
         </el-select>
-        <el-button type="success" :loading="aiLoading" @click="openAiSplit">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 拆分任务
-        </el-button>
+        <AiButton :loading="aiLoading" @click="openAiSplit">AI 拆分任务</AiButton>
         <el-radio-group v-model="viewMode" size="default">
           <el-radio-button value="table">📊 表格</el-radio-button>
           <el-radio-button value="kanban">📌 看板</el-radio-button>
@@ -172,9 +170,7 @@
       </el-form>
       <template #footer>
         <el-button @click="aiSplitVisible = false">取消</el-button>
-        <el-button type="primary" :loading="aiLoading" @click="confirmAiSplit">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ 立即拆分
-        </el-button>
+        <AiButton :loading="aiLoading" @click="confirmAiSplit">立即拆分</AiButton>
       </template>
     </el-dialog>
   </div>
@@ -183,7 +179,8 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { MagicStick, Plus } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
+import AiButton from '@/components/AiButton/index.vue'
 import { useRoute } from 'vue-router'
 import {
   listTask, addTask, updateTask, delTask, getTask, aiSplitTasks,

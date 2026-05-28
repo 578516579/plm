@@ -103,13 +103,10 @@
                 >
                   <el-icon><DocumentAdd /></el-icon>&nbsp;保存草稿
                 </el-button>
-                <el-button
-                  type="success"
+                <AiButton
                   :loading="saving || aiLoading"
                   @click="handleSubmit(true)"
-                >
-                  <el-icon><MagicStick /></el-icon>&nbsp;保存并 AI 分析
-                </el-button>
+                >保存并 AI 分析</AiButton>
               </div>
             </el-form-item>
           </el-form>
@@ -169,9 +166,7 @@
           <div v-else class="ai-not-yet">
             <el-icon :size="40" color="#f59e0b"><InfoFilled /></el-icon>
             <p>草稿已保存 (编号 {{ current.inceptionNo }}),点击下方按钮触发 AI 分析</p>
-            <el-button type="primary" :loading="aiLoading" @click="triggerAi">
-              <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 分析并生成
-            </el-button>
+            <AiButton :loading="aiLoading" @click="triggerAi">AI 分析并生成</AiButton>
           </div>
         </el-card>
       </el-col>
@@ -241,8 +236,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Refresh, DocumentAdd, MagicStick, Document, Loading, InfoFilled, Search
+  Refresh, DocumentAdd, Document, Loading, InfoFilled, Search
 } from '@element-plus/icons-vue'
+import AiButton from '@/components/AiButton/index.vue'
 import {
   listInception, addInception, updateInception, delInception,
   aiGenerateInception, getInception, type Inception, type InceptionQuery

@@ -11,9 +11,7 @@
         <p class="page-subtitle">蓝绿 / 金丝雀 / 滚动发布策略,AI 发布评审,一键回滚</p>
       </div>
       <div class="btn-row">
-        <el-button type="success" plain :loading="aiReviewLoading" :disabled="!current.releaseId" @click="aiReview">
-          <el-icon><MagicStick /></el-icon>&nbsp;AI 发布评审
-        </el-button>
+        <AiButton plain :loading="aiReviewLoading" :disabled="!current.releaseId" @click="aiReview">AI 发布评审</AiButton>
         <el-button type="primary" @click="newRelease">
           <el-icon><Plus /></el-icon>&nbsp;新建发布单
         </el-button>
@@ -271,8 +269,9 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Plus, MagicStick, DocumentChecked, Search, Document, InfoFilled
+  Plus, DocumentChecked, Search, Document, InfoFilled
 } from '@element-plus/icons-vue'
+import AiButton from '@/components/AiButton/index.vue'
 import {
   listRelease, getRelease, addRelease, updateRelease, delRelease,
   aiReviewRelease, listProjectsForSelect, type Release, type ReleaseQuery
