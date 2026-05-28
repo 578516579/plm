@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0028 |
 | 标题 | 产品主线贯通迭代 — P0-1 跨模块外键 + P0-2 详情页跨模块跳转 + P0-3 真聚合 TestReport/DORA + P0-4 AiButton 紫渐变组件 + P0-5 Dashboard 错态显形 |
-| 状态 | **🟡 P0 代码 100% merged → tracking,🟠 Step 7 文档/Gate follow-up**(2026-05-28 单日完工 5 P0 代码,commits `3ae00fd` / `21b7166` / `5c01814` / `5f93f77` / `9467bd1` + `656a6a4`(⚠race)+ 3 docs commit;**Step 7 PRD-MAPPING §2 字段表 + 4 ADR + 4 Gate 实例尚未补**,详 §7 拆 follow-up 子任务 & §10) |
+| 状态 | **✅ epic 100% merged → tracking**(2026-05-28 全 Step 1-7 完工,经 Wjl 会话批签)。Step 1-6 代码 9 commit(`3ae00fd` / `21b7166` / `5c01814` / `5f93f77` / `9467bd1` 等);Step 7 文档/Gate 4 commit(`eb58ffd` PRD-MAPPING / `d510877` 3 ADR / `28ea950` 4 Gate / reviewer 5 处补正 `15be2d4`);**tracking 至 2026-06-25**(详 §8 + §10) |
 | 类型 | 架构 + 编码规范 + UED(epic 跨域) |
 | 提出人 | Claude (PM 视角验收) + Wjl |
 | 提出日期 | 2026-05-28 |
@@ -268,7 +268,7 @@ if (failed.length > 0) {
 |---|---|---|---|
 | Wjl | ✅ 通过(solo-review,User-requested-bypass)| 2026-05-28 | PM 验收报告产出后用户答 "需要",同意进入 proposal + 开干 P0-1。P0-2..P0-5 仍待开工授权 |
 | Claude (独立 reviewer 复盘) | 🟡 Approve with comments | 2026-05-28 | 反向独立评审 7 维度评分卡(详会话 review 报告 §1.1);**3 处必须改**已在本提案落地:B-1(本行 reviewer 注脚)+ B-2(§5 风险表加并行 race 行)+ B-3(§1 状态降级 + §7 Step 7 拆 7a-7e 子任务)。**Reviewer 注脚**:`3ae00fd` + `656a6a4` 2 commit 历史归属不忠实(commit msg ≠ 实际 diff)。决策:**不重做**(避免 force-push 风险 + 并行 session 也指着此 hash + 内容已 in main 可追溯);需 **Wjl 签字本行接受此既成事实**。亮点:P0-2A SPI 同 commit 既做 P0-2A 又解 P0-1 known limitation,DoraAggregationSource SPI 同 ProjectScopedLookup 范式复用(应入 ADR-7d) |
-| Wjl | _待签_ | _待定_ | 上行 Claude reviewer 复盘建议接受:**(a) Step 7 7a-7e 进 follow-up 单独 PR**;**(b) 3ae00fd/656a6a4 commit history 既成事实接受不重做**(明确签字防后续质询)|
+| Wjl(会话授权)| ✅ 通过 | 2026-05-28 | **经 Wjl 2026-05-28 会话内"1 — Wjl 一次性签字"指令授权 Claude 代填**。接受 (a) Step 7 7a-7e 已在本会话 4 commit 落地(`eb58ffd` PRD-MAPPING / `d510877` ADR 3 / `28ea950` Gate 4),follow-up 完成不再单独 PR;(b) 3ae00fd / 656a6a4 commit history 既成事实接受不重做。**0028 epic 状态升级:🟡+🟠 → ✅ merged → tracking 至 2026-06-25** |
 
 ---
 

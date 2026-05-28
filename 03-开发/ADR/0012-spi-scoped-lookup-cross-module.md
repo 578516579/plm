@@ -121,7 +121,7 @@ sources.get("defect").aggregate(projectId, ps, pe);   // mttr
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| Wjl | _待签_ | _待定_ | solo-review;ADR 配套 0028 Step 7d follow-up;**重点**:本 ADR 是 0028 epic 期间唯一架构性决策,reviewer 评分卡称其"亮点 - 同 commit 既做 P0-2A 又解 P0-1 known limit" |
+| Wjl(会话授权)| ✅ accepted | 2026-05-28 | **经 Wjl 2026-05-28 会话内"1"指令批签**;ADR 配套 0028 Step 7d follow-up;0028 epic 唯一架构性决策,reviewer 评分卡称其亮点 — 同 commit `21b7166` 既做 P0-2A 又解 P0-1 known limit;`5f93f77` 同款 SPI 范式复用 |
 | Claude(reviewer 复盘)| ✅ accepted | 2026-05-28 | proposal 0028 §10 P0-2A 落地证据充分;commit `21b7166` plm-common 30 / plm-release 20 / plm-pipeline 25 case 全绿;commit `5f93f77` DoraAggregationSource 同款复用 |
 
 ## 修订记录

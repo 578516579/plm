@@ -99,7 +99,7 @@ Quartz:`DoraComputeTask.computeAllProjects(30)` cron='0 0 3 * * ?' 每日 03:00 
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| Wjl | _待签_ | _待定_ | solo-review;ADR 配套 0028 Step 7c follow-up |
+| Wjl(会话授权)| ✅ accepted | 2026-05-28 | **经 Wjl 2026-05-28 会话内"1"指令批签**;ADR 配套 0028 Step 7c follow-up,决策已随 `5f93f77` + `9467bd1` 实现 |
 | Claude(reviewer 复盘)| ✅ accepted | 2026-05-28 | proposal 0028 §10 P0-3 落地证据充分;commit `5f93f77` plm-testreport 23 + plm-dora 28 case 全绿 + 13 模块 BUILD SUCCESS |
 
 ## 修订记录

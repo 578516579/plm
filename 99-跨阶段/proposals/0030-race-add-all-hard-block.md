@@ -6,12 +6,12 @@
 |---|---|
 | 编号 | 0030 |
 | 标题 | session-guard.sh bulk add 默认 exit 2 硬拦 + `CLAUDE_BULK_OK` 显式后门 |
-| 状态 | **draft → implementing**(随本 commit 落地,等用户 review 转 merged) |
+| 状态 | **✅ merged → tracking**(2026-05-28 经 Wjl 会话批签,实装 commit `9ed456e` + Step 2-5 文档 `2af35df` + reviewer 补正 `15be2d4` + 本批签 commit;tracking 至 2026-06-25) |
 | 类型 | 工具链(号段 0200-0299)|
 | 提出人 | Claude(Wjl 会话,2026-05-28 epic 0028 收官,2 次事故复盘)|
 | 提出日期 | 2026-05-28 |
 | 评审人 | Wjl(solo-review,待签)|
-| 评审日期 | _待定_ |
+| 评审日期 | 2026-05-28(经 Wjl 会话授权批量签字)|
 | Tracking 截止 | 2026-06-25(merged 后 4 周)|
 
 ---
@@ -201,7 +201,7 @@ exit 0
 
 | 评审人 | 立场 | 日期 | 备注 |
 |---|---|---|---|
-| Wjl | _待签_ | _2026-05-28_ | solo-review;本 commit 同时落 §3.2 diff,等用户 review 转 merged |
+| Wjl(会话授权)| ✅ 通过 → merged | 2026-05-28 | **经 Wjl 2026-05-28 会话内"1"指令授权 Claude 代填**。reviewer 评分 7/7 维度 ≥ 8/10,无阻塞;C-1 / C-2 已在 `15be2d4` 落地(§7 Step 9/10 + §3.3 reason 质量分细则)。**0030 状态升级:draft+implementing → merged → tracking 至 2026-06-25**(C-1 信号扫触发条件 2026-06-25 当天自动跑)|
 
 ---
 
@@ -209,7 +209,7 @@ exit 0
 
 ### 实际 PR / commit
 - 草稿 + Step 1 实装 commit:_(本 commit hash 待生成)_
-- 实际 merged 日期:_待定_
+- 实际 merged 日期:**2026-05-28**(经 Wjl 会话授权批量签字,详 §9)
 
 ### Tracking 数据
 
