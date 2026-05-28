@@ -142,6 +142,7 @@ import {
   listManualOps, addManualOps, updateManualOps, delManualOps, aiGenerateManualOps, getManualOps, listProjectsForSelect,
   type ManualOps, type ManualOpsQuery
 } from '@/api/business/manual-ops'
+import { statusTagFor, monLabel, channelLabel } from './manualOpsDict'
 
 const formRef = ref()
 const saving = ref(false)
@@ -194,15 +195,7 @@ const queryParams = reactive<ManualOpsQuery>({ pageNum: 1, pageSize: 10 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
 const hasManual = computed(() => !!(current.monitorMetrics || current.alertRules))
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿', type: 'info' }, '01': { label: '生成中', type: 'warning' },
-  '02': { label: '已生成', type: 'success' }, '03': { label: '已发布', type: 'primary' }
-}
-const statusTagFor = (s?: string) => statusMap[s || '00'] || { label: s || '-', type: 'info' as any }
 const statusTag = computed(() => statusTagFor(current.status))
-
-const monLabel = (v?: string) => ({ prometheus_grafana: 'Prom+Grafana', aliyun_monitor: '阿里云', zabbix: 'Zabbix' } as Record<string, string>)[v || ''] || v || '-'
-const channelLabel = (v?: string) => ({ dingtalk: '钉钉', feishu: '飞书', wecom: '企微', email: '邮件' } as Record<string, string>)[v || ''] || v || '-'
 
 async function getList() {
   listLoading.value = true
