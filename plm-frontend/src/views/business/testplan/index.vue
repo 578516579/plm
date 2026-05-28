@@ -242,6 +242,7 @@ import {
   listTestPlan, getTestPlan, addTestPlan, updateTestPlan, delTestPlan, aiGenerateTestPlan,
   listProjectsForSelect, type TestPlan, type TestPlanQuery
 } from '@/api/business/testplan'
+import { statusTagFor, testTypeLabel, testTypeInfo } from './testplanDict'
 
 const formRef = ref()
 const saving = ref(false)
@@ -277,14 +278,7 @@ const rules = {
   projectId: [{ required: true, message: '请选择关联项目', trigger: 'change' }]
 }
 
-// === 状态机 (4 态) ===
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿',   type: 'info' },
-  '01': { label: '已确认', type: 'warning' },
-  '02': { label: '执行中', type: 'primary' },
-  '03': { label: '已完成', type: 'success' }
-}
-function statusTagFor(s?: string) { return statusMap[s || '00'] || { label: s, type: 'info' } }
+// === 状态标签 (字典已抽到 testplanDict.ts,这里只剩组件态 computed) ===
 const statusTag = computed(() => statusTagFor(current.status))
 
 const TRANSITIONS: Record<string, string[]> = {
@@ -295,23 +289,10 @@ function canTransition(to: string): boolean {
   return TRANSITIONS[from]?.includes(to) || false
 }
 
-// === 测试类型标签 ===
-const testTypeMap: Record<string, { label: string; type: any }> = {
-  functional:  { label: '功能',     type: 'primary' },
-  api:         { label: '接口',     type: 'success' },
-  performance: { label: '性能',     type: 'warning' },
-  automation:  { label: '自动化',   type: 'info' },
-  security:    { label: '安全',     type: 'danger' }
-}
-function testTypeLabel(t: string) { return testTypeMap[t]?.label || t }
-
-const testTypesDisplay = computed(() => {
-  return testTypesArr.value.map(t => ({
-    value: t,
-    label: testTypeMap[t]?.label || t,
-    type: testTypeMap[t]?.type || 'info'
-  }))
-})
+// === 测试类型 (字典已抽到 testplanDict.ts) ===
+const testTypesDisplay = computed(() =>
+  testTypesArr.value.map(t => ({ value: t, ...testTypeInfo(t) }))
+)
 
 // === CRUD ===
 async function getList() {
