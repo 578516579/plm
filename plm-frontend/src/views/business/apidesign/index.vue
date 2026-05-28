@@ -193,6 +193,7 @@ import {
   listApiDesign, addApiDesign, updateApiDesign, delApiDesign, aiGenerateApiDesign,
   listProjectsForSelect, type ApiDesign, type ApiDesignQuery
 } from '@/api/business/apidesign'
+import { statusTagFor, methodTag } from './apiDesignDict'
 
 const dialogVisible = ref(false)
 const formRef = ref()
@@ -218,16 +219,7 @@ const total = ref(0)
 const queryParams = reactive<ApiDesignQuery>({ pageNum: 1, pageSize: 10 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿', type: 'info' }, '01': { label: '评审中', type: 'warning' },
-  '02': { label: '已确认', type: 'success' }, '03': { label: '已废弃', type: 'danger' }
-}
-const statusTagFor = (s?: string) => statusMap[s || '00'] || { label: s || '-', type: 'info' as any }
 const statusTag = computed(() => statusTagFor(current.status))
-
-function methodTag(m?: string): any {
-  return ({ GET: 'success', POST: 'primary', PUT: 'warning', DELETE: 'danger', PATCH: 'info' } as Record<string, string>)[m || ''] || 'info'
-}
 
 async function getList() {
   listLoading.value = true
