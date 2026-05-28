@@ -179,3 +179,4 @@
 | 日期 | 修订人 | 改了什么 |
 |---|---|---|
 | 2026-05-28 | Claude (Wjl 会话) | 初稿:沉淀 2026-W22 solo-review 抽取批次的 15 处漂移分类矩阵 + P0~P3 处置优先级 + 6-10 子任务实施计划 |
+| 2026-05-28(后)| Claude (Wjl 会话) | **附加 root-cause 诊断**:本 proposal 自身 README 索引登记 commit `656a6a4` 二次重现 3ae00fd 同款误吞(12 文件 / 418 insertions,本应 1 文件)。`pre-commit` hook 无 `git add`、git config 无 `commit.all`、无 alias。最可能机制 = **同 working tree 与并行 session 并发 `git add` 的 TOCTOU 竞态**:`git add <path>` 与后续 `git commit` 之间,并行 session 的 `git add` 把它的 M 文件加进同一索引,我的 `git commit` 把整个索引提交。**修复方案**(应纳入协作规范 §3 +本 proposal 0029 子任务 0029.S0):用 `git commit --only <path>` / `git commit <path>` 显式只提交指定路径,绕过共享索引;或改 worktree 物理隔离。两次事故 commit 留作 git 历史佐证:`3ae00fd`(27 文件 / 827 ins)+ `656a6a4`(12 文件 / 418 ins)。|
