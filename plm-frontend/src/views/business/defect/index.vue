@@ -182,6 +182,7 @@ import {
   listDefect, addDefect, updateDefect, delDefect, getDefect, aiMatchDefect, listProjectsForSelect,
   type Defect, type DefectQuery
 } from '@/api/business/defect'
+import { statusTagFor, severityTag, categoryLabel } from './defectDict'
 
 const dialogVisible = ref(false)
 const formRef = ref()
@@ -205,23 +206,6 @@ const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 const criticalCount = computed(() => list.value.filter(d => d.severity === 'P0' || d.severity === 'P1').length)
 const fixingCount = computed(() => list.value.filter(d => d.status === '02').length)
 const closedCount = computed(() => list.value.filter(d => d.status === '04').length)
-
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '新建', type: 'info' },
-  '01': { label: '已确认', type: 'warning' },
-  '02': { label: '处理中', type: 'primary' },
-  '03': { label: '已解决', type: 'success' },
-  '04': { label: '已关闭', type: 'info' }
-}
-const statusTagFor = (s?: string) => statusMap[s || ''] || { label: s || '-', type: 'info' as any }
-
-function severityTag(s?: string): any {
-  return ({ P0: 'danger', P1: 'danger', P2: 'warning', P3: 'info' } as Record<string,string>)[s || ''] || 'info'
-}
-
-function categoryLabel(v?: string) {
-  return ({ functional: '功能', performance: '性能', ui: 'UI/UX', security: '安全' } as Record<string,string>)[v || ''] || v || '-'
-}
 
 async function getList() {
   listLoading.value = true
