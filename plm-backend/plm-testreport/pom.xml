@@ -12,6 +12,9 @@
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-common</artifactId></dependency>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-system</artifactId></dependency>
         <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-project</artifactId></dependency>
+        <!-- Proposal 0028 P0-3A: 聚合 testcase + defect 真数据 -->
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-testcase</artifactId></dependency>
+        <dependency><groupId>cn.com.bosssfot.dv.plm</groupId><artifactId>plm-defect</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>

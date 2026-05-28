@@ -11,6 +11,11 @@
         <result property="metricUnit"         column="metric_unit"         />
         <result property="periodType"         column="period_type"         />
         <result property="snapshotDate"       column="snapshot_date"       />
+        <result property="periodStart"        column="period_start"        />
+        <result property="periodEnd"          column="period_end"          />
+        <result property="periodDays"         column="period_days"         />
+        <result property="isComputed"         column="is_computed"         />
+        <result property="computedAt"         column="computed_at"         />
         <result property="trendChartJson"     column="trend_chart_json"    />
         <result property="heatmapJson"        column="heatmap_json"        />
         <result property="leadtimeBreakdown"  column="leadtime_breakdown"  />
@@ -29,7 +34,8 @@
 
     <sql id="selectDoraVo">
         select dora_id, dora_no, project_id, metric_name, metric_type, metric_value, metric_unit,
-               period_type, snapshot_date, trend_chart_json, heatmap_json, leadtime_breakdown,
+               period_type, snapshot_date, period_start, period_end, period_days, is_computed, computed_at,
+               trend_chart_json, heatmap_json, leadtime_breakdown,
                ai_suggestions, ai_generated, ai_generated_at, status, author_user_id,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_dora_metric
@@ -65,6 +71,11 @@
             <if test="metricUnit != null">metric_unit,</if>
             <if test="periodType != null">period_type,</if>
             <if test="snapshotDate != null">snapshot_date,</if>
+            <if test="periodStart != null">period_start,</if>
+            <if test="periodEnd != null">period_end,</if>
+            <if test="periodDays != null">period_days,</if>
+            <if test="isComputed != null">is_computed,</if>
+            <if test="computedAt != null">computed_at,</if>
             <if test="trendChartJson != null">trend_chart_json,</if>
             <if test="heatmapJson != null">heatmap_json,</if>
             <if test="leadtimeBreakdown != null">leadtime_breakdown,</if>
@@ -86,6 +97,11 @@
             <if test="metricUnit != null">#{metricUnit},</if>
             <if test="periodType != null">#{periodType},</if>
             <if test="snapshotDate != null">#{snapshotDate},</if>
+            <if test="periodStart != null">#{periodStart},</if>
+            <if test="periodEnd != null">#{periodEnd},</if>
+            <if test="periodDays != null">#{periodDays},</if>
+            <if test="isComputed != null">#{isComputed},</if>
+            <if test="computedAt != null">#{computedAt},</if>
             <if test="trendChartJson != null">#{trendChartJson},</if>
             <if test="heatmapJson != null">#{heatmapJson},</if>
             <if test="leadtimeBreakdown != null">#{leadtimeBreakdown},</if>
@@ -110,6 +126,11 @@
             <if test="metricUnit != null">metric_unit = #{metricUnit},</if>
             <if test="periodType != null">period_type = #{periodType},</if>
             <if test="snapshotDate != null">snapshot_date = #{snapshotDate},</if>
+            <if test="periodStart != null">period_start = #{periodStart},</if>
+            <if test="periodEnd != null">period_end = #{periodEnd},</if>
+            <if test="periodDays != null">period_days = #{periodDays},</if>
+            <if test="isComputed != null">is_computed = #{isComputed},</if>
+            <if test="computedAt != null">computed_at = #{computedAt},</if>
             <if test="trendChartJson != null">trend_chart_json = #{trendChartJson},</if>
             <if test="heatmapJson != null">heatmap_json = #{heatmapJson},</if>
             <if test="leadtimeBreakdown != null">leadtime_breakdown = #{leadtimeBreakdown},</if>
@@ -132,5 +153,15 @@
     <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
         select max(cast(substring(dora_no, length(#{prefix}) + 1) as unsigned)) as max_seq
         from tb_dora_metric where dora_no like concat(#{prefix}, '%')
+    </select>
+
+    <!-- Proposal 0028 P0-3B: upsert 查重用,按 projectId + metricType + periodStart 精确定位 -->
+    <select id="selectByProjectTypePeriod" resultMap="DoraResult">
+        <include refid="selectDoraVo"/>
+        where del_flag = '0'
+          and project_id = #{projectId}
+          and metric_type = #{metricType}
+          and period_start = #{periodStart}
+        limit 1
     </select>
 </mapper>

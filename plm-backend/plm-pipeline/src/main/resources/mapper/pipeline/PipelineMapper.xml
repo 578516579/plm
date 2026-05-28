@@ -138,4 +138,16 @@
         select max(cast(substring(pipeline_no, length(#{prefix}) + 1) as unsigned)) as max_seq
         from tb_pipeline where pipeline_no like concat(#{prefix}, '%')
     </select>
+
+    <!-- Proposal 0028 P0-3B: DORA 聚合 — 按 last_run_status 窗口期计数 -->
+    <select id="countByStatusInPeriod" resultType="long">
+        select count(*)
+        from tb_pipeline
+        where del_flag = '0'
+          and project_id = #{projectId}
+          and last_run_status = #{status}
+          and last_run_at is not null
+          and last_run_at >= #{periodStart}
+          and last_run_at &lt; #{periodEnd}
+    </select>
 </mapper>

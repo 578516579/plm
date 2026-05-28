@@ -156,4 +156,19 @@
         from tb_release
         where release_no like concat(#{prefix}, '%')
     </select>
+
+    <!-- Proposal 0028 P0-3B: DORA 前置时间聚合 — SUM(released_at - create_time) ms 数 + 样本数 -->
+    <select id="sumLeadTimeMsInPeriod" resultType="java.util.HashMap">
+        select
+            coalesce(sum(timestampdiff(microsecond, create_time, released_at)) / 1000, 0) as sumMs,
+            count(*) as cnt
+        from tb_release
+        where del_flag = '0'
+          and project_id = #{projectId}
+          and status in ('02','03')
+          and released_at is not null
+          and create_time is not null
+          and released_at >= #{periodStart}
+          and released_at &lt; #{periodEnd}
+    </select>
 </mapper>

@@ -1,11 +1,15 @@
 package cn.com.bosssfot.dv.plm.dora.service.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +20,8 @@ import cn.com.bosssfot.dv.plm.common.ai.AiService;
 import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
+import cn.com.bosssfot.dv.plm.common.spi.DoraAggregationSource;
+import cn.com.bosssfot.dv.plm.common.spi.DoraAggregationSource.DoraAggregationData;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
 import cn.com.bosssfot.dv.plm.dora.domain.DoraMetric;
@@ -41,6 +47,12 @@ public class DoraMetricServiceImpl implements IDoraMetricService {
 
     @Autowired private DoraMetricMapper doraMapper;
     @Autowired private AiService aiService;
+
+    /**
+     * Proposal 0028 P0-3B: 通过 SPI 模式拉跨模块聚合数据,避免 Maven Reactor 循环依赖。
+     * Map key = bean 名 ("pipeline" / "release" / "defect"),值由各业务模块旁挂 @Component 注册。
+     */
+    @Autowired(required = false) private Map<String, DoraAggregationSource> aggregationSources;
 
     @Override
     public List<DoraMetric> selectDoraList(DoraMetric t) { return doraMapper.selectDoraList(t); }
@@ -157,5 +169,134 @@ public class DoraMetricServiceImpl implements IDoraMetricService {
         String prefix = "DORA-" + year + "-";
         Integer maxSeq = doraMapper.selectMaxSeqOfYear(prefix);
         return String.format("%s%04d", prefix, (maxSeq == null ? 0 : maxSeq) + 1);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Proposal 0028 P0-3B: 真聚合 4 个 DORA 指标
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<DoraMetric> computeMetrics(Long projectId, Date periodStart, Date periodEnd) {
+        if (projectId == null) throw new ServiceException("projectId 不能为空", 602);
+        if (periodStart == null || periodEnd == null)
+            throw new ServiceException("聚合窗口不能为空", 602);
+        if (!periodEnd.after(periodStart))
+            throw new ServiceException("periodEnd 必须晚于 periodStart", 604);
+
+        int periodDays = (int) Math.max(1L,
+            TimeUnit.MILLISECONDS.toDays(periodEnd.getTime() - periodStart.getTime()));
+
+        // 1. 聚合数据(SPI 缺失时各 source 返回零值,指标仍能算出 0)
+        DoraAggregationData pipe   = invokeSource("pipeline", projectId, periodStart, periodEnd);
+        DoraAggregationData rel    = invokeSource("release",  projectId, periodStart, periodEnd);
+        DoraAggregationData defect = invokeSource("defect",   projectId, periodStart, periodEnd);
+
+        // 2. 计算 4 个值
+        // 部署频率 = success 次数 / 天数(次/天)
+        BigDecimal deployFreq = BigDecimal.valueOf(pipe.deployCount)
+                .divide(BigDecimal.valueOf(periodDays), 2, RoundingMode.HALF_UP);
+
+        // 前置时间 = avg(ms) / 3600000 (小时);0 样本时为 0
+        BigDecimal leadTimeHours = rel.leadTimeSampleCnt == 0
+                ? BigDecimal.ZERO
+                : rel.totalLeadTimeMs
+                    .divide(BigDecimal.valueOf(rel.leadTimeSampleCnt), 4, RoundingMode.HALF_UP)
+                    .divide(BigDecimal.valueOf(3_600_000L), 2, RoundingMode.HALF_UP);
+
+        // MTTR = avg(ms) / 3600000 (小时);0 样本时为 0
+        BigDecimal mttrHours = defect.recoverSampleCnt == 0
+                ? BigDecimal.ZERO
+                : defect.totalRecoverMs
+                    .divide(BigDecimal.valueOf(defect.recoverSampleCnt), 4, RoundingMode.HALF_UP)
+                    .divide(BigDecimal.valueOf(3_600_000L), 2, RoundingMode.HALF_UP);
+
+        // 变更失败率 = failed / (success+failed) * 100 (%);0 样本时为 0
+        BigDecimal changeFailRate = pipe.totalRunCount == 0
+                ? BigDecimal.ZERO
+                : BigDecimal.valueOf(pipe.failedCount)
+                    .multiply(BigDecimal.valueOf(100))
+                    .divide(BigDecimal.valueOf(pipe.totalRunCount), 2, RoundingMode.HALF_UP);
+
+        // 3. upsert 4 条记录
+        List<DoraMetric> result = new ArrayList<>(4);
+        result.add(upsertMetric(projectId, "deploy_freq",      "部署频率",     deployFreq,     "次/天", periodStart, periodEnd, periodDays));
+        result.add(upsertMetric(projectId, "lead_time",        "前置时间",     leadTimeHours,  "小时",  periodStart, periodEnd, periodDays));
+        result.add(upsertMetric(projectId, "mttr",             "平均恢复时间", mttrHours,      "小时",  periodStart, periodEnd, periodDays));
+        result.add(upsertMetric(projectId, "change_fail_rate", "变更失败率",   changeFailRate, "%",     periodStart, periodEnd, periodDays));
+        return result;
+    }
+
+    private DoraAggregationData invokeSource(String key, Long projectId, Date start, Date end) {
+        if (aggregationSources == null) return new DoraAggregationData();
+        DoraAggregationSource s = aggregationSources.get(key);
+        if (s == null) {
+            log.warn("DoraAggregationSource '{}' 未注册,该 source 视为 0 值", key);
+            return new DoraAggregationData();
+        }
+        return s.aggregate(projectId, start, end);
+    }
+
+    /**
+     * upsert 一条 metric。规则:
+     * - 不存在 → insert,is_computed='Y' / computedAt=now
+     * - 存在且 is_computed='N'(人工录入)→ 跳过(尊重人工)
+     * - 存在且 is_computed='Y' → update 覆盖
+     *
+     * upsert 主键:projectId + metricType + periodStart。
+     * periodType 推断:days≤31 → month;否则 quarter。
+     */
+    private DoraMetric upsertMetric(Long projectId, String metricType, String metricName,
+                                     BigDecimal value, String unit,
+                                     Date periodStart, Date periodEnd, int periodDays) {
+        DoraMetric existing = doraMapper.selectByProjectTypePeriod(projectId, metricType, periodStart);
+
+        if (existing != null && "N".equalsIgnoreCase(existing.getIsComputed())) {
+            log.info("项目 {} metricType={} periodStart={} 是人工录入(is_computed=N),跳过覆盖",
+                projectId, metricType, periodStart);
+            return existing;
+        }
+
+        Date now = new Date();
+        if (existing == null) {
+            DoraMetric m = new DoraMetric();
+            m.setProjectId(projectId);
+            m.setMetricName(metricName);
+            m.setMetricType(metricType);
+            m.setMetricValue(value);
+            m.setMetricUnit(unit);
+            m.setPeriodType(periodDays <= 31 ? "month" : "quarter");
+            m.setSnapshotDate(periodEnd);
+            m.setPeriodStart(periodStart);
+            m.setPeriodEnd(periodEnd);
+            m.setPeriodDays(periodDays);
+            m.setIsComputed("Y");
+            m.setComputedAt(now);
+            m.setStatus("00");
+            m.setAiGenerated("N");
+            m.setAuthorUserId(0L);   // 系统聚合,无具体作者;0 = 系统
+            m.setDoraNo(generateDoraNo());
+            m.setCreateBy("dora-compute");
+            try {
+                doraMapper.insertDora(m);
+            } catch (DuplicateKeyException e) {
+                m.setDoraNo(generateDoraNo());
+                doraMapper.insertDora(m);
+            }
+            return m;
+        }
+
+        // 已有且自动算出 → 覆盖更新
+        existing.setMetricName(metricName);
+        existing.setMetricValue(value);
+        existing.setMetricUnit(unit);
+        existing.setPeriodEnd(periodEnd);
+        existing.setPeriodDays(periodDays);
+        existing.setSnapshotDate(periodEnd);
+        existing.setIsComputed("Y");
+        existing.setComputedAt(now);
+        existing.setUpdateBy("dora-compute");
+        doraMapper.updateDora(existing);
+        return existing;
     }
 }

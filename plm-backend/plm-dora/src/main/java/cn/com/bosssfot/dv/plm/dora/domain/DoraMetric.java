@@ -25,6 +25,19 @@ public class DoraMetric extends BaseEntity {
     @Excel(name = "周期")      private String periodType;
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "记录日期", dateFormat = "yyyy-MM-dd") private Date snapshotDate;
+
+    // ── Proposal 0028 P0-3B 真聚合元数据 ──────────────────────────────
+    /** 聚合窗口开始时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") private Date periodStart;
+    /** 聚合窗口结束时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") private Date periodEnd;
+    /** 聚合窗口天数(默认 30) */
+    private Integer periodDays;
+    /** Y=自动算出 N=人工录入,人工录入的不被覆盖 */
+    private String isComputed;
+    /** 上次自动计算时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") private Date computedAt;
+
     private String trendChartJson;
     private String heatmapJson;
     private String leadtimeBreakdown;
@@ -53,6 +66,16 @@ public class DoraMetric extends BaseEntity {
     public void setPeriodType(String v) { this.periodType = v; }
     public Date getSnapshotDate() { return snapshotDate; }
     public void setSnapshotDate(Date v) { this.snapshotDate = v; }
+    public Date getPeriodStart() { return periodStart; }
+    public void setPeriodStart(Date v) { this.periodStart = v; }
+    public Date getPeriodEnd() { return periodEnd; }
+    public void setPeriodEnd(Date v) { this.periodEnd = v; }
+    public Integer getPeriodDays() { return periodDays; }
+    public void setPeriodDays(Integer v) { this.periodDays = v; }
+    public String getIsComputed() { return isComputed; }
+    public void setIsComputed(String v) { this.isComputed = v; }
+    public Date getComputedAt() { return computedAt; }
+    public void setComputedAt(Date v) { this.computedAt = v; }
     public String getTrendChartJson() { return trendChartJson; }
     public void setTrendChartJson(String v) { this.trendChartJson = v; }
     public String getHeatmapJson() { return heatmapJson; }

@@ -150,4 +150,20 @@
         where defect_no like concat(#{prefix}, '%')
     </select>
 
+    <!-- Proposal 0028 P0-3B: DORA MTTR 聚合 — severity ∈ {00 P0, 01 P1} + status=03 已解决 -->
+    <select id="sumRecoverMsInPeriod" resultType="java.util.HashMap">
+        select
+            coalesce(sum(timestampdiff(microsecond, create_time, update_time)) / 1000, 0) as sumMs,
+            count(*) as cnt
+        from tb_defect
+        where del_flag = '0'
+          and project_id = #{projectId}
+          and severity in ('00','01')
+          and status = '03'
+          and update_time is not null
+          and create_time is not null
+          and update_time >= #{periodStart}
+          and update_time &lt; #{periodEnd}
+    </select>
+
 </mapper>

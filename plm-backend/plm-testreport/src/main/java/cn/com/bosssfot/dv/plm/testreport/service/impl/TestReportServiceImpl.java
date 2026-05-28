@@ -1,5 +1,7 @@
 package cn.com.bosssfot.dv.plm.testreport.service.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -14,8 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
+import cn.com.bosssfot.dv.plm.defect.domain.Defect;
+import cn.com.bosssfot.dv.plm.defect.mapper.DefectMapper;
 import cn.com.bosssfot.dv.plm.project.domain.Project;
 import cn.com.bosssfot.dv.plm.project.mapper.ProjectMapper;
+import cn.com.bosssfot.dv.plm.testcase.domain.TestCase;
+import cn.com.bosssfot.dv.plm.testcase.mapper.TestCaseMapper;
 import cn.com.bosssfot.dv.plm.testreport.domain.TestReport;
 import cn.com.bosssfot.dv.plm.testreport.mapper.TestReportMapper;
 import cn.com.bosssfot.dv.plm.testreport.service.ITestReportService;
@@ -45,6 +51,9 @@ public class TestReportServiceImpl implements ITestReportService
 
     @Autowired private TestReportMapper testreportMapper;
     @Autowired private ProjectMapper projectMapper;
+    // Proposal 0028 P0-3A: 实时聚合 testcase + defect
+    @Autowired private TestCaseMapper testcaseMapper;
+    @Autowired private DefectMapper defectMapper;
 
     @Override
     public List<TestReport> selectTestReportList(TestReport t) {
@@ -143,6 +152,75 @@ public class TestReportServiceImpl implements ITestReportService
     @Transactional(rollbackFor = Exception.class)
     public int deleteTestReportByIds(Long[] ids) {
         return testreportMapper.deleteTestReportByIds(ids);
+    }
+
+    /**
+     * Proposal 0028 P0-3A — 真聚合实现
+     * 按 report.projectId 维度聚合 testcase / defect:
+     *   - testcase.status='03' (已通过) → passedCases
+     *   - testcase.status='04' (已失败) → failedCases
+     *   - coverage = (passed+failed) / total * 100  (保留 2 位)
+     *   - defect.severity='00' (P0 阻塞) → p0Defects
+     *   - defect.severity='01' (P1 严重) → p1Defects
+     *
+     * TODO(P1): 等 testcase 表加 testplan_id 字段后,改为按 testplanId 维度聚合
+     *           (当前 testcase 只有 projectId / requirementId,与 testplan 无关联)
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public TestReport aggregateFromTestplan(Long testreportId) {
+        TestReport report = testreportMapper.selectTestReportById(testreportId);
+        if (report == null) {
+            throw new ServiceException("测试报告不存在", 702);
+        }
+        if ("Y".equalsIgnoreCase(report.getIsManualOverride())) {
+            log.info("testreport {} 已设手工覆盖,跳过聚合", testreportId);
+            return report;
+        }
+
+        // 1) 聚合 testcase by projectId (本期按项目维度;testcase 无 testplan_id)
+        TestCase tcQuery = new TestCase();
+        tcQuery.setProjectId(report.getProjectId());
+        List<TestCase> cases = testcaseMapper.selectTestCaseList(tcQuery);
+        int total = cases.size();
+        int passed = 0;
+        int failed = 0;
+        for (TestCase c : cases) {
+            if ("03".equals(c.getStatus())) passed++;
+            else if ("04".equals(c.getStatus())) failed++;
+        }
+        BigDecimal coverage;
+        if (total == 0) {
+            coverage = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        } else {
+            coverage = BigDecimal.valueOf(passed + failed)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(BigDecimal.valueOf(total), 2, RoundingMode.HALF_UP);
+        }
+
+        // 2) 聚合 defect by projectId
+        Defect dQuery = new Defect();
+        dQuery.setProjectId(report.getProjectId());
+        List<Defect> defects = defectMapper.selectDefectList(dQuery);
+        int p0 = 0;
+        int p1 = 0;
+        for (Defect d : defects) {
+            if ("00".equals(d.getSeverity())) p0++;
+            else if ("01".equals(d.getSeverity())) p1++;
+        }
+
+        // 3) 写回
+        report.setTotalCases(total);
+        report.setPassedCases(passed);
+        report.setFailedCases(failed);
+        report.setCoverageRate(coverage);
+        report.setP0Defects(p0);
+        report.setP1Defects(p1);
+        report.setIsAggregated("Y");
+        report.setAggregatedAt(new Date());
+        report.setUpdateBy(SecurityUtils.getUsername());
+        testreportMapper.updateTestReport(report);
+        return report;
     }
 
     private String generateTestreportNo() {

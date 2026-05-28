@@ -24,6 +24,11 @@
             <groupId>cn.com.bosssfot.dv.plm</groupId>
             <artifactId>plm-system</artifactId>
         </dependency>
+        <!-- Proposal 0028 P0-3B: Quartz 任务遍历项目做全量聚合,需 ProjectMapper -->
+        <dependency>
+            <groupId>cn.com.bosssfot.dv.plm</groupId>
+            <artifactId>plm-project</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
