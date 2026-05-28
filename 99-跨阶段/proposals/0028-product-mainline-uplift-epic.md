@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0028 |
 | 标题 | 产品主线贯通迭代 — P0-1 跨模块外键 + P0-2 详情页跨模块跳转 + P0-3 真聚合 TestReport/DORA + P0-4 AiButton 紫渐变组件 + P0-5 Dashboard 错态显形 |
-| 状态 | **P0-1 merged → tracking**(2026-05-28 commit `3ae00fd`,详 §10);P0-2..P0-5 仍 proposed |
+| 状态 | **P0-1 + P0-4 + P0-5 merged → tracking**(2026-05-28 commits `3ae00fd` / `5c01814`,详 §10);P0-2 + P0-3 仍 proposed |
 | 类型 | 架构 + 编码规范 + UED(epic 跨域) |
 | 提出人 | Claude (PM 视角验收) + Wjl |
 | 提出日期 | 2026-05-28 |
@@ -219,8 +219,8 @@ if (failed.length > 0) {
     [ ] 2b: defect + testcase_id
     [ ] 2c: release + pipeline_id
     [x] 2d: pipeline + release_id(反向)— ⚠ **应用层 FK 校验留 known limitation**(详 §5 风险表新增行),DDL + Domain + Mapper XML 已落
-[ ] Step 3: P0-4 AiButton 组件 + 6 模块批量替换(frontend-coder + ued-orchestrator 评审)
-[ ] Step 4: P0-5 Dashboard 错态显形(frontend-coder + 单测)
+[x] Step 3: P0-4 AiButton 组件 + 6 模块批量替换 9 处(frontend-coder)— commit `5c01814`
+[x] Step 4: P0-5 Dashboard 错态显形(frontend-coder + 单测)— 同 commit `5c01814`
 [ ] Step 5: P0-2 businessRoute 扩展 + 5 详情页按钮 + 后端 promote/attach endpoint(arch-orchestrator + backend-coder + frontend-coder)
 [ ] Step 6: P0-3 TestReport/DORA 聚合服务 + Quartz 任务(backend-coder + db-orchestrator)
 [ ] Step 7: PRD-MAPPING §2 + 4 ADR + 4 Gate 实例(technical-writer)
@@ -266,8 +266,16 @@ if (failed.length > 0) {
 - **合入 commit: `3ae00fd`** ⚠ **协作事故**:本 commit message 写作 `test(openspec): 抽取 openspecDict SSoT + 6 例 [solo-review]`,实际是**并行 openspec 字典抽取 session 跑了 `git add .` 全量 add**,把本会话已 staged 的 0028 epic + 4 SQL + 4 模块 Java FK 改造 25 个文件**一并偷走塞进同一 commit**。git 事实 = P0-1 已 in main 树(`git show 3ae00fd` 可见 27 文件清单);commit 历史归属不忠实但**不重做**(避免 force-push 风险 + 并行 session 也指着这 commit)。教训:多 session 共享 working tree 时,绝不允许 `git add .` / `git add -A`,必须精确 add 自己的文件路径。新 quirk Q-COLLAB-XX 待登记。
 - 实际 merged 日期:2026-05-28(随 commit 3ae00fd 入 chore branch HEAD)
 
-### P0-2..P0-5 状态
-均仍 proposed,待开工授权。
+### P0-4 + P0-5 合入(2026-05-28)
+
+- **合入 commit: `5c01814`** `feat(ui): 0028 P0-4+P0-5 AiButton 紫渐变组件 + dashboard 错态显形 [solo-review]`
+- 8 文件,212 insertions / 67 deletions
+- 验证:vitest `npm run test:unit -- --run` 30 files / **453 tests passed**(含新 AiButton 6 例);vue-tsc 6 改模块零新增类型错
+- P0-4 替换 9 个 AI 按钮(dashboard 1 / requirement 2 / task 2 / defect 1 / release 1 / inception 2),收敛紫渐变 + ✨ Token,解除 UED §N.3 一票否决
+- P0-5 错态显形:dashboard `Promise.allSettled` 失败聚合 `ElMessage.warning` 单 toast + `console.warn` 详记 panel reason + `__failed` 标记防覆盖既有 state
+
+### P0-2 + P0-3 状态
+均仍 proposed,待开工授权(P0-2 包括 release ↔ pipeline SPI 下沉解决 P0-1 known limitation)。
 
 ### Tracking 数据
 
@@ -292,3 +300,4 @@ if (failed.length > 0) {
 |---|---|---|
 | 2026-05-28 | Claude(PM 验收会话)+ Wjl | 初版 — 验收报告 → epic proposal,5 子项拆解 |
 | 2026-05-28 | Claude(PM 验收会话)| P0-1 落地完成,补 §5 风险段 known limitation(release ↔ pipeline 循环依赖)+ §10 合入 commit `3ae00fd`(协作事故注解:并行 session race 偷文件)+ §1 元信息状态升级 P0-1 merged → tracking |
+| 2026-05-28 | Claude(PM 验收会话)| P0-4 + P0-5 落地完成,commit `5c01814`(精确 add 8 文件避协作事故复发);§1 元信息升级 P0-1+P0-4+P0-5 merged → tracking;§7 Steps 3/4 勾选;§10 加 P0-4+P0-5 合入小段 |
