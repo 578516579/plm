@@ -190,6 +190,10 @@ import {
   fetchProjects, fetchMyTasks, fetchDefects, fetchPrds, fetchInceptions,
   fetchAutotests, fetchReleases, fetchTestReports, fetchManualProducts
 } from '@/api/business/dashboard'
+import {
+  statusTagFor, priorityTagFor, priorityClass,
+  taskStatusTagFor, riskTagFor
+} from './dashboardDict'
 
 const router = useRouter()
 const aiInput = ref('')
@@ -279,37 +283,6 @@ function calcProgress(p: any): number {
   return map[p.status] ?? 50
 }
 
-function statusTagFor(s?: string) {
-  return ({
-    '0': { label: '未启动', type: 'info' as const },
-    '1': { label: '进行中', type: 'primary' as const },
-    '2': { label: '暂停',   type: 'warning' as const },
-    '3': { label: '已完成', type: 'success' as const },
-    '4': { label: '已取消', type: 'danger' as const }
-  } as any)[s || '0'] || { label: s || '-', type: 'info' as const }
-}
-
-function priorityTagFor(p?: string) {
-  return ({
-    '00': { label: 'P0', type: 'danger' as const },
-    '01': { label: 'P1', type: 'warning' as const },
-    '02': { label: 'P2', type: 'info' as const }
-  } as any)[p || '02'] || { label: p, type: 'info' as const }
-}
-
-function priorityClass(p?: string) {
-  return ({ '00': 'p0', '01': 'p1', '02': 'p2' } as any)[p || '02'] || 'p2'
-}
-
-function taskStatusTagFor(s?: string) {
-  return ({
-    '00': { label: '待开发', type: 'info' as const },
-    '01': { label: '开发中', type: 'primary' as const },
-    '02': { label: '代码评审', type: 'warning' as const },
-    '03': { label: '测试中',   type: 'warning' as const },
-    '04': { label: '已完成',   type: 'success' as const }
-  } as any)[s || '00'] || { label: s, type: 'info' as const }
-}
 
 // === 质量快照 ===
 const qualitySnapshot = reactive({
@@ -319,13 +292,7 @@ const qualitySnapshot = reactive({
   cfr: 0
 })
 
-const riskTag = computed(() => {
-  return ({
-    green:  { label: '🟢 健康', type: 'success' as const },
-    yellow: { label: '🟡 一般', type: 'warning' as const },
-    red:    { label: '🔴 风险', type: 'danger' as const }
-  } as any)[qualitySnapshot.riskLevel] || { label: '—', type: 'info' as const }
-})
+const riskTag = computed(() => riskTagFor(qualitySnapshot.riskLevel))
 
 // === 生命周期流程图 (对齐原型 fc-wrap) ===
 const lifecycle = [
