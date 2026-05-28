@@ -20,6 +20,8 @@ import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
 import cn.com.bosssfot.dv.plm.inception.domain.Inception;
 import cn.com.bosssfot.dv.plm.inception.mapper.InceptionMapper;
 import cn.com.bosssfot.dv.plm.inception.service.IInceptionService;
+import cn.com.bosssfot.dv.plm.project.domain.Project;
+import cn.com.bosssfot.dv.plm.project.service.IProjectService;
 
 /**
  * 项目立项 Service — PRD §F1.1 + 原型 inception.html
@@ -53,6 +55,7 @@ public class InceptionServiceImpl implements IInceptionService
 
     @Autowired private InceptionMapper inceptionMapper;
     @Autowired private AiService aiService;
+    @Autowired private IProjectService projectService;
 
     @Override
     public List<Inception> selectInceptionList(Inception t) {
@@ -189,6 +192,70 @@ public class InceptionServiceImpl implements IInceptionService
         inc.setUpdateBy(SecurityUtils.getUsername());
         inceptionMapper.updateInception(inc);
         return inc;
+    }
+
+    /**
+     * Proposal 0028 P0-2 — 立项晋升项目
+     *
+     * 字段映射:
+     *   inception.projectName       → project.projectName
+     *   inception.background        → project.description
+     *   inception.submitterUserId   → project.managerUserId(立项提交人 = 项目负责人默认值)
+     *   project.projectType         = "iteration"(默认;inception.inceptionType 字典与 project 字典不同,
+     *                                 保守起见用通用值,人工后续在项目详情可改)
+     *   project.status              = "0"(未启动 — 项目状态字典 0/1/2/3/4)
+     *
+     * 校验:
+     *   - inception 不存在        → 404
+     *   - inception.status != 03  → 601
+     *   - 幂等:若 inception.projectId 不为空且对应 project 仍在 → 直接返回旧 projectId,不重建
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long promoteToProject(Long inceptionId) {
+        Inception inc = inceptionMapper.selectInceptionById(inceptionId);
+        if (inc == null) {
+            throw new ServiceException("立项单不存在", 404);
+        }
+        if (!"03".equals(inc.getStatus())) {
+            throw new ServiceException(
+                "立项状态 " + statusLabel(inc.getStatus()) + " 不能晋升项目,必须先到「已批准」",
+                601
+            );
+        }
+
+        // 幂等:已晋升过且 project 仍在 → 直接返回旧 projectId
+        if (inc.getProjectId() != null) {
+            Project existing = projectService.selectProjectById(inc.getProjectId());
+            if (existing != null) {
+                log.info("inception#{} 已晋升过项目 project#{},直接返回幂等结果",
+                    inceptionId, inc.getProjectId());
+                return inc.getProjectId();
+            }
+            // 旧 projectId 指向已删除 project → 重新建
+            log.warn("inception#{} 旧 projectId={} 对应项目已不存在,重新晋升",
+                inceptionId, inc.getProjectId());
+        }
+
+        // 建项目(项目编号 generateProjectNo 由 ProjectServiceImpl 自动填充)
+        Project project = new Project();
+        project.setProjectName(inc.getProjectName());
+        project.setDescription(inc.getBackground());
+        project.setManagerUserId(inc.getSubmitterUserId());
+        project.setProjectType("iteration");
+        project.setStatus("0");
+        project.setCreateBy(SecurityUtils.getUsername());
+        projectService.insertProject(project);
+
+        // 回填 inception.projectId
+        Inception back = new Inception();
+        back.setInceptionId(inceptionId);
+        back.setProjectId(project.getId());
+        back.setUpdateBy(SecurityUtils.getUsername());
+        inceptionMapper.updateInception(back);
+
+        log.info("inception#{} 晋升项目成功,新 projectId={}", inceptionId, project.getId());
+        return project.getId();
     }
 
     private String generateInceptionNo() {

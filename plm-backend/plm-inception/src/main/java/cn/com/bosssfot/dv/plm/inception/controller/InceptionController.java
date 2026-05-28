@@ -74,4 +74,16 @@ public class InceptionController extends BaseController {
     public AjaxResult aiGenerate(@PathVariable("id") Long id) {
         return success(inceptionService.aiGenerate(id));
     }
+
+    /**
+     * Proposal 0028 P0-2 — 立项晋升项目(主线贯通:立项 → 项目)
+     * 权限复用 edit(与 aiGenerate 同范式 — 业务动作走 edit perm,不新增 sys_menu 按钮项)
+     * 返回新建(或幂等返回的)projectId,前端拿到后跳 project 详情
+     */
+    @PreAuthorize("@ss.hasPermi('business:inception:edit')")
+    @Log(title = "项目立项-晋升项目", businessType = BusinessType.OTHER)
+    @PostMapping("/{id}/promote-to-project")
+    public AjaxResult promoteToProject(@PathVariable("id") Long id) {
+        return success(inceptionService.promoteToProject(id));
+    }
 }

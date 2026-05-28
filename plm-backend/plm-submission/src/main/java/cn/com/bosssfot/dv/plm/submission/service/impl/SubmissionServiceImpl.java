@@ -196,6 +196,24 @@ public class SubmissionServiceImpl implements ISubmissionService
         return submissionMapper.deleteSubmissionByIds(ids);
     }
 
+    /**
+     * Proposal 0028 P0-2 — 提测拉起测试方案
+     * 取现有 submission 校 404,设置 testplanId,走 updateSubmission 复用 P0-1 已有的
+     * 跨模块 FK 校验({@link #validateTestplanFk})。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void attachTestplan(Long submissionId, Long testplanId) {
+        Submission old = submissionMapper.selectSubmissionById(submissionId);
+        if (old == null) {
+            throw new ServiceException("提测单不存在", 404);
+        }
+        Submission upd = new Submission();
+        upd.setSubmissionId(submissionId);
+        upd.setTestplanId(testplanId);
+        updateSubmission(upd);  // 复用 P0-1 validateTestplanFk(同 projectId 强约束 → 702)
+    }
+
     // ─────────────────────────────────────────────────────────────────
     // 私有辅助
     // ─────────────────────────────────────────────────────────────────

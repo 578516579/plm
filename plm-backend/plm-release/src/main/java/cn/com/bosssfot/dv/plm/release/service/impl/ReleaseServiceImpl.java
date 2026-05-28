@@ -15,6 +15,7 @@ import cn.com.bosssfot.dv.plm.common.ai.AiService;
 import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
+import cn.com.bosssfot.dv.plm.common.spi.ProjectScopedLookup;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
 import cn.com.bosssfot.dv.plm.project.domain.Project;
@@ -55,6 +56,12 @@ public class ReleaseServiceImpl implements IReleaseService
     @Autowired private ProjectMapper projectMapper;
     @Autowired private AiService aiService;
 
+    /**
+     * proposal 0028 P0-2A 解 P0-1 known limitation:SPI 模式 ProjectScopedLookup,
+     * 按 bean 名("pipeline" / "release" / ...)查跨模块归属项目,避免 Maven Reactor 循环依赖。
+     */
+    @Autowired(required = false) private Map<String, ProjectScopedLookup> projectScopedLookups;
+
     @Override
     public List<Release> selectReleaseList(Release t) {
         return releaseMapper.selectReleaseList(t);
@@ -81,6 +88,8 @@ public class ReleaseServiceImpl implements IReleaseService
         if (project == null) {
             throw new ServiceException("关联项目不存在", 702);
         }
+        // proposal 0028 P0-2A: 跨模块 FK 校验 — pipeline 必须同项目
+        validatePipelineFk(t);
 
         // 默认 strategy = rolling
         if (StringUtils.isBlank(t.getStrategy())) {
@@ -148,9 +157,40 @@ public class ReleaseServiceImpl implements IReleaseService
                 throw new ServiceException("关联项目不存在", 702);
             }
         }
+        // proposal 0028 P0-2A: 更新 pipelineId 时也要校验 same-project
+        if (t.getPipelineId() != null && !t.getPipelineId().equals(old.getPipelineId())) {
+            Release merged = new Release();
+            merged.setProjectId(t.getProjectId() != null ? t.getProjectId() : old.getProjectId());
+            merged.setPipelineId(t.getPipelineId());
+            validatePipelineFk(merged);
+        }
 
         t.setUpdateBy(SecurityUtils.getUsername());
         return releaseMapper.updateRelease(t);
+    }
+
+    /**
+     * 校验 release.pipelineId 与 release.projectId 跨模块强约束(same-project)。
+     * pipelineId 为 null 时跳过(允许发布单暂不挂流水线)。
+     *
+     * proposal 0028 P0-2A:通过 SPI 模式 ProjectScopedLookup 避免 Maven Reactor 循环依赖。
+     */
+    private void validatePipelineFk(Release release) {
+        if (release.getPipelineId() == null) {
+            return;
+        }
+        ProjectScopedLookup pipelineLookup =
+            projectScopedLookups == null ? null : projectScopedLookups.get("pipeline");
+        if (pipelineLookup == null) {
+            throw new ServiceException("系统配置缺失:ProjectScopedLookup 未注册 pipeline", 500);
+        }
+        Long targetProjectId = pipelineLookup.resolveProjectId(release.getPipelineId());
+        if (targetProjectId == null) {
+            throw new ServiceException("关联的流水线不存在", 702);
+        }
+        if (!targetProjectId.equals(release.getProjectId())) {
+            throw new ServiceException("发布单的流水线必须属于同一项目", 702);
+        }
     }
 
     @Override
