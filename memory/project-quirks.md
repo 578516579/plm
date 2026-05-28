@@ -190,8 +190,11 @@
 | 修复(被动)| 对照 `git log --name-only -- 'plm-backend/sql/business-*.sql'` 自己 diff 哪些新增,逐个 mysql 导入 |
 | 修复(主动 = 推荐)| `cd plm-backend && ./scripts/db-migrate.sh` — 用 `sql/.applied-scripts` 台账比对 sql/ 全集,只跑未入账的;`local-start-backend.sh` 启动前自动调用 |
 | 首次发现 | 2026-05-28 用户反馈 schema drift 反复出现(对话 + Q-DB-03 复发) |
-| 复发次数 | 2+(Q-DB-03 同根因 1 次 + 本次反馈)|
-| **预防 SOP** | ① 新机器/重置库 → `./scripts/db-migrate.sh --init=fresh` ② 已有数据库 → `./scripts/db-migrate.sh --init=existing`(只入账不跑) ③ 后续 pull/切 branch → 直接 `local-start-backend.sh` 自动 diff+apply ④ 应急跳过 → `local-start-backend.sh --skip-migrate` |
+| 复发次数 | 3+(Q-DB-03 同根因 1 次 + 2026-05-28 用户反馈 1 次 + 2026-05-28 E2E 又撞 1 次)|
+| **⚠ 已知盲点(2026-05-28 新增)** | `--init=existing` 是**乐观入账**——只把 sql/ 当前全集写进 `.applied-scripts`,**不验证 DB 是否真的应用了每个 ALTER**。一旦初始化时 DB 实际滞后(早期 import 用的旧 `ry_*.sql` 不含后来的增量列),后续启动 db-migrate.sh 看到台账齐全直接放行,drift 永远不被发现。本次表现: `tb_requirement.ai_evaluation` / `tb_autotest.external_*` 缺列,但台账显示对应 sql 都已应用。 |
+| **预防 SOP(2026-05-28 修订)** | ① **首选 `--init=fresh`** 干净重建(空库 + ry_*.sql + 全部 business-*.sql 真跑一遍 + 入账)②⚠ `--init=existing` 仅在「明确知道 DB 已与 sql/ 全集对齐」时用,且**用完抽检几列**(例:`SHOW COLUMNS FROM tb_requirement LIKE 'ai_evaluation'`)③ 后续 pull/切 branch → `local-start-backend.sh` 自动 diff+apply ④ 应急跳过 → `local-start-backend.sh --skip-migrate` |
+| **被动修复 SOP** | ① E2E 撞 `Unknown column 'xxx'` → 找对应 `business-<entity>-<change>.sql`(都带 `IF NOT EXISTS` / information_schema 预检,幂等可重跑)② 手动 `mysql ... < sql/business-<x>.sql` 一次 ③ 不重启 JVM,MyBatis 运行时拼 SQL 自动恢复 |
+| **未来工具方向** | 给 `db-migrate.sh` 加 `--reconcile` 子命令:对照 sql/ 里每个 ALTER 真去 `information_schema.COLUMNS` 抽检,发现 DB 与台账不一致就报警(本次手动做的事自动化) |
 | **不入仓** | `sql/.applied-scripts` 在 plm-backend/.gitignore;每台机器独立维护 |
 
 ---
