@@ -298,6 +298,7 @@ import {
   aiAnalyzeCompetitive, getCompetitive, listProjectsForSelect,
   type Competitive, type CompetitiveQuery
 } from '@/api/business/competitive'
+import { pricingTierLabel, pricingTierTag, statusTagFor } from './competitiveDict'
 
 const activeTab = ref('matrix')
 const dialogVisible = ref(false)
@@ -332,25 +333,6 @@ const queryParams = reactive<CompetitiveQuery>({ pageNum: 1, pageSize: 10, compe
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
 const monitoredList = computed(() => list.value.filter(x => x.monitorEnabled === 'Y'))
-
-// === 状态标签 ===
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿',   type: 'info' },
-  '01': { label: '已发布', type: 'success' },
-  '02': { label: '已归档', type: 'warning' }
-}
-
-function statusTagFor(s?: string) {
-  return statusMap[s || '00'] || { label: s || '-', type: 'info' }
-}
-
-function pricingTierLabel(v?: string) {
-  return ({ free: '免费', midrange: '中端', enterprise: '企业' } as Record<string, string>)[v || ''] || v || '-'
-}
-
-function pricingTierTag(v?: string): any {
-  return ({ free: 'success', midrange: 'warning', enterprise: 'danger' } as Record<string, string>)[v || ''] || 'info'
-}
 
 // === Markdown 渲染 ===
 const renderedReport = computed(() => {
