@@ -565,6 +565,224 @@
 - `aiMetrics`: hoursSaved / docsGenerated / recommendations[]
 - `lifecycle`: 17 阶段静态数组(立项→…→运维)
 
+### §23. ManualImpl（plm-manual-impl）
+
+**领域**: 实施手册（面向运维/部署人员）。**PRD 出处**: F5.2 / 原型 [implmanual.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/implmanual.html)
+
+#### 表 `tb_manual_impl`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| manualimplId | manualimpl_id | BIGINT | - | 主键 |
+| manualimplNo | manualimpl_no | VARCHAR(32) | MI-YYYY-NNNN | 自动生成 / DuplicateKey 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目 | FK→tb_project.id |
+| title | title | VARCHAR(200) | 原型 "手册标题" | 必填 |
+| deployMode | deploy_mode | VARCHAR(30) | 字典 `biz_manualimpl_deploy` | docker_compose / kubernetes / baremetal |
+| osType | os_type | VARCHAR(30) | 字典 `biz_manualimpl_os` | centos7 / ubuntu20 / kylin (国产化) |
+| dbType | db_type | VARCHAR(30) | 字典 `biz_manualimpl_db` | postgresql14 / mysql8 / kdb (国产化) |
+| envConfig | env_config | TEXT | 原型 "环境变量配置" | KEY=VALUE 多行 |
+| content | content | LONGTEXT | F5.2 AI 生成 | Markdown 手册正文 |
+| outputFormats | output_formats | VARCHAR(100) | 原型 "导出格式" | CSV: word,pdf,html,markdown |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| generatedAt | generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_manualimpl_status` | 00 草稿 / 01 生成中 / 02 已生成 / 03 已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+**AI 端点**: `POST /business/manual-impl/ai/generate/{id}` 权限 `business:manual-impl:edit`（接 `AiTexts.generate`，真 provider 输出 Markdown 手册 / 默认模板兜底）
+
+### §24. ManualOps（plm-manual-ops）
+
+**领域**: 运维手册（监控/告警/IoT 维度）。**PRD 出处**: F5.3 / 原型 [opsmanual.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/opsmanual.html)
+
+#### 表 `tb_manual_ops`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| manualopsId | manualops_id | BIGINT | - | 主键 |
+| manualopsNo | manualops_no | VARCHAR(32) | MO-YYYY-NNNN | 自动生成 / 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目 | FK→tb_project.id |
+| title | title | VARCHAR(200) | 原型 "手册标题" | 必填 |
+| monitoringPlan | monitoring_plan | VARCHAR(500) | 字典 `biz_manualops_monitor` | prometheus / grafana / zabbix（CSV 多选） |
+| alertChannels | alert_channels | VARCHAR(500) | 字典 `biz_manualops_alert` | email / dingtalk / wechat / sms（CSV 多选） |
+| iotDeviceTypes | iot_device_types | VARCHAR(500) | 字典 `biz_manualops_iot` | sensor_soil / sensor_weather / valve / camera（CSV 多选,农业 IoT 特有） |
+| content | content | LONGTEXT | F5.3 AI 生成 | Markdown 手册正文 |
+| outputFormats | output_formats | VARCHAR(100) | 原型 "导出格式" | CSV: word,pdf,html,markdown |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| generatedAt | generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_manualops_status` | 00 草稿 / 01 生成中 / 02 已生成 / 03 已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+**AI 端点**: `POST /business/manual-ops/ai/generate/{id}` 权限 `business:manual-ops:edit`（同 manual-impl 范式）
+
+### §25. Analytics（plm-analytics）
+
+**领域**: 效能分析快照（周期性聚合：吞吐/质量/DORA + AI 工时节省）。**PRD 出处**: F6 / 原型 [analytics.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/analytics.html) + [devops.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/devops.html)
+
+#### 表 `tb_analytics_snapshot`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| snapshotId | snapshot_id | BIGINT | - | 主键 |
+| snapshotNo | snapshot_no | VARCHAR(32) | AN-YYYY-NNNN | 自动生成 / 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目（可空 = 全局快照） | FK→tb_project.id |
+| title | title | VARCHAR(200) | 原型 "快照名称" | 必填 |
+| periodType | period_type | VARCHAR(20) | 字典 `biz_analytics_period` | week / month / quarter / year |
+| snapshotDate | snapshot_date | DATE | 原型 "快照日期" | 周期起算日 |
+| requirementThroughput | requirement_throughput | INT | F6 PLM 吞吐 | 周期内完成需求数 |
+| sprintOnTimeRate | sprint_on_time_rate | DECIMAL(5,2) | F6 PLM 吞吐 | 0-100 % |
+| defectDensity | defect_density | DECIMAL(8,4) | F6 PLM 质量 | 缺陷 / KLOC |
+| autoTestCoverage | auto_test_coverage | DECIMAL(5,2) | F6 PLM 质量 | 0-100 % |
+| deploymentFrequency | deployment_frequency | DECIMAL(8,2) | DORA 1 | 部署 / 天 |
+| leadTimeHours | lead_time_hours | DECIMAL(10,2) | DORA 2 | 需求→上线小时 |
+| mttrHours | mttr_hours | DECIMAL(10,2) | DORA 3 | 故障平均恢复小时 |
+| changeFailureRate | change_failure_rate | DECIMAL(5,2) | DORA 4 | 0-100 % |
+| aiHoursSaved | ai_hours_saved | DECIMAL(10,2) | F6 AI ROI | 周期内 AI 节省工时 |
+| activeProjects | active_projects | INT | F6 项目维度 | 在办项目数 |
+| projectsAtRisk | projects_at_risk | INT | F6 项目维度 | 风险项目数（自动算或手填） |
+| aiRecommendations | ai_recommendations | TEXT | F6 AI 改进建议 | 接 `AiTexts.generate` 文本 |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| aiGeneratedAt | ai_generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_analytics_status` | 00 草稿 / 01 已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+> 注：`aggregate()` 跨模块查询本期 mock（dashboard 同款 P0-1c 延期），快照表本身真实写入,只是 mock 数据。
+
+### §26. AiAgent（plm-ai-agent）
+
+**领域**: AI Agent 注册中心（6 类 Agent：需求/PRD/代码/测试/发布/运维 + Dify 工作流绑定）。**PRD 出处**: F3.5 / 原型 [aiagents.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/aiagents.html)
+
+#### 表 `tb_ai_agent`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| agentId | agent_id | BIGINT | - | 主键 |
+| agentNo | agent_no | VARCHAR(32) | AG-YYYY-NNNN | 自动生成 / 撞号重试 |
+| agentName | agent_name | VARCHAR(200) | 原型 "Agent 名称" | 必填 |
+| agentType | agent_type | VARCHAR(30) | 字典 `biz_aiagent_type` | requirement / prd / code / test / release / ops |
+| description | description | VARCHAR(500) | 原型 "描述" | |
+| promptTemplate | prompt_template | LONGTEXT | F3.5 prompt 工程 | 多行 prompt 文本 |
+| difyWorkflowId | dify_workflow_id | VARCHAR(100) | F3.5 Dify 集成 | Dify 工作流 ID（接真 Dify 时用） |
+| provider | provider | VARCHAR(30) | 字典 `biz_aiagent_provider` | mock / dify / openai / anthropic |
+| modelName | model_name | VARCHAR(100) | F3.5 模型选型 | gpt-4o / claude-3-5-sonnet / Mock 等 |
+| configJson | config_json | TEXT | F3.5 通用配置 | temperature / max_tokens / 等 |
+| totalCalls | total_calls | BIGINT | 统计 | 累计调用次数 |
+| successRate | success_rate | DECIMAL(5,2) | 统计 | 0-100 % |
+| lastInvokedAt | last_invoked_at | DATETIME | 统计 | 最近调用时间 |
+| status | status | VARCHAR(20) | 字典 `biz_aiagent_status` | 00 禁用 / 01 启用 / 02 调试 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+> 已知 UI ↔ SQL 显示层小漂移（2 处）：provider mock 前端「Mock」/ SQL「Mock 占位」；provider dify 前端「Dify」/ SQL「Dify 编排」。values 一致,锁当前前端约定（详 [`aiAgentDict.ts`](plm-frontend/src/views/business/ai-agent/aiAgentDict.ts) + commit `bf1f1a7`）。
+
+### §27. OpenSpec（plm-openspec）
+
+**领域**: AI OpenSpec / Spec as Code（OpenAPI 3.1 / AsyncAPI 3.0 / AI Function / GraphQL 注册）。**PRD 出处**: F3.5 / 原型 [aispec.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/aispec.html)
+
+#### 表 `tb_openspec`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| openspecId | openspec_id | BIGINT | - | 主键 |
+| openspecNo | openspec_no | VARCHAR(32) | OS-YYYY-NNNN | 自动生成 / 撞号重试 |
+| specName | spec_name | VARCHAR(200) | 原型 "规范名称" | 必填 |
+| specType | spec_type | VARCHAR(30) | 字典 `biz_openspec_type` | openapi3.1 / asyncapi3.0 / ai_function / graphql |
+| description | description | VARCHAR(500) | 原型 "描述" | |
+| specContent | spec_content | LONGTEXT | F3.5 spec 正文 | YAML / JSON 正文（接 `AiTexts.generate` 真 LLM 产物） |
+| version | version | VARCHAR(20) | 原型 "版本号" | 如 v1.0.0 |
+| agriKbRef | agri_kb_ref | VARCHAR(200) | F3.5 AgriKB 引用 | 农业知识库挂载 ID |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| aiGeneratedAt | ai_generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_openspec_status` | 00 草稿 / 01 已发布 / 02 已废弃 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §28. Pipeline（plm-pipeline）
+
+**领域**: CI/CD 流水线注册（代码仓库 / 触发方式 / YAML 定义 / 执行统计）。**PRD 出处**: DevOps 扩展 / 原型 [pipeline.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/pipeline.html)
+
+#### 表 `tb_pipeline`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| pipelineId | pipeline_id | BIGINT | - | 主键 |
+| pipelineNo | pipeline_no | VARCHAR(32) | PL-YYYY-NNNN | 自动生成 / 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目 | FK→tb_project.id |
+| pipelineName | pipeline_name | VARCHAR(200) | 原型 "流水线名称" | 必填 |
+| repoName | repo_name | VARCHAR(200) | 原型 "代码仓库" | git@... 或 https URL |
+| repoBranch | repo_branch | VARCHAR(100) | 原型 "分支" | main / develop / feature/* |
+| cicdTool | cicd_tool | VARCHAR(30) | 字典 `biz_pipeline_tool` | jenkins / gitlab / github / gitea |
+| triggerType | trigger_type | VARCHAR(20) | 字典 `biz_pipeline_trigger` | manual / push / cron / tag |
+| cronExpr | cron_expr | VARCHAR(100) | 原型 "Cron 表达式" | triggerType=cron 时必填 |
+| yamlContent | yaml_content | LONGTEXT | 原型 "YAML 定义" | CI 配置文件文本 |
+| lastRunStatus | last_run_status | VARCHAR(20) | 字典 `biz_pipeline_result` | success / failed / running / skipped |
+| lastRunAt | last_run_at | DATETIME | 统计 | 最近执行时间 |
+| totalRuns | total_runs | INT | 统计 | 累计执行次数 |
+| successCount | success_count | INT | 统计 | 成功次数 |
+| successRate | success_rate | DECIMAL(5,2) | 统计 | 0-100 % |
+| status | status | VARCHAR(20) | 字典 `biz_pipeline_status` | 00 禁用 / 01 启用 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §29. FeatureFlag（plm-feature-flag）
+
+**领域**: 灰度发布 / 紧急开关 / 环境隔离（feature toggle）。**PRD 出处**: DevOps 扩展 / 原型 [featureflag.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/featureflag.html)
+
+#### 表 `tb_feature_flag`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| flagId | flag_id | BIGINT | - | 主键 |
+| flagNo | flag_no | VARCHAR(32) | FF-YYYY-NNNN | 自动生成 / 撞号重试 |
+| flagKey | flag_key | VARCHAR(100) | 原型 "Flag Key" | UNIQUE,代码引用键（如 `agri.irrigation.aiSuggest`） |
+| title | title | VARCHAR(200) | 原型 "功能说明" | 必填 |
+| description | description | VARCHAR(500) | 原型 "描述" | |
+| environment | environment | VARCHAR(20) | 字典 `biz_featureflag_env` | dev / test / staging / prod |
+| rolloutPercentage | rollout_percentage | INT | 原型 "灰度百分比" | 0-100 |
+| rolloutStrategy | rollout_strategy | VARCHAR(30) | 字典 `biz_featureflag_strategy` | percentage / user_segment / region / always_on / always_off |
+| targetUserSegment | target_user_segment | VARCHAR(500) | 原型 "目标用户" | rolloutStrategy=user_segment 时用,JSON 或 CSV |
+| status | status | VARCHAR(20) | 字典 `biz_featureflag_status` | 00 草稿 / 01 启用 / 02 暂停 / 03 归档 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+> 已知 UI ↔ schema 列展示漂移：前端 `状态` 列实际渲染 `rolloutMode` 而非 `status`（验收报告 P2-12 备注）—— 待 UED 评审后修正。
+
+### §30. Dora（plm-dora）
+
+**领域**: DORA 4 指标采集 + 热力图 + 前置时间拆解 + AI 持续改进建议。**PRD 出处**: DevOps 扩展 / 原型 [devops.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/devops.html)
+
+#### 表 `tb_dora_metric`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| doraId | dora_id | BIGINT | - | 主键 |
+| doraNo | dora_no | VARCHAR(32) | DM-YYYY-NNNN | 自动生成 / 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目（可空 = 全局） | FK→tb_project.id |
+| metricName | metric_name | VARCHAR(200) | 原型 "指标名" | 必填（如"deploy frequency week"） |
+| metricType | metric_type | VARCHAR(30) | 字典 `biz_dora_metric_type` | deployment_frequency / lead_time / mttr / change_failure_rate |
+| metricValue | metric_value | DECIMAL(10,2) | 原型 "指标值" | |
+| metricUnit | metric_unit | VARCHAR(20) | 原型 "单位" | 次 / 小时 / 分钟 / % |
+| periodType | period_type | VARCHAR(20) | 字典 `biz_dora_period`（验收 P2-12：当前用裸值,未挂字典） | week / month / quarter |
+| snapshotDate | snapshot_date | DATE | 原型 "记录日期" | |
+| trendChartJson | trend_chart_json | TEXT | F6 趋势图 | ECharts data JSON |
+| heatmapJson | heatmap_json | TEXT | F6 部署热力图 | ECharts heatmap data |
+| leadtimeBreakdown | leadtime_breakdown | TEXT | F6 前置时间拆解 | JSON: { dev: x, review: y, deploy: z } |
+| aiSuggestions | ai_suggestions | TEXT | F6 AI 改进建议 | 接 `AiTexts.generate` 文本 |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| aiGeneratedAt | ai_generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_dora_status`（验收 P2-12：UI 未渲染） | 00 草稿 / 01 已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+> ⚠️ **dora 模块已知 5 处跨层契约漂移**（commit `f3dfa01` ledger 记录,锁当前 + spec 显式记录,api-contract 评审走任务卡）:
+> 1. metric_type 码 2/4 错位：前端 `deploy_frequency` ↔ SQL `deploy_freq` 等
+> 2. label emoji 装饰差异
+> 3. LEVEL 前端独有,SQL 无字典且表无列
+> 4. `biz_dora_status` 字典定义但 UI 未渲染
+> 5. `biz_dora_period` 用裸值,字典定义但未应用
+
 ### §32. MCP Server（plm-mcp）
 
 **领域**: 把 PLM 自己的业务能力（项目/需求/任务/用例/文档/数据）通过 MCP 协议暴露给外部 LLM Agent（Claude Code、Cursor、Copilot 等）。
