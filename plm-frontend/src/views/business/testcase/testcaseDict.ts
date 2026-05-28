@@ -66,7 +66,7 @@ const FALLBACK_TAG: TagType = 'info'
  */
 export function statusTagFor(s?: string): { label: string; type: TagType } {
   const item = TESTCASE_STATUS[s || '']
-  return item ? { label: item.label, type: item.tag } : { label: s ?? '-', type: FALLBACK_TAG }
+  return item ? { label: item.label, type: item.tag } : { label: s || '-', type: FALLBACK_TAG }
 }
 
 /** 分类 label(未命中返回裸值) */
