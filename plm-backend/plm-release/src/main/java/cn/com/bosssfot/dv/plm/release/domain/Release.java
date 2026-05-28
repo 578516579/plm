@@ -22,6 +22,8 @@ public class Release extends BaseEntity
     @Excel(name = "版本号") private String version;
     @Excel(name = "项目ID") private Long projectId;
     private Long sprintId;
+    /** 关联流水线 ID（可空）— Proposal 0028 P0-1 产品主线 FK,跨模块同 projectId 强约束 */
+    @Excel(name = "流水线ID") private Long pipelineId;
     @Excel(name = "策略") private String strategy;
     @Excel(name = "环境") private String environment;
     private String releaseNotes;
@@ -53,6 +55,8 @@ public class Release extends BaseEntity
     public void setProjectId(Long v) { this.projectId = v; }
     public Long getSprintId() { return sprintId; }
     public void setSprintId(Long v) { this.sprintId = v; }
+    public Long getPipelineId() { return pipelineId; }
+    public void setPipelineId(Long v) { this.pipelineId = v; }
     public String getStrategy() { return strategy; }
     public void setStrategy(String v) { this.strategy = v; }
     public String getEnvironment() { return environment; }

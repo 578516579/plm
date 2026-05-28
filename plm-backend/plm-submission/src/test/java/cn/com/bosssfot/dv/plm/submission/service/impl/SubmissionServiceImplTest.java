@@ -29,6 +29,8 @@ import cn.com.bosssfot.dv.plm.project.domain.Project;
 import cn.com.bosssfot.dv.plm.project.mapper.ProjectMapper;
 import cn.com.bosssfot.dv.plm.submission.domain.Submission;
 import cn.com.bosssfot.dv.plm.submission.mapper.SubmissionMapper;
+import cn.com.bosssfot.dv.plm.testplan.domain.TestPlan;
+import cn.com.bosssfot.dv.plm.testplan.mapper.TestPlanMapper;
 
 /**
  * SubmissionServiceImpl 单元测试
@@ -50,6 +52,9 @@ class SubmissionServiceImplTest {
 
     @Mock
     private ProjectMapper projectMapper;
+
+    @Mock
+    private TestPlanMapper testPlanMapper;
 
     @InjectMocks
     private SubmissionServiceImpl service;
@@ -344,6 +349,79 @@ class SubmissionServiceImplTest {
             assertThatThrownBy(() -> service.insertSubmission(sample))
                 .isInstanceOf(ServiceException.class)
                 .hasMessageContaining("草稿");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 跨模块 FK testplanId — Proposal 0028 P0-1 (同 projectId 强约束)
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("跨模块 FK testplanId (Proposal 0028 P0-1)")
+    class TestplanFkTests {
+
+        @Test
+        @DisplayName("testFkOk_当目标存在且同 projectId 时插入成功")
+        void testFkOk() {
+            sample.setTestplanId(100L);
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(testPlanMapper.selectTestPlanById(100L)).thenReturn(testPlanWithProject(100L, 1L));
+            when(submissionMapper.selectMaxSeqOfYear(anyString())).thenReturn(null);
+            when(submissionMapper.insertSubmission(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                int rows = service.insertSubmission(sample);
+                assertThat(rows).isEqualTo(1);
+            }
+            assertThat(sample.getTestplanId()).isEqualTo(100L);
+        }
+
+        @Test
+        @DisplayName("testFkNullOk_当 testplanId 为 null 时跳过校验")
+        void testFkNullOk() {
+            sample.setTestplanId(null);
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(submissionMapper.selectMaxSeqOfYear(anyString())).thenReturn(null);
+            when(submissionMapper.insertSubmission(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                int rows = service.insertSubmission(sample);
+                assertThat(rows).isEqualTo(1);
+            }
+            verify(testPlanMapper, never()).selectTestPlanById(any());
+        }
+
+        @Test
+        @DisplayName("testFkNotFound_当目标 TestPlan 不存在 → 702")
+        void testFkNotFound() {
+            sample.setTestplanId(999L);
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(testPlanMapper.selectTestPlanById(999L)).thenReturn(null);
+
+            assertThatThrownBy(() -> service.insertSubmission(sample))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("测试方案不存在");
+        }
+
+        @Test
+        @DisplayName("testFkDifferentProject_当目标 projectId 不同 → 702")
+        void testFkDifferentProject() {
+            sample.setTestplanId(100L);  // submission.projectId = 1L
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(testPlanMapper.selectTestPlanById(100L)).thenReturn(testPlanWithProject(100L, 2L)); // 不同项目
+
+            assertThatThrownBy(() -> service.insertSubmission(sample))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("同一项目");
+        }
+
+        private TestPlan testPlanWithProject(Long testplanId, Long projectId) {
+            TestPlan tp = new TestPlan();
+            tp.setTestplanId(testplanId);
+            tp.setProjectId(projectId);
+            return tp;
         }
     }
 

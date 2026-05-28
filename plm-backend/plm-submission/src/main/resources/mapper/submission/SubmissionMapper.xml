@@ -7,6 +7,7 @@
         <result property="submissionNo"      column="submission_no"       />
         <result property="projectId"         column="project_id"          />
         <result property="sprintId"          column="sprint_id"           />
+        <result property="testplanId"        column="testplan_id"         />
         <result property="title"             column="title"               />
         <result property="scope"             column="scope"               />
         <result property="environment"       column="environment"         />
@@ -32,7 +33,7 @@
     </resultMap>
 
     <sql id="selectSubmissionVo">
-        select submission_id, submission_no, project_id, sprint_id, title, scope,
+        select submission_id, submission_no, project_id, sprint_id, testplan_id, title, scope,
                environment, expected_test_days, risk_notes,
                unit_test_coverage, code_scan_passed, prd_completed, api_doc_updated, quality_gate_passed,
                status, reject_reason, submitter_user_id, reviewer_user_id, submitted_at, approved_at,
@@ -47,6 +48,7 @@
             <if test="submissionNo != null and submissionNo != ''">and submission_no like concat('%', #{submissionNo}, '%')</if>
             <if test="projectId != null">and project_id = #{projectId}</if>
             <if test="sprintId != null">and sprint_id = #{sprintId}</if>
+            <if test="testplanId != null">and testplan_id = #{testplanId}</if>
             <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
             <if test="environment != null and environment != ''">and environment = #{environment}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
@@ -67,6 +69,7 @@
             <if test="submissionNo != null">submission_no,</if>
             <if test="projectId != null">project_id,</if>
             <if test="sprintId != null">sprint_id,</if>
+            <if test="testplanId != null">testplan_id,</if>
             <if test="title != null">title,</if>
             <if test="scope != null">scope,</if>
             <if test="environment != null">environment,</if>
@@ -91,6 +94,7 @@
             <if test="submissionNo != null">#{submissionNo},</if>
             <if test="projectId != null">#{projectId},</if>
             <if test="sprintId != null">#{sprintId},</if>
+            <if test="testplanId != null">#{testplanId},</if>
             <if test="title != null">#{title},</if>
             <if test="scope != null">#{scope},</if>
             <if test="environment != null">#{environment},</if>
@@ -119,6 +123,7 @@
             <if test="submissionNo != null">submission_no = #{submissionNo},</if>
             <if test="projectId != null">project_id = #{projectId},</if>
             <if test="sprintId != null">sprint_id = #{sprintId},</if>
+            <if test="testplanId != null">testplan_id = #{testplanId},</if>
             <if test="title != null">title = #{title},</if>
             <if test="scope != null">scope = #{scope},</if>
             <if test="environment != null">environment = #{environment},</if>

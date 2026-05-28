@@ -22,6 +22,8 @@ import cn.com.bosssfot.dv.plm.defect.service.IDefectService;
 import cn.com.bosssfot.dv.plm.project.mapper.ProjectMapper;
 import cn.com.bosssfot.dv.plm.sprint.mapper.SprintMapper;
 import cn.com.bosssfot.dv.plm.task.mapper.TaskMapper;
+import cn.com.bosssfot.dv.plm.testcase.domain.TestCase;
+import cn.com.bosssfot.dv.plm.testcase.mapper.TestCaseMapper;
 
 /**
  * 缺陷 Service 实现
@@ -60,6 +62,7 @@ public class DefectServiceImpl implements IDefectService
     @Autowired private ProjectMapper projectMapper;
     @Autowired private SprintMapper sprintMapper;
     @Autowired private TaskMapper taskMapper;
+    @Autowired private TestCaseMapper testCaseMapper;
     @Autowired private ApplicationEventPublisher eventPublisher;
 
     @Override
@@ -87,6 +90,8 @@ public class DefectServiceImpl implements IDefectService
         if (defect.getTaskId() != null && taskMapper.selectTaskById(defect.getTaskId()) == null) {
             throw new ServiceException("关联任务不存在", 702);
         }
+        // Proposal 0028 P0-1: 跨模块 FK testcaseId — 同 projectId 强约束
+        validateTestcaseFk(defect);
 
         // 新建状态必须 00
         if (StringUtils.isBlank(defect.getStatus())) defect.setStatus("00");
@@ -152,6 +157,13 @@ public class DefectServiceImpl implements IDefectService
                 && taskMapper.selectTaskById(defect.getTaskId()) == null) {
             throw new ServiceException("关联任务不存在", 702);
         }
+        // Proposal 0028 P0-1: 跨模块 FK testcaseId
+        if (defect.getTestcaseId() != null && !defect.getTestcaseId().equals(old.getTestcaseId())) {
+            Defect forCheck = new Defect();
+            forCheck.setTestcaseId(defect.getTestcaseId());
+            forCheck.setProjectId(defect.getProjectId() != null ? defect.getProjectId() : old.getProjectId());
+            validateTestcaseFk(forCheck);
+        }
 
         defect.setUpdateBy(SecurityUtils.getUsername());
         int rows = defectMapper.updateDefect(defect);
@@ -174,6 +186,23 @@ public class DefectServiceImpl implements IDefectService
     }
 
     // ───────── 私有 ─────────
+
+    /**
+     * Proposal 0028 P0-1 — 缺陷 ↔ 测试用例 同 projectId 强约束。
+     * testcaseId 可空(null 直接放行);非空时:
+     *   1) 目标 TestCase 必须存在 → 否则 702
+     *   2) 目标 TestCase.projectId 必须等于 Defect.projectId → 否则 702
+     */
+    private void validateTestcaseFk(Defect d) {
+        if (d.getTestcaseId() == null) return;
+        TestCase tc = testCaseMapper.selectTestCaseById(d.getTestcaseId());
+        if (tc == null) {
+            throw new ServiceException("关联的测试用例不存在", 702);
+        }
+        if (d.getProjectId() != null && !d.getProjectId().equals(tc.getProjectId())) {
+            throw new ServiceException("缺陷的测试用例必须属于同一项目", 702);
+        }
+    }
 
     private String generateDefectNo() {
         int year = LocalDate.now().getYear();

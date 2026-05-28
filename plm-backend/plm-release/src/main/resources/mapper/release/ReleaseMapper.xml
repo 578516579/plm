@@ -8,6 +8,7 @@
         <result property="version"             column="version"               />
         <result property="projectId"           column="project_id"            />
         <result property="sprintId"            column="sprint_id"             />
+        <result property="pipelineId"          column="pipeline_id"           />
         <result property="strategy"            column="strategy"              />
         <result property="environment"         column="environment"           />
         <result property="releaseNotes"        column="release_notes"         />
@@ -32,7 +33,7 @@
     </resultMap>
 
     <sql id="selectReleaseVo">
-        select release_id, release_no, version, project_id, sprint_id, strategy, environment,
+        select release_id, release_no, version, project_id, sprint_id, pipeline_id, strategy, environment,
                release_notes, planned_at, released_at, rollback_at, rollback_reason, status,
                ai_review_score, ai_review_notes,
                deployment_frequency, lead_time_hours, mttr_minutes, change_failure_rate,
@@ -48,6 +49,7 @@
             <if test="releaseNo != null and releaseNo != ''">and release_no like concat('%', #{releaseNo}, '%')</if>
             <if test="version != null and version != ''">and version like concat('%', #{version}, '%')</if>
             <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="pipelineId != null">and pipeline_id = #{pipelineId}</if>
             <if test="strategy != null and strategy != ''">and strategy = #{strategy}</if>
             <if test="environment != null and environment != ''">and environment = #{environment}</if>
             <if test="status != null and status != ''">and status = #{status}</if>
@@ -67,6 +69,7 @@
             <if test="version != null">version,</if>
             <if test="projectId != null">project_id,</if>
             <if test="sprintId != null">sprint_id,</if>
+            <if test="pipelineId != null">pipeline_id,</if>
             <if test="strategy != null">strategy,</if>
             <if test="environment != null">environment,</if>
             <if test="releaseNotes != null">release_notes,</if>
@@ -91,6 +94,7 @@
             <if test="version != null">#{version},</if>
             <if test="projectId != null">#{projectId},</if>
             <if test="sprintId != null">#{sprintId},</if>
+            <if test="pipelineId != null">#{pipelineId},</if>
             <if test="strategy != null">#{strategy},</if>
             <if test="environment != null">#{environment},</if>
             <if test="releaseNotes != null">#{releaseNotes},</if>
@@ -119,6 +123,7 @@
             <if test="version != null">version = #{version},</if>
             <if test="projectId != null">project_id = #{projectId},</if>
             <if test="sprintId != null">sprint_id = #{sprintId},</if>
+            <if test="pipelineId != null">pipeline_id = #{pipelineId},</if>
             <if test="strategy != null">strategy = #{strategy},</if>
             <if test="environment != null">environment = #{environment},</if>
             <if test="releaseNotes != null">release_notes = #{releaseNotes},</if>

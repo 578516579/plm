@@ -92,6 +92,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { MagicStick } from '@element-plus/icons-vue'
 import { listOpenSpec, addOpenSpec, delOpenSpec, aiGenerateOpenSpec, type OpenSpec, type OpenSpecQuery } from '@/api/business/openspec'
+import { specTypeLabel, specTypeTag } from './openspecDict'
 
 const dialogVisible = ref(false)
 const formRef = ref()
@@ -108,9 +109,6 @@ const rules = {
 const list = ref<OpenSpec[]>([])
 const total = ref(0)
 const queryParams = reactive<OpenSpecQuery>({ pageNum: 1, pageSize: 10 })
-
-const specTypeLabel = (v?: string) => ({ openapi_31: 'OpenAPI 3.1', asyncapi_30: 'AsyncAPI 3.0', ai_function_spec: 'AI Function', graphql: 'GraphQL' } as Record<string,string>)[v||''] || v || '-'
-const specTypeTag = (v?: string): any => ({ openapi_31: 'primary', asyncapi_30: 'success', ai_function_spec: 'warning', graphql: 'info' } as Record<string,string>)[v||''] || 'info'
 
 async function getList() {
   listLoading.value = true
