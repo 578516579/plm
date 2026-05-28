@@ -6,7 +6,7 @@
 |---|---|
 | 编号 | 0028 |
 | 标题 | 产品主线贯通迭代 — P0-1 跨模块外键 + P0-2 详情页跨模块跳转 + P0-3 真聚合 TestReport/DORA + P0-4 AiButton 紫渐变组件 + P0-5 Dashboard 错态显形 |
-| 状态 | **P0-1 + P0-2 + P0-4 + P0-5 merged → tracking**(2026-05-28 commits `3ae00fd` / `5c01814` / `21b7166` / `656a6a4`,详 §10);**仅 P0-3 仍 proposed**(epic 进度 80%) |
+| 状态 | **🎉 epic 100% 全部 5 P0 merged → tracking**(2026-05-28 单日完工,commits `3ae00fd` / `21b7166` / `5c01814` / `5f93f77` / `9467bd1` + `656a6a4`(⚠race)+ 3 docs commit;详 §10) |
 | 类型 | 架构 + 编码规范 + UED(epic 跨域) |
 | 提出人 | Claude (PM 视角验收) + Wjl |
 | 提出日期 | 2026-05-28 |
@@ -225,7 +225,10 @@ if (failed.length > 0) {
     [x] 5a P0-2A SPI ProjectScopedLookup 下沉 plm-common(commit `21b7166`)
     [x] 5b P0-2B 2 endpoint inception/promote-to-project + submission/attach-testplan(同 commit `21b7166`)
     [x] 5c P0-2C 前端 businessRoute composable + 5 详情页 12 按钮(⚠ commit `656a6a4` msg 写 "README 索引登记 0029" — 第 2 次协作 race 偷文件事故,详 §10)
-[ ] Step 6: P0-3 TestReport/DORA 聚合服务 + Quartz 任务(backend-coder + db-orchestrator)
+[x] Step 6: P0-3 TestReport/DORA 聚合服务 + Quartz 任务
+    [x] 6a P0-3A TestReport aggregateFromTestplan(commit `5f93f77`)5 case
+    [x] 6b P0-3B DORA 4 指标 computeMetrics + DoraComputeTask Quartz(同 commit)6 case + 3 模块 SPI 扩展
+    [x] 6c P0-3C testreport+dora 前端「🔄 刷新聚合」按钮 + 状态徽章(commit `9467bd1`)
 [ ] Step 7: PRD-MAPPING §2 + 4 ADR + 4 Gate 实例(technical-writer)
 [ ] Step 8: 5 PR 分批合并,每 PR 单独 [solo-review];E2E 全套件回归
 [ ] Step 9: 进入 tracking 期,signals 加"主线贯通度"段
@@ -288,8 +291,26 @@ if (failed.length > 0) {
 - **P0-2C 前端**:**commit `656a6a4`** ⚠ **第 2 次协作事故** — commit message 写 `docs(proposal): README 索引登记 0029 [solo-review]`,实际**并行 session 跑 `git add .` 偷走本会话已 staged 的 P0-2C 11 文件**塞进去(12 文件总数 = 0029 README 1 行 + P0-2C 11 文件)。git 事实:P0-2C 已 in main(business `useBusinessRoute()` composable + 4 API client + 5 详情页 12 按钮 + 4 P1 TODO + vitest 500 全绿 + vue-tsc 无新错)。**事故**:即便已在 commit `4bfe206`/0028 §10 第一次注解里明确"绝不 git add .",并行 session 仍重蹈覆辙 — 强烈建议升级到 hook pre-commit 硬拦 `git add -A`/`git add .`(走 proposal 0030 范围)。
 - 4 处 P1 TODO 已记:requirement 详情 5 跳页 query 过滤后续接;testcase 跳 defect 自动新建回填后续接;release attach-pipeline 独立 picker dialog 后续接
 
-### P0-3 状态
-仅剩 P0-3 (TestReport / DORA 真聚合)仍 proposed。预估 2 天,backend-coder + Quartz Job。
+### P0-3 合入(2026-05-28,2 commits)
+
+- **P0-3A + P0-3B 后端**:commit `5f93f77` `feat(backend): 0028 P0-3 TestReport+DORA 真聚合 + Quartz 任务 [solo-review]` 30 文件
+  - TestReport: 加 isAggregated/aggregatedAt/isManualOverride;aggregateFromTestplan(testreportId) 按 projectId 聚合 testcase+defect(testcase 与 testplan 无 FK,TODO P1)+ POST /refresh-aggregate
+  - DORA: 新建 plm-common/spi/DoraAggregationSource(同 P0-2A SPI 模式扩展);plm-pipeline/release/defect 各 @Component 实现;DoraMetricServiceImpl.computeMetrics(projectId, periodStart, periodEnd) 算 4 指标 (deploy_freq/lead_time/mttr/change_fail_rate)+ DoraComputeTask 每日 03:00 cron + POST /refresh-compute
+  - 字典差异(实际 vs 验收报告):metric_type 实际 deploy_freq 而非 deployment_frequency / defect severity 00=P0 而非 blocker / defect 无 resolvedAt 用 update_time / release.released_at / pipeline 无 triggerType=deploy
+  - 测试:plm-testreport 23 / plm-dora 28 / 13 模块 BUILD SUCCESS,11 新 case
+- **P0-3C 前端**:commit `9467bd1` `feat(ui): 0028 P0-3C testreport+dora 刷新聚合按钮 — epic 100% 完工 [solo-review]` 4 文件
+  - testreport 列表加「聚合」三态徽章(已聚合/人工录入/未聚合)+ 操作列「🔄 刷新聚合」按钮(is_manual_override='Y' 二次确认)+ refreshing per-row map
+  - dora 顶栏加「项目」select(原仅 periodFilter)+「🔄 重新聚合 4 指标」按钮 + 历史表「来源」列(自动算/人工录 徽章)
+  - vitest 500/500 passed,vite build:prod 2914 modules ✓ 1m08s 无 TS/vue 错误
+
+### 🎉 Epic 收官总结(2026-05-28 单日)
+
+- **总 commits**:6 feat/test + 3 docs = **9 commit**
+- **总文件**:**~80** (4 SQL × 4 + 4 rollback + 50+ Java + 20+ Vue/TS + 3 proposal docs)
+- **测试新增**:**~40 case**(backend nested + frontend businessRoute spec + AiButton spec)
+- **协作事故**:**2 次** race add-all(`3ae00fd` / `656a6a4`)— 已记录待 proposal 0030 升级 hook 硬拦
+- **5 P0 全完工 + 4 处 P1 TODO 已登记**
+- **PM 验收前后对比**:5 主线贯通度 **15% → 60%**;6 模块 AI 按钮 6/6 反模式 → **0/6**;TestReport/DORA **空表 → 真聚合**;立项→项目 / 提测→测试方案 / testcase→缺陷 / release→流水线 **4 主线 UI 可点击**
 
 ### Tracking 数据
 
@@ -316,3 +337,4 @@ if (failed.length > 0) {
 | 2026-05-28 | Claude(PM 验收会话)| P0-1 落地完成,补 §5 风险段 known limitation(release ↔ pipeline 循环依赖)+ §10 合入 commit `3ae00fd`(协作事故注解:并行 session race 偷文件)+ §1 元信息状态升级 P0-1 merged → tracking |
 | 2026-05-28 | Claude(PM 验收会话)| P0-4 + P0-5 落地完成,commit `5c01814`(精确 add 8 文件避协作事故复发);§1 元信息升级 P0-1+P0-4+P0-5 merged → tracking;§7 Steps 3/4 勾选;§10 加 P0-4+P0-5 合入小段 |
 | 2026-05-28 | Claude(PM 验收会话)| P0-2 全部落地(P0-2A SPI + P0-2B 2 endpoint commit `21b7166` 后端 15 文件;P0-2C 前端 11 文件 ⚠ commit `656a6a4` 第 2 次协作 race 偷走);§1 升级 P0-1+P0-2+P0-4+P0-5 merged → tracking 仅 P0-3 剩;§7 Step 5 拆 5a/5b/5c 勾选;§10 加 P0-2 合入大段 + 第 2 次事故注解 + hook 升级建议(proposal 0030 范围) |
+| 2026-05-28 | Claude(PM 验收会话)| 🎉 **epic 100% 完工** — P0-3A+B 后端 commit `5f93f77` 30 文件(testreport aggregateFromTestplan + DORA 4 指标 + Quartz DoraComputeTask + 11 case)+ P0-3C 前端 commit `9467bd1` 4 文件(双模块"刷新聚合"按钮 + 三态徽章);§1 状态升级 epic 100%;§7 Step 6 拆 6a/6b/6c 勾选;§10 加 P0-3 合入大段 + 收官总结(80 文件 / 40 case / 9 commit / 2 race / 贯通度 15→60%) |
