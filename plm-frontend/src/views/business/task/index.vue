@@ -190,6 +190,7 @@ import {
   listProjectsForSelect, listSprintsForSelect, listRequirementsForSelect,
   type Task, type TaskQuery
 } from '@/api/business/task'
+import { priorityTag, taskStatusTag, kanbanColumns } from './taskDict'
 
 const route = useRoute()
 const dialogVisible = ref(false)
@@ -199,15 +200,6 @@ const formRef = ref()
 const saving = ref(false)
 const aiLoading = ref(false)
 const filterSprintId = ref<number | null>(null)
-
-const kanbanColumns = [
-  { status: '00', label: '待开发' },
-  { status: '01', label: '开发中' },
-  { status: '02', label: '代码评审' },
-  { status: '03', label: '测试中' },
-  { status: '04', label: '已完成' },
-  { status: '05', label: '已取消' }
-]
 
 const emptyForm = (): Task => ({ projectId: 0, title: '', priority: 'P1', estimatedHours: 8, status: '00' })
 const form = reactive<Task>(emptyForm())
@@ -222,17 +214,6 @@ const queryParams = reactive<TaskQuery>({ pageNum: 1, pageSize: 200 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 const sprintOptions = ref<Array<{ sprintId: number; name: string }>>([])
 const requirementOptions = ref<Array<{ requirementId: number; title: string }>>([])
-
-function priorityTag(p?: string): any {
-  return ({ P0: 'danger', P1: 'warning', P2: 'info' } as Record<string,string>)[p || ''] || 'info'
-}
-
-function taskStatusTag(s?: string): { label: string; type: any } {
-  const col = kanbanColumns.find(c => c.status === s)
-  return col
-    ? { label: col.label, type: ({ '00':'info', '01':'primary', '02':'warning', '03':'warning', '04':'success', '05':'danger' } as any)[s || ''] || 'info' }
-    : { label: s || '-', type: 'info' }
-}
 
 const tasksByStatus = (s: string) => list.value.filter(t => t.status === s)
 
