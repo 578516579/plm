@@ -293,6 +293,31 @@ test.describe('ApiDesign 模块 E2E (PRD §F3.3)', () => {
     expect(list.rows[0].apidesignNo).toMatch(new RegExp(`^APID-${year}-\\d{4}$`))
   })
 
+  test('TC-APID-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const title = `删除测试-${RUN_ID}`
+    const createResp = await api.post('/business/apidesign', {
+      projectId,
+      title,
+      httpMethod: 'GET',
+      path: `/api/v1/del-${RUN_ID.slice(-4)}`,
+      authorUserId: 1
+    })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/apidesign/list', { pageSize: 200 })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建 apidesign 应能在列表里查到').toBeDefined()
+    const id: number = created.apidesignId
+    expect(typeof id, 'apidesignId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/apidesign/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/apidesign/list', { pageSize: 200 })
+    const stillThere = after.rows.find((x: any) => x.apidesignId === id)
+    expect(stillThere, `apidesignId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-APID-ENC001 编码 HEX — 中文 title 不含 EFBFBD 替换符', async () => {
     const cn = '接口设计中文检测'
     const r = await api.post('/business/apidesign', {

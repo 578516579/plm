@@ -1,15 +1,17 @@
 <!--
-  AiButton — 统一 AI 紫渐变按钮（P0028-P0-4）
+  AiButton — 统一 AI 紫渐变按钮（P0028-P0-4 + 0036-P0-4b v2）
   使用：
-    <AiButton :loading="aiLoading" @click="aiAction">AI 分析优先级</AiButton>
-    <AiButton plain :disabled="!current.id" @click="aiReview">AI 发布评审</AiButton>
+    AiButton :loading="aiLoading" @click="aiAction"   AI 分析优先级
+    AiButton plain :disabled="!current.id" @click="aiReview"   AI 发布评审
+    v2 复合 loading(保存 + AI 生成):
+    AiButton :loading="aiLoading" :saving="saving" @click="handleSubmit(true)"   保存并 AI 生成
   ✨ 图标自带，slot 内只放文字。
 -->
 <template>
   <el-button
     class="ai-button"
     :class="{ 'ai-button--plain': plain }"
-    :loading="loading"
+    :loading="loading || saving"
     :disabled="disabled"
     :size="size"
     @click="$emit('click', $event)"
@@ -22,6 +24,7 @@
 <script setup lang="ts">
 defineProps<{
   loading?: boolean
+  saving?: boolean
   disabled?: boolean
   plain?: boolean
   size?: 'large' | 'default' | 'small'

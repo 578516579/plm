@@ -105,4 +105,20 @@ test.describe('效能分析模块 E2E (PRD §F6)', () => {
     const hex = getFieldHex('tb_analytics_snapshot', 'title', `title like '${cn}-${RUN_ID}%'`)
     expect(hex.toUpperCase()).not.toContain('EFBFBD')
   })
+
+  test('TC-ANALYTICS-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const createResp = await create('删除测试')
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const id = await idByTitle('删除测试')
+    expect(id, '新建 analytics 应能在列表里查到').toBeDefined()
+    expect(typeof id, 'snapshotId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/analytics/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/analytics/list', { title: `删除测试-${RUN_ID}` })
+    const stillThere = after.rows.find((r: any) => r.snapshotId === id)
+    expect(stillThere, `snapshotId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

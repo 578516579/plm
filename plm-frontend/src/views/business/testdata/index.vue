@@ -81,9 +81,9 @@
               <el-button type="primary" :loading="saving" @click="handleSubmit(false)">
                 <el-icon><DocumentAdd /></el-icon>&nbsp;保存配置
               </el-button>
-              <el-button type="success" :loading="saving || aiLoading" @click="handleSubmit(true)">
-                <el-icon><MagicStick /></el-icon>&nbsp;🏭 生成测试数据
-              </el-button>
+              <AiButton :loading="aiLoading" :saving="saving" @click="handleSubmit(true)">
+                🏭 生成测试数据
+              </AiButton>
             </el-form-item>
           </el-form>
         </el-card>
@@ -127,9 +127,9 @@
           <div v-else class="ai-not-yet">
             <el-icon :size="40" color="#f59e0b"><InfoFilled /></el-icon>
             <p>配置已保存 ({{ current.testdataNo }}),点击生成</p>
-            <el-button type="success" :loading="aiLoading" @click="triggerAi">
-              <el-icon><MagicStick /></el-icon>&nbsp;🏭 立即生成
-            </el-button>
+            <AiButton :loading="aiLoading" @click="triggerAi">
+              立即生成
+            </AiButton>
           </div>
         </el-card>
       </el-col>
@@ -157,7 +157,7 @@
         <el-table-column label="操作" width="180" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadTd(row)">载入</el-button>
-            <el-button link type="success" @click="quickAi(row)">生成</el-button>
+            <AiButton link @click="quickAi(row)">生成</AiButton>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>

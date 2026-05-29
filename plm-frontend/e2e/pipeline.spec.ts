@@ -94,4 +94,20 @@ test.describe('Pipeline 模块 E2E (DevOps)', () => {
     const hex = getFieldHex('tb_pipeline', 'pipeline_name', `pipeline_name like '${cn}-${RUN_ID}%'`)
     expect(hex.toUpperCase()).not.toContain('EFBFBD')
   })
+
+  test('TC-PIPELINE-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const createResp = await create('删除测试')
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const id = await idByName('删除测试')
+    expect(id, '新建 pipeline 应能在列表里查到').toBeDefined()
+    expect(typeof id, 'pipelineId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/pipeline/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/pipeline/list', { pipelineName: `删除测试-${RUN_ID}` })
+    const stillThere = after.rows.find((r: any) => r.pipelineId === id)
+    expect(stillThere, `pipelineId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

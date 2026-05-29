@@ -171,6 +171,24 @@ test.describe('TestData 模块 E2E (PRD §F4.3)', () => {
     expect(r.data.generatedContent, '样本含 soil_moisture').toContain('soil_moisture')
   })
 
+  test('TC-TD-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const { r, title } = await createDataset('del')
+    expect(r.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/testdata/list', { pageSize: 100 })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建 testdata 应能在列表里查到').toBeDefined()
+    const id: number = created.testdataId
+    expect(typeof id, 'testdataId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/testdata/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/testdata/list', { pageSize: 100 })
+    const stillThere = after.rows.find((x: any) => x.testdataId === id)
+    expect(stillThere, `testdataId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-TD-UI 测试数据管理菜单可访问', async ({ page, context, request }) => {
     // 动态路由场景: 给 fresh context 重新 login 注入菜单,否则 /business/testdata 404
     await loginAsAdmin(request, context)

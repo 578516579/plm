@@ -97,4 +97,91 @@ test.describe('Release 模块 E2E', () => {
     })
     expect.soft(r.code, 'FK 不存在应返 702').toBe(ERROR_CODES.FK_NOT_EXISTS)
   })
+
+  // === 状态机覆盖 — 5 状态非线性 (Phase 04 Gate B.2) ===
+  // 00 计划中 → {01 发布中, 04 已废弃}
+  // 01 发布中 → {02 已发布, 03 已回滚}
+  // 02 已发布 → {03 已回滚, 04 已废弃}
+  // 03 已回滚 / 04 已废弃 (终态)
+
+  async function createRel(suffix: string, strategy = 'canary') {
+    const version = `v-sm-${suffix}-${RUN_ID.slice(-4)}`
+    await api.post('/business/release', {
+      projectId, version, strategy, environment: 'prod', releasedByUserId: 1
+    })
+    const list = await api.get('/business/release/list', { pageSize: 100 })
+    return list.rows.find((x: any) => x.version === version)
+  }
+
+  test('TC-Rel-F005 状态机正向 00→01→02 (计划→发布中→已发布)', async () => {
+    const rel = await createRel('happy')
+    expect(rel.status).toBe('00')
+
+    const r1 = await api.put('/business/release', { releaseId: rel.releaseId, status: '01' })
+    expect(r1.code).toBe(200)
+
+    const r2 = await api.put('/business/release', { releaseId: rel.releaseId, status: '02' })
+    expect(r2.code).toBe(200)
+    const after = await api.get(`/business/release/${rel.releaseId}`)
+    expect(after.data.status).toBe('02')
+  })
+
+  test('TC-Rel-F006 一键回滚 01→03 (发布中→已回滚)', async () => {
+    const rel = await createRel('rollback', 'rolling')
+    await api.put('/business/release', { releaseId: rel.releaseId, status: '01' })
+
+    const r = await api.put('/business/release', {
+      releaseId: rel.releaseId,
+      status: '03',
+      rollbackReason: '【P0】数据库迁移脚本撞主键 αβγ'
+    })
+    expect(r.code).toBe(200)
+    const after = await api.get(`/business/release/${rel.releaseId}`)
+    expect(after.data.status).toBe('03')
+  })
+
+  test('TC-Rel-F007 跳级 00→02 非法 → 601', async () => {
+    const rel = await createRel('skip')
+    const r = await api.put('/business/release', { releaseId: rel.releaseId, status: '02' })
+    expect.soft(r.code, '00→02 必须先经 01').toBe(ERROR_CODES.STATUS_VIOLATION)
+  })
+
+  // [reverted 2026-05-29] TC-Rel-F008 终态保护 03→01 — agent bonus case 假设 03 是终态,实际后端允许 03→01 转换
+  // 状态机定义需要先评审(是否 03 应该锁死),不能在 e2e 里假定。详 99-跨阶段/在途任务.md 该日 ledger 块;commit 1b4d1f8 引入
+
+  test('TC-Rel-F009 策略字典白名单 (blue_green/canary/rolling)', async () => {
+    const r = await api.post('/business/release', {
+      projectId,
+      version: `v-strategy-${RUN_ID.slice(-4)}`,
+      strategy: 'big_bang', // 非字典值
+      environment: 'prod',
+      releasedByUserId: 1
+    })
+    expect.soft(r.code, '非字典策略应被拒').not.toBe(200)
+  })
+
+  test('TC-Rel-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const version = `v-del-${RUN_ID.slice(-4)}`
+    const createResp = await api.post('/business/release', {
+      projectId,
+      version,
+      strategy: 'rolling',
+      environment: 'prod',
+      releasedByUserId: 1
+    })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/release/list', { pageSize: 100 })
+    const created = before.rows.find((x: any) => x.version === version)
+    expect(created, '新建 release 应能在列表里查到').toBeDefined()
+    const id: number = created.releaseId
+    expect(typeof id, 'releaseId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/release/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/release/list', { pageSize: 100 })
+    const stillThere = after.rows.find((x: any) => x.releaseId === id)
+    expect(stillThere, `releaseId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

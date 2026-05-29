@@ -16,9 +16,9 @@
           <el-option label="本年" value="year" />
         </el-select>
         <el-button plain @click="openAdd"><el-icon><Plus /></el-icon>&nbsp;新建快照</el-button>
-        <el-button type="success" :loading="aiLoading" :disabled="!current.snapshotId" @click="triggerAi">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 生成改进建议
-        </el-button>
+        <AiButton :loading="aiLoading" :disabled="!current.snapshotId" @click="triggerAi">
+          AI 生成改进建议
+        </AiButton>
       </div>
     </div>
 
@@ -128,7 +128,7 @@
         </el-table-column>
         <el-table-column label="操作" width="160" align="center">
           <template #default="{ row }">
-            <el-button link type="success" @click.stop="quickAi(row)">AI</el-button>
+            <AiButton link @click.stop="quickAi(row)">AI</AiButton>
             <el-button link type="danger" @click.stop="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>

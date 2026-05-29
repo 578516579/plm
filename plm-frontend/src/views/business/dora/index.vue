@@ -80,9 +80,9 @@
       <template #header>
         <div class="card-header-flex">
           <span class="card-title">🤖 AI 持续改进建议</span>
-          <el-button v-if="current.metricId" type="success" size="small" :loading="aiLoading" @click="triggerAi">
-            <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 建议
-          </el-button>
+          <AiButton v-if="current.metricId" size="small" :loading="aiLoading" @click="triggerAi">
+            AI 建议
+          </AiButton>
         </div>
       </template>
       <div v-if="!current.aiSuggestion" class="empty-state">
@@ -121,7 +121,7 @@
         </el-table-column>
         <el-table-column label="操作" width="120" align="center">
           <template #default="{ row }">
-            <el-button link type="success" @click.stop="quickAi(row)">AI</el-button>
+            <AiButton link @click.stop="quickAi(row)">AI</AiButton>
             <el-button link type="danger" @click.stop="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>

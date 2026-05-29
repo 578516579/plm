@@ -147,6 +147,24 @@ test.describe('DbDesign 模块 E2E (PRD §F3.2)', () => {
     expect(r.data.normalizationCheck, '规范检查 JSON').toContain('normalization')
   })
 
+  test('TC-DB-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const { r, title } = await createDbDesign('del')
+    expect(r.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/dbdesign/list', { pageSize: 200 })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建 dbdesign 应能在列表里查到').toBeDefined()
+    const id: number = created.dbdesignId
+    expect(typeof id, 'dbdesignId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/dbdesign/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/dbdesign/list', { pageSize: 200 })
+    const stillThere = after.rows.find((x: any) => x.dbdesignId === id)
+    expect(stillThere, `dbdesignId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-DB-UI 数据库设计管理菜单可访问', async ({ page, context, request }) => {
     await loginAsAdmin(request, context)
     await page.goto('/business/dbdesign')

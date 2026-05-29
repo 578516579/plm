@@ -104,4 +104,20 @@ test.describe('AI Agent 模块 E2E (PRD §F3.5)', () => {
     const hex = getFieldHex('tb_ai_agent', 'agent_name', `agent_name like '${cn}-${RUN_ID}%'`)
     expect(hex.toUpperCase()).not.toContain('EFBFBD')
   })
+
+  test('TC-AIAGENT-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const createResp = await create('删除测试')
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const id = await idByName('删除测试')
+    expect(id, '新建 ai-agent 应能在列表里查到').toBeDefined()
+    expect(typeof id, 'agentId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/ai-agent/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/ai-agent/list', { agentName: `删除测试-${RUN_ID}` })
+    const stillThere = after.rows.find((r: any) => r.agentId === id)
+    expect(stillThere, `agentId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

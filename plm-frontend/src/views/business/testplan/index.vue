@@ -89,9 +89,9 @@
                 <el-button type="primary" :loading="saving" @click="handleSubmit(false)">
                   <el-icon><DocumentChecked /></el-icon>&nbsp;{{ current.testplanId ? '更新' : '保存草稿' }}
                 </el-button>
-                <el-button type="success" :loading="saving || aiLoading" @click="handleSubmit(true)">
-                  <el-icon><MagicStick /></el-icon>&nbsp;保存并 AI 分析
-                </el-button>
+                <AiButton :loading="aiLoading" :saving="saving" @click="handleSubmit(true)">
+                  保存并 AI 分析
+                </AiButton>
                 <template v-if="current.testplanId">
                   <el-button v-if="canTransition('01')" type="warning" @click="transition('01')">
                     📝 确认 (→01)
@@ -222,7 +222,7 @@
         <el-table-column label="操作" width="200" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadPlan(row)">载入</el-button>
-            <el-button link type="success" :disabled="row.aiGenerated === 'Y'" @click="quickAi(row)">AI</el-button>
+            <AiButton link :disabled="row.aiGenerated === 'Y'" @click="quickAi(row)">AI</AiButton>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>

@@ -1,12 +1,14 @@
 /**
  * @file AiButton.spec.ts
- * @description AiButton 组件单测（P0028-P0-4）
+ * @description AiButton 组件单测（P0028-P0-4 + 0036-P0-4b v2）
  *
  * 验证：
  *   - 默认渲染：含 ✨ 图标 + slot 文本
  *   - loading / disabled prop 透传给 el-button
  *   - plain 切换 ai-button--plain 样式类
  *   - click 事件向外发射
+ *   - v2: saving prop 单独透传 loading
+ *   - v2: loading + saving 任一 true 都渲染 loading 状态(复合 OR)
  */
 
 import { describe, it, expect } from 'vitest'
@@ -62,5 +64,51 @@ describe('AiButton', () => {
     await wrapper.trigger('click')
     expect(wrapper.emitted('click')).toBeTruthy()
     expect(wrapper.emitted('click')!.length).toBe(1)
+  })
+
+  // ===== v2: saving prop 支持(0036 P0-4b) =====
+  it('v2: saving=true 时 button 渲染 loading 状态', () => {
+    const wrapper = mount(AiButton, {
+      props: { saving: true },
+      slots: { default: 'X' }
+    })
+    const html = wrapper.html()
+    expect(html).toMatch(/is-loading|loading/i)
+  })
+
+  it('v2: loading=true + saving=false → loading 状态', () => {
+    const wrapper = mount(AiButton, {
+      props: { loading: true, saving: false },
+      slots: { default: 'X' }
+    })
+    const html = wrapper.html()
+    expect(html).toMatch(/is-loading|loading/i)
+  })
+
+  it('v2: loading=false + saving=true → loading 状态(复合 OR)', () => {
+    const wrapper = mount(AiButton, {
+      props: { loading: false, saving: true },
+      slots: { default: 'X' }
+    })
+    const html = wrapper.html()
+    expect(html).toMatch(/is-loading|loading/i)
+  })
+
+  it('v2: loading=true + saving=true → loading 状态', () => {
+    const wrapper = mount(AiButton, {
+      props: { loading: true, saving: true },
+      slots: { default: 'X' }
+    })
+    const html = wrapper.html()
+    expect(html).toMatch(/is-loading|loading/i)
+  })
+
+  it('v2: loading=false + saving=false → 非 loading 状态', () => {
+    const wrapper = mount(AiButton, {
+      props: { loading: false, saving: false },
+      slots: { default: 'X' }
+    })
+    const html = wrapper.html()
+    expect(html).not.toMatch(/is-loading/i)
   })
 })

@@ -184,6 +184,30 @@ test.describe('Inception 模块 E2E (PRD §F1.1)', () => {
     expect(list.rows[0].inceptionNo).toMatch(new RegExp(`^INC-${year}-\\d{4}$`))
   })
 
+  test('TC-Inc-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const projectName = `E2E 立项-${RUN_ID}-删除测试`
+    const createResp = await api.post('/business/inception', {
+      projectName,
+      businessLine: 'plant_protection',
+      inceptionType: 'new_product',
+      submitterUserId: 1
+    })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/inception/list', { projectName })
+    const created = before.rows.find((x: any) => x.projectName === projectName)
+    expect(created, '新建 inception 应能在列表里查到').toBeDefined()
+    const id: number = created.inceptionId
+    expect(typeof id, 'inceptionId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/inception/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/inception/list', { projectName })
+    const stillThere = after.rows.find((x: any) => x.inceptionId === id)
+    expect(stillThere, `inceptionId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-Inc-ENC001 编码 HEX — 中文项目名不含 EFBFBD 替换符', async () => {
     const cn = '小麦病害精准防治-中文检测'
     const r = await api.post('/business/inception', {

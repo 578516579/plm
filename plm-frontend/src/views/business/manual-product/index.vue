@@ -9,9 +9,9 @@
         <h2 class="page-title">📖 产品手册</h2>
         <p class="page-subtitle">AI 一键生成,支持截图上传自动描述,多格式导出</p>
       </div>
-      <el-button type="success" :loading="aiLoading" :disabled="!current.manualproductId" @click="triggerAi">
-        <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 生成产品手册
-      </el-button>
+      <AiButton :loading="aiLoading" :disabled="!current.manualproductId" @click="triggerAi">
+        AI 生成产品手册
+      </AiButton>
     </div>
 
     <el-row :gutter="20">
@@ -50,9 +50,9 @@
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :loading="saving" @click="handleSubmit(false)">保存草稿</el-button>
-              <el-button type="success" :loading="saving || aiLoading" @click="handleSubmit(true)">
-                <el-icon><MagicStick /></el-icon>&nbsp;✨ 开始生成
-              </el-button>
+              <AiButton :loading="aiLoading" :saving="saving" @click="handleSubmit(true)">
+                开始生成
+              </AiButton>
             </el-form-item>
           </el-form>
         </el-card>
@@ -92,7 +92,7 @@
           <div v-else class="ai-not-yet">
             <el-icon :size="40" color="#f59e0b"><InfoFilled /></el-icon>
             <p>草稿已保存 ({{ current.manualproductNo }}),点击生成</p>
-            <el-button type="success" :loading="aiLoading" @click="triggerAi">✨ 立即生成</el-button>
+            <AiButton :loading="aiLoading" @click="triggerAi">立即生成</AiButton>
           </div>
         </el-card>
       </el-col>
@@ -113,7 +113,7 @@
         <el-table-column label="操作" width="180" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadM(row)">载入</el-button>
-            <el-button link type="success" @click="quickAi(row)">AI</el-button>
+            <AiButton link @click="quickAi(row)">AI</AiButton>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>

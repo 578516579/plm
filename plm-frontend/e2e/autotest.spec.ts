@@ -219,4 +219,30 @@ test.describe.serial('Autotest 模块 E2E (PRD §F4.5)', () => {
       expect(rcaText.length, 'RCA 文本应非空').toBeGreaterThan(0)
     }
   })
+
+  test('TC-AT-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const title = `E2E 删除测试-${RUN_ID}`
+    const createResp = await api.post('/business/autotest', {
+      projectId,
+      title,
+      testSuiteType: 'ui',
+      framework: 'playwright',
+      targetUrl: 'http://localhost',
+      authorUserId: 1
+    })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/autotest/list', { pageSize: 200, projectId })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建 autotest 应能在列表里查到').toBeDefined()
+    const id: number = created.autotestId
+    expect(typeof id, 'autotestId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/autotest/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/autotest/list', { pageSize: 200, projectId })
+    const stillThere = after.rows.find((x: any) => x.autotestId === id)
+    expect(stillThere, `autotestId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

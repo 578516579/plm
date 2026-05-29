@@ -75,9 +75,9 @@
         </el-col>
         <el-col :span="12">
           <div style="display: flex; flex-direction: column; height: 100%; justify-content: center; align-items: center">
-            <el-button type="success" size="large" :loading="aiLoading" @click="doAiGenerate" style="width: 240px">
-              <el-icon><MagicStick /></el-icon>&nbsp;✨ 开始生成
-            </el-button>
+            <AiButton size="large" :loading="aiLoading" @click="doAiGenerate" style="width: 240px">
+              开始生成
+            </AiButton>
             <el-alert type="info" :closable="false" show-icon
               title="AI 将基于需求 + 字段语义 + AgriKB 自动生成 5-15 条用例"
               style="margin-top: 14px; width: 100%" />

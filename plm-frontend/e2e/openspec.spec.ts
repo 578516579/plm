@@ -101,4 +101,20 @@ test.describe('OpenSpec 模块 E2E (PRD §F3.5)', () => {
     const hex = getFieldHex('tb_openspec', 'spec_name', `spec_name like '${cn}-${RUN_ID}%'`)
     expect(hex.toUpperCase()).not.toContain('EFBFBD')
   })
+
+  test('TC-OPENSPEC-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const createResp = await create('删除测试', { version: '8.8.8' })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const id = await idByName('删除测试')
+    expect(id, '新建 openspec 应能在列表里查到').toBeDefined()
+    expect(typeof id, 'openspecId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/openspec/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/openspec/list', { specName: `删除测试-${RUN_ID}` })
+    const stillThere = after.rows.find((r: any) => r.openspecId === id)
+    expect(stillThere, `openspecId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

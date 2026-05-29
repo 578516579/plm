@@ -107,9 +107,9 @@
                 <el-button type="primary" :loading="saving" @click="handleSubmit(false)">
                   <el-icon><DocumentAdd /></el-icon>&nbsp;保存草稿
                 </el-button>
-                <el-button type="success" :loading="saving || aiLoading" @click="handleSubmit(true)">
-                  <el-icon><MagicStick /></el-icon>&nbsp;AI 生成完整 PRD
-                </el-button>
+                <AiButton :loading="aiLoading" :saving="saving" @click="handleSubmit(true)">
+                  AI 生成完整 PRD
+                </AiButton>
               </div>
             </el-form-item>
           </el-form>

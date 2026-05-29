@@ -202,6 +202,29 @@ test.describe('Competitive 模块 E2E (PRD §F1.3)', () => {
     expect(list.rows[0].competitiveNo).toMatch(new RegExp(`^COMP-${year}-\\d{4}$`))
   })
 
+  test('TC-Comp-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const competitorName = `删除测试-${RUN_ID}`
+    const createResp = await api.post('/business/competitive', {
+      projectId,
+      competitorName,
+      authorUserId: 1
+    })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/competitive/list', { competitorName })
+    const created = before.rows.find((x: any) => x.competitorName === competitorName)
+    expect(created, '新建 competitive 应能在列表里查到').toBeDefined()
+    const id: number = created.competitiveId
+    expect(typeof id, 'competitiveId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/competitive/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/competitive/list', { competitorName })
+    const stillThere = after.rows.find((x: any) => x.competitiveId === id)
+    expect(stillThere, `competitiveId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-Comp-ENC001 编码 HEX — 中文 competitor_name 不含 EFBFBD 替换符', async () => {
     const cn = '禅道开源版-中文检测'
     const r = await api.post('/business/competitive', {

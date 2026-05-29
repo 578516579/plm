@@ -9,7 +9,7 @@
         <h2 class="page-title">📐 AI OpenSpec</h2>
         <p class="page-subtitle">AI 自动生成 OpenAPI / AsyncAPI / AI Function Spec 规范,与 AgriKB 联动</p>
       </div>
-      <el-button type="success" @click="openAdd"><el-icon><MagicStick /></el-icon>&nbsp;✨ AI 生成新规范</el-button>
+      <AiButton @click="openAdd">AI 生成新规范</AiButton>
     </div>
 
     <el-row :gutter="20">

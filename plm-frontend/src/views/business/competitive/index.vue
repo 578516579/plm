@@ -96,7 +96,7 @@
             <el-table-column label="操作" width="200" align="center">
               <template #default="{ row }">
                 <el-button link type="primary" @click.stop="loadCompetitive(row)">编辑</el-button>
-                <el-button link type="success" @click.stop="quickAi(row)">AI 分析</el-button>
+                <AiButton link @click.stop="quickAi(row)">AI 分析</AiButton>
                 <el-button link type="danger" @click.stop="handleDelete(row)">删除</el-button>
               </template>
             </el-table-column>

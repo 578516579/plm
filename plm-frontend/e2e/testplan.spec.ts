@@ -114,4 +114,91 @@ test.describe('TestPlan 模块 E2E', () => {
     expect(r.data.strategy).toContain('功能测试')
     expect(r.data.toolsRecommended).toContain('playwright')
   })
+
+  // === 状态机覆盖 — 4 状态 + 反向边 (Phase 04 Gate B.2) ===
+  // 00 草稿 → {01 已确认}
+  // 01 已确认 → {00 草稿(打回), 02 执行中}
+  // 02 执行中 → {03 已完成}
+  // 03 已完成 (终态)
+
+  async function createPlan(suffix: string) {
+    const title = `状态机-${suffix}-${RUN_ID}`
+    await api.post('/business/testplan', {
+      projectId, title, testTypes: 'functional', testCycleDays: 5, authorUserId: 1
+    })
+    const list = await api.get('/business/testplan/list', { pageSize: 100 })
+    return list.rows.find((x: any) => x.title === title)
+  }
+
+  test('TC-TP-F005 状态机正向 00→01→02→03 (草稿→已确认→执行中→已完成)', async () => {
+    const tp = await createPlan('happy')
+    expect(tp.status).toBe('00')
+
+    expect((await api.put('/business/testplan', { testplanId: tp.testplanId, status: '01' })).code).toBe(200)
+    expect((await api.put('/business/testplan', { testplanId: tp.testplanId, status: '02' })).code).toBe(200)
+    expect((await api.put('/business/testplan', { testplanId: tp.testplanId, status: '03' })).code).toBe(200)
+
+    const after = await api.get(`/business/testplan/${tp.testplanId}`)
+    expect(after.data.status).toBe('03')
+  })
+
+  test('TC-TP-F006 反向边 01→00 合法 (评审打回回草稿)', async () => {
+    const tp = await createPlan('reject')
+    await api.put('/business/testplan', { testplanId: tp.testplanId, status: '01' })
+
+    const r = await api.put('/business/testplan', { testplanId: tp.testplanId, status: '00' })
+    expect(r.code).toBe(200)
+    const after = await api.get(`/business/testplan/${tp.testplanId}`)
+    expect(after.data.status).toBe('00')
+  })
+
+  test('TC-TP-F007 跳级 00→02 非法 → 601', async () => {
+    const tp = await createPlan('skip')
+    const r = await api.put('/business/testplan', { testplanId: tp.testplanId, status: '02' })
+    expect.soft(r.code, '00→02 跳级应被 601').toBe(ERROR_CODES.STATUS_VIOLATION)
+  })
+
+  test('TC-TP-F008 终态保护 03→02 非法 → 601', async () => {
+    const tp = await createPlan('final')
+    await api.put('/business/testplan', { testplanId: tp.testplanId, status: '01' })
+    await api.put('/business/testplan', { testplanId: tp.testplanId, status: '02' })
+    await api.put('/business/testplan', { testplanId: tp.testplanId, status: '03' })
+
+    const r = await api.put('/business/testplan', { testplanId: tp.testplanId, status: '02' })
+    expect.soft(r.code, '03 已完成是终态').toBe(ERROR_CODES.STATUS_VIOLATION)
+  })
+
+  test('TC-TP-F010 反向 02→00 非法 → 601 (执行中不可打回)', async () => {
+    const tp = await createPlan('rev-illegal')
+    await api.put('/business/testplan', { testplanId: tp.testplanId, status: '01' })
+    await api.put('/business/testplan', { testplanId: tp.testplanId, status: '02' })
+
+    const r = await api.put('/business/testplan', { testplanId: tp.testplanId, status: '00' })
+    expect.soft(r.code, '02 执行中不可打回 00').toBe(ERROR_CODES.STATUS_VIOLATION)
+  })
+
+  test('TC-TP-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const title = `删除测试-${RUN_ID}`
+    const createResp = await api.post('/business/testplan', {
+      projectId,
+      title,
+      testTypes: 'functional',
+      testCycleDays: 5,
+      authorUserId: 1
+    })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/testplan/list', { pageSize: 100 })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建 testplan 应能在列表里查到').toBeDefined()
+    const id: number = created.testplanId
+    expect(typeof id, 'testplanId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/testplan/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/testplan/list', { pageSize: 100 })
+    const stillThere = after.rows.find((x: any) => x.testplanId === id)
+    expect(stillThere, `testplanId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

@@ -66,4 +66,28 @@ test.describe('工作台模块 E2E (UI §4.2)', () => {
     expect(Array.isArray(r.data.lifecycle)).toBe(true)
     expect(r.data.lifecycle.length).toBe(17)
   })
+
+  test('TC-DASHBOARD-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const title = `删除测试-${RUN_ID}`
+    const createResp = await api.post('/business/dashboard', {
+      title,
+      ownerUserId: 99,
+      widgetTypes: 'stats',
+      isDefault: 'N'
+    })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/dashboard/list', { ownerUserId: 99 })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建 dashboard 应能在列表里查到').toBeDefined()
+    const id: number = created.dashboardId
+    expect(typeof id, 'dashboardId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/dashboard/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/dashboard/list', { ownerUserId: 99 })
+    const stillThere = after.rows.find((x: any) => x.dashboardId === id)
+    expect(stillThere, `dashboardId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

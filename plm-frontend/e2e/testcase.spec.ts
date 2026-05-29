@@ -148,6 +148,25 @@ test.describe('TestCase 模块 E2E', () => {
     }
   })
 
+  test('TC-TestCase-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const data = makeTestCaseData(projectId, undefined, `del-${RUN_ID}`)
+    const createResp = await api.post('/business/testcase', data)
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/testcase/list', { pageSize: 100 })
+    const created = before.rows.find((x: any) => x.title === data.title)
+    expect(created, '新建 testcase 应能在列表里查到').toBeDefined()
+    const id: number = created.testcaseId
+    expect(typeof id, 'testcaseId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/testcase/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/testcase/list', { pageSize: 100 })
+    const stillThere = after.rows.find((x: any) => x.testcaseId === id)
+    expect(stillThere, `testcaseId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-TestCase-F007 必填字段校验', async () => {
     // steps 缺
     let r = await api.post('/business/testcase', {
