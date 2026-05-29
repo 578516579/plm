@@ -405,4 +405,51 @@ class ReleaseServiceImplTest {
         r.setStatus(newStatus);
         return r;
     }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 委托方法覆盖补强(本会话 task #4 jacoco 0.59→0.60 门槛)
+    // selectReleaseList / selectReleaseById / deleteReleaseByIds
+    // ─────────────────────────────────────────────────────────────────────
+    @Nested
+    @DisplayName("简单委托(覆盖盲点补强)")
+    class DelegationTests {
+        @Test
+        @DisplayName("selectReleaseList 委托 mapper.selectReleaseList")
+        void selectListDelegates() {
+            Release filter = new Release();
+            filter.setStatus("01");
+            when(releaseMapper.selectReleaseList(filter))
+                .thenReturn(java.util.List.of(existingRelease("01")));
+
+            java.util.List<Release> result = service.selectReleaseList(filter);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getStatus()).isEqualTo("01");
+            verify(releaseMapper).selectReleaseList(filter);
+        }
+
+        @Test
+        @DisplayName("selectReleaseById 委托 mapper.selectReleaseById")
+        void selectByIdDelegates() {
+            Release expected = existingRelease("00");
+            when(releaseMapper.selectReleaseById(123L)).thenReturn(expected);
+
+            Release result = service.selectReleaseById(123L);
+
+            assertThat(result).isSameAs(expected);
+            verify(releaseMapper).selectReleaseById(123L);
+        }
+
+        @Test
+        @DisplayName("deleteReleaseByIds 委托 mapper.deleteReleaseByIds")
+        void deleteByIdsDelegates() {
+            Long[] ids = { 1L, 2L, 3L };
+            when(releaseMapper.deleteReleaseByIds(ids)).thenReturn(3);
+
+            int rows = service.deleteReleaseByIds(ids);
+
+            assertThat(rows).isEqualTo(3);
+            verify(releaseMapper).deleteReleaseByIds(ids);
+        }
+    }
 }
