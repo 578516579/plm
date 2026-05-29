@@ -31,3 +31,7 @@ Thumbs.db
 # IDE (root-level fallback; subprojects have their own)
 .idea/
 .vscode/
+
+# Test artifacts (root-level; plm-frontend/.gitignore covers its own)
+# Playwright 在仓库根偶发生成 test-results/ (默认 outputDir),与 plm-frontend/test-results/ 区分
+test-results/
