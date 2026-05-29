@@ -81,9 +81,9 @@
               <el-button type="primary" :loading="saving" @click="handleSubmit(false)">
                 <el-icon><DocumentAdd /></el-icon>&nbsp;保存配置
               </el-button>
-              <el-button type="success" :loading="saving || aiLoading" @click="handleSubmit(true)">
-                <el-icon><MagicStick /></el-icon>&nbsp;🏭 生成测试数据
-              </el-button>
+              <AiButton :loading="aiLoading" :saving="saving" @click="handleSubmit(true)">
+                🏭 生成测试数据
+              </AiButton>
             </el-form-item>
           </el-form>
         </el-card>

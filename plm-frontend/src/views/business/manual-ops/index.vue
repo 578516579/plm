@@ -48,9 +48,9 @@
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :loading="saving" @click="handleSubmit(false)">保存</el-button>
-              <el-button type="success" :loading="saving || aiLoading" @click="handleSubmit(true)">
-                <el-icon><MagicStick /></el-icon>&nbsp;✨ 保存并生成运维手册
-              </el-button>
+              <AiButton :loading="aiLoading" :saving="saving" @click="handleSubmit(true)">
+                保存并生成运维手册
+              </AiButton>
             </el-form-item>
           </el-form>
         </el-card>

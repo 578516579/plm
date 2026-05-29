@@ -50,9 +50,9 @@
             </el-form-item>
             <el-form-item>
               <el-button type="primary" :loading="saving" @click="handleSubmit(false)">保存草稿</el-button>
-              <el-button type="success" :loading="saving || aiLoading" @click="handleSubmit(true)">
-                <el-icon><MagicStick /></el-icon>&nbsp;✨ 开始生成
-              </el-button>
+              <AiButton :loading="aiLoading" :saving="saving" @click="handleSubmit(true)">
+                开始生成
+              </AiButton>
             </el-form-item>
           </el-form>
         </el-card>

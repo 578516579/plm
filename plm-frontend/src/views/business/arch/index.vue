@@ -106,9 +106,9 @@
               <el-button type="primary" :loading="saving" @click="handleSubmit(false)">
                 <el-icon><DocumentAdd /></el-icon>&nbsp;保存草稿
               </el-button>
-              <el-button type="success" :loading="saving || aiLoading" @click="handleSubmit(true)">
-                <el-icon><MagicStick /></el-icon>&nbsp;保存并 AI 生成
-              </el-button>
+              <AiButton :loading="aiLoading" :saving="saving" @click="handleSubmit(true)">
+                保存并 AI 生成
+              </AiButton>
               <el-button v-if="current.archId" plain @click="resetForm">
                 重置
               </el-button>
