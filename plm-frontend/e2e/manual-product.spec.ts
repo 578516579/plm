@@ -91,4 +91,26 @@ test.describe('ManualProduct 模块 E2E', () => {
     })
     expect.soft(r.code, 'FK 不存在应返 702').toBe(ERROR_CODES.FK_NOT_EXISTS)
   })
+
+  test('TC-PM-F004 列表分页参数生效 (pageNum/pageSize)', async () => {
+    // 取第 1 页 5 条
+    const p1 = await api.get('/business/manual-product/list', { pageNum: 1, pageSize: 5 })
+    expect(p1.code).toBe(200)
+    expect(Array.isArray(p1.rows)).toBe(true)
+    expect(p1.rows.length).toBeLessThanOrEqual(5)
+    // total 字段应为非负数字
+    expect(typeof p1.total === 'number' && p1.total >= 0).toBe(true)
+  })
+
+  test('TC-PM-F005 ManualProduct 列表页 UI 可达 — 表格 + 操作按钮存在', async ({ page, context, request }) => {
+    await loginAsAdmin(request, context)
+    await page.goto('/business/manual-product')
+
+    const table = page.locator('.el-table').first()
+    const emptyState = page.locator('.el-empty').first()
+    await expect(table.or(emptyState)).toBeVisible({ timeout: 10_000 })
+
+    const opBtn = page.getByRole('button', { name: /新增|添加|新建|生成|创建/ }).first()
+    await expect(opBtn).toBeVisible({ timeout: 5_000 })
+  })
 })

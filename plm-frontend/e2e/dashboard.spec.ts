@@ -66,4 +66,27 @@ test.describe('工作台模块 E2E (UI §4.2)', () => {
     expect(Array.isArray(r.data.lifecycle)).toBe(true)
     expect(r.data.lifecycle.length).toBe(17)
   })
+
+  test('TC-DASHBOARD-F004 工作台页面 UI 可达 — body 渲染 + 无 JS 错误', async ({ page, context, request }) => {
+    await loginAsAdmin(request, context)
+    const errors: string[] = []
+    page.on('pageerror', err => errors.push(err.message))
+    await page.goto('/business/dashboard', { waitUntil: 'domcontentloaded' })
+    await expect(page.locator('body')).toBeVisible({ timeout: 10_000 })
+    await page.waitForTimeout(1500)
+    expect.soft(errors, `工作台 JS 错误: ${errors.join(' | ')}`).toHaveLength(0)
+  })
+
+  test('TC-DASHBOARD-F005 列表接口分页可控 (pageNum/pageSize 参数生效)', async () => {
+    // 默认 pageSize 10
+    const p1 = await api.get('/business/dashboard/list', { pageNum: 1, pageSize: 5 })
+    expect(p1.code).toBe(200)
+    expect(Array.isArray(p1.rows)).toBe(true)
+    expect(p1.rows.length).toBeLessThanOrEqual(5)
+
+    // page 2 (即使为空数组也合法,只要 code=200 + rows is Array)
+    const p2 = await api.get('/business/dashboard/list', { pageNum: 2, pageSize: 5 })
+    expect(p2.code).toBe(200)
+    expect(Array.isArray(p2.rows)).toBe(true)
+  })
 })

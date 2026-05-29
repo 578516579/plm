@@ -37,6 +37,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- API 契约测试用 standalone MockMvc 需要 DispatcherServlet -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
