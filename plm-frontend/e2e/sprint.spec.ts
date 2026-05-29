@@ -44,6 +44,25 @@ test.describe('Sprint 模块 E2E', () => {
     expect(s.status).toBe('00')
   })
 
+  test('TC-Spr-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const data = makeSprintData(projectId, `del-${RUN_ID}`)
+    const createResp = await api.createSprint(data)
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.listSprints()
+    const created = before.rows.find((x: any) => x.name === data.name)
+    expect(created, '新建 sprint 应能在列表里查到').toBeDefined()
+    const id: number = created.sprintId
+    expect(typeof id, 'sprintId 应是 number').toBe('number')
+
+    const delResp = await api.deleteSprint(id)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.listSprints()
+    const stillThere = after.rows.find((x: any) => x.sprintId === id)
+    expect(stillThere, `sprintId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-Spr-F003 actual_start_date 自动填充 (00→01)', async () => {
     const data = makeSprintData(projectId, `actual-${RUN_ID}`)
     const create = await api.createSprint(data)

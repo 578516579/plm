@@ -1,5 +1,7 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, APIRequestContext } from '@playwright/test'
 import { loginAsAdmin } from './helpers/auth'
+import { ApiClient } from './helpers/api'
+import { RUN_ID, makeProjectData } from './helpers/fixtures'
 
 /**
  * Project 模块 E2E 测试 — 覆盖 PRD §2.2 场景 S1-S4。
@@ -67,5 +69,45 @@ test.describe('Project 模块 E2E', () => {
     await page.getByRole('button', { name: /搜索|查询/ }).first().click()
     // 等接口响应 — 列表仍能渲染
     await expect(page.locator('.el-table')).toBeVisible()
+  })
+})
+
+/**
+ * Project API 软删覆盖 — 补 spec 缺口(2026-05-29):
+ * 此前 project.spec.ts 是纯 UI spec,DELETE 端点零覆盖,容易漏掉回归。
+ * 独立 describe + 独立 setup,不与 UI 测试共享 fixture。
+ */
+test.describe('Project API — 软删', () => {
+  let apiRequest: APIRequestContext
+  let api: ApiClient
+
+  test.beforeAll(async ({ playwright, browser }) => {
+    apiRequest = await playwright.request.newContext()
+    const ctx = await browser.newContext()
+    const token = await loginAsAdmin(apiRequest, ctx)
+    api = new ApiClient(apiRequest, token)
+  })
+
+  test.afterAll(async () => {
+    await apiRequest?.dispose()
+  })
+
+  test('TC-Proj-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const data = makeProjectData(`del-${RUN_ID}`)
+    const createResp = await api.createProject(data)
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.listProjects()
+    const created = before.rows.find((p: any) => p.projectName === data.projectName)
+    expect(created, '新建 project 应能在列表里查到').toBeDefined()
+    const id: number = created.id
+    expect(typeof id, 'project id 应是 number').toBe('number')
+
+    const delResp = await api.deleteProject(id)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.listProjects()
+    const stillThere = after.rows.find((p: any) => p.id === id)
+    expect(stillThere, `project id=${id} 删除后不该出现在 list`).toBeUndefined()
   })
 })
