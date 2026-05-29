@@ -109,4 +109,17 @@ test.describe('TestReport 模块 E2E', () => {
     })
     expect.soft(r.code, 'FK 不存在应返 702').toBe(ERROR_CODES.FK_NOT_EXISTS)
   })
+
+  test('TC-TR-F005 TestReport 列表页 UI 可达 — 表格 + 操作按钮存在', async ({ page, context, request }) => {
+    await loginAsAdmin(request, context)
+    await page.goto('/business/testreport')
+
+    const table = page.locator('.el-table').first()
+    const emptyState = page.locator('.el-empty').first()
+    await expect(table.or(emptyState)).toBeVisible({ timeout: 10_000 })
+
+    // 新增/生成/导出 类型按钮二选一存在性(容错文案)
+    const opBtn = page.getByRole('button', { name: /新增|生成|创建|导出/ }).first()
+    await expect(opBtn).toBeVisible({ timeout: 5_000 })
+  })
 })

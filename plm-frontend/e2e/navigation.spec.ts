@@ -92,4 +92,40 @@ test.describe('导航 / 菜单可达性', () => {
       expect([200, 404, 403].includes(r.status())).toBe(true)
     }
   })
+
+  test('未登录访问业务页应被路由守卫处理 (跳 login 或仍渲染壳)', async ({ browser }) => {
+    // 全新无 cookie context,不注入 token
+    const cleanCtx = await browser.newContext()
+    const cleanPage = await cleanCtx.newPage()
+    const errors: string[] = []
+    cleanPage.on('pageerror', err => errors.push(err.message))
+    await cleanPage.goto('/business/project', { waitUntil: 'domcontentloaded' })
+    // 应跳转到 /login 或者仍展示页面壳(具体取决于路由守卫实现,弱断言不卡死)
+    await cleanPage.waitForTimeout(1500)
+    const url = cleanPage.url()
+    expect.soft(/login|index|business/.test(url), `未登录后 URL=${url}`).toBe(true)
+    // 至少 body 存在,无 JS 致命错
+    await expect(cleanPage.locator('body')).toBeVisible()
+    expect.soft(errors, `未登录跳转触发 JS 错误: ${errors.join(' | ')}`).toHaveLength(0)
+    await cleanCtx.close()
+  })
+
+  test('浏览器后退按钮能返回上一页', async ({ page, context }) => {
+    await context.addCookies([{ name: 'Admin-Token', value: token, url: 'http://localhost' }])
+    await page.goto('/')
+    await page.waitForTimeout(800)
+    const homeUrl = page.url()
+
+    await page.goto('/business/project', { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(800)
+    const projectUrl = page.url()
+    expect(projectUrl).not.toBe(homeUrl)
+
+    // 触发浏览器后退
+    await page.goBack({ waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(800)
+    // 后退后 URL 应回到 homeUrl(或至少不再是 project URL)
+    expect.soft(page.url()).not.toBe(projectUrl)
+    await expect(page.locator('body')).toBeVisible()
+  })
 })

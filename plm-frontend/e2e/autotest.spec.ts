@@ -219,4 +219,22 @@ test.describe.serial('Autotest 模块 E2E (PRD §F4.5)', () => {
       expect(rcaText.length, 'RCA 文本应非空').toBeGreaterThan(0)
     }
   })
+
+  // === 场景 5: 执行历史区块存在性 (弱断言,不依赖具体数据) ===
+  test('TC-AT-E005 套件详情页可见 — 套件编号/类型/框架等元数据展示', async ({ page, context, request }) => {
+    test.skip(!createdAutotestId, '依赖 TC-AT-E002 创建的套件')
+    await loginAsAdmin(request, context)
+    await page.goto('/business/autotest')
+    await expect(page.locator('.el-table')).toBeVisible({ timeout: 10_000 })
+
+    // 选中之前创建的套件
+    await page.locator('.el-table__row').filter({ hasText: suiteTitle }).first().click()
+
+    // 详情区核心字段标签存在性(弱断言,不验数值)
+    await expect(page.getByText('套件编号', { exact: true })).toBeVisible({ timeout: 5_000 })
+
+    // 类型/框架/状态等标签至少有一个可见(容错文案变化)
+    const meta = page.getByText(/类型|框架|状态|目标 URL/).first()
+    await expect(meta).toBeVisible({ timeout: 5_000 })
+  })
 })

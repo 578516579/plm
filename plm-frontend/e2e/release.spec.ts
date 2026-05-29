@@ -97,4 +97,17 @@ test.describe('Release 模块 E2E', () => {
     })
     expect.soft(r.code, 'FK 不存在应返 702').toBe(ERROR_CODES.FK_NOT_EXISTS)
   })
+
+  test('TC-Rel-F005 Release 列表页 UI 可达 — 表格或空状态 + 新增按钮', async ({ page, context, request }) => {
+    await loginAsAdmin(request, context)
+    await page.goto('/business/release')
+
+    const table = page.locator('.el-table').first()
+    const emptyState = page.locator('.el-empty').first()
+    await expect(table.or(emptyState)).toBeVisible({ timeout: 10_000 })
+
+    // 顶部操作区:新增 / 创建发布单 等文案容错
+    const addBtn = page.getByRole('button', { name: /新增|创建|新建|发布/ }).first()
+    await expect(addBtn).toBeVisible({ timeout: 5_000 })
+  })
 })

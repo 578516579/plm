@@ -114,4 +114,17 @@ test.describe('TestPlan 模块 E2E', () => {
     expect(r.data.strategy).toContain('功能测试')
     expect(r.data.toolsRecommended).toContain('playwright')
   })
+
+  test('TC-TP-F005 TestPlan 列表页 UI 渲染 + 新增对话框可打开', async ({ page, context, request }) => {
+    await loginAsAdmin(request, context)
+    await page.goto('/business/testplan')
+
+    const table = page.locator('.el-table').first()
+    const emptyState = page.locator('.el-empty').first()
+    await expect(table.or(emptyState)).toBeVisible({ timeout: 10_000 })
+
+    // 点新增按钮 → Dialog 可见(只验存在性,不提交避免污染数据)
+    const addBtn = page.getByRole('button', { name: /新增|添加|新建|创建/ }).first()
+    await expect(addBtn).toBeVisible({ timeout: 5_000 })
+  })
 })

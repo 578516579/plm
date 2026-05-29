@@ -92,4 +92,18 @@ test.describe('ApiDoc 模块 E2E', () => {
     })
     expect.soft(r.code, 'FK 不存在应返 702').toBe(ERROR_CODES.FK_NOT_EXISTS)
   })
+
+  test('TC-API-F005 ApiDoc 列表页 UI 渲染 (表格 + 新增按钮)', async ({ page, context, request }) => {
+    await loginAsAdmin(request, context)
+    await page.goto('/business/apidoc')
+
+    // 表格容器或空状态二选一(数据不一定有)
+    const table = page.locator('.el-table').first()
+    const emptyState = page.locator('.el-empty').first()
+    await expect(table.or(emptyState)).toBeVisible({ timeout: 10_000 })
+
+    // 顶部应有"新增"类型的按钮(容错文案:新增/添加/新建/导入)
+    const addBtn = page.getByRole('button', { name: /新增|添加|新建|导入/ }).first()
+    await expect(addBtn).toBeVisible({ timeout: 5_000 })
+  })
 })
