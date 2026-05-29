@@ -144,6 +144,24 @@ test.describe('Ued 模块 E2E (PRD §F2.3)', () => {
     expect(Number(r.data.aiReviewScore), '评审评分 > 0').toBeGreaterThan(0)
   })
 
+  test('TC-Ued-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const { r, title } = await createUed('del')
+    expect(r.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/ued/list', { pageSize: 200 })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建 ued 应能在列表里查到').toBeDefined()
+    const id: number = created.uedId
+    expect(typeof id, 'uedId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/ued/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/ued/list', { pageSize: 200 })
+    const stillThere = after.rows.find((x: any) => x.uedId === id)
+    expect(stillThere, `uedId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-Ued-UI UED 设计协同菜单可访问', async ({ page, context, request }) => {
     await loginAsAdmin(request, context)
     await page.goto('/business/ued')

@@ -137,6 +137,22 @@ test.describe('实施手册模块 E2E (PRD §F5.2)', () => {
     expect(row.manualimplNo).toMatch(new RegExp(`^IM-${year}-\\d{4}$`))
   })
 
+  test('TC-MANUAL-IMPL-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const createResp = await createImpl('删除测试')
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const id = await idByTitle('删除测试')
+    expect(id, '新建 manual-impl 应能在列表里查到').toBeDefined()
+    expect(typeof id, 'manualimplId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/manual-impl/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/manual-impl/list', { projectId })
+    const stillThere = after.rows.find((r: any) => r.manualimplId === id)
+    expect(stillThere, `manualimplId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-MANUAL-IMPL-ENC001 编码 HEX — 中文 title 不含 EFBFBD', async () => {
     const cn = '农情实施手册-中文检测'
     expect((await createImpl(cn)).code).toBe(200)

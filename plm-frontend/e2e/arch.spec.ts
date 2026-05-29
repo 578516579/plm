@@ -154,6 +154,24 @@ test.describe('Arch 模块 E2E (PRD §F3.1)', () => {
     expect(r.data.nfrMapping, 'NFR 映射含性能').toContain('性能')
   })
 
+  test('TC-Arch-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const { r, title } = await createArch('del')
+    expect(r.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/arch/list', { pageSize: 200 })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建 arch 应能在列表里查到').toBeDefined()
+    const id: number = created.archId
+    expect(typeof id, 'archId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/arch/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/arch/list', { pageSize: 200 })
+    const stillThere = after.rows.find((x: any) => x.archId === id)
+    expect(stillThere, `archId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-Arch-UI 概要设计管理菜单可访问', async ({ page, context, request }) => {
     await loginAsAdmin(request, context)
     await page.goto('/business/arch')

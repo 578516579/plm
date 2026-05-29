@@ -136,4 +136,27 @@ test.describe('Submission 模块 E2E (PRD §F4.4)', () => {
     u = await api.put('/business/submission', { submissionId: id, status: '00' })
     expect(u.code).toBe(200)
   })
+
+  test('TC-Sub-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const title = `删除测试-${RUN_ID}`
+    const createResp = await api.post('/business/submission', {
+      projectId,
+      title,
+      submitterUserId: 1
+    })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/submission/list', { pageSize: 100 })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建 submission 应能在列表里查到').toBeDefined()
+    const id: number = created.submissionId
+    expect(typeof id, 'submissionId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/submission/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/submission/list', { pageSize: 100 })
+    const stillThere = after.rows.find((x: any) => x.submissionId === id)
+    expect(stillThere, `submissionId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

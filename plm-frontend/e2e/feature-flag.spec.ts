@@ -86,4 +86,23 @@ test.describe('Feature Flag 模块 E2E (DevOps)', () => {
     const hex = getFieldHex('tb_feature_flag', 'title', `flag_key = 'enc_${RT}'`)
     expect(hex.toUpperCase()).not.toContain('EFBFBD')
   })
+
+  test('TC-FF-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const flagKey = `delete_test_${RT}`
+    const createResp = await flag('delete_test', { rolloutStrategy: 'all_off', rolloutPercentage: 0 })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/feature-flag/list', { flagKey })
+    const created = before.rows.find((x: any) => x.flagKey === flagKey)
+    expect(created, '新建 feature-flag 应能在列表里查到').toBeDefined()
+    const id: number = created.flagId
+    expect(typeof id, 'flagId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/feature-flag/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/feature-flag/list', { flagKey })
+    const stillThere = after.rows.find((x: any) => x.flagId === id)
+    expect(stillThere, `flagId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

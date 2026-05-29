@@ -91,4 +91,96 @@ test.describe('ManualProduct 模块 E2E', () => {
     })
     expect.soft(r.code, 'FK 不存在应返 702').toBe(ERROR_CODES.FK_NOT_EXISTS)
   })
+
+  // === 状态机覆盖 — 4 状态 + 反向边 (Phase 04 Gate B.2) ===
+  // 00 草稿 → {01 生成中}
+  // 01 生成中 → {02 已生成}
+  // 02 已生成 → {00 草稿(重做), 03 已发布}
+  // 03 已发布 (终态)
+
+  async function createPm(suffix: string) {
+    const title = `状态机-${suffix}-${RUN_ID}`
+    await api.post('/business/manual-product', {
+      projectId, title, productVersion: 'v0.1',
+      includeModules: '概述,FAQ', outputFormats: 'pdf', authorUserId: 1
+    })
+    const list = await api.get('/business/manual-product/list', { pageSize: 100 })
+    return list.rows.find((x: any) => x.title === title)
+  }
+
+  test('TC-PM-F004 状态机正向 00→01→02→03 (草稿→生成中→已生成→已发布)', async () => {
+    const pm = await createPm('happy')
+    expect(pm.status).toBe('00')
+
+    expect((await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '01' })).code).toBe(200)
+    expect((await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '02' })).code).toBe(200)
+    expect((await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '03' })).code).toBe(200)
+
+    const after = await api.get(`/business/manual-product/${pm.manualproductId}`)
+    expect(after.data.status).toBe('03')
+  })
+
+  test('TC-PM-F005 反向边 02→00 合法 (已生成→草稿重做)', async () => {
+    const pm = await createPm('redo')
+    await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '01' })
+    await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '02' })
+
+    const r = await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '00' })
+    expect(r.code).toBe(200)
+    const after = await api.get(`/business/manual-product/${pm.manualproductId}`)
+    expect(after.data.status).toBe('00')
+  })
+
+  test('TC-PM-F006 跳级 00→02 非法 → 601', async () => {
+    const pm = await createPm('skip')
+    const r = await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '02' })
+    expect.soft(r.code, '00→02 必须先经 01 生成中').toBe(ERROR_CODES.STATUS_VIOLATION)
+  })
+
+  test('TC-PM-F007 终态保护 03→02 非法 → 601', async () => {
+    const pm = await createPm('final')
+    await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '01' })
+    await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '02' })
+    await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '03' })
+
+    const r = await api.put('/business/manual-product', { manualproductId: pm.manualproductId, status: '02' })
+    expect.soft(r.code, '03 已发布是终态').toBe(ERROR_CODES.STATUS_VIOLATION)
+  })
+
+  test('TC-PM-F008 AI 生成 → aiGenerated=Y / content 非空 / 状态推进到 02', async () => {
+    const pm = await createPm('ai')
+
+    const r = await api.post(`/business/manual-product/ai/generate/${pm.manualproductId}`, {})
+    expect(r.code).toBe(200)
+    expect(r.data.aiGenerated).toBe('Y')
+    expect(r.data.content, 'AI 生成内容非空').toBeTruthy()
+    expect((r.data.content || '').length).toBeGreaterThan(20)
+    expect(r.data.generatedAt, 'generatedAt 应填充').toBeTruthy()
+  })
+
+  test('TC-PM-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const title = `删除测试-${RUN_ID}`
+    const createResp = await api.post('/business/manual-product', {
+      projectId,
+      title,
+      productVersion: 'v0.1',
+      includeModules: '概述',
+      outputFormats: 'pdf',
+      authorUserId: 1
+    })
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/manual-product/list', { pageSize: 100 })
+    const created = before.rows.find((x: any) => x.title === title)
+    expect(created, '新建产品手册应能在列表里查到').toBeDefined()
+    const id: number = created.manualproductId
+    expect(typeof id, 'manualproductId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/manual-product/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/manual-product/list', { pageSize: 100 })
+    const stillThere = after.rows.find((x: any) => x.manualproductId === id)
+    expect(stillThere, `manualproductId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
 })

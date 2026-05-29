@@ -73,6 +73,25 @@ test.describe('Defect 模块 E2E', () => {
     expect(d.category).toBe('01')
   })
 
+  test('TC-Defect-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const data = makeDefectData(projectId, `del-${RUN_ID}`)
+    const createResp = await api.post('/business/defect', data)
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/defect/list', { pageSize: 100 })
+    const created = before.rows.find((x: any) => x.title === data.title)
+    expect(created, '新建 defect 应能在列表里查到').toBeDefined()
+    const id: number = created.defectId
+    expect(typeof id, 'defectId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/defect/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/defect/list', { pageSize: 100 })
+    const stillThere = after.rows.find((x: any) => x.defectId === id)
+    expect(stillThere, `defectId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-Defect-F003 反向边 03→01 (回归打回)', async () => {
     const data = makeDefectData(projectId, `reverse-${RUN_ID}`)
     const c = await api.post('/business/defect', data)

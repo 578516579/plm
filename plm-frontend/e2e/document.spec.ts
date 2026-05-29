@@ -149,6 +149,25 @@ test.describe('Document 模块 E2E (合并 5 stub)', () => {
     expect(propDoc.documentNo).toMatch(/^DOC-PROPOSAL-\d{4}-0001$/)
   })
 
+  test('TC-Doc-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    const data = makeDocumentData(projectId, 'prd', `del-${RUN_ID}`)
+    const createResp = await api.post('/business/document', data)
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    const before = await api.get('/business/document/list', { pageSize: 100 })
+    const created = before.rows.find((x: any) => x.title === data.title)
+    expect(created, '新建 document 应能在列表里查到').toBeDefined()
+    const id: number = created.documentId
+    expect(typeof id, 'documentId 应是 number').toBe('number')
+
+    const delResp = await api.delete(`/business/document/${id}`)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    const after = await api.get('/business/document/list', { pageSize: 100 })
+    const stillThere = after.rows.find((x: any) => x.documentId === id)
+    expect(stillThere, `documentId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('UI 层: 文档管理菜单 + 12 doc_type 下拉', async ({ page, context }) => {
     await context.addCookies([{ name: 'Admin-Token', value: token, url: 'http://localhost' }])
     await page.goto('/business/document')
