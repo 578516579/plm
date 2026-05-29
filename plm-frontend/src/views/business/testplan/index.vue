@@ -222,7 +222,7 @@
         <el-table-column label="操作" width="200" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadPlan(row)">载入</el-button>
-            <el-button link type="success" :disabled="row.aiGenerated === 'Y'" @click="quickAi(row)">AI</el-button>
+            <AiButton link :disabled="row.aiGenerated === 'Y'" @click="quickAi(row)">AI</AiButton>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>

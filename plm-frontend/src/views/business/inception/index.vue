@@ -215,7 +215,7 @@
         <el-table-column label="操作" width="320" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadInception(row)">载入编辑</el-button>
-            <el-button link type="success" @click="quickAi(row)" :disabled="row.aiGenerated === 'Y'">AI 分析</el-button>
+            <AiButton link @click="quickAi(row)" :disabled="row.aiGenerated === 'Y'">AI 分析</AiButton>
             <!-- 0028 P0-2C: 已批准 (status='03') 且未晋升 → 显示晋升按钮 -->
             <el-button
               v-if="row.status === '03' && !row.projectId"

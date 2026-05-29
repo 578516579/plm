@@ -9,9 +9,9 @@
         <h2 class="page-title">🛠️ 运维手册</h2>
         <p class="page-subtitle">AI 生成监控告警、故障排查、备份恢复、IoT 运维指南</p>
       </div>
-      <el-button type="success" :loading="aiLoading" :disabled="!current.manualOpsId" @click="triggerAi">
-        <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 生成运维手册
-      </el-button>
+      <AiButton :loading="aiLoading" :disabled="!current.manualOpsId" @click="triggerAi">
+        AI 生成运维手册
+      </AiButton>
     </div>
 
     <el-row :gutter="20">
@@ -94,7 +94,7 @@
           <div v-else class="ai-not-yet">
             <el-icon :size="40" color="#f59e0b"><InfoFilled /></el-icon>
             <p>配置已保存 ({{ current.manualOpsNo }}),点击生成</p>
-            <el-button type="success" :loading="aiLoading" @click="triggerAi">✨ 立即生成</el-button>
+            <AiButton :loading="aiLoading" @click="triggerAi">立即生成</AiButton>
           </div>
         </el-card>
       </el-col>
@@ -124,7 +124,7 @@
         <el-table-column label="操作" width="180" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadM(row)">载入</el-button>
-            <el-button link type="success" @click="quickAi(row)">AI</el-button>
+            <AiButton link @click="quickAi(row)">AI</AiButton>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>

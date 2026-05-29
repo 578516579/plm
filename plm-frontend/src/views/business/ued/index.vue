@@ -151,9 +151,9 @@
           <div v-else class="ai-not-yet">
             <el-icon :size="40" color="#f59e0b"><InfoFilled /></el-icon>
             <p>设计稿已加载 (UED {{ current.uedNo }}),点击「AI 设计规范检查」开始评审</p>
-            <el-button type="success" :loading="aiLoading" @click="runAiReview">
-              <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 规范检查
-            </el-button>
+            <AiButton :loading="aiLoading" @click="runAiReview">
+              AI 规范检查
+            </AiButton>
           </div>
         </el-card>
       </el-col>

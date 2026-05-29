@@ -11,9 +11,9 @@
       </div>
       <div class="header-actions">
         <el-button plain @click="openAdd"><el-icon><Plus /></el-icon>&nbsp;新增套件</el-button>
-        <el-button type="success" :loading="aiLoading" :disabled="!current.autotestId" @click="triggerAi">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 生成脚本
-        </el-button>
+        <AiButton :loading="aiLoading" :disabled="!current.autotestId" @click="triggerAi">
+          AI 生成脚本
+        </AiButton>
         <el-button type="primary" :loading="runLoading" :disabled="!current.autotestId" @click="runNow">
           <el-icon><VideoPlay /></el-icon>&nbsp;▶ 立即执行
         </el-button>

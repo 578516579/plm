@@ -64,7 +64,7 @@
             <el-button link type="primary" @click="loadReq(row)">编辑</el-button>
             <el-button link type="warning" @click="openReview(row)">评审</el-button>
             <el-button link type="info" @click="openDetail(row)">详情</el-button>
-            <el-button link type="success" @click="quickAi(row)">AI 评估</el-button>
+            <AiButton link @click="quickAi(row)">AI 评估</AiButton>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>

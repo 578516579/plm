@@ -158,9 +158,9 @@
           <div v-else class="ai-not-yet">
             <el-icon :size="40" color="#f59e0b"><InfoFilled /></el-icon>
             <p>架构草稿已保存 ({{ current.archNo }}),点击下方按钮触发 AI 生成</p>
-            <el-button type="success" :loading="aiLoading" @click="triggerAi">
-              <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 生成 C4 容器图
-            </el-button>
+            <AiButton :loading="aiLoading" @click="triggerAi">
+              AI 生成 C4 容器图
+            </AiButton>
           </div>
         </el-card>
       </el-col>
@@ -212,7 +212,7 @@
         <el-table-column label="操作" width="200" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadArch(row)">载入</el-button>
-            <el-button link type="success" @click="quickAi(row)">AI 生成</el-button>
+            <AiButton link @click="quickAi(row)">AI 生成</AiButton>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
