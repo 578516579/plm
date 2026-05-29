@@ -62,6 +62,29 @@ test.describe('Task 模块 E2E', () => {
     expect(t.status).toBe('00')
   })
 
+  test('TC-Task-F-DELETE 软删: create → list 存在 → delete → list 不存在', async () => {
+    // 1. 建一个独立 task (避免与 F001 等其他 case 串)
+    const data = makeTaskData(projectId, sprintId, requirementId, `del-${RUN_ID}`)
+    const createResp = await api.createTask(data)
+    expect(createResp.code, '创建应成功').toBe(200)
+
+    // 2. 确认它出现在列表里,拿到 taskId
+    const before = await api.listTasks()
+    const created = before.rows.find((x: any) => x.title === data.title)
+    expect(created, '新建 task 应能在列表里查到').toBeDefined()
+    const id: number = created.taskId
+    expect(typeof id, 'taskId 应是 number').toBe('number')
+
+    // 3. 删除
+    const delResp = await api.deleteTask(id)
+    expect(delResp.code, '删除应成功 (code=200)').toBe(200)
+
+    // 4. 再 list,该 taskId 应消失 (软删 del_flag=2,list 端默认过滤掉)
+    const after = await api.listTasks()
+    const stillThere = after.rows.find((x: any) => x.taskId === id)
+    expect(stillThere, `taskId=${id} 删除后不该出现在 list`).toBeUndefined()
+  })
+
   test('TC-Task-F004 反向边 02→01 (评审打回)', async () => {
     const data = makeTaskData(projectId, sprintId, requirementId, `reverse-${RUN_ID}`)
     const create = await api.createTask(data)
