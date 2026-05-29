@@ -146,14 +146,8 @@ test.describe('Release 模块 E2E', () => {
     expect.soft(r.code, '00→02 必须先经 01').toBe(ERROR_CODES.STATUS_VIOLATION)
   })
 
-  test('TC-Rel-F008 终态保护 03→01 非法 → 601', async () => {
-    const rel = await createRel('final')
-    await api.put('/business/release', { releaseId: rel.releaseId, status: '01' })
-    await api.put('/business/release', { releaseId: rel.releaseId, status: '03' })
-
-    const r = await api.put('/business/release', { releaseId: rel.releaseId, status: '01' })
-    expect.soft(r.code, '03 已回滚是终态').toBe(ERROR_CODES.STATUS_VIOLATION)
-  })
+  // [reverted 2026-05-29] TC-Rel-F008 终态保护 03→01 — agent bonus case 假设 03 是终态,实际后端允许 03→01 转换
+  // 状态机定义需要先评审(是否 03 应该锁死),不能在 e2e 里假定。详 99-跨阶段/在途任务.md 该日 ledger 块;commit 1b4d1f8 引入
 
   test('TC-Rel-F009 策略字典白名单 (blue_green/canary/rolling)', async () => {
     const r = await api.post('/business/release', {
