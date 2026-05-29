@@ -29,6 +29,8 @@ import cn.com.bosssfot.dv.plm.project.domain.Project;
 import cn.com.bosssfot.dv.plm.project.mapper.ProjectMapper;
 import cn.com.bosssfot.dv.plm.submission.domain.Submission;
 import cn.com.bosssfot.dv.plm.submission.mapper.SubmissionMapper;
+import cn.com.bosssfot.dv.plm.testplan.domain.TestPlan;
+import cn.com.bosssfot.dv.plm.testplan.mapper.TestPlanMapper;
 
 /**
  * SubmissionServiceImpl 单元测试
@@ -50,6 +52,9 @@ class SubmissionServiceImplTest {
 
     @Mock
     private ProjectMapper projectMapper;
+
+    @Mock
+    private TestPlanMapper testPlanMapper;
 
     @InjectMocks
     private SubmissionServiceImpl service;
@@ -344,6 +349,138 @@ class SubmissionServiceImplTest {
             assertThatThrownBy(() -> service.insertSubmission(sample))
                 .isInstanceOf(ServiceException.class)
                 .hasMessageContaining("草稿");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 跨模块 FK testplanId — Proposal 0028 P0-1 (同 projectId 强约束)
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("跨模块 FK testplanId (Proposal 0028 P0-1)")
+    class TestplanFkTests {
+
+        @Test
+        @DisplayName("testFkOk_当目标存在且同 projectId 时插入成功")
+        void testFkOk() {
+            sample.setTestplanId(100L);
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(testPlanMapper.selectTestPlanById(100L)).thenReturn(testPlanWithProject(100L, 1L));
+            when(submissionMapper.selectMaxSeqOfYear(anyString())).thenReturn(null);
+            when(submissionMapper.insertSubmission(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                int rows = service.insertSubmission(sample);
+                assertThat(rows).isEqualTo(1);
+            }
+            assertThat(sample.getTestplanId()).isEqualTo(100L);
+        }
+
+        @Test
+        @DisplayName("testFkNullOk_当 testplanId 为 null 时跳过校验")
+        void testFkNullOk() {
+            sample.setTestplanId(null);
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(submissionMapper.selectMaxSeqOfYear(anyString())).thenReturn(null);
+            when(submissionMapper.insertSubmission(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                int rows = service.insertSubmission(sample);
+                assertThat(rows).isEqualTo(1);
+            }
+            verify(testPlanMapper, never()).selectTestPlanById(any());
+        }
+
+        @Test
+        @DisplayName("testFkNotFound_当目标 TestPlan 不存在 → 702")
+        void testFkNotFound() {
+            sample.setTestplanId(999L);
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(testPlanMapper.selectTestPlanById(999L)).thenReturn(null);
+
+            assertThatThrownBy(() -> service.insertSubmission(sample))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("测试方案不存在");
+        }
+
+        @Test
+        @DisplayName("testFkDifferentProject_当目标 projectId 不同 → 702")
+        void testFkDifferentProject() {
+            sample.setTestplanId(100L);  // submission.projectId = 1L
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(testPlanMapper.selectTestPlanById(100L)).thenReturn(testPlanWithProject(100L, 2L)); // 不同项目
+
+            assertThatThrownBy(() -> service.insertSubmission(sample))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("同一项目");
+        }
+
+        private TestPlan testPlanWithProject(Long testplanId, Long projectId) {
+            TestPlan tp = new TestPlan();
+            tp.setTestplanId(testplanId);
+            tp.setProjectId(projectId);
+            return tp;
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // attachTestplan (Proposal 0028 P0-2 研发 → 测试主线贯通)
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("attachTestplan (Proposal 0028 P0-2)")
+    class AttachTestplan {
+
+        @Test
+        @DisplayName("testAttachOk_合法 testplanId 同 projectId 时写入成功")
+        void testAttachOk() {
+            // submission 已存在(projectId=1)
+            Submission existing = existingSub("01");
+            when(submissionMapper.selectSubmissionById(1L)).thenReturn(existing);
+            // 目标 testplan(projectId=1,同项目)
+            TestPlan tp = new TestPlan();
+            tp.setTestplanId(100L);
+            tp.setProjectId(1L);
+            when(testPlanMapper.selectTestPlanById(100L)).thenReturn(tp);
+            when(submissionMapper.updateSubmission(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                service.attachTestplan(1L, 100L);
+            }
+            // 校验真正落到 update
+            verify(submissionMapper).updateSubmission(any(Submission.class));
+        }
+
+        @Test
+        @DisplayName("testAttachSubmissionNotFound_提测单不存在 → 404")
+        void testAttachSubmissionNotFound() {
+            when(submissionMapper.selectSubmissionById(404L)).thenReturn(null);
+
+            assertThatThrownBy(() -> service.attachTestplan(404L, 100L))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("提测单不存在");
+            verify(submissionMapper, never()).updateSubmission(any());
+        }
+
+        @Test
+        @DisplayName("testAttachFkViolation_testplan 不属同项目 → 702 (复用 P0-1 校验)")
+        void testAttachFkViolation() {
+            // submission.projectId=1,testplan.projectId=2 → 跨项目
+            Submission existing = existingSub("01");
+            // updateSubmission 内部:第一次 selectById 取 old(projectId=1)
+            when(submissionMapper.selectSubmissionById(1L)).thenReturn(existing);
+            TestPlan tp = new TestPlan();
+            tp.setTestplanId(100L);
+            tp.setProjectId(2L);
+            when(testPlanMapper.selectTestPlanById(100L)).thenReturn(tp);
+
+            assertThatThrownBy(() -> service.attachTestplan(1L, 100L))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("同一项目");
+            verify(submissionMapper, never()).updateSubmission(any());
         }
     }
 

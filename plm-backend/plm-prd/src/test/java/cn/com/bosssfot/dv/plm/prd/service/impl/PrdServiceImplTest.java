@@ -523,6 +523,64 @@ class PrdServiceImplTest {
         }
 
         @Test
+        @DisplayName("真 provider(非 mock)返回非空 → content 用 LLM 输出,不再走场景模板")
+        void realProviderOutputUsed() {
+            Prd prd = new Prd();
+            prd.setPrdId(80L);
+            prd.setTitle("AI 灌溉推荐引擎");
+            prd.setSceneTemplate("irrigation");
+            prd.setTargetUser("farmer");
+            prd.setVersion("v2.0");
+            // 真 LLM 输出:含 7 段关键字(保证完整度 ≥ 80)+ 唯一标记
+            String llm = "# REAL-LLM-PRD-BODY\n"
+                + "## 1. 背景与目标\n" + "x".repeat(120) + "\n"
+                + "## 2. 用户故事\n" + "x".repeat(120) + "\n"
+                + "## 3. 功能描述\n" + "x".repeat(120) + "\n"
+                + "## 4. 非功能需求\n" + "x".repeat(120) + "\n"
+                + "## 5. 验收标准\n" + "x".repeat(120) + "\n"
+                + "## 6. 原型说明\n" + "x".repeat(120) + "\n"
+                + "## 7. 版本说明\n" + "x".repeat(120);
+            when(prdMapper.selectPrdById(80L)).thenReturn(prd);
+            when(prdMapper.updatePrd(any())).thenReturn(1);
+            when(aiService.chat(any(AiChatRequest.class)))
+                .thenReturn(AiChatResult.ok("openai", "gpt-4o", llm));
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                Prd result = service.aiGenerate(80L);
+                assertThat(result.getContent())
+                    .contains("REAL-LLM-PRD-BODY")
+                    .doesNotContain("agriplm_split/prd.html"); // 场景模板独有水印不应出现
+                assertThat(result.getAiGenerated()).isEqualTo("Y");
+                assertThat(result.getCompletenessScore())
+                    .isGreaterThanOrEqualTo(new BigDecimal("80.00"));
+            }
+        }
+
+        @Test
+        @DisplayName("真 provider 用 ```markdown 围栏 → 落库前剥离围栏")
+        void realProviderFenceStripped() {
+            Prd prd = new Prd();
+            prd.setPrdId(81L);
+            prd.setTitle("围栏 PRD");
+            prd.setSceneTemplate("irrigation");
+            prd.setTargetUser("farmer");
+            String fenced = "```markdown\n# FENCED-PRD\n## 背景与目标\n正文\n```";
+            when(prdMapper.selectPrdById(81L)).thenReturn(prd);
+            when(prdMapper.updatePrd(any())).thenReturn(1);
+            when(aiService.chat(any(AiChatRequest.class)))
+                .thenReturn(AiChatResult.ok("anthropic", "claude", fenced));
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                Prd result = service.aiGenerate(81L);
+                assertThat(result.getContent())
+                    .startsWith("# FENCED-PRD")
+                    .doesNotContain("```");
+            }
+        }
+
+        @Test
         @DisplayName("AiService.chat 失败 → fallback 走场景化 mock,不阻塞(业务连续)")
         void aiServiceFailFallback() {
             Prd prd = new Prd();

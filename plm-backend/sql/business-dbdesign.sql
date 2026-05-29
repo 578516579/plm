@@ -16,7 +16,7 @@ CREATE TABLE tb_dbdesign (
     normalization_check  TEXT                                   COMMENT '规范检查 JSON (命名/索引/范式)',
     ai_generated         CHAR(1)       DEFAULT 'N'              COMMENT 'Y=AI 生成',
     ai_generated_at      DATETIME      DEFAULT NULL             COMMENT 'AI 生成时间',
-    status               VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_dbdesign_status 4 状态',
+    status               VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_dbdesign_status 4 状态',
     author_user_id       BIGINT(20)    NOT NULL                 COMMENT 'DBA',
     reviewer_user_id     BIGINT(20)    DEFAULT NULL             COMMENT '评审人',
     create_by            VARCHAR(64)   DEFAULT '',

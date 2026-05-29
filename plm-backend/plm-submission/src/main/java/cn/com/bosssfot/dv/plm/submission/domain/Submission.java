@@ -21,6 +21,8 @@ public class Submission extends BaseEntity
     @Excel(name = "提测编号") private String submissionNo;
     @Excel(name = "项目ID") private Long projectId;
     private Long sprintId;
+    /** 关联测试方案 ID（可空）— Proposal 0028 P0-1 产品主线 FK,跨模块同 projectId 强约束 */
+    @Excel(name = "测试方案ID") private Long testplanId;
     @Excel(name = "提测标题") private String title;
     private String scope;
     @Excel(name = "环境") private String environment;
@@ -50,6 +52,8 @@ public class Submission extends BaseEntity
     public void setProjectId(Long v) { this.projectId = v; }
     public Long getSprintId() { return sprintId; }
     public void setSprintId(Long v) { this.sprintId = v; }
+    public Long getTestplanId() { return testplanId; }
+    public void setTestplanId(Long v) { this.testplanId = v; }
     public String getTitle() { return title; }
     public void setTitle(String v) { this.title = v; }
     public String getScope() { return scope; }

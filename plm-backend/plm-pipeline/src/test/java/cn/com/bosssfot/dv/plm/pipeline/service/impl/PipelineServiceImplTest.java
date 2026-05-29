@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,10 +22,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
+import cn.com.bosssfot.dv.plm.common.spi.ProjectScopedLookup;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.pipeline.domain.Pipeline;
 import cn.com.bosssfot.dv.plm.pipeline.mapper.PipelineMapper;
@@ -45,6 +49,13 @@ class PipelineServiceImplTest {
 
     @Mock
     private PipelineMapper pipelineMapper;
+
+    /**
+     * proposal 0028 P0-2A: SPI Map 由 @InjectMocks 按字段类型注入到 service。
+     * 用 @Spy + new HashMap 保留真实 Map.get() 行为,测试内手动 put 期望的 lookup mock。
+     */
+    @Spy
+    private Map<String, ProjectScopedLookup> projectScopedLookups = new HashMap<>();
 
     @InjectMocks
     private PipelineServiceImpl service;
@@ -345,6 +356,79 @@ class PipelineServiceImplTest {
             assertThat(result.getLastRunAt()).isNotNull();
             assertThat(result.getSuccessRate()).isNotNull();
             assertThat(result.getSuccessRate().doubleValue()).isBetween(0.0, 100.0);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // proposal 0028 P0-2A: 跨模块 FK 校验 (pipeline.releaseId 同项目)
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("FkValidation — pipeline.releaseId 同项目校验")
+    class FkValidation {
+
+        @Test
+        @DisplayName("testFkOk_目标存在且同 projectId 通过")
+        void testFkOk() {
+            sample.setProjectId(1L);
+            sample.setReleaseId(55L);
+            ProjectScopedLookup releaseLookup = Mockito.mock(ProjectScopedLookup.class);
+            when(releaseLookup.resolveProjectId(55L)).thenReturn(1L);
+            projectScopedLookups.put("release", releaseLookup);
+
+            when(pipelineMapper.selectMaxSeqOfYear(anyString())).thenReturn(null);
+            when(pipelineMapper.insertPipeline(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                assertThat(service.insertPipeline(sample)).isEqualTo(1);
+            }
+            verify(releaseLookup).resolveProjectId(55L);
+        }
+
+        @Test
+        @DisplayName("testFkNullOk_releaseId 为 null 跳过校验")
+        void testFkNullOk() {
+            sample.setProjectId(1L);
+            sample.setReleaseId(null);
+            when(pipelineMapper.selectMaxSeqOfYear(anyString())).thenReturn(null);
+            when(pipelineMapper.insertPipeline(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                assertThat(service.insertPipeline(sample)).isEqualTo(1);
+            }
+            assertThat(projectScopedLookups).doesNotContainKey("release");
+        }
+
+        @Test
+        @DisplayName("testFkNotFound_lookup 返回 null → 702")
+        void testFkNotFound() {
+            sample.setProjectId(1L);
+            sample.setReleaseId(999L);
+            ProjectScopedLookup releaseLookup = Mockito.mock(ProjectScopedLookup.class);
+            when(releaseLookup.resolveProjectId(999L)).thenReturn(null);
+            projectScopedLookups.put("release", releaseLookup);
+
+            assertThatThrownBy(() -> service.insertPipeline(sample))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("发布单不存在");
+            verify(pipelineMapper, never()).insertPipeline(any());
+        }
+
+        @Test
+        @DisplayName("testFkDifferentProject_lookup 返回别的 projectId → 702")
+        void testFkDifferentProject() {
+            sample.setProjectId(1L);
+            sample.setReleaseId(55L);
+            ProjectScopedLookup releaseLookup = Mockito.mock(ProjectScopedLookup.class);
+            when(releaseLookup.resolveProjectId(55L)).thenReturn(2L); // 不同项目
+            projectScopedLookups.put("release", releaseLookup);
+
+            assertThatThrownBy(() -> service.insertPipeline(sample))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("同一项目");
+            verify(pipelineMapper, never()).insertPipeline(any());
         }
     }
 

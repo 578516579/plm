@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -44,6 +47,7 @@ public class ManualProductServiceImpl implements IManualProductService
 
     @Autowired private ManualProductMapper manualproductMapper;
     @Autowired private ProjectMapper projectMapper;
+    @Autowired private AiService aiService;
 
     @Override
     public List<ManualProduct> selectManualProductList(ManualProduct t) {
@@ -139,6 +143,52 @@ public class ManualProductServiceImpl implements IManualProductService
     @Transactional(rollbackFor = Exception.class)
     public int deleteManualProductByIds(Long[] ids) {
         return manualproductMapper.deleteManualProductByIds(ids);
+    }
+
+    /**
+     * P0-1b: AI 一键生成产品手册 Markdown。真 provider 非空采用 LLM 输出,否则回退到结构化模板。
+     * 状态推进至 02 (已生成),同时回填 generatedAt + aiGenerated=Y。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ManualProduct aiGenerate(Long manualproductId) {
+        ManualProduct m = manualproductMapper.selectManualProductById(manualproductId);
+        if (m == null) {
+            throw new ServiceException("产品手册不存在", 404);
+        }
+        AiChatRequest req = AiChatRequest.builder("")
+            .system("你是 PLM 资深技术写作,擅长把产品功能写成面向终端用户的产品手册"
+                + "(Markdown,含目录/章节/截图占位)。")
+            .user("为产品 [" + m.getTitle() + "] 版本 " + m.getProductVersion()
+                + " 生成完整产品手册,包含模块: " + m.getIncludeModules()
+                + "。输出 Markdown:首段 ##目录,后续按模块章节展开,每章含\"功能说明 / 操作步骤 / 常见问题\"三节,"
+                + "在关键操作处插入 `[截图: 描述]` 占位行。")
+            .callerTag("manual-product#" + manualproductId)
+            .temperature(0.6)
+            .maxTokens(4000)
+            .build();
+        String content = AiTexts.generate(aiService, req, () -> buildManualTemplate(m));
+        m.setContent(content);
+        m.setAiGenerated("Y");
+        m.setStatus("02");
+        m.setGeneratedAt(new Date());
+        m.setUpdateBy(SecurityUtils.getUsername());
+        manualproductMapper.updateManualProduct(m);
+        return m;
+    }
+
+    private static String buildManualTemplate(ManualProduct m) {
+        String modules = StringUtils.isBlank(m.getIncludeModules()) ? "全部模块" : m.getIncludeModules();
+        return "# " + m.getTitle() + " v" + m.getProductVersion() + " 产品手册\n\n"
+            + "## 目录\n- 概述\n- 功能模块\n- 常见问题\n\n"
+            + "## 1. 概述\n本手册介绍 " + m.getTitle() + " v" + m.getProductVersion()
+            + " 的功能、操作与注意事项。\n\n"
+            + "## 2. 功能模块\n包含模块: " + modules + "\n\n"
+            + "[截图: 主界面]\n\n"
+            + "### 2.1 功能说明\n(详见 PRD)\n\n"
+            + "### 2.2 操作步骤\n1. 登录系统\n2. 进入模块\n3. 完成业务操作\n\n"
+            + "### 2.3 常见问题\n- Q: 如何登录? A: 使用管理员分配的账号密码。\n\n"
+            + "## 3. 常见问题汇总\n详见各模块章节。\n";
     }
 
     private String generateManualproductNo() {

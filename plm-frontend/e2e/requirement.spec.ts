@@ -9,6 +9,7 @@
  * - TC-Req-F010: 评审前置失败 — 00→01 无通过评审 → 701 (PRD §F2.4 新增 2026-05-25)
  * - TC-Req-F011: 评审 API CRUD — submit / list / delete (PRD §F2.4 新增 2026-05-25)
  * - TC-Req-F012: 打回评审 reviewComment 必填 — 604 (PRD §F2.4 新增 2026-05-25)
+ * - TC-Req-F013: AI 优先级初评 — aiEvaluation high/medium/low + 落库 (PRD §F2.1 新增 2026-05-28)
  */
 import { test, expect, APIRequestContext } from '@playwright/test'
 import { loginAsAdmin } from './helpers/auth'
@@ -217,6 +218,32 @@ test.describe('Requirement 模块 E2E', () => {
     const resp = await api.submitRequirementReview(id, { reviewResult: '01', reviewComment: '' })
     expect(resp.code).toBe(604)
     expect(resp.msg).toContain('打回评审')
+
+    execDelete('tb_requirement', `requirement_id=${id}`)
+  })
+
+  // ─────────────────────────────────────────────────────────────────────
+  // PRD §F2.1 AI 优先级初评 (2026-05-28 新增)
+  // ─────────────────────────────────────────────────────────────────────
+
+  test('TC-Req-F013 AI 优先级初评 → aiEvaluation ∈ {high,medium,low} 且落库', async () => {
+    const data = makeRequirementData(projectId, `ai-eval-${RUN_ID}`)
+    data.title = `紧急:支付系统崩溃修复-${RUN_ID}`   // 含关键词 → 期望 high
+    const create = await api.createRequirement(data)
+    expect(create.code).toBe(200)
+    const list = await api.listRequirements()
+    const r = list.rows.find((x: any) => x.title === data.title)
+    const id = r.requirementId
+
+    const resp = await api.post(`/business/requirement/ai/evaluate/${id}`, {})
+    expect(resp.code).toBe(200)
+    expect(resp.data.aiEvaluation, 'AI 评估等级取值域').toMatch(/^(high|medium|low)$/)
+    expect(resp.data.aiEvaluation, '含「紧急/崩溃」关键词应评 high').toBe('high')
+
+    // 落库校验:列表里 aiEvaluation 已持久化
+    const after = await api.listRequirements()
+    const updated = after.rows.find((x: any) => x.requirementId === id)
+    expect(updated.aiEvaluation, 'aiEvaluation 应已落库').toBe('high')
 
     execDelete('tb_requirement', `requirement_id=${id}`)
   })

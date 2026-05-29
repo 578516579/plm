@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cn.com.bosssfot.dv.plm.common.core.event.EntityChangedEvent.Action;
 import cn.com.bosssfot.dv.plm.common.core.event.RequirementChangedEvent;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -63,6 +65,9 @@ public class RequirementServiceImpl implements IRequirementService
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private AiService aiService;
 
     @Override
     public List<Requirement> selectRequirementList(Requirement requirement)
@@ -194,9 +199,45 @@ public class RequirementServiceImpl implements IRequirementService
         return requirementMapper.countByProjectId(projectId);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Requirement aiEvaluate(Long requirementId)
+    {
+        Requirement r = requirementMapper.selectRequirementById(requirementId);
+        if (r == null) {
+            throw new ServiceException("需求不存在", 404);
+        }
+        // V3 审计:走一次 AiService 产生 invocation log,业务输出仍用 evalLevel 规则(保 E2E 稳定;
+        // Phase 后续接真厂商时改用 result.getText() 解析模型给出的优先级)。
+        aiService.chat(AiChatRequest.builder("")
+            .system("你是 PLM 资深需求分析师,擅长评估需求的业务价值与优先级")
+            .user("请评估需求 [" + r.getTitle() + "] 的优先级(high/medium/low),描述:"
+                + (r.getDescription() == null ? "" : r.getDescription()))
+            .callerTag("requirement#" + requirementId)
+            .build());
+
+        r.setAiEvaluation(evalLevel(r));
+        r.setUpdateBy(SecurityUtils.getUsername());
+        requirementMapper.updateRequirement(r);
+        return r;
+    }
+
     // ─────────────────────────────────────────────────────────────────────
     // 私有辅助
     // ─────────────────────────────────────────────────────────────────────
+
+    /** PRD §F2.1 AI 优先级初评(本期 mock,确定性输出):内容关键词 + 既有优先级 → high/medium/low */
+    private static String evalLevel(Requirement r) {
+        String text = (StringUtils.isNotBlank(r.getTitle()) ? r.getTitle() : "")
+            + " " + (StringUtils.isNotBlank(r.getDescription()) ? r.getDescription() : "");
+        if (text.matches("(?s).*(紧急|核心|关键|安全|事故|崩溃|阻断|高危).*") || "00".equals(r.getPriority())) {
+            return "high";
+        }
+        if (text.matches("(?s).*(重要|优化|性能|体验|改进|提升|扩展).*") || "01".equals(r.getPriority())) {
+            return "medium";
+        }
+        return "low";
+    }
 
     /** ADR-0002：编号规则 REQ-YYYY-NNNN */
     private String generateRequirementNo() {

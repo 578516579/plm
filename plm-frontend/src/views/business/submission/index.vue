@@ -283,15 +283,59 @@
             <el-tag :type="statusTagFor(row.status).type" size="small">{{ statusTagFor(row.status).label }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="280" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadSubmission(row)">编辑</el-button>
+            <!-- 0028 P0-2C: 已关联 → 直接看, 未关联 → 弹框选 -->
+            <el-button
+              v-if="row.testplanId"
+              link
+              type="info"
+              @click="nav.goEntityDetail('testplan', row.testplanId!)"
+            >查看方案#{{ row.testplanId }}</el-button>
+            <el-button
+              v-else
+              link
+              type="warning"
+              @click="openAttachTestplan(row)"
+            >拉起测试方案</el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
       <pagination v-if="total > 0" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" :total="total" @pagination="getList" />
     </el-card>
+
+    <!-- 0028 P0-2C: 关联测试方案 Dialog -->
+    <el-dialog v-model="attachDialog" title="🔗 关联测试方案" width="520">
+      <el-alert type="info" :closable="false" show-icon style="margin-bottom: 12px">
+        选择同项目下已存在的测试方案进行关联。后端会校验 testplan.projectId 必须与本提测单一致。
+      </el-alert>
+      <el-form label-width="100px">
+        <el-form-item label="测试方案">
+          <el-select
+            v-model="attachTestplanId"
+            placeholder="选择测试方案"
+            filterable
+            style="width: 100%"
+            :loading="attachLoading"
+          >
+            <el-option
+              v-for="tp in attachTestplanOptions"
+              :key="tp.testplanId"
+              :label="`${tp.testplanNo} - ${tp.title}`"
+              :value="tp.testplanId"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="attachDialog = false">取消</el-button>
+        <el-button type="primary" :disabled="!attachTestplanId" @click="confirmAttachTestplan">
+          确认关联
+        </el-button>
+      </template>
+    </el-dialog>
 
     <!-- 退回原因 Dialog -->
     <el-dialog v-model="rejectDialog" title="↩ 退回提测单" width="500">
@@ -315,8 +359,14 @@ import {
 } from '@element-plus/icons-vue'
 import {
   listSubmission, getSubmission, addSubmission, updateSubmission, delSubmission,
-  listProjectsForSelect, type Submission, type SubmissionQuery
+  listProjectsForSelect, listTestplansForSelect, attachTestplan,
+  type Submission, type SubmissionQuery
 } from '@/api/business/submission'
+import { statusTagFor } from './submissionDict'
+import { useBusinessRoute } from '@/utils/businessRoute'
+
+// 0028 P0-2C: 跨模块导航 composable
+const nav = useBusinessRoute()
 
 const formRef = ref()
 const saving = ref(false)
@@ -343,15 +393,6 @@ const rules = {
   projectId: [{ required: true, message: '请选择关联项目', trigger: 'change' }]
 }
 
-// === 状态机 ===
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿',     type: 'info' },
-  '01': { label: '已提交',   type: 'warning' },
-  '02': { label: '质量门禁中', type: 'primary' },
-  '03': { label: '已通过',   type: 'success' },
-  '04': { label: '已退回',   type: 'danger' }
-}
-function statusTagFor(s?: string) { return statusMap[s || '00'] || { label: s, type: 'info' } }
 const statusTag = computed(() => statusTagFor(current.status))
 
 // 5 态合法转换 (含反向边 04→00)
@@ -520,6 +561,53 @@ function newSubmission() {
   Object.assign(form, emptyForm())
   Object.keys(current).forEach(k => delete (current as any)[k])
   formRef.value?.clearValidate()
+}
+
+// ─── 0028 P0-2C: 关联测试方案 ───
+const attachDialog = ref(false)
+const attachLoading = ref(false)
+const attachTestplanOptions = ref<Array<{ testplanId: number; testplanNo: string; title: string }>>([])
+const attachTestplanId = ref<number | null>(null)
+const attachTargetRow = ref<Submission | null>(null)
+
+async function openAttachTestplan(row: Submission) {
+  if (!row.submissionId) return
+  if (!row.projectId) {
+    ElMessage.warning('该提测单缺 projectId, 请先在表单中选择项目')
+    return
+  }
+  attachTargetRow.value = row
+  attachTestplanId.value = null
+  attachDialog.value = true
+  attachLoading.value = true
+  try {
+    const res: any = await listTestplansForSelect(row.projectId)
+    attachTestplanOptions.value = res.rows || []
+    if (!attachTestplanOptions.value.length) {
+      ElMessage.warning('该项目下还没有测试方案, 请先到「测试方案」模块创建')
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.msg || '加载测试方案失败')
+  } finally {
+    attachLoading.value = false
+  }
+}
+
+async function confirmAttachTestplan() {
+  if (!attachTargetRow.value?.submissionId || !attachTestplanId.value) return
+  try {
+    const res: any = await attachTestplan(attachTargetRow.value.submissionId, attachTestplanId.value)
+    if (res?.code === 200) {
+      ElMessage.success(`已关联测试方案 #${attachTestplanId.value}`)
+      attachDialog.value = false
+      await getList()
+    } else {
+      ElMessage.error(res?.msg || '关联失败')
+    }
+  } catch (e: any) {
+    if (e?.code === 601) ElMessage.error('该测试方案不属于本项目 (601)')
+    else ElMessage.error(e?.msg || '关联失败')
+  }
 }
 
 onMounted(async () => {

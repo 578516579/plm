@@ -24,6 +24,9 @@
         <result property="status"           column="status"             />
         <result property="generatedAt"      column="generated_at"       />
         <result property="reviewerUserId"   column="reviewer_user_id"   />
+        <result property="isAggregated"     column="is_aggregated"      />
+        <result property="aggregatedAt"     column="aggregated_at"      />
+        <result property="isManualOverride" column="is_manual_override" />
         <result property="createBy"         column="create_by"          />
         <result property="createTime"       column="create_time"        />
         <result property="updateBy"         column="update_by"          />
@@ -37,6 +40,7 @@
                total_cases, passed_cases, failed_cases, coverage_rate, defect_summary,
                p0_defects, p1_defects, p2_defects, risk_level, risk_evaluation, recommendations,
                ai_generated, status, generated_at, reviewer_user_id,
+               is_aggregated, aggregated_at, is_manual_override,
                create_by, create_time, update_by, update_time, remark, del_flag
         from tb_testreport
     </sql>
@@ -85,6 +89,9 @@
             <if test="status != null">status,</if>
             <if test="generatedAt != null">generated_at,</if>
             <if test="reviewerUserId != null">reviewer_user_id,</if>
+            <if test="isAggregated != null">is_aggregated,</if>
+            <if test="aggregatedAt != null">aggregated_at,</if>
+            <if test="isManualOverride != null">is_manual_override,</if>
             <if test="createBy != null">create_by,</if>
             <if test="remark != null">remark,</if>
             create_time
@@ -110,6 +117,9 @@
             <if test="status != null">#{status},</if>
             <if test="generatedAt != null">#{generatedAt},</if>
             <if test="reviewerUserId != null">#{reviewerUserId},</if>
+            <if test="isAggregated != null">#{isAggregated},</if>
+            <if test="aggregatedAt != null">#{aggregatedAt},</if>
+            <if test="isManualOverride != null">#{isManualOverride},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="remark != null">#{remark},</if>
             sysdate()
@@ -139,6 +149,9 @@
             <if test="status != null">status = #{status},</if>
             <if test="generatedAt != null">generated_at = #{generatedAt},</if>
             <if test="reviewerUserId != null">reviewer_user_id = #{reviewerUserId},</if>
+            <if test="isAggregated != null">is_aggregated = #{isAggregated},</if>
+            <if test="aggregatedAt != null">aggregated_at = #{aggregatedAt},</if>
+            <if test="isManualOverride != null">is_manual_override = #{isManualOverride},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="remark != null">remark = #{remark},</if>
             update_time = sysdate()

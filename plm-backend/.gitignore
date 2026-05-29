@@ -39,9 +39,13 @@ nbdist/
 ######################################################################
 # Others
 *.log
+logs/
 *.xml.versionsBackup
 *.swp
 
 !*/build/*.java
 !*/build/*.html
 !*/build/*.xml
+
+# DB migration ledger — 本地状态,不入仓 (scripts/db-migrate.sh 管理)
+sql/.applied-scripts

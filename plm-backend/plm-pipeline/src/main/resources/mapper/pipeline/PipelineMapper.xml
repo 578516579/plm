@@ -5,6 +5,7 @@
         <id     property="pipelineId"     column="pipeline_id"     />
         <result property="pipelineNo"     column="pipeline_no"     />
         <result property="projectId"      column="project_id"      />
+        <result property="releaseId"      column="release_id"      />
         <result property="pipelineName"   column="pipeline_name"   />
         <result property="repoName"       column="repo_name"       />
         <result property="repoBranch"     column="repo_branch"     />
@@ -28,7 +29,7 @@
     </resultMap>
 
     <sql id="selectPipelineVo">
-        select pipeline_id, pipeline_no, project_id, pipeline_name, repo_name, repo_branch,
+        select pipeline_id, pipeline_no, project_id, release_id, pipeline_name, repo_name, repo_branch,
                cicd_tool, trigger_type, cron_expr, yaml_content, last_run_status, last_run_at,
                total_runs, success_count, success_rate, status, author_user_id,
                create_by, create_time, update_by, update_time, remark, del_flag
@@ -41,6 +42,7 @@
             del_flag = '0'
             <if test="pipelineNo != null and pipelineNo != ''">and pipeline_no like concat('%', #{pipelineNo}, '%')</if>
             <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="releaseId != null">and release_id = #{releaseId}</if>
             <if test="pipelineName != null and pipelineName != ''">and pipeline_name like concat('%', #{pipelineName}, '%')</if>
             <if test="repoName != null and repoName != ''">and repo_name like concat('%', #{repoName}, '%')</if>
             <if test="cicdTool != null and cicdTool != ''">and cicd_tool = #{cicdTool}</if>
@@ -59,6 +61,7 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="pipelineNo != null">pipeline_no,</if>
             <if test="projectId != null">project_id,</if>
+            <if test="releaseId != null">release_id,</if>
             <if test="pipelineName != null">pipeline_name,</if>
             <if test="repoName != null">repo_name,</if>
             <if test="repoBranch != null">repo_branch,</if>
@@ -80,6 +83,7 @@
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="pipelineNo != null">#{pipelineNo},</if>
             <if test="projectId != null">#{projectId},</if>
+            <if test="releaseId != null">#{releaseId},</if>
             <if test="pipelineName != null">#{pipelineName},</if>
             <if test="repoName != null">#{repoName},</if>
             <if test="repoBranch != null">#{repoBranch},</if>
@@ -104,6 +108,7 @@
         update tb_pipeline
         <trim prefix="SET" suffixOverrides=",">
             <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="releaseId != null">release_id = #{releaseId},</if>
             <if test="pipelineName != null">pipeline_name = #{pipelineName},</if>
             <if test="repoName != null">repo_name = #{repoName},</if>
             <if test="repoBranch != null">repo_branch = #{repoBranch},</if>
@@ -132,5 +137,17 @@
     <select id="selectMaxSeqOfYear" parameterType="String" resultType="java.lang.Integer">
         select max(cast(substring(pipeline_no, length(#{prefix}) + 1) as unsigned)) as max_seq
         from tb_pipeline where pipeline_no like concat(#{prefix}, '%')
+    </select>
+
+    <!-- Proposal 0028 P0-3B: DORA 聚合 — 按 last_run_status 窗口期计数 -->
+    <select id="countByStatusInPeriod" resultType="long">
+        select count(*)
+        from tb_pipeline
+        where del_flag = '0'
+          and project_id = #{projectId}
+          and last_run_status = #{status}
+          and last_run_at is not null
+          and last_run_at >= #{periodStart}
+          and last_run_at &lt; #{periodEnd}
     </select>
 </mapper>

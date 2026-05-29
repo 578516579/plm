@@ -281,6 +281,7 @@ import {
   listUed, addUed, updateUed, delUed, aiReviewUed, getUed, listProjectsForSelect,
   type Ued, type UedQuery
 } from '@/api/business/ued'
+import { statusTagFor } from './uedDict'
 
 const dialogVisible = ref(false)
 const figmaSyncVisible = ref(false)
@@ -322,17 +323,6 @@ const agriComponents = [
   { tag: '地块地图组件', icon: '🗺️', label: '地块地图组件' },
   { tag: '农作物生长周期', icon: '🌾', label: '农作物生长周期' }
 ]
-
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿',   type: 'info' },
-  '01': { label: '评审中', type: 'warning' },
-  '02': { label: '已确认', type: 'success' },
-  '03': { label: '已废弃', type: 'danger' }
-}
-
-function statusTagFor(s?: string) {
-  return statusMap[s || '00'] || { label: s || '-', type: 'info' }
-}
 
 function scoreTagType(s?: number): any {
   if (!s) return 'info'

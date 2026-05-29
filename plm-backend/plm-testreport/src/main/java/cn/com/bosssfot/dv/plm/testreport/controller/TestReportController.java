@@ -62,4 +62,12 @@ public class TestReportController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(testreportService.deleteTestReportByIds(ids));
     }
+
+    /** Proposal 0028 P0-3A — 按 projectId/testplanId 实时聚合 testcase + defect */
+    @PreAuthorize("@ss.hasPermi('business:testreport:edit')")
+    @Log(title = "测试报告", businessType = BusinessType.OTHER)
+    @PostMapping("/{id}/refresh-aggregate")
+    public AjaxResult refreshAggregate(@PathVariable("id") Long id) {
+        return AjaxResult.success(testreportService.aggregateFromTestplan(id));
+    }
 }

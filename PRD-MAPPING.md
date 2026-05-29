@@ -42,12 +42,15 @@
 | 31 | DORA | - | devops.html | plm-dora | 🟢 PRD-aligned |
 | **32** | **MCP Server** | **§2.5/§3.4/§4.1** | **settings.html#MCP集成 (Tab3)** | **plm-mcp** | **🆕 v0.x（Proposal 0007）** |
 | **33** | **集成对接 Integration** | **§3.1/§3.5 Phase2** | **settings.html#MCP集成 (Tab3)** | **plm-integration** | **🆕 v0.x（Proposal 0007）** |
+| 34 | 立项建议书 Proposal | (v0.4 路线图) | — | plm-proposal | 🟡 Maven 占位 — 仅 `package-info.java`，功能由 **#7 Document (`doc_type=proposal`)** 承载（详 [03-开发/Stubs-Roadmap.md §2.1](03-开发/Stubs-Roadmap.md)）；保留模块坐标以便将来真拆分时无破坏迁移 |
+
+> 注：CLAUDE.md 顶部 "🟡 空壳 0 个" 指 31 个**业务模块**，不含 plm-proposal 这种 Maven 占位（实际承载体已 🟢）。
 
 ---
 
 ## 2. 字段对照表（Domain ↔ 原型表单元素 ↔ DB 列）
 
-> 每个 PRD-aligned 模块一节。当前已填 §1-13（13 PRD-aligned）+ §14-§21（**8 个 prd-align 空壳模块**)+ §22 Dashboard + §32-33（MCP/Integration）—— **全 23 个业务模块字段对照表完工**。末批 8 模块（manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora，2026-05-27 转 🟢 PRD-aligned）的字段契约已由 Domain/Mapper/ServiceImpl 源码 + 200 case 单测锁定，业务 SQL（`business-<module>.sql`）含 DDL+字典；§2 inline 字段对照表暂参见各模块 [02-设计/<模块>-数据库设计.md](02-设计/) 和 [02-设计/<模块>-API设计.md](02-设计/)，待后续补齐为 inline。
+> 每个 PRD-aligned 模块一节。当前已填 §1-13（13 PRD-aligned）+ §14-§21（**8 个 prd-align 空壳模块**)+ §22 Dashboard + §32-33（MCP/Integration）—— **全 23 个业务模块字段对照表完工**。末批 8 模块（manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora，2026-05-27 转 🟢 PRD-aligned）的**字段契约权威以 Domain/Mapper/ServiceImpl 源码 + 200 case 单测 + `business-<module>.sql` (DDL+字典) + [02-设计/<模块>-数据库设计.md / -API设计.md](02-设计/) 为准**；§2 inline 表暂未补全，追踪登记在 [99-跨阶段/在途任务.md](99-跨阶段/在途任务.md) P1-4 行，**不阻塞业务**（前后端契约一致性由 `api-contract-keeper` 子 agent 把关,最近一轮抽查 8 模块 7 个完全一致）。
 
 ### §1. Project（plm-project）
 
@@ -87,6 +90,7 @@
 | status | status | VARCHAR | 字典 `biz_req_status` | 00=待评审 01=开发中 02=已完成 03=已取消 |
 | assigneeUserId | assignee_user_id | BIGINT | F2.1 指派人 | FK→sys_user.user_id（可空） |
 | reviewNote | review_note | VARCHAR | 状态推进时简要纪要 | |
+| aiEvaluation | ai_evaluation | VARCHAR(20) | **F2.1 AI 优先级初评** | high/medium/low；非字典前端约定值；端点 `POST /ai/evaluate/{id}` |
 | createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
 
 ### §3. Sprint（plm-sprint）
@@ -149,6 +153,7 @@
 | projectId | project_id | BIGINT | F4.6 | FK→tb_project.id（必填） |
 | sprintId | sprint_id | BIGINT | F4.6 | FK→tb_sprint.id（可空） |
 | taskId | task_id | BIGINT | F4.6 | FK→tb_task.id（可空） |
+| testcaseId | testcase_id | BIGINT | **0028 P0-1b** | FK→tb_testcase.id（可空,用例失败→缺陷溯源;同 projectId 强校验 → 702）|
 | title | title | VARCHAR | 原型 defects.html "标题" | 必填 |
 | description | description | TEXT | 原型 "详细描述" | |
 | severity | severity | VARCHAR | 字典 `biz_defect_severity` | 严重级别 |
@@ -226,6 +231,7 @@
 | submissionNo | submission_no | VARCHAR | ADR | 编号 SUB-YYYY-NNNN |
 | projectId | project_id | BIGINT | F4.4 | FK→tb_project.id（必填） |
 | sprintId | sprint_id | BIGINT | F4.4 | FK→tb_sprint.id（可空） |
+| testplanId | testplan_id | BIGINT | **0028 P0-1a** | FK→tb_testplan.id（可空,提测拉起测试方案;同 projectId 强校验 → 702;状态 ≥01 必填）|
 | title | title | VARCHAR | 原型 "提测标题" | 必填 |
 | scope | scope | TEXT | 原型 "范围" | 本次提测范围 |
 | environment | environment | VARCHAR | 原型 "环境" | dev/sit/uat/prod |
@@ -257,6 +263,7 @@
 | version | version | VARCHAR | 原型 "版本号" | 如 v1.0.0,必填 |
 | projectId | project_id | BIGINT | - | FK→tb_project.id（必填） |
 | sprintId | sprint_id | BIGINT | - | FK→tb_sprint.id（可空） |
+| pipelineId | pipeline_id | BIGINT | **0028 P0-1c** | FK→tb_pipeline.id（可空,发布关联流水线;同 projectId 校验经 ProjectScopedLookup SPI → 702;状态 ≥01 必填）|
 | strategy | strategy | VARCHAR | 字典 `biz_release_strategy` | blue_green / canary / rolling |
 | environment | environment | VARCHAR | 原型 "环境" | dev/sit/uat/prod |
 | releaseNotes | release_notes | TEXT | 原型 "发布说明" | 变更内容 |
@@ -380,6 +387,9 @@
 | status | status | VARCHAR | 字典 `biz_testreport_status` | 00=草稿 01=审核中 02=已发布 |
 | generatedAt | generated_at | DATETIME | - | AI 生成时自动填 |
 | reviewerUserId | reviewer_user_id | BIGINT | - | FK→sys_user |
+| isAggregated | is_aggregated | CHAR(1) | **0028 P0-3A** | Y/N,默认 N。`aggregateFromTestplan` 跑完置 Y(自动从 testcase + defect 聚合 totalCases/passedCases/failedCases/p0Defects/p1Defects/coverageRate)|
+| aggregatedAt | aggregated_at | DATETIME | **0028 P0-3A** | 聚合时间戳;`POST /business/testreport/{id}/refresh-aggregate` 端点触发 |
+| isManualOverride | is_manual_override | CHAR(1) | **0028 P0-3A** | Y/N,默认 N。Y 时聚合服务**直接 return 不动数据**(尊重人工填的字段)— 防覆盖语义关键字段 |
 | createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
 
 ### §14. Inception（plm-inception）
@@ -560,6 +570,232 @@
 - `qualitySnapshot`: defectCount / testPassRate / codeCoverage
 - `aiMetrics`: hoursSaved / docsGenerated / recommendations[]
 - `lifecycle`: 17 阶段静态数组(立项→…→运维)
+
+### §23. ManualImpl（plm-manual-impl）
+
+**领域**: 实施手册（面向运维/部署人员）。**PRD 出处**: F5.2 / 原型 [implmanual.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/implmanual.html)
+
+#### 表 `tb_manual_impl`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| manualimplId | manualimpl_id | BIGINT | - | 主键 |
+| manualimplNo | manualimpl_no | VARCHAR(32) | MI-YYYY-NNNN | 自动生成 / DuplicateKey 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目 | FK→tb_project.id |
+| title | title | VARCHAR(200) | 原型 "手册标题" | 必填 |
+| deployMode | deploy_mode | VARCHAR(30) | 字典 `biz_manualimpl_deploy` | docker_compose / kubernetes / baremetal |
+| osType | os_type | VARCHAR(30) | 字典 `biz_manualimpl_os` | centos7 / ubuntu20 / kylin (国产化) |
+| dbType | db_type | VARCHAR(30) | 字典 `biz_manualimpl_db` | postgresql14 / mysql8 / kdb (国产化) |
+| envConfig | env_config | TEXT | 原型 "环境变量配置" | KEY=VALUE 多行 |
+| content | content | LONGTEXT | F5.2 AI 生成 | Markdown 手册正文 |
+| outputFormats | output_formats | VARCHAR(100) | 原型 "导出格式" | CSV: word,pdf,html,markdown |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| generatedAt | generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_manualimpl_status` | 00 草稿 / 01 生成中 / 02 已生成 / 03 已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+**AI 端点**: `POST /business/manual-impl/ai/generate/{id}` 权限 `business:manual-impl:edit`（接 `AiTexts.generate`，真 provider 输出 Markdown 手册 / 默认模板兜底）
+
+### §24. ManualOps（plm-manual-ops）
+
+**领域**: 运维手册（监控/告警/IoT 维度）。**PRD 出处**: F5.3 / 原型 [opsmanual.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/opsmanual.html)
+
+#### 表 `tb_manual_ops`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| manualopsId | manualops_id | BIGINT | - | 主键 |
+| manualopsNo | manualops_no | VARCHAR(32) | MO-YYYY-NNNN | 自动生成 / 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目 | FK→tb_project.id |
+| title | title | VARCHAR(200) | 原型 "手册标题" | 必填 |
+| monitoringPlan | monitoring_plan | VARCHAR(500) | 字典 `biz_manualops_monitor` | prometheus / grafana / zabbix（CSV 多选） |
+| alertChannels | alert_channels | VARCHAR(500) | 字典 `biz_manualops_alert` | email / dingtalk / wechat / sms（CSV 多选） |
+| iotDeviceTypes | iot_device_types | VARCHAR(500) | 字典 `biz_manualops_iot` | sensor_soil / sensor_weather / valve / camera（CSV 多选,农业 IoT 特有） |
+| content | content | LONGTEXT | F5.3 AI 生成 | Markdown 手册正文 |
+| outputFormats | output_formats | VARCHAR(100) | 原型 "导出格式" | CSV: word,pdf,html,markdown |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| generatedAt | generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_manualops_status` | 00 草稿 / 01 生成中 / 02 已生成 / 03 已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+**AI 端点**: `POST /business/manual-ops/ai/generate/{id}` 权限 `business:manual-ops:edit`（同 manual-impl 范式）
+
+### §25. Analytics（plm-analytics）
+
+**领域**: 效能分析快照（周期性聚合：吞吐/质量/DORA + AI 工时节省）。**PRD 出处**: F6 / 原型 [analytics.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/analytics.html) + [devops.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/devops.html)
+
+#### 表 `tb_analytics_snapshot`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| snapshotId | snapshot_id | BIGINT | - | 主键 |
+| snapshotNo | snapshot_no | VARCHAR(32) | AN-YYYY-NNNN | 自动生成 / 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目（可空 = 全局快照） | FK→tb_project.id |
+| title | title | VARCHAR(200) | 原型 "快照名称" | 必填 |
+| periodType | period_type | VARCHAR(20) | 字典 `biz_analytics_period` | week / month / quarter / year |
+| snapshotDate | snapshot_date | DATE | 原型 "快照日期" | 周期起算日 |
+| requirementThroughput | requirement_throughput | INT | F6 PLM 吞吐 | 周期内完成需求数 |
+| sprintOnTimeRate | sprint_on_time_rate | DECIMAL(5,2) | F6 PLM 吞吐 | 0-100 % |
+| defectDensity | defect_density | DECIMAL(8,4) | F6 PLM 质量 | 缺陷 / KLOC |
+| autoTestCoverage | auto_test_coverage | DECIMAL(5,2) | F6 PLM 质量 | 0-100 % |
+| deploymentFrequency | deployment_frequency | DECIMAL(8,2) | DORA 1 | 部署 / 天 |
+| leadTimeHours | lead_time_hours | DECIMAL(10,2) | DORA 2 | 需求→上线小时 |
+| mttrHours | mttr_hours | DECIMAL(10,2) | DORA 3 | 故障平均恢复小时 |
+| changeFailureRate | change_failure_rate | DECIMAL(5,2) | DORA 4 | 0-100 % |
+| aiHoursSaved | ai_hours_saved | DECIMAL(10,2) | F6 AI ROI | 周期内 AI 节省工时 |
+| activeProjects | active_projects | INT | F6 项目维度 | 在办项目数 |
+| projectsAtRisk | projects_at_risk | INT | F6 项目维度 | 风险项目数（自动算或手填） |
+| aiRecommendations | ai_recommendations | TEXT | F6 AI 改进建议 | 接 `AiTexts.generate` 文本 |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| aiGeneratedAt | ai_generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_analytics_status` | 00 草稿 / 01 已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+> 注：`aggregate()` 跨模块查询本期 mock（dashboard 同款 P0-1c 延期），快照表本身真实写入,只是 mock 数据。
+
+### §26. AiAgent（plm-ai-agent）
+
+**领域**: AI Agent 注册中心（6 类 Agent：需求/PRD/代码/测试/发布/运维 + Dify 工作流绑定）。**PRD 出处**: F3.5 / 原型 [aiagents.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/aiagents.html)
+
+#### 表 `tb_ai_agent`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| agentId | agent_id | BIGINT | - | 主键 |
+| agentNo | agent_no | VARCHAR(32) | AG-YYYY-NNNN | 自动生成 / 撞号重试 |
+| agentName | agent_name | VARCHAR(200) | 原型 "Agent 名称" | 必填 |
+| agentType | agent_type | VARCHAR(30) | 字典 `biz_aiagent_type` | requirement / prd / code / test / release / ops |
+| description | description | VARCHAR(500) | 原型 "描述" | |
+| promptTemplate | prompt_template | LONGTEXT | F3.5 prompt 工程 | 多行 prompt 文本 |
+| difyWorkflowId | dify_workflow_id | VARCHAR(100) | F3.5 Dify 集成 | Dify 工作流 ID（接真 Dify 时用） |
+| provider | provider | VARCHAR(30) | 字典 `biz_aiagent_provider` | mock / dify / openai / anthropic |
+| modelName | model_name | VARCHAR(100) | F3.5 模型选型 | gpt-4o / claude-3-5-sonnet / Mock 等 |
+| configJson | config_json | TEXT | F3.5 通用配置 | temperature / max_tokens / 等 |
+| totalCalls | total_calls | BIGINT | 统计 | 累计调用次数 |
+| successRate | success_rate | DECIMAL(5,2) | 统计 | 0-100 % |
+| lastInvokedAt | last_invoked_at | DATETIME | 统计 | 最近调用时间 |
+| status | status | VARCHAR(20) | 字典 `biz_aiagent_status` | 00 禁用 / 01 启用 / 02 调试 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+> 已知 UI ↔ SQL 显示层小漂移（2 处）：provider mock 前端「Mock」/ SQL「Mock 占位」；provider dify 前端「Dify」/ SQL「Dify 编排」。values 一致,锁当前前端约定（详 [`aiAgentDict.ts`](plm-frontend/src/views/business/ai-agent/aiAgentDict.ts) + commit `bf1f1a7`）。
+
+### §27. OpenSpec（plm-openspec）
+
+**领域**: AI OpenSpec / Spec as Code（OpenAPI 3.1 / AsyncAPI 3.0 / AI Function / GraphQL 注册）。**PRD 出处**: F3.5 / 原型 [aispec.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/aispec.html)
+
+#### 表 `tb_openspec`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| openspecId | openspec_id | BIGINT | - | 主键 |
+| openspecNo | openspec_no | VARCHAR(32) | OS-YYYY-NNNN | 自动生成 / 撞号重试 |
+| specName | spec_name | VARCHAR(200) | 原型 "规范名称" | 必填 |
+| specType | spec_type | VARCHAR(30) | 字典 `biz_openspec_type` | openapi3.1 / asyncapi3.0 / ai_function / graphql |
+| description | description | VARCHAR(500) | 原型 "描述" | |
+| specContent | spec_content | LONGTEXT | F3.5 spec 正文 | YAML / JSON 正文（接 `AiTexts.generate` 真 LLM 产物） |
+| version | version | VARCHAR(20) | 原型 "版本号" | 如 v1.0.0 |
+| agriKbRef | agri_kb_ref | VARCHAR(200) | F3.5 AgriKB 引用 | 农业知识库挂载 ID |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| aiGeneratedAt | ai_generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_openspec_status` | 00 草稿 / 01 已发布 / 02 已废弃 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §28. Pipeline（plm-pipeline）
+
+**领域**: CI/CD 流水线注册（代码仓库 / 触发方式 / YAML 定义 / 执行统计）。**PRD 出处**: DevOps 扩展 / 原型 [pipeline.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/pipeline.html)
+
+#### 表 `tb_pipeline`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| pipelineId | pipeline_id | BIGINT | - | 主键 |
+| pipelineNo | pipeline_no | VARCHAR(32) | PL-YYYY-NNNN | 自动生成 / 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目 | FK→tb_project.id |
+| releaseId | release_id | BIGINT | **0028 P0-1d** | FK→tb_release.id（可空,流水线→所属发布反向;同 projectId 校验经 ProjectScopedLookup SPI → 702;known limit 已关闭 commit `21b7166`）|
+| pipelineName | pipeline_name | VARCHAR(200) | 原型 "流水线名称" | 必填 |
+| repoName | repo_name | VARCHAR(200) | 原型 "代码仓库" | git@... 或 https URL |
+| repoBranch | repo_branch | VARCHAR(100) | 原型 "分支" | main / develop / feature/* |
+| cicdTool | cicd_tool | VARCHAR(30) | 字典 `biz_pipeline_tool` | jenkins / gitlab / github / gitea |
+| triggerType | trigger_type | VARCHAR(20) | 字典 `biz_pipeline_trigger` | manual / push / cron / tag |
+| cronExpr | cron_expr | VARCHAR(100) | 原型 "Cron 表达式" | triggerType=cron 时必填 |
+| yamlContent | yaml_content | LONGTEXT | 原型 "YAML 定义" | CI 配置文件文本 |
+| lastRunStatus | last_run_status | VARCHAR(20) | 字典 `biz_pipeline_result` | success / failed / running / skipped |
+| lastRunAt | last_run_at | DATETIME | 统计 | 最近执行时间 |
+| totalRuns | total_runs | INT | 统计 | 累计执行次数 |
+| successCount | success_count | INT | 统计 | 成功次数 |
+| successRate | success_rate | DECIMAL(5,2) | 统计 | 0-100 % |
+| status | status | VARCHAR(20) | 字典 `biz_pipeline_status` | 00 禁用 / 01 启用 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+### §29. FeatureFlag（plm-feature-flag）
+
+**领域**: 灰度发布 / 紧急开关 / 环境隔离（feature toggle）。**PRD 出处**: DevOps 扩展 / 原型 [featureflag.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/featureflag.html)
+
+#### 表 `tb_feature_flag`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| flagId | flag_id | BIGINT | - | 主键 |
+| flagNo | flag_no | VARCHAR(32) | FF-YYYY-NNNN | 自动生成 / 撞号重试 |
+| flagKey | flag_key | VARCHAR(100) | 原型 "Flag Key" | UNIQUE,代码引用键（如 `agri.irrigation.aiSuggest`） |
+| title | title | VARCHAR(200) | 原型 "功能说明" | 必填 |
+| description | description | VARCHAR(500) | 原型 "描述" | |
+| environment | environment | VARCHAR(20) | 字典 `biz_featureflag_env` | dev / test / staging / prod |
+| rolloutPercentage | rollout_percentage | INT | 原型 "灰度百分比" | 0-100 |
+| rolloutStrategy | rollout_strategy | VARCHAR(30) | 字典 `biz_featureflag_strategy` | percentage / user_segment / region / always_on / always_off |
+| targetUserSegment | target_user_segment | VARCHAR(500) | 原型 "目标用户" | rolloutStrategy=user_segment 时用,JSON 或 CSV |
+| status | status | VARCHAR(20) | 字典 `biz_featureflag_status` | 00 草稿 / 01 启用 / 02 暂停 / 03 归档 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+> 已知 UI ↔ schema 列展示漂移：前端 `状态` 列实际渲染 `rolloutMode` 而非 `status`（验收报告 P2-12 备注）—— 待 UED 评审后修正。
+
+### §30. Dora（plm-dora）
+
+**领域**: DORA 4 指标采集 + 热力图 + 前置时间拆解 + AI 持续改进建议。**PRD 出处**: DevOps 扩展 / 原型 [devops.html](prd和原型/AgriPLM-DevOps-原型/agriplm_split/devops.html)
+
+#### 表 `tb_dora_metric`
+
+| Java field | 列 | 类型 | PRD/原型出处 | 说明 |
+|---|---|---|---|---|
+| doraId | dora_id | BIGINT | - | 主键 |
+| doraNo | dora_no | VARCHAR(32) | DM-YYYY-NNNN | 自动生成 / 撞号重试 |
+| projectId | project_id | BIGINT | F1.2 关联项目（可空 = 全局） | FK→tb_project.id |
+| metricName | metric_name | VARCHAR(200) | 原型 "指标名" | 必填（如"deploy frequency week"） |
+| metricType | metric_type | VARCHAR(30) | 字典 `biz_dora_metric_type` | deployment_frequency / lead_time / mttr / change_failure_rate |
+| metricValue | metric_value | DECIMAL(10,2) | 原型 "指标值" | |
+| metricUnit | metric_unit | VARCHAR(20) | 原型 "单位" | 次 / 小时 / 分钟 / % |
+| periodType | period_type | VARCHAR(20) | 字典 `biz_dora_period`（验收 P2-12：当前用裸值,未挂字典） | week / month / quarter |
+| snapshotDate | snapshot_date | DATE | 原型 "记录日期" | |
+| trendChartJson | trend_chart_json | TEXT | F6 趋势图 | ECharts data JSON |
+| heatmapJson | heatmap_json | TEXT | F6 部署热力图 | ECharts heatmap data |
+| leadtimeBreakdown | leadtime_breakdown | TEXT | F6 前置时间拆解 | JSON: { dev: x, review: y, deploy: z } |
+| aiSuggestions | ai_suggestions | TEXT | F6 AI 改进建议 | 接 `AiTexts.generate` 文本 |
+| aiGenerated | ai_generated | CHAR(1) | - | Y / N |
+| aiGeneratedAt | ai_generated_at | DATETIME | - | AI 生成时间戳 |
+| status | status | VARCHAR(20) | 字典 `biz_dora_status`（验收 P2-12：UI 未渲染） | 00 草稿 / 01 已发布 |
+| authorUserId | author_user_id | BIGINT | - | FK→sys_user.user_id |
+| periodStart | period_start | DATE | **0028 P0-3B** | 聚合窗口起,默认 now - periodDays |
+| periodEnd | period_end | DATE | **0028 P0-3B** | 聚合窗口止,默认 now |
+| periodDays | period_days | INT | **0028 P0-3B** | 窗口天数,默认 30(对应"近 30 天 DORA 4 指标") |
+| isComputed | is_computed | CHAR(1) | **0028 P0-3B** | Y/N,默认 N。`computeMetrics(projectId, periodStart, periodEnd)` 跑完置 Y;Y 时再算覆盖,N 时跳过尊重人工录入 |
+| computedAt | computed_at | DATETIME | **0028 P0-3B** | 聚合时间戳;`POST /business/dora/refresh-compute` 端点触发 + `DoraComputeTask` 每日 03:00 cron 自动跑 |
+| createBy/createTime/updateBy/updateTime/remark/delFlag | (RuoYi 标准 6 字段) | | | |
+
+**联合索引**（0028 P0-3B）：`(project_id, metric_type, period_start)` — 防同窗口同指标重算冲突 + 加速 dashboard 查询。
+
+> ⚠️ **dora 模块已知 5 处跨层契约漂移**（commit `f3dfa01` 首登 + commit `5f93f77` P0-3B 部分修齐）:
+> 1. ~~metric_type 码 2/4 错位~~ → **0028 P0-3B 后端已修齐**：SQL `biz_dora_metric_type` 实际码为 `deploy_freq` / `lead_time` / `mttr` / `change_fail_rate`(非 PRD 描述的 deployment_frequency 全名);`DoraMetricServiceImpl.computeMetrics` 与 SQL 码对齐;前端 `doraDict.ts` 待 0029 子任务修齐(详 0029 漂移分类 A2)
+> 2. label emoji 装饰差异(显示层,锁当前)
+> 3. LEVEL 前端独有,SQL 无字典且表无列(仍待评审,0029 漂移分类 C4)
+> 4. `biz_dora_status` 字典定义但 UI 未渲染(0029 漂移分类 C1)
+> 5. ~~`biz_dora_period` 用裸值~~ → **0028 P0-3B 部分修齐**:后端引入 period_start/period_end/period_days 显式三列,不再裸值;前端字典渲染待 0029 C2 修齐
 
 ### §32. MCP Server（plm-mcp）
 
@@ -1025,3 +1261,4 @@
 | 2026-05-25 | Wjl + Claude | **需求与设计阶段(2920 菜单分组)整批收尾 — Prd / Arch / DbDesign 三模块 🟡→🟢 PRD-aligned 流程证据补齐**(承接 UED + ApiDesign 之后,完成 5 模块全部 🟢)— 同 chore/local-start-backend-script 分支并行 session 协同产出。具体:**(A) Prd(§17 §F2.2 AI PRD 生成器)**:字段表 §15 已升级到 inception 详细程度(5 列 + 唯一键 + F2.2 验收红线 ≥80);`PrdServiceImpl.aiGenerate()` 场景化增强(4 sceneTemplate × 3 targetUser = 12 组合 + 真实 `computeCompleteness` 7 段命中 × 90% + 字数 × 10% + `AiChatResult` 失败 fallback);`PrdServiceImplTest` 33 case 全绿(605 行);E2E `prd.spec.ts` 扩 1→11 case;创建 `instances/prd/` Phase 01/02/03 Gate 实例 3 文件。**(B) Arch(§18 §F3.1 系统概要设计 HLD)**:后端 5 件套已存在,本期补 `ArchServiceImplTest` **35 case 全绿** / BUILD SUCCESS(610 行,StateMachine×13[4 态含反向边 01→00 + 02 终态保护 + 跳级 4 种 + 反向非法 + ENUM 改非法 604]+ AiGenerate×3[designContent Markdown HLD / c4DiagramContent Mermaid C4 / nfrMapping 4 维 NFR]);创建 `instances/arch/` Phase 01/02/03 Gate 实例 3 文件。**(C) DbDesign(§19 §F3.2 数据库设计)**:后端 5 件套 + business-dbdesign.sql + business-dbdesign-rollback.sql + 共用 4 态状态机本已存在,本期补 `DbDesignServiceImplTest` 31 case(569 行,GenerateNo×4 / Validation×6 / Defaults×2 / **StateMachine×11**[4 态含反向边 + 02 终态保护 + 跳级 + 反向非法 + 改 projectId 不存在 702 + dbEngine 改非法 604]/ **AiGenerate×3**[erDiagramContent Mermaid erDiagram + dataDictionary Markdown + ddlScript CREATE TABLE 集合 + normalizationCheck 范式检查 JSON]/ Delete×1);创建 `instances/dbdesign/` Phase 01/02/03 Gate 实例 3 文件;**国产化金仓 (Kingbase) 适配登记 Phase 02 §B.2** — dbEngine ENUM 含 kingbase,本期 mock 按选项生成示例 DDL,真实 Dify 接入时 v0.2 验证。**(整批)**:5 模块 Gate 实例总计 16 文件(prd 3 + ued 3 + arch 3 + dbdesign 3 + apidesign 4);5 模块单测合计 ~2941 行(605+513+610+569+644);§1 第 17/18/19 行 🟡→🟢;§7 路线图 Prd/Arch/DbDesign 三模块加入 ✅ 完工列;在途任务台账增 6 行说明 4 模块流程证据并行展开 + dbdesign 收尾(zentao 钩子并存不冲突,路径精确互不重叠)。**至此需求与设计阶段 prd + ued + arch + dbdesign + apidesign 5 模块全部 🟢 PRD-aligned**,菜单种子 2210-2245 全部就绪(待 `menu-regroup-by-phase.sql` 跑后 admin 即可看见);下一批 testdata / autotest / analytics / ai-agent / openspec / pipeline / feature-flag / dora / manual-impl / manual-ops(测试 + DevOps + 交付 三阶段空壳模块)。 |
 | 2026-05-25 | Wjl + Claude | **测试阶段(2940 菜单)补色 + 下批 scope 划分** — TestData(§21) 和 AutoTest(§22) 实际已就绪(prd-align-batch-2026-05-17 含其 18 模块 Phase 03-05 batch 签字 + 后端 5 件套 + 字段表 §21 + 共用 3 态状态机本已存在;autotest 还有 4 E2E case 实测全套件验证可通过),仅 §1 状态色滞后未同步,本次补:(a) §1 行 21/22 🟡→🟢;(b) §7 路线图 TestData / AutoTest 挪入 ✅ 完工列;(c) 通过本会话 P0 troubleshoot(menu-path-absolute-business-prefix.sql)+ E2E spec 路径回归 `/business/*`,跑全套件 **171 passed / 1 failed(autotest TC-AT-E002 dialog selector 稳定性,与本工作无关已 spawn followup)/ 1 skipped**;**至此 PRD-aligned 业务模块 = 22+2 = 24 个,空壳剩 7 个**(manual-impl/manual-ops/pipeline/dora/analytics/feature-flag P0-P1 共 6.5 人日 + ai-agent/openspec V2 P2 各留 1.5 人日);scope-decider 划分 3 波节奏见 §7 "下一批"段。 |
 | 2026-05-27 | Wjl + Claude | **末批 8 个空壳模块 🟡→🟢 PRD-aligned 收尾 — 全 31 业务模块完工** — §1 行 23/24/25(ManualImpl/ManualOps/Analytics)+ 27/28/29/30/31(AiAgent/OpenSpec/Pipeline/FeatureFlag/DORA)状态色 🟡 空壳 → 🟢 PRD-aligned(8 模块后端 5 件套 + 前端 index.vue + api.ts + business-*.sql + e2e 3-4 case + 菜单种子 menu-seed-prd-aligned-modules.sql 2280-2365 本已存在,本批补 ServiceImpl 单测 + Gate 流程证据 + 状态色 + 菜单可见性修复)。**单测共 200 case 全绿**(实测各模块 `mvn -pl plm-<m> test` Failures=0 Errors=0):manual-impl 30(GenerateNo×4/Validation×8/Enum×4/StateMachine×10/AiGenerate×3/Delete×1)、manual-ops 31(CSV 多选告警渠道/IoT 设备类型逐项校验)、feature-flag 28(snake_case 正则 + 灰度策略↔百分比一致性 + canary 哈希 isEnabled + 双撞键 701)、openspec 23(3 态机 + 4 类 specType + 唯一键 701)、pipeline 21(2 态机 + trigger 模拟统计 + cron 表达式必填)、analytics 20(3 态机 + aiRecommend DORA 复盘)、dora 22(4 指标类型 + aiSuggest DORA 等级)、ai-agent 25(3 态机分支 00→{01,02}/01→{00}/02→{00,01} + invoke 成功率移动平均 + 失败 708 + buildChatRequest)。创建 `instances/<module>/` Phase 01/02/03 Gate 实例(8×3=24 文件);菜单可见性修复 SQL `menu-regroup-remaining-7.sql`(把 manual-impl 2280/manual-ops 2290/analytics 2300/openspec 2330/pipeline 2340/feature-flag 2350/dora 2360 从 hidden 2000 重挂到阶段目录 2950 交付与运维/2960 AI/2970 分析报表,修正 menu-regroup-by-phase.sql 行 92-104 引用了与 seed 不一致的 stale ID 2710-2780 的遗留问题)。**触发器**:用户"遍历所有没有实现的功能,开始实现";走 reflect 2026-W22 SOP(plm-module-uplift skill 同款流程)。E2E spec 扩充 + 真厂商 AI 接入留作后续(本批 E2E 沿用既有 3-4 case,§I Phase 04 准出待本地全套件回填)。 |
+| 2026-05-28 | Wjl + Claude | **Requirement 补「AI 优先级初评」子特性(PRD §F2.1)— review 发现前后端断裂后补全** — review 抓到前端已造壳(`requirement.ts` `aiEvaluation`+`aiEvaluateRequirement` / `index.vue` 表格列+3 触发点 / `requirementDict` `REQ_AI_EVAL`)但后端四层全缺(端点/domain/resultMap/DB 列)→ 前端调 `POST /ai/evaluate/{id}` 必 404。补全后端:`Requirement.aiEvaluation` 字段 + `RequirementMapper` 4 处(resultMap/selectVo/insert/update)+ `RequirementController` `POST /ai/evaluate/{id}` + `RequirementServiceImpl.aiEvaluate`(AiService 审计联动 + `evalLevel` 关键词/优先级规则 mock 输出 high/medium/low)+ DDL `ai_evaluation VARCHAR(20)` + 幂等迁移 `business-requirement-ai-eval.sql`(只写未应用)+ §2 字段表登记 + `RequirementServiceImplTest.AiEvaluateTests` 5 case;实测 `mvn -pl plm-requirement test` → **Tests run: 42, Failures: 0, Errors: 0**。`aiEvaluation` 为前端约定值 high/medium/low(非字典,不动 `sys_dict_*`);前端壳已就绪无需改动。 |

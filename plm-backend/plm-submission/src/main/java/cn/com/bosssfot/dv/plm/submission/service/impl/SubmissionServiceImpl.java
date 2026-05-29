@@ -20,6 +20,8 @@ import cn.com.bosssfot.dv.plm.project.mapper.ProjectMapper;
 import cn.com.bosssfot.dv.plm.submission.domain.Submission;
 import cn.com.bosssfot.dv.plm.submission.mapper.SubmissionMapper;
 import cn.com.bosssfot.dv.plm.submission.service.ISubmissionService;
+import cn.com.bosssfot.dv.plm.testplan.domain.TestPlan;
+import cn.com.bosssfot.dv.plm.testplan.mapper.TestPlanMapper;
 
 /**
  * 提测管理 Service — PRD §F4.4 + 原型 submit.html
@@ -53,6 +55,7 @@ public class SubmissionServiceImpl implements ISubmissionService
 
     @Autowired private SubmissionMapper submissionMapper;
     @Autowired private ProjectMapper projectMapper;
+    @Autowired private TestPlanMapper testPlanMapper;
 
     @Override
     public List<Submission> selectSubmissionList(Submission t) {
@@ -79,6 +82,9 @@ public class SubmissionServiceImpl implements ISubmissionService
         if (project == null) {
             throw new ServiceException("关联项目不存在", 702);
         }
+
+        // Proposal 0028 P0-1: 跨模块 FK testplanId — 同 projectId 强约束
+        validateTestplanFk(t);
 
         // 默认值
         if (StringUtils.isBlank(t.getStatus())) {
@@ -160,6 +166,15 @@ public class SubmissionServiceImpl implements ISubmissionService
             }
         }
 
+        // Proposal 0028 P0-1: 跨模块 FK testplanId
+        if (t.getTestplanId() != null && !t.getTestplanId().equals(old.getTestplanId())) {
+            // 重新校验 — 用更新单的 projectId(若有)否则用 old 的 projectId
+            Submission forCheck = new Submission();
+            forCheck.setTestplanId(t.getTestplanId());
+            forCheck.setProjectId(t.getProjectId() != null ? t.getProjectId() : old.getProjectId());
+            validateTestplanFk(forCheck);
+        }
+
         // 任意一项门禁字段变更 → 重算 qualityGatePassed
         boolean gateChanged =
             t.getUnitTestCoverage() != null
@@ -181,9 +196,44 @@ public class SubmissionServiceImpl implements ISubmissionService
         return submissionMapper.deleteSubmissionByIds(ids);
     }
 
+    /**
+     * Proposal 0028 P0-2 — 提测拉起测试方案
+     * 取现有 submission 校 404,设置 testplanId,走 updateSubmission 复用 P0-1 已有的
+     * 跨模块 FK 校验({@link #validateTestplanFk})。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void attachTestplan(Long submissionId, Long testplanId) {
+        Submission old = submissionMapper.selectSubmissionById(submissionId);
+        if (old == null) {
+            throw new ServiceException("提测单不存在", 404);
+        }
+        Submission upd = new Submission();
+        upd.setSubmissionId(submissionId);
+        upd.setTestplanId(testplanId);
+        updateSubmission(upd);  // 复用 P0-1 validateTestplanFk(同 projectId 强约束 → 702)
+    }
+
     // ─────────────────────────────────────────────────────────────────
     // 私有辅助
     // ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Proposal 0028 P0-1 — 提测 ↔ 测试方案 同 projectId 强约束。
+     * testplanId 可空(null 直接放行);非空时:
+     *   1) 目标 TestPlan 必须存在 → 否则 702
+     *   2) 目标 TestPlan.projectId 必须等于 Submission.projectId → 否则 702
+     */
+    private void validateTestplanFk(Submission s) {
+        if (s.getTestplanId() == null) return;
+        TestPlan tp = testPlanMapper.selectTestPlanById(s.getTestplanId());
+        if (tp == null) {
+            throw new ServiceException("关联的测试方案不存在", 702);
+        }
+        if (s.getProjectId() != null && !s.getProjectId().equals(tp.getProjectId())) {
+            throw new ServiceException("提测的测试方案必须属于同一项目", 702);
+        }
+    }
 
     /** PRD §F4.4 — 4 项全 Y 才通过门禁 */
     private static String computeQualityGate(Submission s) {

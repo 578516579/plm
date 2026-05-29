@@ -4,10 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,8 +29,12 @@ import org.springframework.dao.DuplicateKeyException;
 
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
+import cn.com.bosssfot.dv.plm.defect.domain.Defect;
+import cn.com.bosssfot.dv.plm.defect.mapper.DefectMapper;
 import cn.com.bosssfot.dv.plm.project.domain.Project;
 import cn.com.bosssfot.dv.plm.project.mapper.ProjectMapper;
+import cn.com.bosssfot.dv.plm.testcase.domain.TestCase;
+import cn.com.bosssfot.dv.plm.testcase.mapper.TestCaseMapper;
 import cn.com.bosssfot.dv.plm.testreport.domain.TestReport;
 import cn.com.bosssfot.dv.plm.testreport.mapper.TestReportMapper;
 
@@ -47,6 +57,12 @@ class TestReportServiceImplTest {
 
     @Mock
     private ProjectMapper projectMapper;
+
+    @Mock
+    private TestCaseMapper testcaseMapper;
+
+    @Mock
+    private DefectMapper defectMapper;
 
     @InjectMocks
     private TestReportServiceImpl service;
@@ -345,6 +361,135 @@ class TestReportServiceImplTest {
             assertThatThrownBy(() -> service.insertTestReport(sample))
                 .isInstanceOf(ServiceException.class)
                 .hasMessageContaining("草稿");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Proposal 0028 P0-3A — aggregateFromTestplan 真聚合
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("aggregateFromTestplan (P0028 P0-3A)")
+    class AggregationTests {
+
+        @Test
+        @DisplayName("正常计算 totalCases/passed/failed/p0/p1/coverage")
+        void testAggregateOk() {
+            TestReport report = existingTestReport("00");
+            when(testreportMapper.selectTestReportById(1L)).thenReturn(report);
+            // 4 testcase: 2 已通过 03, 1 已失败 04, 1 草稿 00 → total=4 / passed=2 / failed=1 / coverage=75.00
+            List<TestCase> cases = Arrays.asList(
+                tc("03"), tc("03"), tc("04"), tc("00")
+            );
+            when(testcaseMapper.selectTestCaseList(any(TestCase.class))).thenReturn(cases);
+            // 3 defect: 1 P0(00), 2 P1(01)
+            List<Defect> defects = Arrays.asList(
+                def("00"), def("01"), def("01")
+            );
+            when(defectMapper.selectDefectList(any(Defect.class))).thenReturn(defects);
+            when(testreportMapper.updateTestReport(any())).thenReturn(1);
+
+            TestReport result;
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                result = service.aggregateFromTestplan(1L);
+            }
+
+            assertThat(result.getTotalCases()).isEqualTo(4);
+            assertThat(result.getPassedCases()).isEqualTo(2);
+            assertThat(result.getFailedCases()).isEqualTo(1);
+            assertThat(result.getCoverageRate()).isEqualByComparingTo(new BigDecimal("75.00"));
+            assertThat(result.getP0Defects()).isEqualTo(1);
+            assertThat(result.getP1Defects()).isEqualTo(2);
+            assertThat(result.getIsAggregated()).isEqualTo("Y");
+            verify(testreportMapper).updateTestReport(any());
+        }
+
+        @Test
+        @DisplayName("无 testcase 时 coverage=0.00 不挂")
+        void testAggregateZeroCases() {
+            TestReport report = existingTestReport("00");
+            when(testreportMapper.selectTestReportById(1L)).thenReturn(report);
+            when(testcaseMapper.selectTestCaseList(any(TestCase.class))).thenReturn(Collections.emptyList());
+            when(defectMapper.selectDefectList(any(Defect.class))).thenReturn(Collections.emptyList());
+            when(testreportMapper.updateTestReport(any())).thenReturn(1);
+
+            TestReport result;
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                result = service.aggregateFromTestplan(1L);
+            }
+
+            assertThat(result.getTotalCases()).isZero();
+            assertThat(result.getPassedCases()).isZero();
+            assertThat(result.getFailedCases()).isZero();
+            assertThat(result.getCoverageRate()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(result.getP0Defects()).isZero();
+            assertThat(result.getP1Defects()).isZero();
+        }
+
+        @Test
+        @DisplayName("isManualOverride='Y' 跳过聚合,不写库")
+        void testAggregateManualOverride() {
+            TestReport report = existingTestReport("00");
+            report.setIsManualOverride("Y");
+            report.setTotalCases(99);  // 保留人工录入值
+            report.setPassedCases(50);
+            when(testreportMapper.selectTestReportById(1L)).thenReturn(report);
+
+            TestReport result = service.aggregateFromTestplan(1L);
+
+            // 不应写库
+            verify(testreportMapper, never()).updateTestReport(any());
+            // 不应查 testcase / defect
+            verify(testcaseMapper, never()).selectTestCaseList(any());
+            verify(defectMapper, never()).selectDefectList(any());
+            // 原值保留
+            assertThat(result.getTotalCases()).isEqualTo(99);
+            assertThat(result.getPassedCases()).isEqualTo(50);
+        }
+
+        @Test
+        @DisplayName("report 不存在 → 702")
+        void testAggregateReportNotFound() {
+            when(testreportMapper.selectTestReportById(99L)).thenReturn(null);
+            assertThatThrownBy(() -> service.aggregateFromTestplan(99L))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("测试报告不存在");
+        }
+
+        @Test
+        @DisplayName("aggregatedAt 被设为 now()")
+        void testAggregateSetsTimestamp() {
+            TestReport report = existingTestReport("00");
+            when(testreportMapper.selectTestReportById(1L)).thenReturn(report);
+            when(testcaseMapper.selectTestCaseList(any(TestCase.class))).thenReturn(Collections.emptyList());
+            when(defectMapper.selectDefectList(any(Defect.class))).thenReturn(Collections.emptyList());
+            when(testreportMapper.updateTestReport(any())).thenReturn(1);
+
+            long beforeMs = System.currentTimeMillis();
+            TestReport result;
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                result = service.aggregateFromTestplan(1L);
+            }
+            long afterMs = System.currentTimeMillis();
+
+            assertThat(result.getAggregatedAt()).isNotNull();
+            long ts = result.getAggregatedAt().getTime();
+            assertThat(ts).isBetween(beforeMs, afterMs);
+        }
+
+        private TestCase tc(String status) {
+            TestCase c = new TestCase();
+            c.setStatus(status);
+            return c;
+        }
+
+        private Defect def(String severity) {
+            Defect d = new Defect();
+            d.setSeverity(severity);
+            return d;
         }
     }
 

@@ -4,14 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +36,8 @@ import cn.com.bosssfot.dv.plm.common.ai.AiService;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatResult;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
+import cn.com.bosssfot.dv.plm.common.spi.DoraAggregationSource;
+import cn.com.bosssfot.dv.plm.common.spi.DoraAggregationSource.DoraAggregationData;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.dora.domain.DoraMetric;
 import cn.com.bosssfot.dv.plm.dora.mapper.DoraMetricMapper;
@@ -388,6 +397,236 @@ class DoraMetricServiceImplTest {
             when(doraMapper.deleteDoraByIds(any())).thenReturn(2);
             int rows = service.deleteDoraByIds(new Long[] { 1L, 2L });
             assertThat(rows).isEqualTo(2);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Proposal 0028 P0-3B: computeMetrics 真聚合
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("computeMetrics — 真聚合 4 个 DORA 指标")
+    class ComputeMetrics {
+
+        /** 构造 30 天聚合窗口 */
+        private Date[] window30d() {
+            Date end = new Date();
+            Date start = new Date(end.getTime() - TimeUnit.DAYS.toMillis(30));
+            return new Date[] { start, end };
+        }
+
+        /** 反射注入 aggregationSources Map(@InjectMocks 不会注入这个字段) */
+        private void injectSources(Map<String, DoraAggregationSource> map) {
+            try {
+                Field f = DoraMetricServiceImpl.class.getDeclaredField("aggregationSources");
+                f.setAccessible(true);
+                f.set(service, map);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private DoraAggregationSource sourceOf(String name, DoraAggregationData data) {
+            return new DoraAggregationSource() {
+                @Override public String entityType() { return name; }
+                @Override public DoraAggregationData aggregate(Long pid, Date s, Date e) { return data; }
+            };
+        }
+
+        @Test
+        @DisplayName("4 个指标都算出 & is_computed='Y' / computedAt 设置 & 各自指标值正确")
+        void testComputeOk_4_metrics() {
+            DoraAggregationData pipe = new DoraAggregationData();
+            pipe.deployCount = 60;          // 30 天 60 次成功 → 频率 2.00 次/天
+            pipe.failedCount = 15;          // 总运行 75,失败率 20.00%
+            pipe.totalRunCount = 75;
+
+            DoraAggregationData rel = new DoraAggregationData();
+            // 2 个发布,各耗 6 小时 → SUM = 12*3600000 ms,AVG = 6h
+            rel.totalLeadTimeMs = BigDecimal.valueOf(12L * 3_600_000L);
+            rel.leadTimeSampleCnt = 2;
+
+            DoraAggregationData defect = new DoraAggregationData();
+            // 3 个 P0/P1 缺陷,各耗 2 小时 → SUM = 6*3600000 ms,AVG = 2h
+            defect.totalRecoverMs = BigDecimal.valueOf(6L * 3_600_000L);
+            defect.recoverSampleCnt = 3;
+
+            Map<String, DoraAggregationSource> map = new HashMap<>();
+            map.put("pipeline", sourceOf("pipeline", pipe));
+            map.put("release",  sourceOf("release",  rel));
+            map.put("defect",   sourceOf("defect",   defect));
+            injectSources(map);
+
+            // 都不存在 → insert
+            when(doraMapper.selectByProjectTypePeriod(any(), anyString(), any())).thenReturn(null);
+            when(doraMapper.selectMaxSeqOfYear(anyString())).thenReturn(0);
+            when(doraMapper.insertDora(any())).thenReturn(1);
+
+            Date[] w = window30d();
+            List<DoraMetric> result = service.computeMetrics(100L, w[0], w[1]);
+
+            assertThat(result).hasSize(4);
+            // 顺序:deploy_freq → lead_time → mttr → change_fail_rate
+            assertThat(result.get(0).getMetricType()).isEqualTo("deploy_freq");
+            assertThat(result.get(0).getMetricValue()).isEqualByComparingTo("2.00");
+            assertThat(result.get(1).getMetricType()).isEqualTo("lead_time");
+            assertThat(result.get(1).getMetricValue()).isEqualByComparingTo("6.00");
+            assertThat(result.get(2).getMetricType()).isEqualTo("mttr");
+            assertThat(result.get(2).getMetricValue()).isEqualByComparingTo("2.00");
+            assertThat(result.get(3).getMetricType()).isEqualTo("change_fail_rate");
+            assertThat(result.get(3).getMetricValue()).isEqualByComparingTo("20.00");
+
+            // 元数据
+            for (DoraMetric m : result) {
+                assertThat(m.getIsComputed()).isEqualTo("Y");
+                assertThat(m.getComputedAt()).isNotNull();
+                assertThat(m.getPeriodStart()).isEqualTo(w[0]);
+                assertThat(m.getPeriodEnd()).isEqualTo(w[1]);
+                assertThat(m.getPeriodDays()).isEqualTo(30);
+                assertThat(m.getStatus()).isEqualTo("00");
+            }
+        }
+
+        @Test
+        @DisplayName("pipeline/release/defect 都无数据时 4 个指标均为 0")
+        void testComputeNoData() {
+            // 不注入任何 source → aggregationSources=null → 全部零值
+            injectSources(null);
+
+            when(doraMapper.selectByProjectTypePeriod(any(), anyString(), any())).thenReturn(null);
+            when(doraMapper.selectMaxSeqOfYear(anyString())).thenReturn(0);
+            when(doraMapper.insertDora(any())).thenReturn(1);
+
+            Date[] w = window30d();
+            List<DoraMetric> result = service.computeMetrics(100L, w[0], w[1]);
+
+            assertThat(result).hasSize(4);
+            for (DoraMetric m : result) {
+                assertThat(m.getMetricValue()).isEqualByComparingTo("0");
+            }
+        }
+
+        @Test
+        @DisplayName("已存在 is_computed='N'(人工录入)→ 跳过不动")
+        void testComputeManualPreserved() {
+            DoraAggregationData pipe = new DoraAggregationData();
+            pipe.deployCount = 60;
+            pipe.totalRunCount = 60;
+            // 其它 source 无数据
+            Map<String, DoraAggregationSource> map = new HashMap<>();
+            map.put("pipeline", sourceOf("pipeline", pipe));
+            injectSources(map);
+
+            DoraMetric manual = new DoraMetric();
+            manual.setDoraId(999L);
+            manual.setMetricType("deploy_freq");
+            manual.setMetricValue(BigDecimal.valueOf(99.99));   // 人工值
+            manual.setIsComputed("N");
+
+            // 只 deploy_freq 有人工值,其余 3 个均 null
+            when(doraMapper.selectByProjectTypePeriod(any(), eq("deploy_freq"), any())).thenReturn(manual);
+            when(doraMapper.selectByProjectTypePeriod(any(), eq("lead_time"), any())).thenReturn(null);
+            when(doraMapper.selectByProjectTypePeriod(any(), eq("mttr"), any())).thenReturn(null);
+            when(doraMapper.selectByProjectTypePeriod(any(), eq("change_fail_rate"), any())).thenReturn(null);
+            when(doraMapper.selectMaxSeqOfYear(anyString())).thenReturn(0);
+            when(doraMapper.insertDora(any())).thenReturn(1);
+
+            Date[] w = window30d();
+            List<DoraMetric> result = service.computeMetrics(100L, w[0], w[1]);
+
+            // deploy_freq 返回的是人工 manual,值仍 99.99,is_computed='N'
+            assertThat(result.get(0).getMetricValue()).isEqualByComparingTo("99.99");
+            assertThat(result.get(0).getIsComputed()).isEqualTo("N");
+            // 没调 update / insert 覆盖人工的那条
+            verify(doraMapper, never()).updateDora(argThat(m ->
+                m != null && m.getDoraId() != null && m.getDoraId().equals(999L)));
+        }
+
+        @Test
+        @DisplayName("已存在 is_computed='Y'(自动)→ update 覆盖")
+        void testComputeUpsertReplacesOld() {
+            DoraAggregationData pipe = new DoraAggregationData();
+            pipe.deployCount = 30;        // 30/30 = 1.0
+            pipe.totalRunCount = 30;
+            Map<String, DoraAggregationSource> map = new HashMap<>();
+            map.put("pipeline", sourceOf("pipeline", pipe));
+            injectSources(map);
+
+            DoraMetric oldComputed = new DoraMetric();
+            oldComputed.setDoraId(500L);
+            oldComputed.setMetricType("deploy_freq");
+            oldComputed.setMetricValue(BigDecimal.valueOf(0.50));  // 老值
+            oldComputed.setIsComputed("Y");
+
+            when(doraMapper.selectByProjectTypePeriod(any(), eq("deploy_freq"), any())).thenReturn(oldComputed);
+            when(doraMapper.selectByProjectTypePeriod(any(), eq("lead_time"), any())).thenReturn(null);
+            when(doraMapper.selectByProjectTypePeriod(any(), eq("mttr"), any())).thenReturn(null);
+            when(doraMapper.selectByProjectTypePeriod(any(), eq("change_fail_rate"), any())).thenReturn(null);
+            when(doraMapper.selectMaxSeqOfYear(anyString())).thenReturn(0);
+            when(doraMapper.insertDora(any())).thenReturn(1);
+            when(doraMapper.updateDora(any())).thenReturn(1);
+
+            Date[] w = window30d();
+            List<DoraMetric> result = service.computeMetrics(100L, w[0], w[1]);
+
+            // deploy_freq 被覆盖
+            DoraMetric updated = result.get(0);
+            assertThat(updated.getDoraId()).isEqualTo(500L);
+            assertThat(updated.getMetricValue()).isEqualByComparingTo("1.00");  // 30/30=1.00
+            assertThat(updated.getIsComputed()).isEqualTo("Y");
+            assertThat(updated.getUpdateBy()).isEqualTo("dora-compute");
+            // 调到 update 一次(只 deploy_freq 是 update,其他 3 个走 insert)
+            verify(doraMapper, times(1)).updateDora(any());
+            verify(doraMapper, times(3)).insertDora(any());
+        }
+
+        @Test
+        @DisplayName("MTTR 只算 severity ∈ {00 P0,01 P1} 的 defect — 由 source 实现保证")
+        void testComputeMTTRFiltersSeverity() {
+            // 这一条对 service 而言是 contract 测试:
+            //   service 完全信任 source 返回的 totalRecoverMs / recoverSampleCnt,
+            //   过滤 severity ∈ {00,01} AND status='03' 由 DefectMapper.sumRecoverMsInPeriod
+            //   在 SQL 中保证(WHERE severity in ('00','01') and status='03')。
+            // 这里验证:source 给一组"已过滤"数据,service 正确转 hour 单位。
+
+            DoraAggregationData defect = new DoraAggregationData();
+            // 4 个已过滤的 P0/P1 defect,总恢复 8 小时 → AVG = 2h
+            defect.totalRecoverMs = BigDecimal.valueOf(8L * 3_600_000L);
+            defect.recoverSampleCnt = 4;
+
+            Map<String, DoraAggregationSource> map = new HashMap<>();
+            map.put("defect", sourceOf("defect", defect));
+            injectSources(map);
+
+            when(doraMapper.selectByProjectTypePeriod(any(), anyString(), any())).thenReturn(null);
+            when(doraMapper.selectMaxSeqOfYear(anyString())).thenReturn(0);
+            when(doraMapper.insertDora(any())).thenReturn(1);
+
+            Date[] w = window30d();
+            List<DoraMetric> result = service.computeMetrics(100L, w[0], w[1]);
+
+            DoraMetric mttr = result.get(2);
+            assertThat(mttr.getMetricType()).isEqualTo("mttr");
+            assertThat(mttr.getMetricValue()).isEqualByComparingTo("2.00");
+            assertThat(mttr.getMetricUnit()).isEqualTo("小时");
+        }
+
+        @Test
+        @DisplayName("projectId / 窗口 入参非法 → ServiceException")
+        void testInvalidParams() {
+            Date now = new Date();
+            assertThatThrownBy(() -> service.computeMetrics(null, now, now))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("projectId");
+
+            assertThatThrownBy(() -> service.computeMetrics(1L, null, now))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("窗口");
+
+            Date earlier = new Date(now.getTime() - 1000);
+            assertThatThrownBy(() -> service.computeMetrics(1L, now, earlier))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("periodEnd");
         }
     }
 }

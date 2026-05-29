@@ -83,12 +83,18 @@ public class AiAgentController extends BaseController {
         return toAjax(aiAgentService.deleteAiAgentByIds(ids));
     }
 
-    /** PRD §F3.5 调用 Agent — 真调 Dify workflow (enabled=false 时降级 mock) */
+    /**
+     * PRD §F3.5 调用 Agent — 真调 AI provider (mock 降级永不阻塞)。
+     *
+     * <p>可选 {@code input}:业务上下文(需求描述 / 代码片段 / 提测摘要),按 agentType 注入对应人设后送 LLM。
+     * 不传则执行该类型的默认自检任务。</p>
+     */
     @PreAuthorize("@ss.hasPermi('business:ai-agent:edit')")
     @Log(title = "AI Agent-调用", businessType = BusinessType.OTHER)
     @PostMapping("/invoke/{id}")
-    public AjaxResult invoke(@PathVariable("id") Long id) {
-        return success(aiAgentService.invoke(id));
+    public AjaxResult invoke(@PathVariable("id") Long id,
+                             @RequestParam(value = "input", required = false) String input) {
+        return success(aiAgentService.invoke(id, input));
     }
 
     /**
@@ -112,13 +118,14 @@ public class AiAgentController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('business:ai-agent:edit')")
     @GetMapping(value = "/invoke-stream/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter invokeStream(@PathVariable("id") Long id) {
+    public SseEmitter invokeStream(@PathVariable("id") Long id,
+                                   @RequestParam(value = "input", required = false) String input) {
         SseEmitter emitter = new SseEmitter(60_000L);
 
         // 构造请求(在主线程做,异常立刻 completeWithError)
         final AiChatRequest req;
         try {
-            req = aiAgentService.buildChatRequest(id);
+            req = aiAgentService.buildChatRequest(id, input);
         } catch (Exception e) {
             emitter.completeWithError(e);
             return emitter;

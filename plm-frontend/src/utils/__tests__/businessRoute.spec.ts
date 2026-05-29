@@ -4,9 +4,18 @@
  * 锁定 entity → path 映射 (P0 troubleshoot: menu-path-absolute-business-prefix.sql 落地后,
  * sys_menu 子菜单 path 改 `/business/<entity>` 绝对路径,映射统一回 `/business/<entity>`).
  * 此 spec 失败 = 映射表与 sys_menu 漂移, 必须按文件头部 SQL 重新校对.
+ *
+ * 2026-05-28 0028 P0-2C 扩展: 加 useBusinessRoute composable 单测,
+ * 用 vi.mock('vue-router') 拦截 router.push, 验证 4 个跨模块导航语义。
  */
-import { describe, it, expect } from 'vitest'
-import { entityToPath, ENTITY_TO_PATH } from '../businessRoute'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { entityToPath, ENTITY_TO_PATH, useBusinessRoute } from '../businessRoute'
+
+// Mock vue-router 的 useRouter — 注入一个可观察的 router.push spy
+const pushMock = vi.fn().mockResolvedValue(undefined)
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: pushMock })
+}))
 
 describe('businessRoute SSoT (entity → /business/<entity>)', () => {
   describe('8 阶段映射齐全', () => {
@@ -77,6 +86,76 @@ describe('businessRoute SSoT (entity → /business/<entity>)', () => {
       Object.keys(ENTITY_TO_PATH).forEach(entity => {
         expect(entity).toMatch(/^[a-z][a-z-]*$/)
       })
+    })
+  })
+
+  // ────── 0028 P0-2C: useBusinessRoute composable ──────
+  describe('useBusinessRoute (跨模块导航 composable)', () => {
+    beforeEach(() => pushMock.mockClear())
+
+    it('goEntityList 不带 query → 仅 path', async () => {
+      const nav = useBusinessRoute()
+      await nav.goEntityList('project')
+      expect(pushMock).toHaveBeenCalledWith({ path: '/business/project', query: undefined })
+    })
+
+    it('goEntityList 带 query → 路径 + 过滤参数', async () => {
+      const nav = useBusinessRoute()
+      await nav.goEntityList('defect', { testcaseId: '42', projectId: '1' })
+      expect(pushMock).toHaveBeenCalledWith({
+        path: '/business/defect',
+        query: { testcaseId: '42', projectId: '1' }
+      })
+    })
+
+    it('goEntityDetail → 携 id + openDetail=1 query', async () => {
+      const nav = useBusinessRoute()
+      await nav.goEntityDetail('project', 42)
+      expect(pushMock).toHaveBeenCalledWith({
+        path: '/business/project',
+        query: { id: '42', openDetail: '1' }
+      })
+    })
+
+    it('goEntityDetail 接受 string id', async () => {
+      const nav = useBusinessRoute()
+      await nav.goEntityDetail('testplan', '7')
+      expect(pushMock).toHaveBeenCalledWith({
+        path: '/business/testplan',
+        query: { id: '7', openDetail: '1' }
+      })
+    })
+
+    it('backToParent 等价于 goEntityDetail', async () => {
+      const nav = useBusinessRoute()
+      await nav.backToParent('requirement', 99)
+      expect(pushMock).toHaveBeenCalledWith({
+        path: '/business/requirement',
+        query: { id: '99', openDetail: '1' }
+      })
+    })
+
+    it('goEntity 兜底 — 仅 path 无 query', async () => {
+      const nav = useBusinessRoute()
+      await nav.goEntity('dashboard')
+      expect(pushMock).toHaveBeenCalledWith({ path: '/business/dashboard' })
+    })
+
+    it('未注册 entity 走 entityToPath fallback /business/<entity>', async () => {
+      const nav = useBusinessRoute()
+      await nav.goEntityList('not-a-module')
+      expect(pushMock).toHaveBeenCalledWith({
+        path: '/business/not-a-module',
+        query: undefined
+      })
+    })
+
+    it('返回对象暴露 4 个方法', () => {
+      const nav = useBusinessRoute()
+      expect(typeof nav.goEntityList).toBe('function')
+      expect(typeof nav.goEntityDetail).toBe('function')
+      expect(typeof nav.backToParent).toBe('function')
+      expect(typeof nav.goEntity).toBe('function')
     })
   })
 })

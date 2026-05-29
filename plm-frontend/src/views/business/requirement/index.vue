@@ -11,9 +11,7 @@
         <p class="page-subtitle">全链路需求追踪,AI 辅助需求分析与优先级评估</p>
       </div>
       <div class="header-actions">
-        <el-button type="success" :loading="aiLoading" @click="aiAnalyzeAll">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 分析优先级
-        </el-button>
+        <AiButton :loading="aiLoading" @click="aiAnalyzeAll">AI 分析优先级</AiButton>
         <el-button type="primary" @click="openAdd">
           <el-icon><Plus /></el-icon>&nbsp;新增需求
         </el-button>
@@ -45,7 +43,7 @@
         </el-table-column>
         <el-table-column label="优先级" width="90" align="center">
           <template #default="{ row }">
-            <el-tag :type="priorityTag(row.priority)" size="small" effect="dark">{{ row.priority || '-' }}</el-tag>
+            <el-tag :type="priorityTag(row.priority)" size="small" effect="dark">{{ priorityLabel(row.priority) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100" align="center">
@@ -93,19 +91,19 @@
           <el-col :span="12">
             <el-form-item label="来源" prop="source">
               <el-select v-model="form.source" style="width: 100%">
-                <el-option label="客户反馈" value="customer" />
-                <el-option label="内部提案" value="internal" />
-                <el-option label="竞品分析" value="competitive" />
-                <el-option label="运营数据" value="data" />
+                <el-option label="客户反馈" value="01" />
+                <el-option label="内部提案" value="02" />
+                <el-option label="运营数据" value="03" />
+                <el-option label="竞品分析" value="04" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="优先级" prop="priority">
               <el-select v-model="form.priority" style="width: 100%">
-                <el-option label="P0 - 紧急" value="P0" />
-                <el-option label="P1 - 重要" value="P1" />
-                <el-option label="P2 - 一般" value="P2" />
+                <el-option label="P0 - 紧急" value="00" />
+                <el-option label="P1 - 重要" value="01" />
+                <el-option label="P2 - 一般" value="02" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -121,9 +119,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="success" :loading="aiLoading" @click="aiEvalCurrent" v-if="form.requirementId">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 评估
-        </el-button>
+        <AiButton v-if="form.requirementId" :loading="aiLoading" @click="aiEvalCurrent">AI 评估</AiButton>
         <el-button type="primary" :loading="saving" @click="handleSubmit">
           {{ form.requirementId ? '保存' : '✅ 提交需求' }}
         </el-button>
@@ -167,7 +163,11 @@
             {{ statusTagFor(currentDetailReq.status).label }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="优先级">{{ currentDetailReq.priority || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="优先级">
+          <el-tag :type="priorityTag(currentDetailReq.priority)" size="small" effect="dark">
+            {{ priorityLabel(currentDetailReq.priority) }}
+          </el-tag>
+        </el-descriptions-item>
       </el-descriptions>
       <el-tabs v-model="detailTab">
         <el-tab-pane name="reviews" :label="`📝 评审记录 (${reviewsList.length})`">
@@ -221,6 +221,15 @@
         </el-tab-pane>
       </el-tabs>
       <template #footer>
+        <!-- 0028 P0-2C: 跨模块跳转 (按需求 ID 过滤;目标页 query.requirementId 过滤待 P1 接) -->
+        <div class="cross-nav-row">
+          <span class="cross-nav-label">查看关联文档:</span>
+          <el-button size="small" link type="primary" @click="jumpToLinked('prd')">📄 PRD</el-button>
+          <el-button size="small" link type="primary" @click="jumpToLinked('ued')">🎨 UED</el-button>
+          <el-button size="small" link type="primary" @click="jumpToLinked('arch')">🏗 架构</el-button>
+          <el-button size="small" link type="primary" @click="jumpToLinked('dbdesign')">🗄 数据库</el-button>
+          <el-button size="small" link type="primary" @click="jumpToLinked('apidesign')">🔌 接口</el-button>
+        </div>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </template>
     </el-dialog>
@@ -230,7 +239,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { MagicStick, Plus } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
+import AiButton from '@/components/AiButton/index.vue'
 import {
   listRequirement, addRequirement, updateRequirement, delRequirement,
   aiEvaluateRequirement, getRequirement, listProjectsForSelect,
@@ -238,6 +248,14 @@ import {
   listPrdByRequirementId, listUedByRequirementId, listTasksByRequirementId,
   type Requirement, type RequirementQuery, type RequirementReview
 } from '@/api/business/requirement'
+import {
+  sourceLabel, sourceTag, priorityLabel, priorityTag,
+  statusTagFor, aiEvalLabel, aiEvalTag
+} from './requirementDict'
+import { useBusinessRoute } from '@/utils/businessRoute'
+
+// 0028 P0-2C: 跨模块导航 composable
+const nav = useBusinessRoute()
 
 const activeTab = ref('')
 const dialogVisible = ref(false)
@@ -247,7 +265,7 @@ const aiLoading = ref(false)
 const listLoading = ref(false)
 
 const emptyForm = (): Requirement => ({
-  projectId: 0, title: '', description: '', source: 'customer', priority: 'P1', status: '00'
+  projectId: 0, title: '', description: '', source: '01', priority: '01', status: '00'
 })
 const form = reactive<Requirement>(emptyForm())
 const rules = {
@@ -261,30 +279,7 @@ const statusCounts = ref<Record<string, number>>({})
 const queryParams = reactive<RequirementQuery>({ pageNum: 1, pageSize: 10 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '待评审', type: 'warning' },
-  '01': { label: '开发中', type: 'primary' },
-  '02': { label: '已完成', type: 'success' },
-  '03': { label: '已取消', type: 'danger' }
-}
-const statusTagFor = (s?: string) => statusMap[s || ''] || { label: s || '-', type: 'info' as any }
 const statusCount = (s: string) => statusCounts.value[s] || 0
-
-function sourceLabel(v?: string) {
-  return ({ customer: '客户反馈', internal: '内部提案', competitive: '竞品分析', data: '运营数据' } as Record<string,string>)[v || ''] || v || '-'
-}
-function sourceTag(v?: string): any {
-  return ({ customer: 'primary', internal: 'success', competitive: 'warning', data: 'info' } as Record<string,string>)[v || ''] || 'info'
-}
-function priorityTag(p?: string): any {
-  return ({ P0: 'danger', P1: 'warning', P2: 'info' } as Record<string,string>)[p || ''] || 'info'
-}
-function aiEvalLabel(v?: string) {
-  return ({ high: '高价值', medium: '中价值', low: '低价值' } as Record<string,string>)[v || ''] || v || '-'
-}
-function aiEvalTag(v?: string): any {
-  return ({ high: 'success', medium: 'warning', low: 'info' } as Record<string,string>)[v || ''] || 'info'
-}
 
 async function getList() {
   listLoading.value = true
@@ -449,6 +444,22 @@ async function openDetail(row: Requirement) {
   ])
 }
 
+/**
+ * 0028 P0-2C: 跨模块跳转到关联文档列表
+ *
+ * 携带 requirementId query 给目标页, 目标页支持 ?requirementId=NN 过滤即可"按需求过滤"。
+ * ⚠ TODO P1: prd / ued / arch / dbdesign / apidesign 5 个目标列表页当前未实现
+ *    onMounted 内 `route.query.requirementId` → queryParams 自动应用过滤,
+ *    第一版仅完成跳转动作, 用户落到目标页后看到完整列表。
+ *
+ * 5 个 entity 由 requirementDict 详情对话框 footer 按钮触发。
+ */
+async function jumpToLinked(entity: 'prd' | 'ued' | 'arch' | 'dbdesign' | 'apidesign') {
+  if (!currentDetailReq.value?.requirementId) return
+  detailDialogVisible.value = false
+  await nav.goEntityList(entity, { requirementId: String(currentDetailReq.value.requirementId) })
+}
+
 async function handleDeleteReview(row: RequirementReview) {
   if (!row.reviewId) return
   await ElMessageBox.confirm('确认撤回这条评审记录?', '提示', { type: 'warning' })
@@ -471,4 +482,10 @@ onMounted(() => { getList(); loadProjects() })
 .status-tabs { background: #fff; padding: 0 16px; border-radius: 8px; margin-bottom: 14px; }
 .muted { color: #9ca3af; font-size: 12px; }
 .mb12 { margin-bottom: 12px; }
+/* 0028 P0-2C 跨模块跳转 footer */
+.cross-nav-row {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-right: 16px;
+}
+.cross-nav-label { color: #6b7280; font-size: 12px; }
 </style>

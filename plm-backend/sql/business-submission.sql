@@ -18,7 +18,7 @@ CREATE TABLE tb_submission (
     prd_completed         CHAR(1)       DEFAULT 'N'              COMMENT 'PRD 文档完整 Y/N',
     api_doc_updated       CHAR(1)       DEFAULT 'N'              COMMENT '接口文档已更新 Y/N',
     quality_gate_passed   CHAR(1)       DEFAULT 'N'              COMMENT 'AI 质量门禁综合判定',
-    status                VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_submission_status',
+    status                VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_submission_status',
     reject_reason         VARCHAR(500)  DEFAULT NULL             COMMENT '退回原因 (status=04 必填)',
     submitter_user_id     BIGINT(20)    NOT NULL                 COMMENT '提测人',
     reviewer_user_id      BIGINT(20)    DEFAULT NULL             COMMENT '测试经理审批人',

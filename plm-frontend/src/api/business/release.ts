@@ -25,6 +25,8 @@ export interface Release {
   changeFailureRate?: number
   releasedByUserId?: number
   status?: string
+  // 0028 epic P0-1 加列: 发布单 ↔ 流水线
+  pipelineId?: number
 }
 
 export interface ReleaseQuery {
@@ -53,6 +55,11 @@ export const delRelease = (ids: number | number[]): Promise<any> => {
   const idStr = Array.isArray(ids) ? ids.join(',') : ids
   return request({ url: `/business/release/${idStr}`, method: 'delete' })
 }
+
+// PRD §F5 — AI 发布评审。后端真实端点(plm-release P0-1b):
+// 文本走 LLM(AiTexts),评分由 DORA 4 指标确定性计算,不让 LLM 幻觉数字
+export const aiReviewRelease = (id: number): Promise<any> =>
+  request({ url: `/business/release/ai/review/${id}`, method: 'post' })
 
 export const listProjectsForSelect = (): Promise<any> =>
   request({ url: '/business/project/list', method: 'get', params: { pageSize: 200 } })

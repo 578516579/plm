@@ -235,6 +235,10 @@ import {
   getAiHealth,
   type AiAgent, type AiHealthInfo
 } from '@/api/business/ai-agent'
+import {
+  agentIcon, agentTypeLabel, providerLabel, providerTag,
+  agentStatusLabel, agentStatusTag
+} from './aiAgentDict'
 import useUserStore from '@/store/modules/user'
 
 const userStore = useUserStore()
@@ -307,25 +311,6 @@ function onProviderChange() {
   } else {
     form.difyWorkflowId = ''
   }
-}
-
-function agentIcon(t?: string) {
-  return ({ requirement: '📋', prd: '📝', code: '🔍', test: '🧪', release: '🚀', ops: '🛠️' } as Record<string,string>)[t || ''] || '🤖'
-}
-function agentTypeLabel(t?: string) {
-  return ({ requirement: '需求分析', prd: 'PRD 生成', code: '代码审查', test: '测试生成', release: '发布评审', ops: '运维巡检' } as Record<string,string>)[t || ''] || t || '-'
-}
-function providerLabel(p?: string | number) {
-  return ({ mock: 'Mock', dify: 'Dify', openai: 'OpenAI 兼容', anthropic: 'Anthropic' } as Record<string,string>)[String(p || '')] || String(p || '-')
-}
-function providerTag(p?: string): any {
-  return ({ mock: 'info', dify: 'primary', openai: 'success', anthropic: 'warning' } as Record<string,string>)[p || ''] || 'info'
-}
-function agentStatusLabel(s?: string) {
-  return ({ '00': '运行中', '01': '已停止', '02': '错误' } as Record<string,string>)[s || ''] || '-'
-}
-function agentStatusTag(s?: string): any {
-  return ({ '00': 'success', '01': 'info', '02': 'danger' } as Record<string,string>)[s || ''] || 'info'
 }
 
 async function loadHealth() {

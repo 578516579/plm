@@ -9,4 +9,7 @@ public interface IReleaseService {
     int insertRelease(Release release);
     int updateRelease(Release release);
     int deleteReleaseByIds(Long[] releaseIds);
+
+    /** P0-1b: AI 发布评审 — 综合 release 元信息 + DORA 指标,产出评分(0-100) + Markdown 评审说明。 */
+    Release aiReview(Long releaseId);
 }

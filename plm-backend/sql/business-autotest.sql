@@ -23,7 +23,7 @@ CREATE TABLE tb_autotest (
     last_root_cause_analysis LONGTEXT                                COMMENT 'AI 智能根因分析 (失败用例)',
     ai_generated             CHAR(1)       DEFAULT 'N'              COMMENT 'Y/N AI 生成的脚本',
     ai_generated_at          DATETIME      DEFAULT NULL,
-    status                   VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_autotest_status',
+    status                   VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_autotest_status',
     author_user_id           BIGINT(20)    NOT NULL                 COMMENT '创建人',
     create_by                VARCHAR(64)   DEFAULT '',
     create_time              DATETIME      DEFAULT NULL,

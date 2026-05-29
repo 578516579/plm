@@ -11,9 +11,7 @@
         <p class="page-subtitle">蓝绿 / 金丝雀 / 滚动发布策略,AI 发布评审,一键回滚</p>
       </div>
       <div class="btn-row">
-        <el-button type="success" plain :disabled="!current.releaseId" @click="aiReview">
-          <el-icon><MagicStick /></el-icon>&nbsp;AI 发布评审
-        </el-button>
+        <AiButton plain :loading="aiReviewLoading" :disabled="!current.releaseId" @click="aiReview">AI 发布评审</AiButton>
         <el-button type="primary" @click="newRelease">
           <el-icon><Plus /></el-icon>&nbsp;新建发布单
         </el-button>
@@ -243,9 +241,23 @@
             <el-tag :type="statusTagFor(row.status).type" size="small">{{ statusTagFor(row.status).label }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="280" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadRelease(row)">编辑</el-button>
+            <!-- 0028 P0-2C: 已关联流水线 → 直接跳, 未关联 → 提示走编辑表单填 pipelineId
+                 (P1 待后端开放 attach-pipeline endpoint, 先用现有 updateRelease 写入) -->
+            <el-button
+              v-if="row.pipelineId"
+              link
+              type="info"
+              @click="nav.goEntityDetail('pipeline', row.pipelineId!)"
+            >🔧 查看流水线</el-button>
+            <el-button
+              v-else
+              link
+              type="warning"
+              @click="attachPipelineHint(row)"
+            >关联流水线</el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -271,12 +283,21 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Plus, MagicStick, DocumentChecked, Search, Document, InfoFilled
+  Plus, DocumentChecked, Search, Document, InfoFilled
 } from '@element-plus/icons-vue'
+import AiButton from '@/components/AiButton/index.vue'
 import {
   listRelease, getRelease, addRelease, updateRelease, delRelease,
-  listProjectsForSelect, type Release, type ReleaseQuery
+  aiReviewRelease, listProjectsForSelect, type Release, type ReleaseQuery
 } from '@/api/business/release'
+import {
+  statusTagFor, strategyLabel,
+  strategyHint as getStrategyHint
+} from './releaseDict'
+import { useBusinessRoute } from '@/utils/businessRoute'
+
+// 0028 P0-2C: 跨模块导航 composable
+const nav = useBusinessRoute()
 
 const formRef = ref()
 const saving = ref(false)
@@ -301,15 +322,6 @@ const rules = {
   projectId: [{ required: true, message: '请选择关联项目', trigger: 'change' }]
 }
 
-// === 状态机 (5 态) ===
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '计划中', type: 'info' },
-  '01': { label: '发布中', type: 'warning' },
-  '02': { label: '已发布', type: 'success' },
-  '03': { label: '已回滚', type: 'danger' },
-  '04': { label: '已废弃', type: 'info' }
-}
-function statusTagFor(s?: string) { return statusMap[s || '00'] || { label: s, type: 'info' } }
 const statusTag = computed(() => statusTagFor(current.status))
 
 // 5 态合法转换 (含废弃)
@@ -321,16 +333,8 @@ function canTransition(to: string): boolean {
   return TRANSITIONS[from]?.includes(to) || false
 }
 
-// === 策略提示 ===
-const strategyHints: Record<string, string> = {
-  blue_green: '🟦 蓝绿:同时存在新旧两套环境,流量切换瞬时完成;回滚最快但资源 2x',
-  canary: '🐤 金丝雀:先放 5%~10% 流量到新版本,观察 metrics 再渐进扩量',
-  rolling: '🔄 滚动:批次替换实例(如每次 25%);资源占用少但回滚慢'
-}
-const strategyHint = computed(() => strategyHints[form.strategy || ''] || '')
-function strategyLabel(s?: string) {
-  return ({ blue_green: '蓝绿', canary: '金丝雀', rolling: '滚动' } as Record<string, string>)[s || ''] || s || '-'
-}
+// === 策略提示 (computed 引用 releaseDict.ts 的纯函数,避免命名冲突用别名) ===
+const strategyHint = computed(() => getStrategyHint(form.strategy))
 
 // === DORA 4 (静态聚合显示;真实数据应来自后端 dora 模块) ===
 const doraMetrics = computed(() => {
@@ -515,31 +519,28 @@ async function confirmDeprecate() {
   await transition('04')
 }
 
+const aiReviewLoading = ref(false)
 async function aiReview() {
   if (!current.releaseId) {
     ElMessage.warning('请先保存发布单')
     return
   }
-  // 后端没有 ai/review 端点;模拟前端打分 (基于 release notes 长度 + 策略)
-  const score = Math.min(95, 60 + (current.releaseNotes?.length || 0) / 30)
-  const notes = `## AI 发布评审\n\n` +
-    `- **策略**: ${strategyLabel(current.strategy)} (${current.strategy === 'blue_green' ? '✓ 风险最低' : current.strategy === 'canary' ? '✓ 可控渐进' : '⚠ 滚动周期偏长'})\n` +
-    `- **环境**: ${current.environment}\n` +
-    `- **Release Notes**: ${current.releaseNotes?.length || 0} 字符,${(current.releaseNotes?.length || 0) > 100 ? '✓ 充分' : '⚠ 偏少,建议补充影响范围'}\n` +
-    `- **AI 建议**: ${score >= 80 ? '可以发布' : '建议补充测试用例后再上线'}\n`
+  // 后端真端点 POST /business/release/ai/review/{id} (plm-release P0-1b)
+  // 文本走 LLM(AiTexts,默认 mock provider 走模板兜底),
+  // 评分由后端 DORA 4 指标确定性计算(基线 85 + 失败率/MTTR 扣分 + 部署频率加分,clamp[0,100]),
+  // 不让 LLM 幻觉数字
+  aiReviewLoading.value = true
   try {
-    const res: any = await updateRelease({
-      releaseId: current.releaseId,
-      version: current.version,
-      aiReviewScore: score,
-      aiReviewNotes: notes
-    })
-    if (res.code === 200) {
-      Object.assign(current, { aiReviewScore: score, aiReviewNotes: notes })
-      ElMessage.success(`AI 评分 ${score.toFixed(0)} 已写入`)
+    const res: any = await aiReviewRelease(current.releaseId)
+    if (res.code === 200 && res.data) {
+      Object.assign(current, res.data)
+      ElMessage.success(`AI 评分 ${Number(res.data.aiReviewScore || 0).toFixed(0)} 已写入`)
+      await getList()
     }
   } catch (e: any) {
     ElMessage.error(e?.msg || 'AI 评审失败')
+  } finally {
+    aiReviewLoading.value = false
   }
 }
 
@@ -566,6 +567,21 @@ function newRelease() {
   Object.assign(form, emptyForm())
   Object.keys(current).forEach(k => delete (current as any)[k])
   formRef.value?.clearValidate()
+}
+
+/**
+ * 0028 P0-2C: 关联流水线 (软提示)
+ * ⚠ 后端 P0-1 已加列 release.pipelineId + P0-2A 的 SPI 校验,
+ *    但 P0-2B 未做独立 attach-pipeline endpoint。
+ * 第一版: 提示用户走"编辑"在表单内填 pipelineId, 后端 SPI 会校验流水线归属同项目。
+ * 完整 attach 流程留 P1 (与 attachTestplan 同样 picker dialog 模式)。
+ */
+function attachPipelineHint(row: Release) {
+  ElMessageBox.confirm(
+    `请点击「编辑」打开发布单 ${row.releaseNo} 并在表单中填入 pipelineId 后保存。\n\n后端会校验流水线必须归属同一项目 (601)。\n\n要现在打开编辑吗?`,
+    '关联流水线 (P1 完整流程开发中)',
+    { type: 'info', confirmButtonText: '打开编辑', cancelButtonText: '取消' }
+  ).then(() => loadRelease(row)).catch(() => {})
 }
 
 onMounted(async () => {

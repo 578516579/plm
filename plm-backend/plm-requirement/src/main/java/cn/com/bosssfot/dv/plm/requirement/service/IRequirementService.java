@@ -25,4 +25,7 @@ public interface IRequirementService
 
     /** 统计项目下未删除的需求数（Project 删除时反向检查） */
     public int countByProjectId(Long projectId);
+
+    /** AI 优先级初评（PRD §F2.1）：根据需求内容生成 high/medium/low 并落库；本期 mock */
+    public Requirement aiEvaluate(Long requirementId);
 }

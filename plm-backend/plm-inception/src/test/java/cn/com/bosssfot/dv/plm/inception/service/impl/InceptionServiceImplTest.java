@@ -32,6 +32,8 @@ import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.inception.domain.Inception;
 import cn.com.bosssfot.dv.plm.inception.mapper.InceptionMapper;
+import cn.com.bosssfot.dv.plm.project.domain.Project;
+import cn.com.bosssfot.dv.plm.project.service.IProjectService;
 
 /**
  * InceptionServiceImpl 单元测试 — PRD §F1.1 + 原型 inception.html
@@ -52,6 +54,9 @@ class InceptionServiceImplTest {
 
     @Mock
     private AiService aiService;
+
+    @Mock
+    private IProjectService projectService;
 
     @InjectMocks
     private InceptionServiceImpl service;
@@ -482,6 +487,109 @@ class InceptionServiceImplTest {
                 service.aiGenerate(60L);
             }
             verify(aiService).chat(any(AiChatRequest.class));
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // promoteToProject (Proposal 0028 P0-2 立项 → 项目主线贯通)
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("promoteToProject (Proposal 0028 P0-2)")
+    class PromoteToProject {
+
+        private Inception approvedInception(Long projectIdField) {
+            Inception inc = new Inception();
+            inc.setInceptionId(50L);
+            inc.setStatus("03");                            // 已批准
+            inc.setProjectName("精准灌溉系统");
+            inc.setBackground("基于土壤湿度的智能灌溉");
+            inc.setSubmitterUserId(7L);
+            inc.setInceptionType("new_product");
+            inc.setProjectId(projectIdField);
+            return inc;
+        }
+
+        @Test
+        @DisplayName("testPromoteOk_审批通过的立项成功建项目 + 回填 projectId")
+        void testPromoteOk() {
+            when(inceptionMapper.selectInceptionById(50L)).thenReturn(approvedInception(null));
+            when(projectService.insertProject(any())).thenAnswer(invocation -> {
+                Project p = invocation.getArgument(0);
+                p.setId(8888L);  // 模拟自动生成 id
+                return 1;
+            });
+            when(inceptionMapper.updateInception(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                Long newId = service.promoteToProject(50L);
+                assertThat(newId).isEqualTo(8888L);
+            }
+            // 验证调用 insertProject 一次,字段映射正确
+            verify(projectService).insertProject(any(Project.class));
+            // 验证回填 inception.projectId
+            verify(inceptionMapper).updateInception(any(Inception.class));
+        }
+
+        @Test
+        @DisplayName("testPromoteIdempotent_已晋升过 → 直接返回旧 projectId 不重建")
+        void testPromoteIdempotent() {
+            Inception inc = approvedInception(7777L);
+            when(inceptionMapper.selectInceptionById(50L)).thenReturn(inc);
+            Project existing = new Project();
+            existing.setId(7777L);
+            when(projectService.selectProjectById(7777L)).thenReturn(existing);
+
+            Long result = service.promoteToProject(50L);
+            assertThat(result).isEqualTo(7777L);
+            verify(projectService, never()).insertProject(any());
+            verify(inceptionMapper, never()).updateInception(any());
+        }
+
+        @Test
+        @DisplayName("testPromoteNotApproved_状态非已批准 → 601")
+        void testPromoteNotApproved() {
+            Inception inc = approvedInception(null);
+            inc.setStatus("02");  // 审批中
+            when(inceptionMapper.selectInceptionById(50L)).thenReturn(inc);
+
+            assertThatThrownBy(() -> service.promoteToProject(50L))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("已批准");
+            verify(projectService, never()).insertProject(any());
+        }
+
+        @Test
+        @DisplayName("testPromoteNotFound_inception 不存在 → 404")
+        void testPromoteNotFound() {
+            when(inceptionMapper.selectInceptionById(404L)).thenReturn(null);
+
+            assertThatThrownBy(() -> service.promoteToProject(404L))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("立项单不存在");
+        }
+
+        @Test
+        @DisplayName("testPromoteOldProjectGone_旧 projectId 指向已删项目 → 重新建")
+        void testPromoteOldProjectGone() {
+            // inception.projectId 不为空但 projectService 查不到 → 重新建
+            Inception inc = approvedInception(6666L);
+            when(inceptionMapper.selectInceptionById(50L)).thenReturn(inc);
+            when(projectService.selectProjectById(6666L)).thenReturn(null);
+            when(projectService.insertProject(any())).thenAnswer(invocation -> {
+                Project p = invocation.getArgument(0);
+                p.setId(9999L);
+                return 1;
+            });
+            when(inceptionMapper.updateInception(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                Long newId = service.promoteToProject(50L);
+                assertThat(newId).isEqualTo(9999L);
+            }
+            verify(projectService).insertProject(any(Project.class));
         }
     }
 

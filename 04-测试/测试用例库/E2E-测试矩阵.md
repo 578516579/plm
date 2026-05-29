@@ -2,10 +2,11 @@
 
 | 字段 | 值 |
 |---|---|
-| 版本 | **v2.0** |
+| 版本 | **v3.0** |
 | 框架 | Playwright 1.60+ (Chromium) |
-| 落地日期 | 2026-05-16（v1.0） / 2026-05-17（v2.0 全 13 PRD-aligned 模块覆盖） |
-| 当前总用例数 | **~91 case (24 spec 文件)** |
+| 落地日期 | 2026-05-16（v1.0） / 2026-05-17（v2.0 全 13 模块） / 2026-05-27（v3.0 全 31 模块） |
+| 当前总用例数 | **277 case (37 spec 文件)** — 业务 255 + 跨切 22 |
+| 跨层 SSoT | 完整覆盖表（E2E + 后端单测）见 [测试计划.md §1.1](../测试计划.md)；本文聚焦 E2E 维度的逐 case 矩阵 |
 | 强制级别 | **MUST** — Phase 03→04 准入条件之一（[.claude/rules.md §G.4](../../.claude/rules.md)） |
 | 关联 skill | [.claude/skills/plm-e2e/SKILL.md](../../.claude/skills/plm-e2e/SKILL.md) |
 
@@ -13,12 +14,12 @@
 
 ## 1. 套件总览
 
-### 1.1 13 个 PRD-aligned 模块（全部已覆盖 E2E）
+### 1.1 原 13 模块 — 深度覆盖（状态机 + FK + 编码 完整断言）
 
 | # | 模块 | spec 文件 | case 数 | 深度 |
 |---|---|---|---|---|
 | 1 | Project | [project.spec.ts](../../plm-frontend/e2e/project.spec.ts) | 5 | UI + 路由 + 列表 + 搜索 |
-| 2 | Requirement | [requirement.spec.ts](../../plm-frontend/e2e/requirement.spec.ts) | 6 | 4×4 状态机 + 反向边 + FK + UI |
+| 2 | Requirement | [requirement.spec.ts](../../plm-frontend/e2e/requirement.spec.ts) | 9 | 4×4 状态机 + 反向边 + FK + 评审 + UI |
 | 3 | Sprint | [sprint.spec.ts](../../plm-frontend/e2e/sprint.spec.ts) | 6 | 4×4 + **703 单一活跃** + actual_dates + stats + UI |
 | 4 | Task | [task.spec.ts](../../plm-frontend/e2e/task.spec.ts) | 10 | 6×6 含 02↔01 / 03→02 反向边 + 看板 + 我的任务 + 3 FK |
 | 5 | Defect | [defect.spec.ts](../../plm-frontend/e2e/defect.spec.ts) | 8 | 5×5 + 反向边 03→01 + 必填 resolution + 3 FK |
@@ -31,19 +32,38 @@
 | 12 | ApiDoc | [apidoc.spec.ts](../../plm-frontend/e2e/apidoc.spec.ts) ✨ v2.0 | 4 | CRUD + UK(method+path+ver) + 编码守门员 + FK |
 | 13 | ManualProduct | [manual-product.spec.ts](../../plm-frontend/e2e/manual-product.spec.ts) ✨ v2.0 | 3 | CRUD + 编码守门员 + FK |
 
-**小计：~74 case，13/13 模块 100% 覆盖。**
+**小计：~77 case，原 13 模块深度覆盖。**
 
-### 1.2 1 个缺模块（已有占位 spec）
+### 1.2 后续转 🟢 模块（2026-05-25 ~ 27 批次 — 真实 E2E）
 
-| 模块 | 状态 | spec |
-|---|---|---|
-| Inception | 🔴 缺模块（PRD §F1.1） | [inception.spec.ts](../../plm-frontend/e2e/inception.spec.ts)（1 case 占位） |
+| # | 模块 | spec | case | 深度 |
+|---|---|---|---|---|
+| 14 | Inception | [inception.spec.ts](../../plm-frontend/e2e/inception.spec.ts) | 11 | 4 态状态机 + AI 评估 + FK + 编码 |
+| 16 | Competitive | [competitive.spec.ts](../../plm-frontend/e2e/competitive.spec.ts) | 11 | 状态机 + AI 分析 + FK + 编码 |
+| 17 | PRD | [prd.spec.ts](../../plm-frontend/e2e/prd.spec.ts) | 11 | 状态机 + AI 生成 + 完整度 + 编码 |
+| 20 | ApiDesign | [apidesign.spec.ts](../../plm-frontend/e2e/apidesign.spec.ts) | 15 | 4 态状态机 + UK + HTTP method 白名单 + OpenAPI 生成 |
+| 23 | ManualImpl | [manual-impl.spec.ts](../../plm-frontend/e2e/manual-impl.spec.ts) | 11 | 状态机 + FK + 编码 |
+| 24 | ManualOps | [manual-ops.spec.ts](../../plm-frontend/e2e/manual-ops.spec.ts) | 11 | 状态机 + FK + 编码 |
+| 25 | Analytics | [analytics.spec.ts](../../plm-frontend/e2e/analytics.spec.ts) | 10 | 快照 + 维度聚合 + 编码 |
+| 27 | AI Agent | [ai-agent.spec.ts](../../plm-frontend/e2e/ai-agent.spec.ts) | 10 | 状态机 + AI 调用 + 编码 |
+| 28 | OpenSpec | [openspec.spec.ts](../../plm-frontend/e2e/openspec.spec.ts) | 11 | 状态机 + spec 生成 + 编码 |
+| 29 | Pipeline | [pipeline.spec.ts](../../plm-frontend/e2e/pipeline.spec.ts) | 10 | 状态机 + 阶段 + 编码 |
+| 30 | FeatureFlag | [feature-flag.spec.ts](../../plm-frontend/e2e/feature-flag.spec.ts) | 10 | 开关状态 + 灰度 + 编码 |
+| 31 | DORA | [dora.spec.ts](../../plm-frontend/e2e/dora.spec.ts) | 10 | 4 指标 + 周期 + 编码 |
+| 21 | TestData | [testdata.spec.ts](../../plm-frontend/e2e/testdata.spec.ts) | 11 | 3 状态机 + ENUM 白名单 + FK + 编码 HEX + generate |
+| 22 | AutoTest | [autotest.spec.ts](../../plm-frontend/e2e/autotest.spec.ts) | 4 | CRUD + 706 脚本 + FK + 编码 |
+| 26 | Dashboard | [dashboard.spec.ts](../../plm-frontend/e2e/dashboard.spec.ts) | 3（+button-fix 6） | 卡片 + 按钮跳转回归 |
+| 15 | UED | [ued.spec.ts](../../plm-frontend/e2e/ued.spec.ts) | 9 | 4 态状态机含反向边 01→00 + aiReview + FK + 编码 HEX |
+| 18 | Arch | [arch.spec.ts](../../plm-frontend/e2e/arch.spec.ts) | 10 | 4 态状态机含反向边 + 6 ENUM 604 + C4 生成 + FK + 编码 |
+| 19 | DbDesign | [dbdesign.spec.ts](../../plm-frontend/e2e/dbdesign.spec.ts) | 10 | 4 态状态机含反向边 + dbEngine 604 + ER/DDL 生成 + FK + 编码 |
 
-### 1.3 16 个空壳模块（已有占位 spec — 每个 1 case 验证 POST 可通）
+**小计：178 case。** 逐 case 断言明细待补（见 §2.17），当前以 spec 文件为准。
 
-| 模块 | spec | 状态 |
-|---|---|---|
-| Competitive / PRD / Arch / DbDesign / ApiDesign / UED / TestData | 各 1 case | 🟡 占位（POST 返 200 即可） |
+### 1.3 占位待扩 — ✅ 已清零（2026-05-28）
+
+> 全 31 模块 E2E 均为真实覆盖,**无占位 spec**。
+> - TestData 2026-05-27 闭环：`testdata.spec.ts` 11 case（+ `TestDataServiceImplTest` 30）。
+> - UED / Arch / DbDesign 2026-05-28 闭环：`ued/arch/dbdesign.spec.ts` 扩到 **9 / 10 / 10 case**（4 态状态机含反向边 01→00 + AI 动作 + FK 702 + 必填 602 + ENUM 604 + 编码 HEX），实跑 29 passed,见 §1.2。
 
 ### 1.4 跨切关注 / 烟雾测试
 
@@ -51,7 +71,12 @@
 |---|---|---|
 | [encoding.spec.ts](../../plm-frontend/e2e/encoding.spec.ts) | 6 | **乱码守门员**（P0，必跑） |
 | [navigation.spec.ts](../../plm-frontend/e2e/navigation.spec.ts) | 3 | 菜单可达性烟雾测试 |
+| [all-pages.spec.ts](../../plm-frontend/e2e/all-pages.spec.ts) | 5 | 全页面可达性巡检 |
+| [menu-sidebar-click.spec.ts](../../plm-frontend/e2e/menu-sidebar-click.spec.ts) | 1 | 侧边栏菜单点击跳转（gotcha #8 回归） |
+| [dashboard-button-fix.spec.ts](../../plm-frontend/e2e/dashboard-button-fix.spec.ts) | 6 | 工作台按钮跳转回归（gotcha #8） |
 | [screenshot-tour.spec.ts](../../plm-frontend/e2e/screenshot-tour.spec.ts) | 1 | 截图巡检 |
+
+**跨切合计 22 case。**
 
 ---
 
@@ -206,18 +231,13 @@
 | Nav-Menu | 30 模块菜单可达性烟雾测试 |
 | Nav-Stub | stub packages 文件结构完整 |
 
-### 2.16 空壳模块 spec（占位 — 每个 1 case 验证 POST 返 200）
+### 2.16 占位 spec — ✅ 已清零（2026-05-28）
 
-| spec | 模块 |
-|---|---|
-| `inception.spec.ts` | 立项 |
-| `competitive.spec.ts` | 竞品 |
-| `prd.spec.ts` | PRD 文档 |
-| `arch.spec.ts` | 架构设计 |
-| `dbdesign.spec.ts` | 数据库设计 |
-| `apidesign.spec.ts` | 接口设计 |
-| `ued.spec.ts` | UED |
-| `testdata.spec.ts` | 测试数据 |
+> 全 31 模块 E2E 均真实覆盖,**无占位 spec**。最后的 UED / 架构设计 / 数据库设计 三占位已于 2026-05-28 扩到 9 / 10 / 10 case（详 §1.2 / §1.3）。
+
+### 2.17 §1.2 批次模块逐 case 明细（待补）
+
+§1.2 的 18 个后续转 🟢 模块（inception/competitive/prd/apidesign/manual-impl/manual-ops/analytics/ai-agent/openspec/pipeline/feature-flag/dora/autotest/dashboard/testdata/ued/arch/dbdesign，共 178 case）已有真实 spec，但本矩阵的**逐 case 断言表**尚未逐一回填。在补齐前，以各 `*.spec.ts` 源文件的 `test('TC-…')` 标题为准（命名遵循 [测试策略.md §7 军规 5](../测试策略.md) `TC-{模块}-{编号}` 格式）。
 
 ---
 
@@ -292,3 +312,6 @@
 |---|---|---|
 | v1.0 | 2026-05-16 | 首次创建,覆盖 41 case (encoding + 4 业务 + navigation) |
 | v2.0 | 2026-05-17 | 全面覆盖 13/13 PRD-aligned 模块；补 5 个浅 spec → 各 3-4 case (release/apidoc/manual-product/testplan/testreport)；列出 16 空壳 + 1 缺模块 spec；登记 plm-e2e skill 引用。总 case ~91。 |
+| v3.0 | 2026-05-27 | **全 31 模块同步**：§1.1 改为"原 13 深度覆盖"；§1.2 新增 14 个后续转 🟢 模块（~127 case，inception 含原"缺模块"已落地）；§1.3 占位收敛到 4 个（UED/Arch/DbDesign/TestData，TestData 双缺口）；§1.4 跨切 3→6 spec=22；§2.16 占位列表纠正（移除 inception/competitive/prd/apidesign）；新增 §2.17 批次模块逐 case 明细待补说明。总 case ~91→**241 / 37 spec**。与 [测试计划.md v0.5](../测试计划.md) 对齐。 |
+| v3.1 | 2026-05-27 | **TestData 闭环**：§1.2 加 testdata 行（11 case）小计→149；§1.3 占位 4→3（移除 TestData）；§2.16 占位列表移除 testdata；§2.17 14→15 模块·149 case。总 case 241→**251 / 37 spec**。与 [测试计划.md v0.6](../测试计划.md) 对齐。 |
+| v3.2 | 2026-05-28 | **三占位 E2E 闭环（占位清零）**：§1.2 加 ued/arch/dbdesign（9/10/10 case）小计 149→178；§1.3 占位 3→0（✅ 清零）；§2.16 占位列表清空；§2.17 15→18 模块·178 case。总 case 251→**277 / 37 spec**（业务 255 + 跨切 22）。与 [测试计划.md v0.8](../测试计划.md) 对齐。 |

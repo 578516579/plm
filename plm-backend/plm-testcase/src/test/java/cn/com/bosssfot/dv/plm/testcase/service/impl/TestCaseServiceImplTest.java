@@ -24,6 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatResult;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.project.domain.Project;
@@ -58,6 +61,9 @@ class TestCaseServiceImplTest {
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private AiService aiService;
 
     @InjectMocks
     private TestCaseServiceImpl service;
@@ -373,6 +379,107 @@ class TestCaseServiceImplTest {
                 mocked.when(SecurityUtils::getUsername).thenReturn("admin");
                 service.executeTestCase(1L, "03", "页面渲染正常");
             }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // aiGenerate (PRD §F3.5 AI 生成用例要素)
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("aiGenerate (PRD §F3.5 AI 生成用例要素)")
+    class AiGenerateTests {
+
+        private TestCase draft() {
+            TestCase t = new TestCase();
+            t.setTestcaseId(1L);
+            t.setTestcaseNo("TC-2026-0001");
+            t.setTitle("验证登录功能");
+            t.setProjectId(1L);
+            t.setStatus("00");
+            return t;
+        }
+
+        @Test
+        @DisplayName("不存在 → 404")
+        void notFound() {
+            when(testcaseMapper.selectTestCaseById(404L)).thenReturn(null);
+            assertThatThrownBy(() -> service.aiGenerate(404L))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("用例不存在");
+        }
+
+        @Test
+        @DisplayName("真 provider 返回 JSON → 填充 preconditions/steps/expectedResult")
+        void realProviderJsonApplied() {
+            TestCase t = draft();
+            when(testcaseMapper.selectTestCaseById(1L)).thenReturn(t);
+            when(testcaseMapper.updateTestCase(any())).thenReturn(1);
+            String json = "{\"preconditions\":\"已登录\",\"steps\":\"1. 打开页面\\n2. 点击登录\",\"expectedResult\":\"跳转首页\"}";
+            when(aiService.chat(any(AiChatRequest.class)))
+                .thenReturn(AiChatResult.ok("openai", "gpt-4o", json));
+
+            TestCase r = service.aiGenerate(1L);
+            assertThat(r.getPreconditions()).isEqualTo("已登录");
+            assertThat(r.getSteps()).contains("点击登录");
+            assertThat(r.getExpectedResult()).isEqualTo("跳转首页");
+        }
+
+        @Test
+        @DisplayName("LLM 用 ```json 围栏 → 剥离后解析")
+        void fencedJsonParsed() {
+            TestCase t = draft();
+            when(testcaseMapper.selectTestCaseById(1L)).thenReturn(t);
+            when(testcaseMapper.updateTestCase(any())).thenReturn(1);
+            String fenced = "```json\n{\"steps\":\"步骤A\",\"expectedResult\":\"结果B\"}\n```";
+            when(aiService.chat(any(AiChatRequest.class)))
+                .thenReturn(AiChatResult.ok("anthropic", "claude", fenced));
+
+            TestCase r = service.aiGenerate(1L);
+            assertThat(r.getSteps()).isEqualTo("步骤A");
+            assertThat(r.getExpectedResult()).isEqualTo("结果B");
+        }
+
+        @Test
+        @DisplayName("mock provider → 退回确定性骨架(steps 含标题)")
+        void mockFallsBackToTemplate() {
+            TestCase t = draft();
+            when(testcaseMapper.selectTestCaseById(1L)).thenReturn(t);
+            when(testcaseMapper.updateTestCase(any())).thenReturn(1);
+            when(aiService.chat(any(AiChatRequest.class)))
+                .thenReturn(AiChatResult.ok("mock", "mock-model", "[mock] system=... user=..."));
+
+            TestCase r = service.aiGenerate(1L);
+            assertThat(r.getSteps()).contains("验证登录功能");
+            assertThat(r.getExpectedResult()).isNotBlank();
+            assertThat(r.getPreconditions()).isNotBlank();
+        }
+
+        @Test
+        @DisplayName("真 provider 返回非 JSON → 退回模板兜底")
+        void invalidJsonFallsBack() {
+            TestCase t = draft();
+            when(testcaseMapper.selectTestCaseById(1L)).thenReturn(t);
+            when(testcaseMapper.updateTestCase(any())).thenReturn(1);
+            when(aiService.chat(any(AiChatRequest.class)))
+                .thenReturn(AiChatResult.ok("openai", "gpt-4o", "抱歉,我无法生成该用例"));
+
+            TestCase r = service.aiGenerate(1L);
+            assertThat(r.getSteps()).contains("验证登录功能"); // 模板兜底
+        }
+
+        @Test
+        @DisplayName("真 provider 失败 → 708,不落库")
+        void failureThrows708() {
+            TestCase t = draft();
+            when(testcaseMapper.selectTestCaseById(1L)).thenReturn(t);
+            when(aiService.chat(any(AiChatRequest.class)))
+                .thenReturn(AiChatResult.fail("openai", "quota exceeded"));
+
+            assertThatThrownBy(() -> service.aiGenerate(1L))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("AI 用例生成失败");
+            verify(testcaseMapper, never()).updateTestCase(any());
         }
     }
 

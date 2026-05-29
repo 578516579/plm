@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
+import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
@@ -47,6 +50,7 @@ public class TestDataServiceImpl implements ITestDataService
 
     @Autowired private TestDataMapper testdataMapper;
     @Autowired private ProjectMapper projectMapper;
+    @Autowired private AiService aiService;
 
     @Override
     public List<TestData> selectTestDataList(TestData t) { return testdataMapper.selectTestDataList(t); }
@@ -153,16 +157,33 @@ public class TestDataServiceImpl implements ITestDataService
         if (td == null) {
             throw new ServiceException("测试数据集不存在", 404);
         }
+        // fieldSemantics 是 schema 元数据(列含义+值域),不属"AI 产物",保持稳定
         String semantics = "{\"sensor_id\":\"ID\",\"farm_id\":\"FK->farm\","
             + "\"timestamp\":\"datetime\",\"latitude\":\"中国范围 18~53\","
             + "\"longitude\":\"中国范围 73~135\","
             + "\"soil_moisture\":\"0-100\",\"soil_temperature\":\"-10~50\"}";
-        String sample = "[{\"sensor_id\":\"S001\",\"farm_id\":1,"
+        // P0-1b: 真 provider 时由 LLM 生成数据行,默认 mock / 失败时回退到示例 JSON
+        // 注: 示例 fallback 包含 "soil_moisture" 以兼容 §M.2 单测断言并保 dev/CI 零依赖
+        String fallbackSample = "[{\"sensor_id\":\"S001\",\"farm_id\":1,"
             + "\"timestamp\":\"2026-05-17 10:00:00\","
             + "\"latitude\":34.7472,\"longitude\":113.6253,"
             + "\"soil_moisture\":42.5,\"soil_temperature\":18.3}]";
+        int count = td.getGenerateCount() != null ? td.getGenerateCount() : 1000;
+        boolean wantOutliers = "Y".equalsIgnoreCase(td.getRuleIncludeOutliers());
+        AiChatRequest req = AiChatRequest.builder("")
+            .system("你是 PLM 测试数据工厂,精通农业 IoT/农情/作物数据。"
+                + "严格遵守: 中国大陆坐标(纬度 18~53,经度 73~135)、时序连续、传感器值域合理"
+                + (wantOutliers ? "、约 5% 异常值" : "") + "。"
+                + "仅输出 JSON 数组,不要任何解释、不要 markdown 围栏。")
+            .user("为表 [" + td.getTargetTable() + "] 生成 " + Math.min(count, 50)
+                + " 行测试数据(JSON 数组)。字段语义: " + semantics)
+            .callerTag("testdata#" + testdataId)
+            .temperature(0.5)
+            .maxTokens(3000)
+            .build();
+        String content = AiTexts.generate(aiService, req, () -> fallbackSample);
         td.setFieldSemantics(semantics);
-        td.setGeneratedContent(sample);
+        td.setGeneratedContent(content);
         td.setStatus("01");
         td.setAiGenerated("Y");
         td.setGeneratedAt(new Date());

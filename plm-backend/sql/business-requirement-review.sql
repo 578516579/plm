@@ -16,7 +16,7 @@ CREATE TABLE tb_requirement_review (
     review_id          BIGINT(20)    NOT NULL AUTO_INCREMENT  COMMENT '主键',
     requirement_id     BIGINT(20)    NOT NULL                 COMMENT '需求 FK→tb_requirement.requirement_id (必填)',
     reviewer_user_id   BIGINT(20)    NOT NULL                 COMMENT '评审人 FK→sys_user.user_id (必填)',
-    review_result      VARCHAR(2)    NOT NULL                 COMMENT '评审结果（字典 biz_req_review_result：00=通过 01=打回）',
+    review_result      VARCHAR(20)   NOT NULL                 COMMENT '评审结果（字典 biz_req_review_result：00=通过 01=打回）',
     review_comment     VARCHAR(1000) DEFAULT NULL             COMMENT '评审意见正文（打回必填）',
     review_at          DATETIME      DEFAULT NULL             COMMENT '评审时间（提交时回填）',
     create_by          VARCHAR(64)   DEFAULT ''               COMMENT '创建者',

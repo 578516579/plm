@@ -14,7 +14,7 @@ CREATE TABLE tb_document (
     title                 VARCHAR(200)  NOT NULL                 COMMENT '文档标题',
     content               LONGTEXT                               COMMENT 'Markdown 全文',
     version               VARCHAR(20)   NOT NULL DEFAULT 'v1.0'  COMMENT '版本号',
-    status                VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_doc_status',
+    status                VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_doc_status',
     author_user_id        BIGINT(20)    NOT NULL                 COMMENT '作者',
     reviewer_user_id      BIGINT(20)    DEFAULT NULL             COMMENT '审核人',
     tags                  VARCHAR(200)  DEFAULT NULL             COMMENT 'CSV 标签',

@@ -36,6 +36,10 @@ public class Defect extends BaseEntity
     @Excel(name = "任务ID")
     private Long taskId;
 
+    /** 关联测试用例 ID（可空）— Proposal 0028 P0-1 产品主线 FK,跨模块同 projectId 强约束 */
+    @Excel(name = "测试用例ID")
+    private Long testcaseId;
+
     /** 缺陷标题 */
     @Excel(name = "标题")
     private String title;
@@ -97,6 +101,9 @@ public class Defect extends BaseEntity
 
     public void setTaskId(Long taskId) { this.taskId = taskId; }
     public Long getTaskId() { return taskId; }
+
+    public void setTestcaseId(Long testcaseId) { this.testcaseId = testcaseId; }
+    public Long getTestcaseId() { return testcaseId; }
 
     public void setTitle(String title) { this.title = title; }
     public String getTitle() { return title; }

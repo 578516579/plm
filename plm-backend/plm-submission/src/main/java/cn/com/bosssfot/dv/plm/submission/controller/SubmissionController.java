@@ -62,4 +62,16 @@ public class SubmissionController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(submissionService.deleteSubmissionByIds(ids));
     }
+
+    /**
+     * Proposal 0028 P0-2 — 提测拉起测试方案(主线贯通:研发 → 测试)
+     * 权限复用 edit(同 RuoYi 范式;FK 校验复用 P0-1 已有的 validateTestplanFk → 跨项目抛 702)
+     */
+    @PreAuthorize("@ss.hasPermi('business:submission:edit')")
+    @Log(title = "提测管理-拉起测试方案", businessType = BusinessType.UPDATE)
+    @PostMapping("/{id}/attach-testplan")
+    public AjaxResult attachTestplan(@PathVariable("id") Long id, @RequestParam Long testplanId) {
+        submissionService.attachTestplan(id, testplanId);
+        return success();
+    }
 }

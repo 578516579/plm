@@ -271,6 +271,7 @@ import {
   listRequirementsForSelect,
   type Prd, type PrdQuery
 } from '@/api/business/prd'
+import { statusTagFor } from './prdDict'
 
 const formRef = ref()
 const saving = ref(false)
@@ -301,17 +302,6 @@ const rules = {
 }
 
 const aiSteps = ref<{ label: string; done: boolean; active: boolean }[]>([])
-
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿',   type: 'info' },
-  '01': { label: '评审中', type: 'warning' },
-  '02': { label: '已确认', type: 'success' },
-  '03': { label: '已废弃', type: 'danger' }
-}
-
-function statusTagFor(s?: string) {
-  return statusMap[s || '00'] || { label: s || '-', type: 'info' }
-}
 
 const completenessTag = computed(() => {
   const score = current.completenessScore

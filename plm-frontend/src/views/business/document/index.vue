@@ -118,7 +118,7 @@
         <el-form-item v-if="form.documentId && !readOnly" label="状态">
           <el-select v-model="form.status" style="width: 100%">
             <el-option label="草稿" value="00" />
-            <el-option label="评审中" value="01" />
+            <el-option label="待评审" value="01" />
             <el-option label="已发布" value="02" />
             <el-option label="已归档" value="03" />
           </el-select>
@@ -152,6 +152,7 @@ import {
   listDocument, addDocument, updateDocument, delDocument, getDocument, listProjectsForSelect,
   type Document, type DocumentQuery
 } from '@/api/business/document'
+import { statusTagFor, docTypeLabel, docTypeTag } from './documentDict'
 
 const dialogVisible = ref(false)
 const readOnly = ref(false)
@@ -185,26 +186,6 @@ const list = ref<Document[]>([])
 const total = ref(0)
 const queryParams = reactive<DocumentQuery>({ pageNum: 1, pageSize: 10, docType: '' })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
-
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿', type: 'info' },
-  '01': { label: '评审中', type: 'warning' },
-  '02': { label: '已发布', type: 'success' },
-  '03': { label: '已归档', type: 'danger' }
-}
-const statusTagFor = (s?: string) => statusMap[s || ''] || { label: s || '-', type: 'info' as any }
-
-function docTypeLabel(v?: string) {
-  const t = docTypes.find(x => x.value === v)
-  return t ? `${t.icon} ${t.label}` : v || '-'
-}
-function docTypeTag(v?: string): any {
-  return ({
-    prd: 'primary', hld: 'success', lld: 'warning', db: 'info', api: 'primary',
-    req: 'warning', arch: 'success', test: 'primary', manual: 'info',
-    changelog: 'info', other: 'info'
-  } as Record<string,string>)[v || ''] || 'info'
-}
 
 function countByType(t: string) {
   return list.value.filter(d => d.docType === t).length

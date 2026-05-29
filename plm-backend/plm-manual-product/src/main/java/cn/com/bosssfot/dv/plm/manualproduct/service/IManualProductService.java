@@ -9,4 +9,7 @@ public interface IManualProductService {
     int insertManualProduct(ManualProduct manualproduct);
     int updateManualProduct(ManualProduct manualproduct);
     int deleteManualProductByIds(Long[] manualproductIds);
+
+    /** P0-1b: AI 生成产品手册 Markdown 正文(真 provider 落 LLM 文本,否则回退模板)。 */
+    ManualProduct aiGenerate(Long manualproductId);
 }

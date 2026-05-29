@@ -12,6 +12,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
@@ -19,6 +20,8 @@ import cn.com.bosssfot.dv.plm.common.utils.StringUtils;
 import cn.com.bosssfot.dv.plm.inception.domain.Inception;
 import cn.com.bosssfot.dv.plm.inception.mapper.InceptionMapper;
 import cn.com.bosssfot.dv.plm.inception.service.IInceptionService;
+import cn.com.bosssfot.dv.plm.project.domain.Project;
+import cn.com.bosssfot.dv.plm.project.service.IProjectService;
 
 /**
  * 项目立项 Service — PRD §F1.1 + 原型 inception.html
@@ -52,6 +55,7 @@ public class InceptionServiceImpl implements IInceptionService
 
     @Autowired private InceptionMapper inceptionMapper;
     @Autowired private AiService aiService;
+    @Autowired private IProjectService projectService;
 
     @Override
     public List<Inception> selectInceptionList(Inception t) {
@@ -166,12 +170,12 @@ public class InceptionServiceImpl implements IInceptionService
         // V3 审计:走一次 AiService 产生 invocation log,业务输出仍用下方 mock(保 E2E)。
         // 当 plm.ai.default-provider 切到真厂商时,审计表能立刻看到真实 tokens/elapsed,
         // 业务侧可逐步替换 result.getText() (本期保持 mock 输出兼容现有 E2E 断言)。
-        aiService.chat(AiChatRequest.builder("")
+        AiChatRequest aiReq = AiChatRequest.builder("")
             .system("你是 PLM 资深立项专家,擅长农业 IoT 项目可行性分析")
             .user("请生成项目 [" + inc.getProjectName() + "] 的立项建议书,业务线:" + inc.getBusinessLine())
             .callerTag("inception#" + inceptionId)
-            .build());
-        // 本期 mock
+            .build();
+        // P0-1: 真 provider 时 aiProposalContent 采用 LLM 输出;mock/失败时下方模板兜底(aiRisks 保持模板)
         String proposal = "# 立项建议书:" + inc.getProjectName() + "\n\n"
             + "## 1. 背景与诉求\n" + (inc.getBackground() == null ? "(待补充)" : inc.getBackground()) + "\n\n"
             + "## 2. 业务价值\n- 业务线:" + inc.getBusinessLine() + "\n- 项目类型:" + inc.getInceptionType() + "\n\n"
@@ -182,12 +186,76 @@ public class InceptionServiceImpl implements IInceptionService
             + "2. 弱网/离线场景比例较高,需评估离线能力\n"
             + "3. 跨部门协同 (产品/算法/实施) 沟通成本";
         inc.setAiGenerated("Y");
-        inc.setAiProposalContent(proposal);
+        inc.setAiProposalContent(AiTexts.generate(aiService,aiReq, () -> proposal));
         inc.setAiRisks(risks);
         inc.setAiGeneratedAt(new Date());
         inc.setUpdateBy(SecurityUtils.getUsername());
         inceptionMapper.updateInception(inc);
         return inc;
+    }
+
+    /**
+     * Proposal 0028 P0-2 — 立项晋升项目
+     *
+     * 字段映射:
+     *   inception.projectName       → project.projectName
+     *   inception.background        → project.description
+     *   inception.submitterUserId   → project.managerUserId(立项提交人 = 项目负责人默认值)
+     *   project.projectType         = "iteration"(默认;inception.inceptionType 字典与 project 字典不同,
+     *                                 保守起见用通用值,人工后续在项目详情可改)
+     *   project.status              = "0"(未启动 — 项目状态字典 0/1/2/3/4)
+     *
+     * 校验:
+     *   - inception 不存在        → 404
+     *   - inception.status != 03  → 601
+     *   - 幂等:若 inception.projectId 不为空且对应 project 仍在 → 直接返回旧 projectId,不重建
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long promoteToProject(Long inceptionId) {
+        Inception inc = inceptionMapper.selectInceptionById(inceptionId);
+        if (inc == null) {
+            throw new ServiceException("立项单不存在", 404);
+        }
+        if (!"03".equals(inc.getStatus())) {
+            throw new ServiceException(
+                "立项状态 " + statusLabel(inc.getStatus()) + " 不能晋升项目,必须先到「已批准」",
+                601
+            );
+        }
+
+        // 幂等:已晋升过且 project 仍在 → 直接返回旧 projectId
+        if (inc.getProjectId() != null) {
+            Project existing = projectService.selectProjectById(inc.getProjectId());
+            if (existing != null) {
+                log.info("inception#{} 已晋升过项目 project#{},直接返回幂等结果",
+                    inceptionId, inc.getProjectId());
+                return inc.getProjectId();
+            }
+            // 旧 projectId 指向已删除 project → 重新建
+            log.warn("inception#{} 旧 projectId={} 对应项目已不存在,重新晋升",
+                inceptionId, inc.getProjectId());
+        }
+
+        // 建项目(项目编号 generateProjectNo 由 ProjectServiceImpl 自动填充)
+        Project project = new Project();
+        project.setProjectName(inc.getProjectName());
+        project.setDescription(inc.getBackground());
+        project.setManagerUserId(inc.getSubmitterUserId());
+        project.setProjectType("iteration");
+        project.setStatus("0");
+        project.setCreateBy(SecurityUtils.getUsername());
+        projectService.insertProject(project);
+
+        // 回填 inception.projectId
+        Inception back = new Inception();
+        back.setInceptionId(inceptionId);
+        back.setProjectId(project.getId());
+        back.setUpdateBy(SecurityUtils.getUsername());
+        inceptionMapper.updateInception(back);
+
+        log.info("inception#{} 晋升项目成功,新 projectId={}", inceptionId, project.getId());
+        return project.getId();
     }
 
     private String generateInceptionNo() {

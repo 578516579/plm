@@ -149,6 +149,7 @@ import {
   listManualImpl, addManualImpl, updateManualImpl, delManualImpl, aiGenerateManualImpl, getManualImpl, listProjectsForSelect,
   type ManualImpl, type ManualImplQuery
 } from '@/api/business/manual-impl'
+import { statusTagFor, deployLabel, osLabel } from './manualImplDict'
 
 const formRef = ref()
 const saving = ref(false)
@@ -173,15 +174,7 @@ const queryParams = reactive<ManualImplQuery>({ pageNum: 1, pageSize: 10 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 
 const hasManual = computed(() => !!(current.installSteps || current.initConfigSteps))
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '草稿', type: 'info' }, '01': { label: '评审中', type: 'warning' },
-  '02': { label: '已发布', type: 'success' }, '03': { label: '已废弃', type: 'danger' }
-}
-const statusTagFor = (s?: string) => statusMap[s || '00'] || { label: s || '-', type: 'info' as any }
 const statusTag = computed(() => statusTagFor(current.status))
-
-const deployLabel = (v?: string) => ({ docker_compose: 'Docker', k8s: 'K8s', baremetal: '裸机' } as Record<string,string>)[v||''] || v || '-'
-const osLabel = (v?: string) => ({ centos: 'CentOS', ubuntu: 'Ubuntu', kylin: '麒麟' } as Record<string,string>)[v||''] || v || '-'
 
 async function getList() {
   listLoading.value = true

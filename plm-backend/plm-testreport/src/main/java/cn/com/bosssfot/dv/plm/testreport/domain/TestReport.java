@@ -38,6 +38,13 @@ public class TestReport extends BaseEntity
     @Excel(name = "状态") private String status;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") private Date generatedAt;
     private Long reviewerUserId;
+    // === Proposal 0028 P0-3A: 聚合元数据 ===
+    /** Y/N 是否经聚合算出 (N = 人工录入) */
+    private String isAggregated;
+    /** 上次聚合时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") private Date aggregatedAt;
+    /** Y = 用户手工覆盖了聚合值,后续聚合跳过 */
+    private String isManualOverride;
     private String delFlag;
 
     public Long getTestreportId() { return testreportId; }
@@ -82,6 +89,12 @@ public class TestReport extends BaseEntity
     public void setGeneratedAt(Date v) { this.generatedAt = v; }
     public Long getReviewerUserId() { return reviewerUserId; }
     public void setReviewerUserId(Long v) { this.reviewerUserId = v; }
+    public String getIsAggregated() { return isAggregated; }
+    public void setIsAggregated(String v) { this.isAggregated = v; }
+    public Date getAggregatedAt() { return aggregatedAt; }
+    public void setAggregatedAt(Date v) { this.aggregatedAt = v; }
+    public String getIsManualOverride() { return isManualOverride; }
+    public void setIsManualOverride(String v) { this.isManualOverride = v; }
     public String getDelFlag() { return delFlag; }
     public void setDelFlag(String v) { this.delFlag = v; }
 

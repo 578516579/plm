@@ -1,6 +1,13 @@
 # 24 Stub 模块启动路线图
 
-| 字段 | 值 |
+> ⚠️ **本文档为 v1.0 历史规划路线图，2026-05-27 已完成路线**
+>
+> 截至 2026-05-28：原 24 个 stub **全部** 已转 🟢 PRD-aligned，外加 v0.x 新增 MCP / Integration。
+> 当前真实模块清单见 [PRD-MAPPING.md §1](../PRD-MAPPING.md)。
+> 例外：`plm-proposal` 保留为 Maven 占位（无业务代码），实际功能由 `plm-document` (doc_type=proposal) 承载——见 §2.1 "实施提示"。
+> 本文档保留供历史回溯,不再驱动开发。
+
+| 字段 | 值（v1.0 历史值） |
 |---|---|
 | 版本 | v1.0 |
 | 当前已 active | 6 个 (Project / Requirement / Sprint / Task / Defect / TestCase) |

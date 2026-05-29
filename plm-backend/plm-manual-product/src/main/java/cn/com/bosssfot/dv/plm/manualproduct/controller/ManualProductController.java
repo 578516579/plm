@@ -62,4 +62,12 @@ public class ManualProductController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(manualproductService.deleteManualProductByIds(ids));
     }
+
+    /** P0-1b: AI 一键生成产品手册正文。 */
+    @PreAuthorize("@ss.hasPermi('business:manual-product:edit')")
+    @Log(title = "产品手册-AI生成", businessType = BusinessType.UPDATE)
+    @PostMapping("/ai/generate/{id}")
+    public AjaxResult aiGenerate(@PathVariable("id") Long id) {
+        return success(manualproductService.aiGenerate(id));
+    }
 }

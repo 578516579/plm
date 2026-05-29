@@ -9,17 +9,16 @@ export interface DbDesign {
   projectId: number
   archId?: number
   title: string
-  dbEngine?: string  // mysql / postgres / kingbase
-  domainEntities?: string
-  erDiagram?: string  // Mermaid erDiagram
-  dataDictionary?: string  // JSON / Markdown
-  ddlScript?: string
-  normalForm?: string  // 1nf / 2nf / 3nf / bcnf
-  indexSuggestions?: string
+  dbEngine?: string  // mysql / postgresql / kingbase (字典 biz_dbdesign_engine)
+  erDiagramContent?: string  // Mermaid erDiagram 源码
+  dataDictionary?: string  // 数据字典 Markdown / JSON
+  ddlScript?: string  // CREATE TABLE 集合
+  normalizationCheck?: string  // 规范检查 JSON (命名/索引/范式)
   aiGenerated?: string
   aiGeneratedAt?: string
-  status?: string
+  status?: string  // 字典 biz_dbdesign_status (00/01/02/03)
   authorUserId?: number
+  reviewerUserId?: number
 }
 
 export interface DbDesignQuery {

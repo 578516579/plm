@@ -1,5 +1,6 @@
 package cn.com.bosssfot.dv.plm.dora.controller;
 
+import java.util.Date;
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import cn.com.bosssfot.dv.plm.common.core.controller.BaseController;
 import cn.com.bosssfot.dv.plm.common.core.domain.AjaxResult;
 import cn.com.bosssfot.dv.plm.common.core.page.TableDataInfo;
 import cn.com.bosssfot.dv.plm.common.enums.BusinessType;
+import cn.com.bosssfot.dv.plm.common.utils.DateUtils;
 import cn.com.bosssfot.dv.plm.common.utils.poi.ExcelUtil;
 import cn.com.bosssfot.dv.plm.dora.domain.DoraMetric;
 import cn.com.bosssfot.dv.plm.dora.service.IDoraMetricService;
@@ -69,5 +71,22 @@ public class DoraMetricController extends BaseController {
     @PostMapping("/ai/suggest/{id}")
     public AjaxResult aiSuggest(@PathVariable("id") Long id) {
         return success(doraService.aiSuggest(id));
+    }
+
+    /**
+     * Proposal 0028 P0-3B: 按 project + 窗口期触发 DORA 4 指标真聚合(upsert)。
+     * - periodDays 缺省 30 天
+     * - 窗口固定 [now - periodDays, now]
+     * - 已有 is_computed='N' 的人工录入条目不被覆盖
+     */
+    @PreAuthorize("@ss.hasPermi('business:dora:edit')")
+    @Log(title = "DORA-真聚合", businessType = BusinessType.UPDATE)
+    @PostMapping("/refresh-compute")
+    public AjaxResult refreshCompute(@RequestParam Long projectId,
+                                     @RequestParam(required = false) Integer periodDays) {
+        int days = periodDays != null && periodDays > 0 ? periodDays : 30;
+        Date now = new Date();
+        Date start = DateUtils.addDays(now, -days);
+        return AjaxResult.success(doraService.computeMetrics(projectId, start, now));
     }
 }

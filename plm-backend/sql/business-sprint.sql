@@ -16,7 +16,7 @@ CREATE TABLE tb_sprint (
     project_id           BIGINT(20)    NOT NULL                 COMMENT '所属项目 FK→tb_project.id',
     name                 VARCHAR(100)  NOT NULL                 COMMENT '迭代名称（如 Sprint 26W21）',
     goal                 VARCHAR(500)  DEFAULT NULL             COMMENT '迭代目标（一句话）',
-    status               VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT '状态（字典 biz_sprint_status）',
+    status               VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT '状态（字典 biz_sprint_status）',
     planned_start_date   DATE          NOT NULL                 COMMENT '计划开始日',
     planned_end_date     DATE          NOT NULL                 COMMENT '计划结束日',
     actual_start_date    DATE          DEFAULT NULL             COMMENT '实际开始（00→01 时自动填）',

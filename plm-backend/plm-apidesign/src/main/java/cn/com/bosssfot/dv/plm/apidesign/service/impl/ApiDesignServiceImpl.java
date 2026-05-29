@@ -15,6 +15,7 @@ import cn.com.bosssfot.dv.plm.apidesign.domain.ApiDesign;
 import cn.com.bosssfot.dv.plm.apidesign.mapper.ApiDesignMapper;
 import cn.com.bosssfot.dv.plm.apidesign.service.IApiDesignService;
 import cn.com.bosssfot.dv.plm.common.ai.AiService;
+import cn.com.bosssfot.dv.plm.common.ai.AiTexts;
 import cn.com.bosssfot.dv.plm.common.ai.dto.AiChatRequest;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
@@ -164,10 +165,10 @@ public class ApiDesignServiceImpl implements IApiDesignService
         if (a == null) {
             throw new ServiceException("接口设计不存在", 404);
         }
-        aiService.chat(AiChatRequest.builder("")
+        AiChatRequest aiReq = AiChatRequest.builder("")
             .system("你是 PLM 资深 API 架构师,擅长 OpenAPI 3.0 与 mock 响应设计")
             .user("请生成 [" + a.getTitle() + "] " + a.getHttpMethod() + " " + a.getPath() + " 的 OpenAPI 定义")
-            .callerTag("apidesign#" + apidesignId).build());
+            .callerTag("apidesign#" + apidesignId).build();
         String spec = "openapi: 3.0.3\n"
             + "info:\n  title: " + a.getTitle() + "\n  version: '1.0'\n"
             + "paths:\n  " + a.getPath() + ":\n"
@@ -187,7 +188,7 @@ public class ApiDesignServiceImpl implements IApiDesignService
         String reqSchema = "{\"type\":\"object\",\"properties\":{},\"required\":[]}";
         String respSchema = "{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"integer\"},\"msg\":{\"type\":\"string\"},\"data\":{}}}";
         String mock = "{\"code\":200,\"msg\":\"操作成功\",\"data\":null}";
-        a.setOpenapiSpec(spec);
+        a.setOpenapiSpec(AiTexts.generate(aiService,aiReq, () -> spec));
         a.setRequestSchema(reqSchema);
         a.setResponseSchema(respSchema);
         a.setMockResponse(mock);

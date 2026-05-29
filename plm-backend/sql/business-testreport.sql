@@ -22,7 +22,7 @@ CREATE TABLE tb_testreport (
     risk_evaluation      TEXT                                   COMMENT '风险评估说明',
     recommendations      TEXT                                   COMMENT '改进建议',
     ai_generated         CHAR(1)       DEFAULT 'N'              COMMENT 'Y/N',
-    status               VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_testreport_status',
+    status               VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_testreport_status',
     generated_at         DATETIME      DEFAULT NULL             COMMENT '生成时间',
     reviewer_user_id     BIGINT(20)    DEFAULT NULL             COMMENT '审核人',
     create_by            VARCHAR(64)   DEFAULT '',

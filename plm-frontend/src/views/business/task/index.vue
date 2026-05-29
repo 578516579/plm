@@ -13,9 +13,7 @@
         <el-select v-model="filterSprintId" placeholder="按迭代过滤" clearable style="width: 200px" @change="getList">
           <el-option v-for="s in sprintOptions" :key="s.sprintId" :label="s.name" :value="s.sprintId" />
         </el-select>
-        <el-button type="success" :loading="aiLoading" @click="openAiSplit">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ AI 拆分任务
-        </el-button>
+        <AiButton :loading="aiLoading" @click="openAiSplit">AI 拆分任务</AiButton>
         <el-radio-group v-model="viewMode" size="default">
           <el-radio-button value="table">📊 表格</el-radio-button>
           <el-radio-button value="kanban">📌 看板</el-radio-button>
@@ -172,9 +170,7 @@
       </el-form>
       <template #footer>
         <el-button @click="aiSplitVisible = false">取消</el-button>
-        <el-button type="primary" :loading="aiLoading" @click="confirmAiSplit">
-          <el-icon><MagicStick /></el-icon>&nbsp;✨ 立即拆分
-        </el-button>
+        <AiButton :loading="aiLoading" @click="confirmAiSplit">立即拆分</AiButton>
       </template>
     </el-dialog>
   </div>
@@ -183,13 +179,15 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { MagicStick, Plus } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
+import AiButton from '@/components/AiButton/index.vue'
 import { useRoute } from 'vue-router'
 import {
   listTask, addTask, updateTask, delTask, getTask, aiSplitTasks,
   listProjectsForSelect, listSprintsForSelect, listRequirementsForSelect,
   type Task, type TaskQuery
 } from '@/api/business/task'
+import { priorityTag, taskStatusTag, kanbanColumns } from './taskDict'
 
 const route = useRoute()
 const dialogVisible = ref(false)
@@ -199,14 +197,6 @@ const formRef = ref()
 const saving = ref(false)
 const aiLoading = ref(false)
 const filterSprintId = ref<number | null>(null)
-
-const kanbanColumns = [
-  { status: '00', label: '待开发' },
-  { status: '01', label: '开发中' },
-  { status: '02', label: '代码评审' },
-  { status: '03', label: '测试中' },
-  { status: '04', label: '已完成' }
-]
 
 const emptyForm = (): Task => ({ projectId: 0, title: '', priority: 'P1', estimatedHours: 8, status: '00' })
 const form = reactive<Task>(emptyForm())
@@ -221,17 +211,6 @@ const queryParams = reactive<TaskQuery>({ pageNum: 1, pageSize: 200 })
 const projectOptions = ref<Array<{ id: number; projectName: string }>>([])
 const sprintOptions = ref<Array<{ sprintId: number; name: string }>>([])
 const requirementOptions = ref<Array<{ requirementId: number; title: string }>>([])
-
-function priorityTag(p?: string): any {
-  return ({ P0: 'danger', P1: 'warning', P2: 'info' } as Record<string,string>)[p || ''] || 'info'
-}
-
-function taskStatusTag(s?: string): { label: string; type: any } {
-  const col = kanbanColumns.find(c => c.status === s)
-  return col
-    ? { label: col.label, type: ({ '00':'info', '01':'primary', '02':'warning', '03':'warning', '04':'success' } as any)[s || ''] || 'info' }
-    : { label: s || '-', type: 'info' }
-}
 
 const tasksByStatus = (s: string) => list.value.filter(t => t.status === s)
 

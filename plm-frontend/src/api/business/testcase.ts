@@ -1,6 +1,6 @@
 /**
  * 测试用例管理 API — PRD §F4.2 + 原型 testcase.html
- * 5 态: 00 待执行 → 01 准备中 → 02 执行中 → 03 通过 → 04 失败 (含反向边 03/04 → 01)
+ * 5 态: 00 草稿 → 01 待执行 → 02 执行中 → 03 已通过 → 04 已失败 (含反向边 03/04 → 01; 对齐 biz_testcase_status 字典)
  */
 import request from '@/utils/request'
 
@@ -19,7 +19,7 @@ export interface TestCase {
   expectedResult?: string
   actualResult?: string
   isAutomated?: string  // Y / N
-  automationScript?: string
+  automationScriptPath?: string
   executionCount?: number
   lastExecutedAt?: string
 }
@@ -52,9 +52,13 @@ export const delTestCase = (ids: number | number[]): Promise<any> => {
 }
 
 export const executeTestCase = (id: number, result: { status: string; actualResult?: string }): Promise<any> =>
-  request({ url: `/business/testcase/execute/${id}`, method: 'post', data: result })
+  request({ url: `/business/testcase/${id}/execute`, method: 'post', data: result })
 
-// AI 生成测试用例 — PRD §F4.2 testcase-gen-flow
+// AI 补全单条用例要素(前置条件/步骤/预期结果)— PRD §F3.5,后端 /ai/generate/{id}(全模块约定)
+export const aiGenerateTestCaseElements = (id: number): Promise<any> =>
+  request({ url: `/business/testcase/ai/generate/${id}`, method: 'post' })
+
+// AI 批量生成测试用例 — PRD §F4.2 testcase-gen-flow(⚠ 后端批量端点待实现,见在途任务)
 export const aiGenerateTestCases = (params: {
   projectId: number; requirementId?: number; categories: string[]
 }): Promise<any> =>

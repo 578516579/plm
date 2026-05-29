@@ -19,7 +19,7 @@ CREATE TABLE tb_testdata (
     generated_content      LONGTEXT                               COMMENT '生成的数据集',
     generated_at           DATETIME      DEFAULT NULL             COMMENT '生成时间',
     ai_generated           CHAR(1)       DEFAULT 'N'              COMMENT 'Y=AI 生成',
-    status                 VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_testdata_status 3 状态',
+    status                 VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_testdata_status 3 状态',
     author_user_id         BIGINT(20)    NOT NULL                 COMMENT '创建人',
     create_by              VARCHAR(64)   DEFAULT '',
     create_time            DATETIME      DEFAULT NULL,

@@ -8,6 +8,7 @@
         <result property="projectId"       column="project_id"       />
         <result property="sprintId"        column="sprint_id"        />
         <result property="taskId"          column="task_id"          />
+        <result property="testcaseId"      column="testcase_id"      />
         <result property="title"           column="title"            />
         <result property="description"     column="description"      />
         <result property="severity"        column="severity"         />
@@ -29,7 +30,7 @@
     </resultMap>
 
     <sql id="selectDefectVo">
-        select defect_id, defect_no, project_id, sprint_id, task_id, title, description,
+        select defect_id, defect_no, project_id, sprint_id, task_id, testcase_id, title, description,
                severity, category, status, assignee_user_id, reporter_user_id,
                reproduce_steps, expected_result, actual_result, resolution, tags,
                create_by, create_time, update_by, update_time, remark, del_flag
@@ -44,6 +45,7 @@
             <if test="projectId != null">and project_id = #{projectId}</if>
             <if test="sprintId != null">and sprint_id = #{sprintId}</if>
             <if test="taskId != null">and task_id = #{taskId}</if>
+            <if test="testcaseId != null">and testcase_id = #{testcaseId}</if>
             <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
             <if test="severity != null and severity != ''">and severity = #{severity}</if>
             <if test="category != null and category != ''">and category = #{category}</if>
@@ -67,6 +69,7 @@
             <if test="projectId != null">project_id,</if>
             <if test="sprintId != null">sprint_id,</if>
             <if test="taskId != null">task_id,</if>
+            <if test="testcaseId != null">testcase_id,</if>
             <if test="title != null">title,</if>
             <if test="description != null">description,</if>
             <if test="severity != null">severity,</if>
@@ -88,6 +91,7 @@
             <if test="projectId != null">#{projectId},</if>
             <if test="sprintId != null">#{sprintId},</if>
             <if test="taskId != null">#{taskId},</if>
+            <if test="testcaseId != null">#{testcaseId},</if>
             <if test="title != null">#{title},</if>
             <if test="description != null">#{description},</if>
             <if test="severity != null">#{severity},</if>
@@ -113,6 +117,7 @@
             <if test="projectId != null">project_id = #{projectId},</if>
             <if test="sprintId != null">sprint_id = #{sprintId},</if>
             <if test="taskId != null">task_id = #{taskId},</if>
+            <if test="testcaseId != null">testcase_id = #{testcaseId},</if>
             <if test="title != null">title = #{title},</if>
             <if test="description != null">description = #{description},</if>
             <if test="severity != null">severity = #{severity},</if>
@@ -143,6 +148,22 @@
         select max(cast(substring(defect_no, length(#{prefix}) + 1) as unsigned)) as max_seq
         from tb_defect
         where defect_no like concat(#{prefix}, '%')
+    </select>
+
+    <!-- Proposal 0028 P0-3B: DORA MTTR 聚合 — severity ∈ {00 P0, 01 P1} + status=03 已解决 -->
+    <select id="sumRecoverMsInPeriod" resultType="java.util.HashMap">
+        select
+            coalesce(sum(timestampdiff(microsecond, create_time, update_time)) / 1000, 0) as sumMs,
+            count(*) as cnt
+        from tb_defect
+        where del_flag = '0'
+          and project_id = #{projectId}
+          and severity in ('00','01')
+          and status = '03'
+          and update_time is not null
+          and create_time is not null
+          and update_time >= #{periodStart}
+          and update_time &lt; #{periodEnd}
     </select>
 
 </mapper>

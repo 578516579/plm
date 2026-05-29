@@ -53,6 +53,9 @@ public class Requirement extends BaseEntity
     /** 评审简要纪要（状态推进时填） */
     private String reviewNote;
 
+    /** AI 优先级初评（PRD §F2.1：high/medium/low，非字典前端约定值） */
+    private String aiEvaluation;
+
     /** 删除标志（0=正常, 2=删除） */
     private String delFlag;
 
@@ -86,6 +89,9 @@ public class Requirement extends BaseEntity
     public void setReviewNote(String reviewNote) { this.reviewNote = reviewNote; }
     public String getReviewNote() { return reviewNote; }
 
+    public void setAiEvaluation(String aiEvaluation) { this.aiEvaluation = aiEvaluation; }
+    public String getAiEvaluation() { return aiEvaluation; }
+
     public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
     public String getDelFlag() { return delFlag; }
 
@@ -102,6 +108,7 @@ public class Requirement extends BaseEntity
             .append("status", getStatus())
             .append("assigneeUserId", getAssigneeUserId())
             .append("reviewNote", getReviewNote())
+            .append("aiEvaluation", getAiEvaluation())
             .append("createBy", getCreateBy())
             .append("createTime", getCreateTime())
             .append("updateBy", getUpdateBy())

@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
+import cn.com.bosssfot.dv.plm.common.ai.AiService;
 import cn.com.bosssfot.dv.plm.common.exception.ServiceException;
 import cn.com.bosssfot.dv.plm.common.utils.SecurityUtils;
 import cn.com.bosssfot.dv.plm.project.domain.Project;
@@ -46,6 +47,9 @@ class TestPlanServiceImplTest {
 
     @Mock
     private ProjectMapper projectMapper;
+
+    @Mock
+    private AiService aiService;
 
     @InjectMocks
     private TestPlanServiceImpl service;
@@ -270,6 +274,82 @@ class TestPlanServiceImplTest {
         void notFound() {
             when(testplanMapper.selectTestPlanById(99L)).thenReturn(null);
             assertThatThrownBy(() -> service.updateTestPlan(updateTestPlan(99L, "01")))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("测试方案不存在");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // aiGenerate (PRD §F4.1 AI 生成测试方案 — test-plan-flow)
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("aiGenerate (AI 生成测试方案)")
+    class AiGenerateTests {
+
+        @Test
+        @DisplayName("生成成功：aiGenerated=Y / 策略含中文类型标签 / 工具含 playwright / 回写 + 审计")
+        void generateSuccess() {
+            TestPlan t = existingTestPlan("01");
+            t.setTestTypes("functional,api,automation");
+            t.setTestCycleDays(7);
+            when(testplanMapper.selectTestPlanById(1L)).thenReturn(t);
+            when(testplanMapper.updateTestPlan(any())).thenReturn(1);
+
+            TestPlan r;
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("tester");
+                r = service.aiGenerate(1L);
+            }
+
+            assertThat(r.getAiGenerated()).isEqualTo("Y");
+            assertThat(r.getStrategy()).contains("功能测试").contains("接口测试").contains("自动化测试");
+            assertThat(r.getScope()).isNotBlank();
+            assertThat(r.getToolsRecommended()).contains("playwright");
+            assertThat(r.getResourcesPlan()).contains("7 天");
+            assertThat(r.getRiskAssessment()).isNotBlank();
+            verify(aiService).chat(any());            // 审计:必走一次 AiService 产生 invocation log
+            verify(testplanMapper).updateTestPlan(any());
+        }
+
+        @Test
+        @DisplayName("testTypes 为空 → 类型标签回退为「功能测试」")
+        void blankTestTypesFallback() {
+            TestPlan t = existingTestPlan("01");
+            t.setTestTypes(null);
+            when(testplanMapper.selectTestPlanById(1L)).thenReturn(t);
+            when(testplanMapper.updateTestPlan(any())).thenReturn(1);
+
+            TestPlan r;
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("tester");
+                r = service.aiGenerate(1L);
+            }
+            assertThat(r.getStrategy()).contains("功能测试");
+        }
+
+        @Test
+        @DisplayName("testCycleDays 为空 → 资源计划默认周期 10 天")
+        void defaultCycleDays() {
+            TestPlan t = existingTestPlan("01");
+            t.setTestTypes("functional");
+            t.setTestCycleDays(null);
+            when(testplanMapper.selectTestPlanById(1L)).thenReturn(t);
+            when(testplanMapper.updateTestPlan(any())).thenReturn(1);
+
+            TestPlan r;
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("tester");
+                r = service.aiGenerate(1L);
+            }
+            assertThat(r.getResourcesPlan()).contains("10 天");
+        }
+
+        @Test
+        @DisplayName("测试方案不存在 → 404")
+        void notFound() {
+            when(testplanMapper.selectTestPlanById(99L)).thenReturn(null);
+            assertThatThrownBy(() -> service.aiGenerate(99L))
                 .isInstanceOf(ServiceException.class)
                 .hasMessageContaining("测试方案不存在");
         }

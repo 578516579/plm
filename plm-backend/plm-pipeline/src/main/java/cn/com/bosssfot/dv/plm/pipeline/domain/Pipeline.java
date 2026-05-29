@@ -18,6 +18,8 @@ public class Pipeline extends BaseEntity {
     private Long pipelineId;
     @Excel(name = "流水线编号") private String pipelineNo;
     @Excel(name = "项目ID")     private Long projectId;
+    /** 关联发布单 ID（可空）— Proposal 0028 P0-1 产品主线 FK,跨模块同 projectId 强约束 */
+    @Excel(name = "发布单ID")   private Long releaseId;
     @Excel(name = "流水线名称") private String pipelineName;
     @Excel(name = "代码仓库")   private String repoName;
     @Excel(name = "分支")       private String repoBranch;
@@ -40,6 +42,8 @@ public class Pipeline extends BaseEntity {
     public void setPipelineNo(String v) { this.pipelineNo = v; }
     public Long getProjectId() { return projectId; }
     public void setProjectId(Long v) { this.projectId = v; }
+    public Long getReleaseId() { return releaseId; }
+    public void setReleaseId(Long v) { this.releaseId = v; }
     public String getPipelineName() { return pipelineName; }
     public void setPipelineName(String v) { this.pipelineName = v; }
     public String getRepoName() { return repoName; }

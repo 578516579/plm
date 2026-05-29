@@ -34,6 +34,8 @@ import cn.com.bosssfot.dv.plm.sprint.domain.Sprint;
 import cn.com.bosssfot.dv.plm.sprint.mapper.SprintMapper;
 import cn.com.bosssfot.dv.plm.task.domain.Task;
 import cn.com.bosssfot.dv.plm.task.mapper.TaskMapper;
+import cn.com.bosssfot.dv.plm.testcase.domain.TestCase;
+import cn.com.bosssfot.dv.plm.testcase.mapper.TestCaseMapper;
 
 /**
  * DefectServiceImpl 单元测试
@@ -59,6 +61,9 @@ class DefectServiceImplTest {
 
     @Mock
     private TaskMapper taskMapper;
+
+    @Mock
+    private TestCaseMapper testCaseMapper;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
@@ -217,6 +222,81 @@ class DefectServiceImplTest {
             }
 
             assertThat(sample.getReporterUserId()).isEqualTo(42L);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 跨模块 FK testcaseId — Proposal 0028 P0-1 (同 projectId 强约束)
+    // ─────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("跨模块 FK testcaseId (Proposal 0028 P0-1)")
+    class TestcaseFkTests {
+
+        @Test
+        @DisplayName("testFkOk_当目标存在且同 projectId 时插入成功")
+        void testFkOk() {
+            sample.setTestcaseId(200L);
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(testCaseMapper.selectTestCaseById(200L)).thenReturn(testCaseWithProject(200L, 1L));
+            when(defectMapper.selectMaxSeqOfYear(anyString())).thenReturn(null);
+            when(defectMapper.insertDefect(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+                int rows = service.insertDefect(sample);
+                assertThat(rows).isEqualTo(1);
+            }
+            assertThat(sample.getTestcaseId()).isEqualTo(200L);
+        }
+
+        @Test
+        @DisplayName("testFkNullOk_当 testcaseId 为 null 时跳过校验")
+        void testFkNullOk() {
+            sample.setTestcaseId(null);
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(defectMapper.selectMaxSeqOfYear(anyString())).thenReturn(null);
+            when(defectMapper.insertDefect(any())).thenReturn(1);
+
+            try (MockedStatic<SecurityUtils> mocked = Mockito.mockStatic(SecurityUtils.class)) {
+                mocked.when(SecurityUtils::getUsername).thenReturn("admin");
+                mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+                int rows = service.insertDefect(sample);
+                assertThat(rows).isEqualTo(1);
+            }
+            verify(testCaseMapper, never()).selectTestCaseById(any());
+        }
+
+        @Test
+        @DisplayName("testFkNotFound_当目标 TestCase 不存在 → 702")
+        void testFkNotFound() {
+            sample.setTestcaseId(999L);
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(testCaseMapper.selectTestCaseById(999L)).thenReturn(null);
+
+            assertThatThrownBy(() -> service.insertDefect(sample))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("测试用例不存在");
+        }
+
+        @Test
+        @DisplayName("testFkDifferentProject_当目标 projectId 不同 → 702")
+        void testFkDifferentProject() {
+            sample.setTestcaseId(200L);  // defect.projectId = 1L
+            when(projectMapper.selectProjectById(1L)).thenReturn(existingProject());
+            when(testCaseMapper.selectTestCaseById(200L)).thenReturn(testCaseWithProject(200L, 2L)); // 不同项目
+
+            assertThatThrownBy(() -> service.insertDefect(sample))
+                .isInstanceOf(ServiceException.class)
+                .hasMessageContaining("同一项目");
+        }
+
+        private TestCase testCaseWithProject(Long testcaseId, Long projectId) {
+            TestCase tc = new TestCase();
+            tc.setTestcaseId(testcaseId);
+            tc.setProjectId(projectId);
+            return tc;
         }
     }
 

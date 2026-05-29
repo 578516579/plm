@@ -32,13 +32,13 @@
             </div>
           </template>
 
-          <div v-if="!current.erDiagram" class="empty-state">
+          <div v-if="!current.erDiagramContent" class="empty-state">
             <el-icon :size="48" color="#9ca3af"><Coin /></el-icon>
             <p>选择左侧方案后点击「AI 生成数据库设计」</p>
           </div>
-          <pre v-else class="mermaid-code">{{ current.erDiagram }}</pre>
+          <pre v-else class="mermaid-code">{{ current.erDiagramContent }}</pre>
           <el-alert
-            v-if="current.erDiagram"
+            v-if="current.erDiagramContent"
             type="info"
             :closable="false"
             show-icon
@@ -73,6 +73,22 @@
       <pre class="sql-code">{{ current.ddlScript }}</pre>
     </el-card>
 
+    <!-- 规范检查 (AI 生成) -->
+    <el-card v-if="current.normalizationCheck" shadow="never" style="margin-top: 14px">
+      <template #header><span class="card-title">🔍 规范检查 (命名 / 索引 / 范式)</span></template>
+      <div class="norm-check">
+        <el-tag
+          v-for="(v, k) in normalizationItems"
+          :key="k"
+          :type="normTagType(v)"
+          size="large"
+          style="margin: 0 10px 8px 0"
+        >
+          {{ normLabel(k) }}:{{ v }}
+        </el-tag>
+      </div>
+    </el-card>
+
     <!-- 历史方案 -->
     <el-card shadow="never" style="margin-top: 20px">
       <template #header>
@@ -94,7 +110,6 @@
         <el-table-column label="DB 引擎" width="100" align="center">
           <template #default="{ row }">{{ dbEngineLabel(row.dbEngine) }}</template>
         </el-table-column>
-        <el-table-column label="范式" width="80" align="center" prop="normalForm" />
         <el-table-column label="AI" width="80" align="center">
           <template #default="{ row }">
             <el-tag v-if="row.aiGenerated === 'Y'" type="success" size="small">已生成</el-tag>
@@ -127,29 +142,12 @@
         <el-form-item label="方案名称" prop="title" required>
           <el-input v-model="form.title" placeholder="如:智慧灌溉 DB v1" />
         </el-form-item>
-        <el-row :gutter="10">
-          <el-col :span="12">
-            <el-form-item label="DB 引擎" prop="dbEngine">
-              <el-select v-model="form.dbEngine" style="width: 100%">
-                <el-option label="MySQL 8.x" value="mysql" />
-                <el-option label="PostgreSQL 15+" value="postgres" />
-                <el-option label="人大金仓 (国产化)" value="kingbase" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="规范化" prop="normalForm">
-              <el-select v-model="form.normalForm" style="width: 100%">
-                <el-option label="1NF" value="1nf" />
-                <el-option label="2NF" value="2nf" />
-                <el-option label="3NF" value="3nf" />
-                <el-option label="BCNF" value="bcnf" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="领域实体" prop="domainEntities">
-          <el-input v-model="form.domainEntities" type="textarea" :rows="3" placeholder="如:User, FarmPlot, IotSensor, IrrigationPlan, CropInfo" />
+        <el-form-item label="DB 引擎" prop="dbEngine">
+          <el-select v-model="form.dbEngine" style="width: 100%">
+            <el-option label="MySQL" value="mysql" />
+            <el-option label="PostgreSQL" value="postgresql" />
+            <el-option label="人大金仓" value="kingbase" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -176,7 +174,7 @@ const aiLoading = ref(false)
 const listLoading = ref(false)
 
 const emptyForm = (): DbDesign => ({
-  projectId: 0, title: '', dbEngine: 'mysql', normalForm: '3nf', authorUserId: 1
+  projectId: 0, title: '', dbEngine: 'mysql', authorUserId: 1
 })
 const form = reactive<DbDesign>(emptyForm())
 const current = reactive<DbDesign>({ projectId: 0, title: '' })
@@ -197,7 +195,17 @@ const statusMap: Record<string, { label: string; type: any }> = {
 const statusTagFor = (s?: string) => statusMap[s || '00'] || { label: s || '-', type: 'info' as any }
 
 const dbEngineLabel = (v?: string) =>
-  ({ mysql: 'MySQL', postgres: 'PostgreSQL', kingbase: '人大金仓' } as Record<string, string>)[v || ''] || v || '-'
+  ({ mysql: 'MySQL', postgresql: 'PostgreSQL', kingbase: '人大金仓' } as Record<string, string>)[v || ''] || v || '-'
+
+const normLabelMap: Record<string, string> = { naming: '命名', index: '索引', normalization: '范式' }
+const normLabel = (k: string) => normLabelMap[k] || k
+const normTagType = (v: string): 'success' | 'warning' | 'info' =>
+  v?.startsWith('pass') ? 'success' : v?.startsWith('warn') ? 'warning' : 'info'
+const normalizationItems = computed<Record<string, string>>(() => {
+  const raw = current.normalizationCheck
+  if (!raw) return {}
+  try { return JSON.parse(raw) } catch { return { 原始: raw } }
+})
 
 const renderedDict = computed(() => {
   const md = current.dataDictionary || ''

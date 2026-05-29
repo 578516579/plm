@@ -139,6 +139,7 @@ import {
   listPipeline, addPipeline, updatePipeline, delPipeline, getPipeline, triggerPipeline, listProjectsForSelect,
   type Pipeline, type PipelineQuery
 } from '@/api/business/pipeline'
+import { ciToolLabel, triggerLabel, lastRunLabel, lastRunTag } from './pipelineDict'
 
 const dialogVisible = ref(false)
 const formRef = ref()
@@ -165,11 +166,6 @@ const successRate = computed(() => {
   if (!list.value.length) return 0
   return Math.round((successCount.value / list.value.length) * 100)
 })
-
-const ciToolLabel = (v?: string) => ({ jenkins: 'Jenkins', gitlab_ci: 'GitLab', github_actions: 'GHA', drone: 'Drone' } as Record<string,string>)[v||''] || v || '-'
-const triggerLabel = (v?: string) => ({ push: 'Push', pr: 'PR', tag: 'Tag', cron: '定时', manual: '手动' } as Record<string,string>)[v||''] || v || '-'
-const lastRunLabel = (v?: string) => ({ success: '成功', running: '运行中', failed: '失败', never: '未执行' } as Record<string,string>)[v||''] || '-'
-const lastRunTag = (v?: string): any => ({ success: 'success', running: 'primary', failed: 'danger', never: 'info' } as Record<string,string>)[v||''] || 'info'
 
 async function getList() {
   listLoading.value = true

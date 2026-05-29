@@ -17,7 +17,7 @@ CREATE TABLE tb_ai_agent (
     total_calls         BIGINT(20)    DEFAULT 0                COMMENT '总调用次数',
     success_rate        DECIMAL(5,2)  DEFAULT 0                COMMENT '成功率 %',
     last_invoked_at     DATETIME      DEFAULT NULL             COMMENT '最近调用时间',
-    status              VARCHAR(2)    NOT NULL DEFAULT '00'    COMMENT 'biz_aiagent_status: 00 运行中/01 已停止/02 错误',
+    status              VARCHAR(20)   NOT NULL DEFAULT '00'    COMMENT 'biz_aiagent_status: 00 运行中/01 已停止/02 错误',
     author_user_id      BIGINT(20)    NOT NULL                 COMMENT '创建者',
     create_by           VARCHAR(64)   DEFAULT '',
     create_time         DATETIME      DEFAULT NULL,

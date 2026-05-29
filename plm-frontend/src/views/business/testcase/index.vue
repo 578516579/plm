@@ -127,11 +127,21 @@
             <el-tag v-else type="info" size="small">手动</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" align="center">
+        <el-table-column label="操作" width="380" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="loadTc(row)">编辑</el-button>
+            <el-button link type="warning" :loading="aiRowId === row.testcaseId" @click="aiEnrich(row)">
+              <el-icon><MagicStick /></el-icon>&nbsp;AI补全
+            </el-button>
             <el-button link type="success" @click="execTc(row, '03')">▶ 通过</el-button>
             <el-button link type="danger" @click="execTc(row, '04')">✗ 失败</el-button>
+            <!-- 0028 P0-2C: 已失败用例 (status='04') 一键提缺陷, 携 testcaseId / projectId / requirementId 给目标 -->
+            <el-button
+              v-if="row.status === '04'"
+              link
+              type="danger"
+              @click="raiseDefect(row)"
+            >🐛 一键提缺陷</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -185,6 +195,21 @@
         <el-form-item label="预期结果" prop="expectedResult">
           <el-input v-model="form.expectedResult" type="textarea" :rows="2" placeholder="期望的系统响应/输出" />
         </el-form-item>
+        <el-row :gutter="10">
+          <el-col :span="8">
+            <el-form-item label="是否自动化" prop="isAutomated">
+              <el-select v-model="form.isAutomated" style="width: 100%">
+                <el-option label="手动" value="N" />
+                <el-option label="自动化" value="Y" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="16">
+            <el-form-item v-if="form.isAutomated === 'Y'" label="脚本路径" prop="automationScriptPath">
+              <el-input v-model="form.automationScriptPath" placeholder="如 src/test/e2e/login.spec.ts" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -202,15 +227,22 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { MagicStick, Plus } from '@element-plus/icons-vue'
 import {
   listTestCase, addTestCase, updateTestCase, delTestCase, executeTestCase,
-  getTestCase, aiGenerateTestCases, listProjectsForSelect, listRequirementsForSelect,
+  getTestCase, aiGenerateTestCases, aiGenerateTestCaseElements,
+  listProjectsForSelect, listRequirementsForSelect,
   type TestCase, type TestCaseQuery
 } from '@/api/business/testcase'
+import { statusTagFor, categoryLabel, categoryTag, priorityTag } from './testcaseDict'
+import { useBusinessRoute } from '@/utils/businessRoute'
+
+// 0028 P0-2C: 跨模块导航 composable
+const nav = useBusinessRoute()
 
 const dialogVisible = ref(false)
 const aiPanelVisible = ref(false)
 const formRef = ref()
 const saving = ref(false)
 const aiLoading = ref(false)
+const aiRowId = ref<number | null>(null)  // 行内 AI 补全 loading 锁定到具体行
 const listLoading = ref(false)
 const selection = ref<TestCase[]>([])
 
@@ -221,11 +253,17 @@ const catBoundary = ref(true)
 const catException = ref(true)
 const catAgri = ref(true)
 
-const emptyForm = (): TestCase => ({ projectId: 0, title: '', category: 'functional', priority: 'P1', status: '00' })
+const emptyForm = (): TestCase => ({ projectId: 0, title: '', category: 'functional', priority: 'P1', status: '00', isAutomated: 'N', automationScriptPath: '' })
 const form = reactive<TestCase>(emptyForm())
 const rules = {
   projectId: [{ required: true, message: '请选择项目', trigger: 'change' }],
-  title: [{ required: true, message: '请输入用例标题', trigger: 'blur' }]
+  title: [{ required: true, message: '请输入用例标题', trigger: 'blur' }],
+  // 对齐后端 706: is_automated='Y' 时脚本路径必填
+  automationScriptPath: [{
+    validator: (_rule: any, value: string, cb: (e?: Error) => void) =>
+      cb(form.isAutomated === 'Y' && !value ? new Error('自动化用例必须填写脚本路径') : undefined),
+    trigger: 'blur'
+  }]
 }
 
 const list = ref<TestCase[]>([])
@@ -243,22 +281,6 @@ const passRate = computed(() => {
   if (exec === 0) return '—'
   return Math.round((passedCount.value / exec) * 100)
 })
-
-const statusMap: Record<string, { label: string; type: any }> = {
-  '00': { label: '待执行', type: 'info' },
-  '01': { label: '准备中', type: 'warning' },
-  '02': { label: '执行中', type: 'primary' },
-  '03': { label: '通过', type: 'success' },
-  '04': { label: '失败', type: 'danger' }
-}
-const statusTagFor = (s?: string) => statusMap[s || ''] || { label: s || '-', type: 'info' as any }
-
-const categoryLabel = (v?: string) =>
-  ({ functional: '功能', boundary: '边界', exception: '异常', agri: '农业专项', performance: '性能' } as Record<string,string>)[v || ''] || v || '-'
-const categoryTag = (v?: string): any =>
-  ({ functional: 'primary', boundary: 'warning', exception: 'danger', agri: 'success', performance: 'info' } as Record<string,string>)[v || ''] || 'info'
-const priorityTag = (p?: string): any =>
-  ({ P0: 'danger', P1: 'warning', P2: 'info' } as Record<string,string>)[p || ''] || 'info'
 
 async function getList() {
   listLoading.value = true
@@ -285,6 +307,25 @@ async function loadTc(row: TestCase) {
   if (!row.testcaseId) return
   const res: any = await getTestCase(row.testcaseId)
   if (res.code === 200 && res.data) { Object.assign(form, res.data); dialogVisible.value = true }
+}
+
+// 行内 AI 补全用例要素 — 调 /business/testcase/ai/generate/{id},回填后打开编辑框供确认
+async function aiEnrich(row: TestCase) {
+  if (!row.testcaseId) return
+  aiRowId.value = row.testcaseId
+  try {
+    const res: any = await aiGenerateTestCaseElements(row.testcaseId)
+    if (res.code === 200 && res.data) {
+      Object.assign(form, res.data)
+      dialogVisible.value = true
+      ElMessage.success('AI 已补全用例要素,请确认后保存')
+      await getList()
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.msg || 'AI 补全失败')
+  } finally {
+    aiRowId.value = null
+  }
 }
 
 async function handleSubmit() {
@@ -335,6 +376,24 @@ async function batchDelete() {
   const ids = selection.value.map(t => t.testcaseId).filter(Boolean) as number[]
   await delTestCase(ids); ElMessage.success('批量删除完成')
   selection.value = []; await getList()
+}
+
+/**
+ * 0028 P0-2C: 一键提缺陷
+ * 失败用例 (status='04') → 跳到缺陷模块列表页, 携 testcaseId / projectId / requirementId + openDetail
+ * ⚠ 第一版: 缺陷模块尚未实现 `route.query.openDetail` 监听 → 跳过去后用户需手动点"新增缺陷"
+ *    粘贴 testcaseId. 完整自动回填留 P1。
+ */
+async function raiseDefect(row: TestCase) {
+  if (!row.testcaseId) return
+  const query: Record<string, string> = {
+    testcaseId: String(row.testcaseId),
+    projectId: String(row.projectId),
+    openDetail: '1'
+  }
+  if (row.requirementId) query.requirementId = String(row.requirementId)
+  await nav.goEntityList('defect', query)
+  ElMessage.info(`已跳转到缺陷模块。失败用例 ${row.testcaseNo || '#' + row.testcaseId} 信息已传递, 请点击「新增缺陷」并填写其他字段。`)
 }
 
 onMounted(() => { getList(); loadOpts() })
